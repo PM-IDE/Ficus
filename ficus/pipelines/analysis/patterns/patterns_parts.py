@@ -308,8 +308,9 @@ class DrawSingleActivityPlacement(InternalDrawingPipelinePart):
                  title: str = None,
                  plot_legend: bool = False,
                  height_scale: int = 1,
+                 width_scale: int = 1,
                  save_path: str = None):
-        super().__init__(title, plot_legend, height_scale, save_path)
+        super().__init__(title, plot_legend, height_scale, width_scale, save_path)
         self.activity_selector = activity_selector
         self.use_different_colors = use_different_colors
 
@@ -434,4 +435,10 @@ class SaveAllActivitiesNames(InternalPipelinePart):
                 fout.write(sep_string)
                 fout.write('\n\n')
 
+        return current_input
+
+
+class PrintNumberOfUnderlyingEvents(InternalPipelinePart):
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        print(f'Underlying events count: {calculate_underlying_events_count(log(current_input))}')
         return current_input

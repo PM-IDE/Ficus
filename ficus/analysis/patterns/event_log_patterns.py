@@ -673,3 +673,26 @@ def create_logs_for_activities_with_promote(log: MyEventLog,
         return None
 
     return _create_logs_for_activities(log, activities, trace_creator)
+
+
+def calculate_underlying_events_count(log: MyEventLog):
+    count = 0
+    for trace in log:
+        for event in trace:
+            count += count_underlying_events(event)
+
+    return count
+
+
+def count_underlying_events(event: MyEvent):
+    count = 0
+    q = [event]
+    while len(q) != 0:
+        current_event = q.pop(0)
+        if underlying_events_key in current_event:
+            for underlying_event in current_event[underlying_events_key]:
+                q.append(underlying_event)
+        else:
+            count += 1
+
+    return count

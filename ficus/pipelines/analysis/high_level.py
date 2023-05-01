@@ -189,7 +189,6 @@ class ExecuteWithEachActivityLog(InternalPipelinePart):
 
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
         for activity_name, activity_log in activities_to_logs(current_input).items():
-            print(activity_name)
             self.pipeline(PipelinePartResult().with_log(activity_log).with_activity_name(activity_name))
 
         return current_input

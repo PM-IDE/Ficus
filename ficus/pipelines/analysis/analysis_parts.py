@@ -19,7 +19,10 @@ class TracesDiversityDiagram(InternalPipelinePart):
         self.width_scale = width_scale
 
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
-        save_path = self.save_path if type(self.save_path) == str else self.save_path(current_input)
+        save_path = None
+        if self.save_path is not None:
+            save_path = self.save_path if type(self.save_path) == str else self.save_path(current_input)
+
         draw_traces_diversity_diagram(log(current_input),
                                       cached_colors(current_input),
                                       title=self.title,
@@ -86,8 +89,9 @@ class DrawPlacementOfEvents(InternalDrawingPipelinePart):
                  title: str = None,
                  plot_legend: bool = False,
                  height_scale: int = 1,
+                 width_scale: int = 1,
                  save_path: str = None):
-        super().__init__(title, plot_legend, height_scale, save_path)
+        super().__init__(title, plot_legend, height_scale, width_scale, save_path)
         self.predicate = predicate
 
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
@@ -99,4 +103,25 @@ class DrawPlacementOfEvents(InternalDrawingPipelinePart):
                                   height_scale=self.height_scale,
                                   plot_legend=self.plot_legend)
 
+        return current_input
+
+
+class SaveAllEventNames(InternalPipelinePart):
+    def __init__(self, save_path: str):
+        self.save_path = save_path
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        event_names = list(create_log_information(log(current_input)).events_count.keys())
+        with open(self.save_path, 'w') as fout:
+            fout.write('\n\n'.join(event_names))
+
+        return current_input
+
+
+class PrintEventLogInfo(InternalPipelinePart):
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        info = create_log_information(log(current_input))
+        print(f'Number of traces in log: {len(log(current_input))}')
+        print(f'Number of events in log: {sum(map(len, log(current_input)))}')
+        print(f'Number of low-level event classes in log: {len(info.events_count)}')
         return current_input

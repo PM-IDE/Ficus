@@ -97,9 +97,12 @@ class RandomUniqueColorsProvider(ColorsProvider):
         self.used_colors.clear()
 
 
+random_unique_color_provider_instance = RandomUniqueColorsProvider()
+
+
 class SingleColorProvider(ColorsProvider):
     def __init__(self):
-        self.provider = RandomUniqueColorsProvider()
+        self.provider = random_unique_color_provider_instance
         self.cached_color = self.provider.next()
 
     def next(self) -> (int, int, int):

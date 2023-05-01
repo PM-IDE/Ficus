@@ -1,8 +1,8 @@
 from typing import Callable, Optional
 
+import graphviz
 from IPython.core.display import Image
 from IPython.core.display_functions import display
-import graphviz
 from matplotlib import pyplot as plt
 
 from .constants import undefined_activity, activity_name_sep
@@ -10,7 +10,8 @@ from ..common.common_models import GraphNode
 from ..event_log_analysis import TraceDiversityLikeDiagramContext, _draw_traces_diversity_like_diagram_internal
 from ...analysis.patterns.patterns_models import ActivityInTraceInfo, ActivityNode, EventClassNode
 from ...log.event_log import MyEventLog
-from ...util import RandomUniqueColorsProvider, to_hex, calculate_poly_hash_for_collection, SingleColorProvider
+from ...util import to_hex, calculate_poly_hash_for_collection, SingleColorProvider, \
+    random_unique_color_provider_instance
 
 
 def draw_full_activity_diagram(log: MyEventLog,
@@ -57,7 +58,7 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
                         cached_colors: dict[str, str],
                         activities: list[list[ActivityInTraceInfo]],
                         draw_short_diagram: bool):
-    real_colors_provider = RandomUniqueColorsProvider()
+    real_colors_provider = random_unique_color_provider_instance
 
     def colors_provider(name: str):
         if name in cached_colors:
@@ -114,10 +115,10 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
                 current_x += activity_x_width
                 last_drew_index = activity.start_pos + activity.length
 
-            if last_drew_index < len(trace_activities):
+            if last_drew_index < len(real_trace):
                 width = ctx.rect_width
                 if not draw_short_diagram:
-                    width *= (len(trace_activities) - last_drew_index)
+                    width *= (len(real_trace) - last_drew_index)
 
                 rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height,
                                      fc=colors_provider(undefined_activity))
@@ -215,7 +216,7 @@ def draw_activity_placement_diagram(log: MyEventLog,
                                     height_scale: int = 1,
                                     save_path: str = None):
     def draw_func(ctx: TraceDiversityLikeDiagramContext):
-        color_provider = RandomUniqueColorsProvider() if use_different_colors else SingleColorProvider()
+        color_provider = random_unique_color_provider_instance if use_different_colors else SingleColorProvider()
         undefined_color = to_hex((0, 0, 0))
         current_y = 0
         undefined_activity_name = 'UndefinedActivity'

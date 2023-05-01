@@ -1,6 +1,7 @@
 import copy
 from typing import Any
 
+from ..util import random_unique_color_provider_instance
 from .contexts.part_results import PipelinePartResult
 from ..filtering.event_log_filters import *
 
@@ -20,6 +21,7 @@ class Pipeline:
 
     def execute(self, input: Any):
         current_input = input
+        random_unique_color_provider_instance.reset()
         for part in self.parts:
             current_input = part.execute(current_input)
 

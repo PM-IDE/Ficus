@@ -157,7 +157,7 @@ def _draw_traces_diversity_like_diagram(log: MyEventLog,
                                         width_scale: int = 1,
                                         colors_provider: Callable[[str], str] = None):
     if colors_provider is None:
-        colors = RandomUniqueColorsProvider()
+        colors = random_unique_color_provider_instance
 
         def generate_color(_: str):
             return colors.next()
@@ -231,7 +231,7 @@ def draw_placements_of_events(log: MyEventLog,
                               height_scale: int = 1,
                               plot_legend: bool = True):
     colors_to_events = dict()
-    colors_provider = RandomUniqueColorsProvider()
+    colors_provider = random_unique_color_provider_instance
     colors_provider.used_colors.add((0, 0, 0))
     default_color = '#000000'
 
@@ -262,7 +262,7 @@ def draw_events_entropy_histogram(log: MyEventLog,
     current_x = 0
     rect_length = 1
     names_to_rects = dict()
-    colors_provider = RandomUniqueColorsProvider()
+    colors_provider = random_unique_color_provider_instance
 
     current_figure, ax = plt.subplots(1, 1, figsize=(20, 20))
 
