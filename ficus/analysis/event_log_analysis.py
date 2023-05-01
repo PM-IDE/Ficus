@@ -230,23 +230,22 @@ def draw_placements_of_events(log: MyEventLog,
                               save_path: str = None,
                               height_scale: int = 1,
                               plot_legend: bool = True):
-    colors_to_events = dict()
     colors_provider = random_unique_color_provider_instance
     colors_provider.used_colors.add((0, 0, 0))
     default_color = '#000000'
 
     def generate_color(name: str) -> str:
         if events_predicate(name):
-            if name in colors_to_events:
-                return colors_to_events[name]
+            if name in cached_colors:
+                return cached_colors[name]
 
-            colors_to_events[name] = colors_provider.next()
-            return colors_to_events[name]
+            cached_colors[name] = colors_provider.next()
+            return cached_colors[name]
 
         return default_color
 
     _draw_traces_diversity_like_diagram(log,
-                                        cached_colors,
+                                        dict(),
                                         title=title,
                                         save_path=save_path,
                                         plot_legend=plot_legend,
