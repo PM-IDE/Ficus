@@ -1,0 +1,13 @@
+bin
+obj
+.idea
+data
+.DS_Store
+*.tmp
+.pytest_cache
+__pycache__
+results
+DS_Store
+build/*
+pm4pyex.egg-info/*
+tests/test_data
