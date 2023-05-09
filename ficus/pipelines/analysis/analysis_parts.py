@@ -1,6 +1,7 @@
 from ..common import InternalDrawingPipelinePart
 from ..serialization.pipeline_parts import SavePathCreator
 from ...analysis.event_log_analysis import *
+from ...log.event_log import MyEvent
 from ...pipelines.contexts.accessors import log, cached_colors
 from ...pipelines.pipelines import *
 
@@ -124,4 +125,21 @@ class PrintEventLogInfo(InternalPipelinePart):
         print(f'Number of traces in log: {len(log(current_input))}')
         print(f'Number of events in log: {sum(map(len, log(current_input)))}')
         print(f'Number of low-level event classes in log: {len(info.events_count)}')
+        return current_input
+
+
+class PrintDFG(InternalPipelinePart):
+    def __init__(self, selector: Callable[[str], bool]):
+        self.selector = selector
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        info = create_log_information(log(current_input))
+        for event_name, followers in info.dfg.followed_events.items():
+            if self.selector(event_name):
+                print(f"Followers of {event_name}:")
+                for follower, count in followers.items():
+                    print(f'{follower}: {count}')
+
+                print()
+
         return current_input

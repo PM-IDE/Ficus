@@ -8,7 +8,7 @@ from ..util import *
 class DirectlyFollowsGraph:
     def __init__(self, pairs: dict[(str, str), int]):
         self.pairs: dict[(str, str), int] = pairs
-        self.followed_events: dict[str, list[str]] = dict()
+        self.followed_events: dict[str, dict[str, int]] = dict()
         self.events_with_single_follower: set[str] = set()
 
         for first, second in pairs.keys():
@@ -16,9 +16,10 @@ class DirectlyFollowsGraph:
                 if first in self.events_with_single_follower:
                     self.events_with_single_follower.remove(first)
 
-                self.followed_events[first].append(second)
+                if second not in self.followed_events[first]:
+                    self.followed_events[first][second] = pairs[(first, second)]
             else:
-                self.followed_events[first] = [second]
+                self.followed_events[first] = {second: pairs[(first, second)]}
                 self.events_with_single_follower.add(first)
 
 
