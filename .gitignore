@@ -10,3 +10,4 @@ results
 build/*
 pm4pyex.egg-info/*
 test_data
+target
