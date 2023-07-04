@@ -1,7 +1,17 @@
-use std::{collections::HashMap, fs::File, io::BufReader};
+use std::{collections::HashMap, fs::File, io::BufReader, rc::Rc, cell::RefCell};
 use quick_xml::reader::Reader;
 
 fn main() {
+    let path = "/Users/aero/Programming/pmide/Ficus/src/python/tests/test_data/source/example_logs/exercise1.xes";
+    let reader = FromFileXesEventLogReader::new(path).unwrap();
+
+    for trace in reader {
+        println!("New trace");
+        for event in trace {
+            println!("{}", event.event_class);
+        }
+    }
+
     println!("Hello, world!");
 }
 
@@ -37,22 +47,71 @@ trait EventLogReader : Iterator {
 
 struct FromFileXesEventLogReader {
     storage: Vec<u8>,
-    reader: Reader<BufReader<File>>
+    reader: Rc<RefCell<Reader<BufReader<File>>>>
 }
 
-impl Iterator for FromFileXesEventLogReader {
+struct TraceXesEventLogIterator {
+    buffer: Vec<u8>,
+    reader: Rc<RefCell<Reader<BufReader<File>>>>
+}
+
+impl Iterator for TraceXesEventLogIterator {
     type Item = EventImpl;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.reader.read_event_into(&mut self.storage) {
-            Ok(quick_xml::events::Event::Start(e)) => {
-                if let Ok(event_class) = String::from_utf8(e.name().0.to_vec()) {
-                    Some(EventImpl::new(event_class, 123))
-                } else {
-                    None
+        loop {
+            match self.reader.borrow_mut().read_event_into(&mut self.buffer) {
+                Ok(quick_xml::events::Event::Start(e)) => {
+                    if let Ok(event_class) = String::from_utf8(e.name().0.to_vec()) {
+                        return Some(EventImpl::new(event_class, 123));
+                    } else {
+                        continue;
+                    }
+                },
+                Ok(quick_xml::events::Event::End(e)) => {
+                    match e.name().as_ref() {
+                        b"trace" => return None,
+                        _ => continue
+                    }
                 }
-            },
-            _ => None
+                Err(error) => {
+                    println!("Error: {}", error);
+                    return None;
+                },
+                _ => continue
+            }
+        }
+    }
+}
+
+impl TraceXesEventLogIterator {
+    fn new(reader: Rc<RefCell<Reader<BufReader<File>>>>) -> TraceXesEventLogIterator {
+        TraceXesEventLogIterator { reader, buffer: Vec::new() }
+    }
+}
+
+impl<'a> Iterator for FromFileXesEventLogReader {
+    type Item = TraceXesEventLogIterator;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.reader.borrow_mut().read_event_into(&mut self.storage) {
+                Ok(quick_xml::events::Event::Start(e)) => {
+                    match e.name().as_ref() {
+                        b"trace" => {
+                            let copy_rc = Rc::clone(&self.reader);
+                            return Some(TraceXesEventLogIterator::new(copy_rc))
+                        },
+                        _ => continue
+                    }
+                },
+                Ok(quick_xml::events::Event::Eof) => return None,
+                Err(error) => {
+                    println!("Error: {}", error);
+                    return None
+                }
+                _ => continue
+            }
         }
     }
 }
@@ -60,7 +119,10 @@ impl Iterator for FromFileXesEventLogReader {
 impl FromFileXesEventLogReader {
     fn new(file_path: &str) -> Option<FromFileXesEventLogReader> {
         match Reader::from_file(file_path) {
-            Ok(reader) => Some(FromFileXesEventLogReader { reader, storage: Vec::new() }),
+            Ok(reader) => Some(FromFileXesEventLogReader {
+                reader: Rc::new(RefCell::new(reader)),
+                storage: Vec::new()
+            }),
             Err(_) => None
         }
     }
