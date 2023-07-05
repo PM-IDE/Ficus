@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr, rc::Rc, cell::RefCell};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, str::FromStr};
 
 use chrono::Utc;
 
@@ -8,12 +8,12 @@ pub enum EventPayloadValue {
     String(String),
     Boolean(bool),
     Int(i32),
-    Float(f32)
+    Float(f32),
 }
 
 #[derive(Debug, Clone, Copy)]
 pub enum Lifecycle {
-    XesStandardLifecycle(XesStandardLifecycle)
+    XesStandardLifecycle(XesStandardLifecycle),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -21,7 +21,7 @@ pub enum XesStandardLifecycle {
     Schedule,
     Start,
     Complete,
-    Unknown
+    Unknown,
 }
 
 impl FromStr for XesStandardLifecycle {
@@ -33,7 +33,7 @@ impl FromStr for XesStandardLifecycle {
             "start" => Ok(XesStandardLifecycle::Start),
             "complete" => Ok(XesStandardLifecycle::Complete),
             "unknown" => Ok(XesStandardLifecycle::Unknown),
-            _ => Err(ParseXesStandardLifecycleError)
+            _ => Err(ParseXesStandardLifecycleError),
         }
     }
 }
@@ -52,15 +52,22 @@ pub struct EventImpl {
     timestamp: chrono::DateTime<Utc>,
     lifecycle: Option<Lifecycle>,
 
-    payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>
+    payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>,
 }
 
 impl EventImpl {
-    pub(crate) fn new(name: String,
-                      timestamp: chrono::DateTime<Utc>,
-                      lifecycle: Option<Lifecycle>,
-                      payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>) -> EventImpl {
-        EventImpl { name: name.to_owned(), timestamp, lifecycle, payload }
+    pub(crate) fn new(
+        name: String,
+        timestamp: chrono::DateTime<Utc>,
+        lifecycle: Option<Lifecycle>,
+        payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+    ) -> EventImpl {
+        EventImpl {
+            name: name.to_owned(),
+            timestamp,
+            lifecycle,
+            payload,
+        }
     }
 }
 
@@ -76,7 +83,7 @@ impl Event for EventImpl {
     fn get_lifecycle(&self) -> Option<Lifecycle> {
         match self.lifecycle.as_ref() {
             Some(value) => Some(*value),
-            None => None
+            None => None,
         }
     }
 
