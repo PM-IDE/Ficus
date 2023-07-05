@@ -1,7 +1,7 @@
 use std::{rc::Rc, cell::RefCell, io::BufReader, fs::File, collections::HashMap, str::FromStr};
 use chrono::{Utc, DateTime};
 use quick_xml::{Reader, events::BytesStart};
-use super::constants::{*};
+use super::constants::*;
 use super::event::{EventImpl, Lifecycle, EventPayloadValue, XesStandardLifecycle};
 
 

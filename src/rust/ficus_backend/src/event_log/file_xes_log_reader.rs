@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::RefCell, io::BufReader, fs::File};
-use quick_xml::{Reader};
-use super::{constants::{*}, xes_log_trace_reader::TraceXesEventLogIterator};
+use quick_xml::Reader;
+use super::{constants::*, xes_log_trace_reader::TraceXesEventLogIterator};
 
 
 pub(crate) struct FromFileXesEventLogReader {
@@ -8,7 +8,7 @@ pub(crate) struct FromFileXesEventLogReader {
     reader: Rc<RefCell<Reader<BufReader<File>>>>
 }
 
-impl<'a> Iterator for FromFileXesEventLogReader {
+impl Iterator for FromFileXesEventLogReader {
     type Item = TraceXesEventLogIterator;
 
     fn next(&mut self) -> Option<Self::Item> {
