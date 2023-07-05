@@ -1,8 +1,5 @@
 mod event_log;
 
-use std::{collections::HashMap, fs::File, io::BufReader, rc::Rc, cell::RefCell};
-use quick_xml::reader::Reader;
-
 use crate::event_log::event::Event;
 
 fn main() {
