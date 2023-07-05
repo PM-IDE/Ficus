@@ -1,7 +1,8 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, str::FromStr, rc::Rc, cell::RefCell};
 
 use chrono::Utc;
 
+#[derive(Debug)]
 pub enum EventPayloadValue {
     Date(chrono::DateTime<Utc>),
     String(String),
@@ -10,12 +11,12 @@ pub enum EventPayloadValue {
     Float(f32)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum Lifecycle {
     XesStandardLifecycle(XesStandardLifecycle)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum XesStandardLifecycle {
     Schedule,
     Start,
@@ -43,6 +44,7 @@ pub trait Event {
     fn get_name(&self) -> &str;
     fn get_timestamp(&self) -> chrono::DateTime<Utc>;
     fn get_lifecycle(&self) -> Option<Lifecycle>;
+    fn get_payload(&self) -> Rc<RefCell<HashMap<String, EventPayloadValue>>>;
 }
 
 pub struct EventImpl {
@@ -50,14 +52,14 @@ pub struct EventImpl {
     timestamp: chrono::DateTime<Utc>,
     lifecycle: Option<Lifecycle>,
 
-    payload: HashMap<String, EventPayloadValue>
+    payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>
 }
 
 impl EventImpl {
     pub(crate) fn new(name: String,
                       timestamp: chrono::DateTime<Utc>,
                       lifecycle: Option<Lifecycle>,
-                      payload: HashMap<String, EventPayloadValue>) -> EventImpl {
+                      payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>) -> EventImpl {
         EventImpl { name: name.to_owned(), timestamp, lifecycle, payload }
     }
 }
@@ -76,5 +78,9 @@ impl Event for EventImpl {
             Some(value) => Some(*value),
             None => None
         }
+    }
+
+    fn get_payload(&self) -> Rc<RefCell<HashMap<String, EventPayloadValue>>> {
+        Rc::clone(&self.payload)
     }
 }

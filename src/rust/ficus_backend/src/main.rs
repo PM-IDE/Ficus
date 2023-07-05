@@ -9,7 +9,7 @@ fn main() {
     for trace in reader {
         println!("New trace");
         for event in trace {
-            println!("{}", event.get_name());
+            println!("{},{},{:?},{:?}", event.get_name(), event.get_timestamp(), event.get_lifecycle(), event.get_payload());
         }
     }
 

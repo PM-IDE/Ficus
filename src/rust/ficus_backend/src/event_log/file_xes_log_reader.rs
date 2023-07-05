@@ -71,7 +71,7 @@ impl TraceXesEventLogIterator {
         let mut name: Option<String> = None;
         let mut date: Option<DateTime<Utc>> = None;
         let mut lifecycle: Option<Lifecycle> = None;
-        let mut payload: HashMap<String, EventPayloadValue> = HashMap::new();
+        let payload: Rc<RefCell<HashMap<String, EventPayloadValue>>> = Rc::new(RefCell::new(HashMap::new()));
 
         loop {
             let x = self.reader.borrow_mut().read_event_into(&mut self.buffer);
@@ -165,7 +165,7 @@ impl TraceXesEventLogIterator {
                             }
                         },
                         _ => {
-                            payload.insert(key.unwrap(), payload_value.unwrap());
+                            payload.borrow_mut().insert(key.unwrap(), payload_value.unwrap());
                         }
                     }
                 },
