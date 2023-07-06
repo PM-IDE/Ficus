@@ -54,40 +54,30 @@ impl TraceXesEventLogIterator {
         let mut name: Option<String> = None;
         let mut date: Option<DateTime<Utc>> = None;
         let mut lifecycle: Option<Lifecycle> = None;
-        let payload: Rc<RefCell<HashMap<String, EventPayloadValue>>> =
-            Rc::new(RefCell::new(HashMap::new()));
+        let payload: Rc<RefCell<HashMap<String, EventPayloadValue>>> = Rc::new(RefCell::new(HashMap::new()));
 
         loop {
-            let x = self.reader.borrow_mut().read_event_into(&mut self.buffer);
-            match x {
+            match self.reader.borrow_mut().read_event_into(&mut self.buffer) {
                 Ok(quick_xml::events::Event::End(end)) => match end.name().0 {
                     EVENT_TAG_NAME => {
-                        if !name.is_some() {
-                            return None;
-                        }
-                        if !date.is_some() {
-                            return None;
-                        }
+                        if !name.is_some() { return None; }
+                        if !date.is_some() { return None; }
 
-                        let event =
-                            EventImpl::new(name.unwrap(), date.unwrap(), lifecycle, payload);
+                        let event = EventImpl::new(name.unwrap(), date.unwrap(), lifecycle, payload);
                         return Some(event);
                     }
                     _ => continue,
                 },
                 Ok(quick_xml::events::Event::Empty(empty)) => {
                     let kv = Self::extract_key_value(&empty);
-                    if !kv.value.is_some() || !kv.key.is_some() {
-                        return None;
-                    }
+                    if !kv.value.is_some() || !kv.key.is_some() { return None; }
 
                     let key = kv.key.as_ref().unwrap().as_str();
                     let value = kv.value.as_ref().unwrap().as_str();
 
                     let payload_value = Self::extract_payload_value(&empty, value);
-                    if !payload_value.is_some() {
-                        return None;
-                    }
+                    if !payload_value.is_some() { return None; }
+                    
                     Self::update_event_data(
                         key,
                         payload_value.unwrap(),
