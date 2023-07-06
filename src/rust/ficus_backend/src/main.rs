@@ -1,14 +1,12 @@
+use crate::event_log::xes_event_log::XesEventLogImpl;
+
 mod event_log;
-
-use event_log::event_log::EventLogImpl;
-
-use crate::event_log::event::Event;
 
 fn main() {
     let path = "/Users/aero/Programming/pmide/Ficus/src/python/tests/test_data/source/example_logs/exercise1.xes";
     let reader = event_log::file_xes_log_reader::FromFileXesEventLogReader::new(path).unwrap();
 
-    let log = EventLogImpl::new(reader);
+    let log = XesEventLogImpl::new(reader);
 
     println!("Hello, world!");
 }

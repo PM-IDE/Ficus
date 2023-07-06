@@ -1,8 +1,12 @@
-use super::constants::*;
-use super::event::{EventImpl, EventPayloadValue, Lifecycle, XesStandardLifecycle};
+use super::{constants::*, lifecycle::XesStandardLifecycle};
+use super::event::EventPayloadValue;
+use super::lifecycle::Lifecycle;
+use super::xes_event::XesEventImpl;
+
 use chrono::{DateTime, Utc};
 use quick_xml::{events::BytesStart, Reader};
-use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
+use std::str::FromStr;
+use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
 
 pub(crate) struct TraceXesEventLogIterator {
     buffer: Vec<u8>,
@@ -10,7 +14,7 @@ pub(crate) struct TraceXesEventLogIterator {
 }
 
 impl Iterator for TraceXesEventLogIterator {
-    type Item = EventImpl;
+    type Item = XesEventImpl;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -50,7 +54,7 @@ impl TraceXesEventLogIterator {
         }
     }
 
-    fn parse_event_from(&mut self) -> Option<EventImpl> {
+    fn parse_event_from(&mut self) -> Option<XesEventImpl> {
         let mut name: Option<String> = None;
         let mut date: Option<DateTime<Utc>> = None;
         let mut lifecycle: Option<Lifecycle> = None;
@@ -63,7 +67,7 @@ impl TraceXesEventLogIterator {
                         if !name.is_some() { return None; }
                         if !date.is_some() { return None; }
 
-                        let event = EventImpl::new(name.unwrap(), date.unwrap(), lifecycle, payload);
+                        let event = XesEventImpl::new(name.unwrap(), date.unwrap(), lifecycle, payload);
                         return Some(event);
                     }
                     _ => continue,
