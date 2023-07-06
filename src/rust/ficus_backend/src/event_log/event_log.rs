@@ -1,55 +1,72 @@
 use std::rc::Rc;
 
-use super::event::Event;
+use super::event::{Event, EventImpl};
 
-pub struct EventLog<TEvent>
-where
-    TEvent: Event,
-{
-    traces: Vec<Rc<Trace<TEvent>>>,
+pub trait EventLog {
+    type TEvent: Event;
+    type TTrace: Trace<TEvent = Self::TEvent>;
+
+    fn get_traces(&self) -> &Vec<Rc<Self::TTrace>>;
 }
 
-impl<TEvent> EventLog<TEvent>
-where
-    TEvent: Event,
-{
-    pub fn new<TLogReader, TTraceReader>(event_log_reader: TLogReader) -> Option<EventLog<TEvent>>
+pub trait Trace {
+    type TEvent: Event;
+    fn get_events(&self) -> &Vec<Rc<Self::TEvent>>;
+}
+
+pub struct EventLogImpl {
+    traces: Vec<Rc<TraceImpl>>,
+}
+
+impl EventLogImpl {
+    pub fn new<TLogReader, TTraceReader>(event_log_reader: TLogReader) -> Option<EventLogImpl>
     where
         TLogReader: Iterator<Item = TTraceReader>,
-        TTraceReader: Iterator<Item = TEvent>,
+        TTraceReader: Iterator<Item = EventImpl>,
     {
-        let mut traces: Vec<Rc<Trace<TEvent>>> = Vec::new();
+        let mut traces: Vec<Rc<TraceImpl>> = Vec::new();
         for trace_reader in event_log_reader {
-            match Trace::new(trace_reader) {
+            match TraceImpl::new(trace_reader) {
                 Some(trace) => traces.push(Rc::new(trace)),
                 None => return None,
             }
         }
 
-        Some(EventLog { traces })
+        Some(EventLogImpl { traces })
     }
 }
 
-pub struct Trace<TEvent>
-where
-    TEvent: Event,
-{
-    events: Vec<Rc<TEvent>>,
+impl EventLog for EventLogImpl {
+    type TEvent = EventImpl;
+    type TTrace = TraceImpl;
+
+    fn get_traces(&self) -> &Vec<Rc<Self::TTrace>> {
+        &self.traces
+    }
 }
 
-impl<TEvent> Trace<TEvent>
-where
-    TEvent: Event,
-{
-    pub fn new<TTraceReader>(trace_reader: TTraceReader) -> Option<Trace<TEvent>>
+pub struct TraceImpl {
+    events: Vec<Rc<EventImpl>>,
+}
+
+impl TraceImpl {
+    pub fn new<TTraceReader>(trace_reader: TTraceReader) -> Option<TraceImpl>
     where
-        TTraceReader: Iterator<Item = TEvent>,
+        TTraceReader: Iterator<Item = EventImpl>,
     {
-        let mut events: Vec<Rc<TEvent>> = Vec::new();
+        let mut events: Vec<Rc<EventImpl>> = Vec::new();
         for event in trace_reader {
             events.push(Rc::new(event))
         }
 
-        Some(Trace { events })
+        Some(TraceImpl { events })
+    }
+}
+
+impl Trace for TraceImpl {
+    type TEvent = EventImpl;
+
+    fn get_events(&self) -> &Vec<Rc<Self::TEvent>> {
+        &self.events
     }
 }
