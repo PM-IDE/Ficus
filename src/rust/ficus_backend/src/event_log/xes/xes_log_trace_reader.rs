@@ -1,12 +1,11 @@
-use super::{constants::*, lifecycle::XesStandardLifecycle};
-use super::event::EventPayloadValue;
-use super::lifecycle::Lifecycle;
+use crate::event_log::core::{lifecycle::{Lifecycle, XesStandardLifecycle}, event::EventPayloadValue};
+
+use super::constants::*;
 use super::xes_event::XesEventImpl;
 
 use chrono::{DateTime, Utc};
 use quick_xml::{events::BytesStart, Reader};
-use std::str::FromStr;
-use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
 
 pub(crate) struct TraceXesEventLogIterator {
     buffer: Vec<u8>,

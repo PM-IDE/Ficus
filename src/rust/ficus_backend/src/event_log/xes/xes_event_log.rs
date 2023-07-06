@@ -1,6 +1,6 @@
 use std::rc::Rc;
-
-use super::{xes_event::XesEventImpl, event_log::{EventLog, Trace}};
+use crate::event_log::core::event_log::{Trace, EventLog};
+use super::xes_event::XesEventImpl;
 
 
 pub struct XesEventLogImpl {
