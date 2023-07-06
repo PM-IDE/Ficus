@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use crate::event_log::core::event_log::{Trace, EventLog};
+use crate::event_log::core::{event_log::EventLog, trace::Trace};
 use super::xes_event::XesEventImpl;
 
 
