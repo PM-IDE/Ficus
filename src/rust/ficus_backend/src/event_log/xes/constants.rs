@@ -2,11 +2,13 @@ pub const EVENT_TAG_NAME: &[u8] = b"event";
 pub const TRACE_TAG_NAME: &[u8] = b"trace";
 pub const GLOBAL_TAG_NAME: &[u8] = b"global";
 pub const EXTENSION_TAG_NAME: &[u8] = b"extension";
+pub const CLASSIFIER_TAG_NAME: &[u8] = b"classifier";
 
 pub const NAME_ATTR_NAME: &[u8] = b"name";
 pub const PREFIX_ATTR_NAME: &[u8] = b"prefix";
 pub const URI_ATTR_NAME: &[u8] = b"uri";
 pub const SCOPE_ATTR_NAME: &[u8] = b"scope";
+pub const KEYS_ATTR_NAME: &[u8] = b"keys";
 
 pub const DATE_TAG_NAME: &[u8] = b"date";
 pub const STRING_TAG_NAME: &[u8] = b"string";

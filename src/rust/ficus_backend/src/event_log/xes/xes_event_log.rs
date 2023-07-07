@@ -1,12 +1,13 @@
 use std::{rc::Rc, collections::HashMap};
 use crate::event_log::core::{event_log::EventLog, trace::Trace};
-use super::{xes_event::XesEventImpl, shared::XesEventLogExtension, file_xes_log_reader::XesEventLogItem};
+use super::{xes_event::XesEventImpl, shared::{XesEventLogExtension, XesClassifier}, file_xes_log_reader::XesEventLogItem};
 
 
 pub struct XesEventLogImpl {
     traces: Vec<Rc<XesTraceImpl>>,
     globals: HashMap<String, HashMap<String, String>>,
-    extensions: Vec<XesEventLogExtension>
+    extensions: Vec<XesEventLogExtension>,
+    classifiers: Vec<XesClassifier>,
 }
 
 impl XesEventLogImpl {
@@ -16,7 +17,8 @@ impl XesEventLogImpl {
     {
         let mut extensions = Vec::new();
         let mut globals = HashMap::new();
-        let mut traces: Vec<Rc<XesTraceImpl>> = Vec::new();
+        let mut traces = Vec::new();
+        let mut classifiers = Vec::new();
 
         for item in event_log_reader {
             match item {
@@ -26,10 +28,11 @@ impl XesEventLogImpl {
                 },
                 XesEventLogItem::Global(global) => _ = globals.insert(global.scope, global.default_values),
                 XesEventLogItem::Extension(extension) => extensions.push(extension),
+                XesEventLogItem::Classifier(classifier) => classifiers.push(classifier),
             }
         }
 
-        Some(XesEventLogImpl { traces, globals, extensions })
+        Some(XesEventLogImpl { traces, globals, extensions, classifiers })
     }
 }
 

@@ -10,3 +10,8 @@ pub struct XesGlobal {
     pub scope: String,
     pub default_values: HashMap<String, String>
 }
+
+pub struct XesClassifier {
+    pub name: String,
+    pub keys: Vec<String>
+}
