@@ -19,7 +19,7 @@ impl XesEventImpl {
         timestamp: chrono::DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
         payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>,
-        ) -> XesEventImpl {
+    ) -> XesEventImpl {
         XesEventImpl {
             name: name.to_owned(),
             timestamp,

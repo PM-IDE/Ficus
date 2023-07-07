@@ -1,6 +1,6 @@
 use super::{constants::*, xes_log_trace_reader::TraceXesEventLogIterator, shared::{XesEventLogExtension, XesGlobal, XesClassifier}, utils};
 use quick_xml::{Reader, events::BytesStart};
-use std::{cell::RefCell, fs::File, io::BufReader, rc::Rc, collections::HashMap};
+use std::{cell::{RefCell, RefMut}, fs::File, io::BufReader, rc::Rc, collections::HashMap};
 
 pub(crate) struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
@@ -28,50 +28,26 @@ impl Iterator for FromFileXesEventLogReader {
                         let copy_rc = Rc::clone(&self.reader);
                         return Some(XesEventLogItem::Trace(TraceXesEventLogIterator::new(copy_rc)));
                     },
-                    GLOBAL_TAG_NAME => {
-                        let mut scope_name: Option<String> = None;
-
-                        for attr in tag.attributes() {
-                            match attr {
-                                Ok(real_attr) => match real_attr.key.0 {
-                                    SCOPE_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut scope_name) { continue },
-                                    _ => continue
-                                },
-                                Err(_) => continue
-                            }
-                        }
-
-                        if scope_name.is_none() { continue }
-
-                        match Self::read_global(&mut reader, &mut storage) {
+                    GLOBAL_TAG_NAME => match Self::read_scope_name(&tag) {
+                        Some(scope_name) => match Self::read_global_internal(&mut reader, &mut storage) {
                             Some(default_values) => {
-                                let global = XesGlobal { scope: scope_name.unwrap(), default_values };
+                                let global = XesGlobal { scope: scope_name, default_values };
                                 return Some(XesEventLogItem::Global(global))
                             },
                             None => continue,
-                        }
-                    },
-                    EXTENSION_TAG_NAME => match Self::read_extension(&tag) {
-                        Some(extension) => return Some(XesEventLogItem::Extension(extension)),
+                        },
                         None => continue
                     },
-                    CLASSIFIER_TAG_NAME => match Self::read_classifier(&tag) {
-                        Some(classifier) => return Some(XesEventLogItem::Classifier(classifier)),
+                    EXTENSION_TAG_NAME | CLASSIFIER_TAG_NAME => match Self::read_extension_or_classifier(&tag) {
+                        Some(item) => return Some(item),
                         None => continue,
-                    }
+                    },
                     _ => continue,
                 },
-                Ok(quick_xml::events::Event::Empty(tag)) => match tag.name().as_ref() {
-                    EXTENSION_TAG_NAME => match Self::read_extension(&tag) {
-                        Some(extension) => return Some(XesEventLogItem::Extension(extension)),
-                        None => continue
-                    },
-                    CLASSIFIER_TAG_NAME => match Self::read_classifier(&tag) {
-                        Some(classifier) => return Some(XesEventLogItem::Classifier(classifier)),
-                        None => continue,
-                    },
-                    _ => continue,
-                }
+                Ok(quick_xml::events::Event::Empty(tag)) => match Self::read_extension_or_classifier(&tag) {
+                    Some(item) => return Some(item),
+                    None => continue
+                },
                 Ok(quick_xml::events::Event::Eof) => return None,
                 Err(_) => return None,
                 _ => continue,
@@ -91,7 +67,37 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn read_global(
+    fn read_scope_name(tag: &BytesStart) -> Option<String> {
+        let mut scope_name: Option<String> = None;
+
+        for attr in tag.attributes() {
+            match attr {
+                Ok(real_attr) => match real_attr.key.0 {
+                    SCOPE_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut scope_name) { continue },
+                    _ => continue
+                },
+                Err(_) => continue
+            }
+        }
+
+        scope_name
+    }
+
+    fn read_extension_or_classifier(tag: &BytesStart) -> Option<XesEventLogItem> {
+        match tag.name().as_ref() {
+            EXTENSION_TAG_NAME => match Self::read_extension(&tag) {
+                Some(extension) => Some(XesEventLogItem::Extension(extension)),
+                None => None
+            },
+            CLASSIFIER_TAG_NAME => match Self::read_classifier(&tag) {
+                Some(classifier) => Some(XesEventLogItem::Classifier(classifier)),
+                None => None,
+            },
+            _ => None
+        }
+    }
+
+    fn read_global_internal(
         reader: &mut Reader<BufReader<File>>,
         storage: &mut Vec<u8>
     ) -> Option<HashMap<String, String>> {
