@@ -10,7 +10,7 @@ use crate::event_log::{
 mod event_log;
 
 fn main() {
-    let path = "/Users/aero/Programming/pmide/Ficus/src/python/tests/test_data/source/example_logs/exercise1.xes";
+    let path = r"C:\Users\aeroo\Desktop\Programming\CSharp\pmide\Ficus\src\python\tests\test_data\source\example_logs\exercise1.xes";
     let reader = FromFileXesEventLogReader::new(path).unwrap();
 
     let log = XesEventLogImpl::new(reader);

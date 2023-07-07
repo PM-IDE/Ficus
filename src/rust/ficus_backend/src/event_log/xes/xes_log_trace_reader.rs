@@ -1,13 +1,13 @@
 use crate::event_log::core::{lifecycle::{Lifecycle, XesStandardLifecycle}, event::EventPayloadValue};
 
-use super::constants::*;
+use super::{constants::*, utils};
 use super::xes_event::XesEventImpl;
 
 use chrono::{DateTime, Utc};
 use quick_xml::{events::BytesStart, Reader};
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
 
-pub(crate) struct TraceXesEventLogIterator {
+pub struct TraceXesEventLogIterator {
     buffer: Vec<u8>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
 }
@@ -40,11 +40,6 @@ impl Iterator for TraceXesEventLogIterator {
     }
 }
 
-struct KeyValuePair<TKey, TValue> {
-    pub key: Option<TKey>,
-    pub value: Option<TValue>,
-}
-
 impl TraceXesEventLogIterator {
     pub(crate) fn new(reader: Rc<RefCell<Reader<BufReader<File>>>>) -> TraceXesEventLogIterator {
         TraceXesEventLogIterator {
@@ -72,7 +67,7 @@ impl TraceXesEventLogIterator {
                     _ => continue,
                 },
                 Ok(quick_xml::events::Event::Empty(empty)) => {
-                    let kv = Self::extract_key_value(&empty);
+                    let kv = utils::extract_key_value(&empty);
                     if !kv.value.is_some() || !kv.key.is_some() { return None; }
 
                     let key = kv.key.as_ref().unwrap().as_str();
@@ -93,31 +88,6 @@ impl TraceXesEventLogIterator {
                 _ => continue,
             }
         }
-    }
-
-    fn extract_key_value(start: &BytesStart) -> KeyValuePair<String, String> {
-        let mut key: Option<String> = None;
-        let mut value: Option<String> = None;
-
-        for attr in start.attributes() {
-            match attr {
-                Err(_) => continue,
-                Ok(real_attr) => match real_attr.key.0 {
-                    KEY_ATTR_NAME => match String::from_utf8(real_attr.value.to_owned().to_vec()) {
-                        Err(_) => continue,
-                        Ok(string) => key = Some(string),
-                    },
-                    VALUE_ATTR_NAME => match String::from_utf8(real_attr.value.to_owned().to_vec())
-                    {
-                        Err(_) => continue,
-                        Ok(string) => value = Some(string),
-                    },
-                    _ => continue,
-                },
-            }
-        }
-
-        return KeyValuePair { key, value };
     }
 
     fn extract_payload_value(empty: &BytesStart, value: &str) -> Option<EventPayloadValue> {
