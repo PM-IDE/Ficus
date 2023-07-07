@@ -34,10 +34,7 @@ impl Iterator for FromFileXesEventLogReader {
                         for attr in tag.attributes() {
                             match attr {
                                 Ok(real_attr) => match real_attr.key.0 {
-                                    SCOPE_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
-                                        Ok(string) => scope_name = Some(string),
-                                        Err(_) => continue,
-                                    },
+                                    SCOPE_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut scope_name) { continue },
                                     _ => continue
                                 },
                                 Err(_) => continue
@@ -107,9 +104,8 @@ impl FromFileXesEventLogReader {
                     let kv = utils::extract_key_value(&tag);
                     if kv.key.is_none() || kv.value.is_none() { return None }
 
-                    match map {
-                        Some(_) => {},
-                        None => map = Some(HashMap::new())
+                    if let None = map {
+                        map = Some(HashMap::new())
                     }
 
                     map.as_mut().unwrap().insert(kv.key.unwrap(), kv.value.unwrap());
@@ -132,10 +128,7 @@ impl FromFileXesEventLogReader {
         for attr in tag.attributes() {
             match attr {
                 Ok(real_attr) => match real_attr.key.0 {
-                    NAME_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
-                        Ok(string) => name = Some(string),
-                        Err(_) => return None,
-                    },
+                    NAME_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut name) { return None },
                     KEYS_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
                         Ok(keys_string) => keys = Some(keys_string.split(" ").map(|s| s.to_owned()).collect()),
                         Err(_) => return None,
@@ -159,18 +152,9 @@ impl FromFileXesEventLogReader {
         for attr in tag.attributes() {
             match attr {
                 Ok(real_attr) => match real_attr.key.0 {
-                    PREFIX_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
-                        Ok(string) => prefix = Some(string),
-                        Err(_) => return None
-                    },
-                    NAME_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
-                        Ok(string) => name = Some(string),
-                        Err(_) => return None
-                    },
-                    URI_ATTR_NAME => match String::from_utf8(real_attr.value.into_owned()) {
-                        Ok(string) => uri = Some(string),
-                        Err(_) => return None
-                    },
+                    PREFIX_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut prefix) { return None },
+                    NAME_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut name) { return None },
+                    URI_ATTR_NAME => if !utils::read_attr_value(&real_attr, &mut uri) { return None },
                     _ => continue,
                 },
                 Err(_) => return None

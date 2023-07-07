@@ -17,8 +17,8 @@ impl Iterator for TraceXesEventLogIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let read_content = self.reader.borrow_mut().read_event_into(&mut self.buffer);
-            match read_content {
+            let event = self.reader.borrow_mut().read_event_into(&mut self.buffer);
+            match event {
                 Ok(quick_xml::events::Event::Start(e)) => match e.name().0 {
                     EVENT_TAG_NAME => match self.parse_event_from() {
                         None => continue,
