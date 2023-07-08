@@ -3,7 +3,7 @@ import pytest
 
 from ..core.gold_based_test import execute_test_with_gold
 from ..log_creators import *
-from ..test_data_provider import all_test_split_traces
+from ..test_data_provider import all_test_split_traces, data_dir, gold_dir
 from ...ficus.log.functions import *
 from ...ficus.log.pm4py_converters import *
 
@@ -34,7 +34,7 @@ def test_write_example_logs(log_path):
     my_log = read_log_from_xes(log_path)
     serialized_log = serialize_log_to_xes_beautiful(my_log)
     file_name = os.path.splitext(os.path.basename(log_path))[0]
-    gold_path = os.path.join(os.path.curdir, 'test_data', 'gold', 'serialized_example_logs', f'{file_name}.gold')
+    gold_path = os.path.join(gold_dir(), 'serialized_example_logs', f'{file_name}.gold')
     execute_test_with_gold(gold_path, serialized_log)
 
 
@@ -43,8 +43,8 @@ def test_write_test_split_logs(log_path):
     my_log = read_log_from_xes(log_path)
     serialized_log = serialize_log_to_xes_beautiful(my_log)
     file_name = os.path.splitext(os.path.basename(log_path))[0]
-    folder_name = os.path.normpath(log_path).split(os.sep)[3]
-    gold_path = os.path.join(os.path.curdir, 'test_data', 'gold', 'serialized_test_split_logs', folder_name, f'{file_name}.gold')
+    folder_name = os.path.normpath(log_path).split(os.sep)[-2]
+    gold_path = os.path.join(gold_dir(), 'serialized_test_split_logs', folder_name, f'{file_name}.gold')
     execute_test_with_gold(gold_path, serialized_log)
 
 

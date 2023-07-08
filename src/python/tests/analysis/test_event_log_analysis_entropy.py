@@ -1,5 +1,8 @@
-from ...ficus.log.functions import read_log_from_xes
+import os.path
+
+from ..test_data_provider import sources_dir
 from ...ficus.analysis.event_log_analysis import calculate_default_entropies
+from ...ficus.log.functions import read_log_from_xes
 from ...tests import log_creators
 
 
@@ -38,6 +41,6 @@ def test():
     ]
 
     for (log_file, expected_entropy) in source:
-        log = read_log_from_xes(f'./test_data/source/example_logs/{log_file}')
+        log = read_log_from_xes(os.path.join(sources_dir(), 'example_logs', log_file))
         entropy = calculate_default_entropies(log)
         assert entropy == expected_entropy

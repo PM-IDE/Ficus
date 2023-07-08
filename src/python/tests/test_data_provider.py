@@ -4,7 +4,7 @@ from typing import Iterable
 
 
 def data_dir() -> str:
-    return os.path.join(os.path.curdir, 'test_data')
+    return os.path.join(dirname(dirname(dirname(abspath(os.path.curdir)))), 'test_data')
 
 
 def sources_dir() -> str:
@@ -37,11 +37,11 @@ def get_repair_example_path() -> str:
 
 
 def console_app_method2_log_path() -> str:
-    return os.path.join(os.path.curdir, 'test_data', 'source', 'solutions_logs', 'consoleapp1Program.Method2.xes')
+    return os.path.join(data_dir(), 'source', 'solutions_logs', 'consoleapp1Program.Method2.xes')
 
 
 def all_test_split_traces() -> Iterable[str]:
-    initial_dir = os.path.join(os.path.curdir, 'test_data', 'source', 'test_split_traces')
+    initial_dir = os.path.join(data_dir(), 'source', 'test_split_traces')
     for solution_dir in os.listdir(initial_dir):
         for log_path in os.listdir(os.path.join(initial_dir, solution_dir)):
             yield os.path.join(initial_dir, solution_dir, log_path)
