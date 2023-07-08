@@ -1,6 +1,6 @@
 use std::{rc::Rc, collections::HashMap};
 use crate::event_log::core::{event_log::EventLog, trace::Trace};
-use super::{xes_event::XesEventImpl, shared::{XesEventLogExtension, XesClassifier}, file_xes_log_reader::XesEventLogItem};
+use super::{xes_event::XesEventImpl, shared::{XesEventLogExtension, XesClassifier}, reader::file_xes_log_reader::XesEventLogItem};
 
 
 pub struct XesEventLogImpl {

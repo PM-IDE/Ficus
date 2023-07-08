@@ -1,7 +1,6 @@
-use crate::event_log::core::{lifecycle::{Lifecycle, XesStandardLifecycle}, event::EventPayloadValue};
+use crate::event_log::{core::{lifecycle::{Lifecycle, XesStandardLifecycle}, event::EventPayloadValue}, xes::{xes_event::XesEventImpl, utils}};
 
-use super::{constants::*, utils};
-use super::xes_event::XesEventImpl;
+use crate::event_log::xes::constants::*;
 
 use chrono::{DateTime, Utc};
 use quick_xml::{Reader};
@@ -31,10 +30,7 @@ impl Iterator for TraceXesEventLogIterator {
                     b"trace" => return None,
                     _ => continue,
                 },
-                Err(error) => {
-                    println!("Error: {}", error);
-                    return None;
-                }
+                Err(_) => return None,
                 _ => continue,
             }
         }

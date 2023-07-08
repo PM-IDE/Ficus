@@ -1,4 +1,7 @@
-use super::{constants::*, xes_log_trace_reader::TraceXesEventLogIterator, shared::{XesEventLogExtension, XesGlobal, XesClassifier}, utils};
+use crate::event_log::xes::{shared::{XesGlobal, XesEventLogExtension, XesClassifier}, constants::{EXTENSION_TAG_NAME, CLASSIFIER_TAG_NAME}, utils};
+
+use crate::event_log::xes::constants::*;
+use super::xes_log_trace_reader::TraceXesEventLogIterator;
 use quick_xml::{Reader, events::BytesStart};
 use std::{cell::RefCell, fs::File, io::BufReader, rc::Rc, collections::HashMap};
 

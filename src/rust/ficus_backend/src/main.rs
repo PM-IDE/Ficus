@@ -4,7 +4,7 @@ use crate::event_log::{
         event_log::EventLog,
         trace::Trace
     },
-    xes::{file_xes_log_reader::FromFileXesEventLogReader, xes_event_log::XesEventLogImpl},
+    xes::{xes_event_log::XesEventLogImpl, reader::file_xes_log_reader::FromFileXesEventLogReader},
 };
 
 mod event_log;
