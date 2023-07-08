@@ -33,9 +33,10 @@ impl Iterator for FromFileXesEventLogReader {
             match reader.read_event_into(&mut storage) {
                 Ok(quick_xml::events::Event::Start(tag)) => match tag.name().as_ref() {
                     TRACE_TAG_NAME => {
-                        let copy_rc = Rc::clone(&self.reader);
+                        let copy_reader = Rc::clone(&self.reader);
                         let copy_globals = Rc::clone(&self.seen_globals);
-                        return Some(XesEventLogItem::Trace(TraceXesEventLogIterator::new(copy_rc, copy_globals)));
+                        let iterator = TraceXesEventLogIterator::new(copy_reader, copy_globals);
+                        return Some(XesEventLogItem::Trace(iterator));
                     }
                     GLOBAL_TAG_NAME => match Self::read_scope_name(&tag) {
                         Some(scope_name) => match Self::read_global(&mut reader, &mut storage) {

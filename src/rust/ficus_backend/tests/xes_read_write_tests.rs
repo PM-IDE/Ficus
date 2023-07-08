@@ -1,4 +1,2 @@
 #[test]
-fn test_read_xes() {
-    
-}
+fn test_read_xes() {}

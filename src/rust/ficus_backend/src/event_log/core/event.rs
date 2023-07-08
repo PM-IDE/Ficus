@@ -1,5 +1,5 @@
 use super::lifecycle::Lifecycle;
-use chrono::{Utc, DateTime};
+use chrono::{DateTime, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug)]

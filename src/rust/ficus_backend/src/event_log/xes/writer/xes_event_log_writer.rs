@@ -1,9 +1,23 @@
-use std::{io::{Cursor, self}, fs, string::FromUtf8Error, cell::RefCell};
+use std::{
+    cell::RefCell,
+    fs,
+    io::{self, Cursor},
+    string::FromUtf8Error,
+};
 
-use quick_xml;
-use quick_xml::{Writer, events::{BytesStart, BytesEnd}};
+use quick_xml::{
+    events::{BytesEnd, BytesStart},
+    Writer,
+};
 
-use crate::event_log::{xes::{xes_event_log::XesEventLogImpl, constants::*}, core::{event_log::EventLog, trace::Trace, event::{Event, EventPayloadValue}}};
+use crate::event_log::{
+    core::{
+        event::{Event, EventPayloadValue},
+        event_log::EventLog,
+        trace::Trace,
+    },
+    xes::{constants::*, xes_event_log::XesEventLogImpl},
+};
 
 pub enum WriteLogError {
     FromUt8Error(FromUtf8Error),
@@ -24,7 +38,7 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
     //todo: refactor this trash
     let writer = RefCell::new(Writer::new(Cursor::new(Vec::new())));
     let mut attrs = Vec::new();
-    
+
     {
         let _log_cookie = StartEndElementCookie::new(&writer, LOG_TAG_NAME_STR);
 
@@ -61,7 +75,9 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
 
         for trace in log.get_traces() {
             let events = trace.get_events();
-            if events.len() == 0 { continue; }
+            if events.len() == 0 {
+                continue;
+            }
 
             let _trace_cookie = StartEndElementCookie::new(&writer, TRACE_TAG_NAME_STR);
 
@@ -112,17 +128,16 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
     String::from_utf8(content)
 }
 
-fn write_empty(
-    writer: & RefCell<Writer<Cursor<Vec<u8>>>>,
-    tag_name: &str,
-    attrs: &Vec<(&str, &str)>
-) {
+fn write_empty(writer: &RefCell<Writer<Cursor<Vec<u8>>>>, tag_name: &str, attrs: &Vec<(&str, &str)>) {
     let mut empty_tag = BytesStart::new(tag_name);
     for (name, value) in attrs {
         empty_tag.push_attribute((*name, *value));
     }
 
-    assert!(writer.borrow_mut().write_event(quick_xml::events::Event::Empty(empty_tag)).is_ok());
+    assert!(writer
+        .borrow_mut()
+        .write_event(quick_xml::events::Event::Empty(empty_tag))
+        .is_ok());
 }
 
 struct StartEndElementCookie<'a> {
@@ -148,14 +163,15 @@ impl<'a> StartEndElementCookie<'a> {
     fn new_with_attrs(
         writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>,
         tag_name: &'a str,
-        attrs: &Vec<(&str, &str)>
+        attrs: &Vec<(&str, &str)>,
     ) -> StartEndElementCookie<'a> {
         let mut start_tag = BytesStart::new(tag_name);
         for (name, value) in attrs {
             start_tag.push_attribute((*name, *value));
         }
 
-        assert!(writer.borrow_mut().write_event(quick_xml::events::Event::Start(start_tag)).is_ok());
+        let start_event = quick_xml::events::Event::Start(start_tag);
+        assert!(writer.borrow_mut().write_event(start_event).is_ok());
         assert!(writer.borrow_mut().write_indent().is_ok());
         StartEndElementCookie { tag_name, writer }
     }
