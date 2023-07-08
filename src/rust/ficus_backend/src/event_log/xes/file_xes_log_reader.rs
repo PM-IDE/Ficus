@@ -1,6 +1,6 @@
 use super::{constants::*, xes_log_trace_reader::TraceXesEventLogIterator, shared::{XesEventLogExtension, XesGlobal, XesClassifier}, utils};
 use quick_xml::{Reader, events::BytesStart};
-use std::{cell::{RefCell, RefMut}, fs::File, io::BufReader, rc::Rc, collections::HashMap};
+use std::{cell::RefCell, fs::File, io::BufReader, rc::Rc, collections::HashMap};
 
 pub(crate) struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
@@ -29,7 +29,7 @@ impl Iterator for FromFileXesEventLogReader {
                         return Some(XesEventLogItem::Trace(TraceXesEventLogIterator::new(copy_rc)));
                     },
                     GLOBAL_TAG_NAME => match Self::read_scope_name(&tag) {
-                        Some(scope_name) => match Self::read_global_internal(&mut reader, &mut storage) {
+                        Some(scope_name) => match Self::read_global(&mut reader, &mut storage) {
                             Some(default_values) => {
                                 let global = XesGlobal { scope: scope_name, default_values };
                                 return Some(XesEventLogItem::Global(global))
@@ -97,7 +97,7 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn read_global_internal(
+    fn read_global(
         reader: &mut Reader<BufReader<File>>,
         storage: &mut Vec<u8>
     ) -> Option<HashMap<String, String>> {
