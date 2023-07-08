@@ -4,12 +4,13 @@ use super::{constants::*, utils};
 use super::xes_event::XesEventImpl;
 
 use chrono::{DateTime, Utc};
-use quick_xml::{events::BytesStart, Reader};
+use quick_xml::{Reader};
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
 
 pub struct TraceXesEventLogIterator {
     buffer: Vec<u8>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
+    globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,
 }
 
 impl Iterator for TraceXesEventLogIterator {
@@ -41,10 +42,14 @@ impl Iterator for TraceXesEventLogIterator {
 }
 
 impl TraceXesEventLogIterator {
-    pub(crate) fn new(reader: Rc<RefCell<Reader<BufReader<File>>>>) -> TraceXesEventLogIterator {
+    pub(crate) fn new(
+        reader: Rc<RefCell<Reader<BufReader<File>>>>,
+        seen_globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>
+    ) -> TraceXesEventLogIterator {
         TraceXesEventLogIterator {
             reader,
             buffer: Vec::new(),
+            globals: seen_globals
         }
     }
 
@@ -53,6 +58,8 @@ impl TraceXesEventLogIterator {
         let mut date: Option<DateTime<Utc>> = None;
         let mut lifecycle: Option<Lifecycle> = None;
         let payload: Rc<RefCell<HashMap<String, EventPayloadValue>>> = Rc::new(RefCell::new(HashMap::new()));
+
+        self.set_defaults_value(&mut name, &mut date, &mut lifecycle, &payload);
 
         loop {
             match self.reader.borrow_mut().read_event_into(&mut self.buffer) {
@@ -72,26 +79,55 @@ impl TraceXesEventLogIterator {
 
                     let key = kv.key.as_ref().unwrap().as_str();
                     let value = kv.value.as_ref().unwrap().as_str();
-
-                    let payload_value = Self::extract_payload_value(&empty, value);
-                    if !payload_value.is_some() { return None; }
-                    
-                    Self::update_event_data(
-                        key,
-                        payload_value.unwrap(),
-                        &mut date,
-                        &mut name,
-                        &mut lifecycle,
-                        &payload,
-                    )
+                    let payload_type = empty.name().0;
+                    Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &payload);
                 }
                 _ => continue,
             }
         }
     }
 
-    fn extract_payload_value(empty: &BytesStart, value: &str) -> Option<EventPayloadValue> {
-        match empty.name().0 {
+    fn set_defaults_value(
+        &self,
+        name: &mut Option<String>,
+        date: &mut Option<DateTime<Utc>>,
+        lifecycle: &mut Option<Lifecycle>,
+        payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>
+    ) {
+        let globals = self.globals.borrow_mut();
+        if !globals.contains_key("event") { return }
+
+        for (key, value) in globals.get("event").unwrap() {
+            Self::set_parsed_value("string".as_bytes(), key, value, name, date, lifecycle, payload);
+        }
+    }
+
+    fn set_parsed_value(
+        payload_type: &[u8],
+        key: &str,
+        value: &str,
+        name: &mut Option<String>,
+        date: &mut Option<DateTime<Utc>>,
+        lifecycle: &mut Option<Lifecycle>,
+        payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>
+    ) -> bool {
+        let payload_value = Self::extract_payload_value(payload_type, value);
+        if !payload_value.is_some() { return false; }
+
+        Self::update_event_data(
+            key,
+            payload_value.unwrap(),
+            date,
+            name,
+            lifecycle,
+            &payload,
+        );
+
+        true
+    }
+
+    fn extract_payload_value(name: &[u8], value: &str) -> Option<EventPayloadValue> {
+        match name {
             DATE_TAG_NAME => match DateTime::parse_from_rfc3339(value) {
                 Err(_) => None,
                 Ok(date) => Some(EventPayloadValue::Date(date.with_timezone(&Utc))),
@@ -143,7 +179,12 @@ impl TraceXesEventLogIterator {
                 }
             }
             _ => {
-                payload.borrow_mut().insert(key.to_owned(), payload_value);
+                let mut map = payload.borrow_mut();
+                if map.contains_key(key) {
+                    *map.get_mut(key).unwrap() = payload_value;
+                } else {
+                    map.insert(key.to_owned(), payload_value);
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ use std::{cell::RefCell, fs::File, io::BufReader, rc::Rc, collections::HashMap};
 pub(crate) struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
+    seen_globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,
 }
 
 pub enum XesEventLogItem {
@@ -26,11 +27,18 @@ impl Iterator for FromFileXesEventLogReader {
                 Ok(quick_xml::events::Event::Start(tag)) => match tag.name().as_ref() {
                     TRACE_TAG_NAME => {
                         let copy_rc = Rc::clone(&self.reader);
-                        return Some(XesEventLogItem::Trace(TraceXesEventLogIterator::new(copy_rc)));
+                        let copy_globals = Rc::clone(&self.seen_globals);
+                        return Some(XesEventLogItem::Trace(TraceXesEventLogIterator::new(copy_rc, copy_globals)));
                     },
                     GLOBAL_TAG_NAME => match Self::read_scope_name(&tag) {
                         Some(scope_name) => match Self::read_global(&mut reader, &mut storage) {
                             Some(default_values) => {
+                                let mut globals = self.seen_globals.borrow_mut();
+                                if globals.contains_key(&scope_name) {
+                                    continue
+                                }
+
+                                globals.insert(scope_name.to_owned(), default_values.to_owned());
                                 let global = XesGlobal { scope: scope_name, default_values };
                                 return Some(XesEventLogItem::Global(global))
                             },
@@ -62,6 +70,7 @@ impl FromFileXesEventLogReader {
             Ok(reader) => Some(FromFileXesEventLogReader {
                 reader: Rc::new(RefCell::new(reader)),
                 storage: Rc::new(RefCell::new(Vec::new())),
+                seen_globals: Rc::new(RefCell::new(HashMap::new())),
             }),
             Err(_) => None,
         }
