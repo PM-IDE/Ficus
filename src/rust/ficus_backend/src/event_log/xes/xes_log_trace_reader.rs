@@ -95,10 +95,10 @@ impl TraceXesEventLogIterator {
         payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>
     ) {
         let globals = self.globals.borrow_mut();
-        if !globals.contains_key("event") { return }
+        if !globals.contains_key(EVENT_TAG_NAME_STR) { return }
 
-        for (key, value) in globals.get("event").unwrap() {
-            Self::set_parsed_value("string".as_bytes(), key, value, name, date, lifecycle, payload);
+        for (key, value) in globals.get(EVENT_TAG_NAME_STR).unwrap() {
+            Self::set_parsed_value(STRING_TAG_NAME, key, value, name, date, lifecycle, payload);
         }
     }
 
