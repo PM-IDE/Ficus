@@ -1,7 +1,10 @@
-use std::{rc::Rc, collections::HashMap};
+use super::{
+    reader::file_xes_log_reader::XesEventLogItem,
+    shared::{XesClassifier, XesEventLogExtension},
+    xes_event::XesEventImpl,
+};
 use crate::event_log::core::{event_log::EventLog, trace::Trace};
-use super::{xes_event::XesEventImpl, shared::{XesEventLogExtension, XesClassifier}, reader::file_xes_log_reader::XesEventLogItem};
-
+use std::{collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
     traces: Vec<Rc<XesTraceImpl>>,
@@ -27,7 +30,7 @@ impl XesEventLogImpl {
 impl XesEventLogImpl {
     pub fn new<TLogReader>(event_log_reader: TLogReader) -> Option<XesEventLogImpl>
     where
-        TLogReader: Iterator<Item = XesEventLogItem>
+        TLogReader: Iterator<Item = XesEventLogItem>,
     {
         let mut extensions = Vec::new();
         let mut globals = HashMap::new();
@@ -46,7 +49,12 @@ impl XesEventLogImpl {
             }
         }
 
-        Some(XesEventLogImpl { traces, globals, extensions, classifiers })
+        Some(XesEventLogImpl {
+            traces,
+            globals,
+            extensions,
+            classifiers,
+        })
     }
 }
 

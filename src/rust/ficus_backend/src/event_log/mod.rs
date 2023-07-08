@@ -1,2 +1,2 @@
-pub mod xes;
 pub mod core;
+pub mod xes;

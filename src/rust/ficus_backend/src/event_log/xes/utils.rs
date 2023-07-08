@@ -1,4 +1,4 @@
-use quick_xml::events::{BytesStart, attributes::Attribute};
+use quick_xml::events::{attributes::Attribute, BytesStart};
 
 use super::constants::{KEY_ATTR_NAME, VALUE_ATTR_NAME};
 
@@ -34,7 +34,10 @@ pub fn extract_key_value(start: &BytesStart) -> KeyValuePair<String, String> {
 #[inline]
 pub fn read_attr_value(real_attr: &Attribute, var: &mut Option<String>) -> bool {
     match String::from_utf8(real_attr.value.as_ref().to_vec()) {
-        Ok(string) => { *var = Some(string); true }
-        Err(_) => false
+        Ok(string) => {
+            *var = Some(string);
+            true
+        }
+        Err(_) => false,
     }
 }

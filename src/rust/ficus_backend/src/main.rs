@@ -1,10 +1,6 @@
 use crate::event_log::{
-    core::{
-        event::Event,
-        event_log::EventLog,
-        trace::Trace
-    },
-    xes::{xes_event_log::XesEventLogImpl, reader::file_xes_log_reader::FromFileXesEventLogReader},
+    core::{event::Event, event_log::EventLog, trace::Trace},
+    xes::{reader::file_xes_log_reader::FromFileXesEventLogReader, xes_event_log::XesEventLogImpl},
 };
 
 mod event_log;

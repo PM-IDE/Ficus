@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use super::event::Event;
+use std::rc::Rc;
 
 pub trait Trace {
     type TEvent: Event;
