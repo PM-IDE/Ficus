@@ -164,17 +164,17 @@ impl TraceXesEventLogIterator {
         payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>,
     ) {
         match key {
-            TIME_TIMESTAMP => {
+            TIME_TIMESTAMP_STR => {
                 if let EventPayloadValue::Date(parsed_date) = payload_value {
                     *date = Some(parsed_date);
                 }
             }
-            CONCEPT_NAME => {
+            CONCEPT_NAME_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
                     *name = Some(parsed_string);
                 }
             }
-            LIFECYCLE_TRANSITION => {
+            LIFECYCLE_TRANSITION_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
                     match XesStandardLifecycle::from_str(parsed_string.as_str()) {
                         Ok(lifecycle_value) => *lifecycle = Some(Lifecycle::XesStandardLifecycle(lifecycle_value)),

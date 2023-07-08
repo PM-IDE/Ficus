@@ -5,6 +5,25 @@ pub enum Lifecycle {
     XesStandardLifecycle(XesStandardLifecycle),
 }
 
+impl ToString for Lifecycle {
+    fn to_string(&self) -> String {
+        match self {
+            Self::XesStandardLifecycle(xes_lifecycle) => xes_lifecycle.to_string(),
+        }
+    }
+}
+
+impl ToString for XesStandardLifecycle {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Schedule => String::from_str("schedule").ok().unwrap(),
+            Self::Start => String::from_str("start").ok().unwrap(),
+            Self::Complete => String::from_str("complete").ok().unwrap(),
+            Self::Unknown => String::from_str("unknown").ok().unwrap(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum XesStandardLifecycle {
     Schedule,
