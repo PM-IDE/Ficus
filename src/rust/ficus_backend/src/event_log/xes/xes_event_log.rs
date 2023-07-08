@@ -11,6 +11,20 @@ pub struct XesEventLogImpl {
 }
 
 impl XesEventLogImpl {
+    pub fn get_globals(&self) -> &HashMap<String, HashMap<String, String>> {
+        &self.globals
+    }
+
+    pub fn get_extensions(&self) -> &Vec<XesEventLogExtension> {
+        &self.extensions
+    }
+
+    pub fn get_classifiers(&self) -> &Vec<XesClassifier> {
+        &self.classifiers
+    }
+}
+
+impl XesEventLogImpl {
     pub fn new<TLogReader>(event_log_reader: TLogReader) -> Option<XesEventLogImpl>
     where
         TLogReader: Iterator<Item = XesEventLogItem>
