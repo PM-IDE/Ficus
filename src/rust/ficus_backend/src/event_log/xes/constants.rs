@@ -1,6 +1,8 @@
 pub const EVENT_TAG_NAME_STR: &str = "event";
 pub const STRING_TAG_NAME_STR: &str = "string";
+pub const LOG_TAG_NAME_STR: &str = "log";
 
+pub const LOG_TAG_NAME: &[u8] = b"log";
 pub const EVENT_TAG_NAME: &[u8] = EVENT_TAG_NAME_STR.as_bytes();
 pub const TRACE_TAG_NAME: &[u8] = b"trace";
 pub const GLOBAL_TAG_NAME: &[u8] = b"global";
