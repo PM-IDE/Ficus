@@ -35,7 +35,7 @@ impl Iterator for TraceXesEventLogIterator {
                     _ => continue,
                 },
                 Ok(quick_xml::events::Event::End(e)) => match e.name().0 {
-                    b"trace" => return None,
+                    TRACE_TAG_NAME => return None,
                     _ => continue,
                 },
                 Err(_) => return None,
