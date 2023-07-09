@@ -26,10 +26,10 @@ pub const EXTENSION_TAG_NAME: &[u8] = EXTENSION_TAG_NAME_STR.as_bytes();
 pub const CLASSIFIER_TAG_NAME: &[u8] = CLASSIFIER_TAG_NAME_STR.as_bytes();
 
 pub const NAME_ATTR_NAME: &[u8] = NAME_ATTR_NAME_STR.as_bytes();
-pub const PREFIX_ATTR_NAME: &[u8] = b"prefix";
-pub const URI_ATTR_NAME: &[u8] = b"uri";
+pub const PREFIX_ATTR_NAME: &[u8] = PREFIX_ATTR_NAME_STR.as_bytes();
+pub const URI_ATTR_NAME: &[u8] = URI_ATTR_NAME_STR.as_bytes();
 pub const SCOPE_ATTR_NAME: &[u8] = SCOPE_ATTR_NAME_STR.as_bytes();
-pub const KEYS_ATTR_NAME: &[u8] = b"keys";
+pub const KEYS_ATTR_NAME: &[u8] = KEYS_ATTR_NAME_STR.as_bytes();
 
 pub const DATE_TAG_NAME: &[u8] = DATE_TAG_NAME_STR.as_bytes();
 pub const STRING_TAG_NAME: &[u8] = STRING_TAG_NAME_STR.as_bytes();

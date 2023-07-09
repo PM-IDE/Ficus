@@ -38,8 +38,8 @@ impl Iterator for FromFileXesEventLogReader {
                         let iterator = TraceXesEventLogIterator::new(copy_reader, copy_globals);
                         return Some(XesEventLogItem::Trace(iterator));
                     }
-                    GLOBAL_TAG_NAME => match Self::read_scope_name(&tag) {
-                        Some(scope_name) => match Self::read_global(&mut reader, &mut storage) {
+                    GLOBAL_TAG_NAME => match Self::try_read_scope_name(&tag) {
+                        Some(scope_name) => match Self::try_read_global(&mut reader, &mut storage) {
                             Some(default_values) => {
                                 let mut globals = self.seen_globals.borrow_mut();
                                 if globals.contains_key(&scope_name) {
@@ -87,7 +87,7 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn read_scope_name(tag: &BytesStart) -> Option<String> {
+    fn try_read_scope_name(tag: &BytesStart) -> Option<String> {
         let mut scope_name: Option<String> = None;
 
         for attr in tag.attributes() {
@@ -109,11 +109,11 @@ impl FromFileXesEventLogReader {
 
     fn try_read_tag(tag: &BytesStart) -> Option<XesEventLogItem> {
         let result = match tag.name().as_ref() {
-            EXTENSION_TAG_NAME => match Self::read_extension(&tag) {
+            EXTENSION_TAG_NAME => match Self::try_read_extension(&tag) {
                 Some(extension) => Some(XesEventLogItem::Extension(extension)),
                 None => None,
             },
-            CLASSIFIER_TAG_NAME => match Self::read_classifier(&tag) {
+            CLASSIFIER_TAG_NAME => match Self::try_read_classifier(&tag) {
                 Some(classifier) => Some(XesEventLogItem::Classifier(classifier)),
                 None => None,
             },
@@ -139,7 +139,10 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn read_global(reader: &mut Reader<BufReader<File>>, storage: &mut Vec<u8>) -> Option<HashMap<String, String>> {
+    fn try_read_global(
+        reader: &mut Reader<BufReader<File>>,
+        storage: &mut Vec<u8>
+    ) -> Option<HashMap<String, String>> {
         let mut map: Option<HashMap<String, String>> = None;
 
         loop {
@@ -168,7 +171,7 @@ impl FromFileXesEventLogReader {
         map
     }
 
-    fn read_classifier(tag: &BytesStart) -> Option<XesClassifier> {
+    fn try_read_classifier(tag: &BytesStart) -> Option<XesClassifier> {
         let mut name: Option<String> = None;
         let mut keys: Option<Vec<String>> = None;
 
@@ -200,7 +203,7 @@ impl FromFileXesEventLogReader {
         })
     }
 
-    fn read_extension(tag: &BytesStart) -> Option<XesEventLogExtension> {
+    fn try_read_extension(tag: &BytesStart) -> Option<XesEventLogExtension> {
         let mut name: Option<String> = None;
         let mut prefix: Option<String> = None;
         let mut uri: Option<String> = None;
