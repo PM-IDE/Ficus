@@ -60,6 +60,10 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
             write_empty(&writer, CLASSIFIER_TAG_NAME_STR, &attrs);
         }
 
+        for (name, value) in log.get_properties() {
+            write_payload_tag(&writer, name, value);
+        }
+
         for (scope, defaults) in log.get_globals() {
             let mut attrs = vec![(SCOPE_ATTR_NAME_STR, scope.as_str())];
 
@@ -111,21 +115,7 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
 
                 let payload = event.get_payload();
                 for (key, value) in payload.borrow().iter() {
-                    let tag_name = match value {
-                        EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
-                        EventPayloadValue::String(_) => STRING_TAG_NAME_STR,
-                        EventPayloadValue::Boolean(_) => BOOLEAN_TAG_NAME_STR,
-                        EventPayloadValue::Int(_) => INT_TAG_NAME_STR,
-                        EventPayloadValue::Float(_) => FLOAT_TAG_NAME_STR,
-                    };
-
-                    let string_value = value.to_string();
-                    let attrs = vec![
-                        (KEY_ATTR_NAME_STR, key.as_str()),
-                        (VALUE_ATTR_NANE_STR, string_value.as_str()),
-                    ];
-
-                    write_empty(&writer, tag_name, &attrs);
+                    write_payload_tag(&writer, key, value);
                 }
             }
         }
@@ -135,16 +125,29 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
     String::from_utf8(content)
 }
 
+fn write_payload_tag(writer: &RefCell<Writer<Cursor<Vec<u8>>>>, key: &str, value: &EventPayloadValue) {
+    let tag_name = match value {
+        EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
+        EventPayloadValue::String(_) => STRING_TAG_NAME_STR,
+        EventPayloadValue::Boolean(_) => BOOLEAN_TAG_NAME_STR,
+        EventPayloadValue::Int(_) => INT_TAG_NAME_STR,
+        EventPayloadValue::Float(_) => FLOAT_TAG_NAME_STR,
+    };
+
+    let string_value = value.to_string();
+    let attrs = vec![(KEY_ATTR_NAME_STR, key), (VALUE_ATTR_NANE_STR, string_value.as_str())];
+
+    write_empty(&writer, tag_name, &attrs);
+}
+
 fn write_empty(writer: &RefCell<Writer<Cursor<Vec<u8>>>>, tag_name: &str, attrs: &Vec<(&str, &str)>) {
     let mut empty_tag = BytesStart::new(tag_name);
     for (name, value) in attrs {
         empty_tag.push_attribute((*name, *value));
     }
 
-    assert!(writer
-        .borrow_mut()
-        .write_event(quick_xml::events::Event::Empty(empty_tag))
-        .is_ok());
+    let empty = quick_xml::events::Event::Empty(empty_tag);
+    assert!(writer.borrow_mut().write_event(empty).is_ok());
 }
 
 struct StartEndElementCookie<'a> {
