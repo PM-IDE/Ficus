@@ -81,18 +81,24 @@ impl TraceXesEventLogIterator {
                     }
                     _ => continue,
                 },
-                Ok(quick_xml::events::Event::Empty(empty)) => {
-                    match utils::read_payload_like_tag(&empty) {
-                        Some(descriptor) => {
-                            let payload_type = descriptor.payload_type.as_str().as_bytes();
-                            let key = descriptor.key.as_str();
-                            let value = descriptor.value.as_str();
+                Ok(quick_xml::events::Event::Empty(empty)) => match utils::read_payload_like_tag(&empty) {
+                    Some(descriptor) => {
+                        let payload_type = descriptor.payload_type.as_str().as_bytes();
+                        let key = descriptor.key.as_str();
+                        let value = descriptor.value.as_str();
 
-                            Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &payload);
-                        }
-                        None => continue,
+                        Self::set_parsed_value(
+                            payload_type,
+                            key,
+                            value,
+                            &mut name,
+                            &mut date,
+                            &mut lifecycle,
+                            &payload,
+                        );
                     }
-                }
+                    None => continue,
+                },
                 _ => continue,
             }
         }

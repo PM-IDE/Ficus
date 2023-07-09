@@ -4,7 +4,6 @@ use crate::event_log::{core::event::EventPayloadValue, xes::constants::*};
 
 use quick_xml::events::{attributes::Attribute, BytesStart};
 
-
 pub struct KeyValuePair<TKey, TValue> {
     pub key: Option<TKey>,
     pub value: Option<TValue>,
@@ -26,10 +25,16 @@ pub fn read_payload_like_tag(tag: &BytesStart) -> Option<PayloadTagDescriptor> {
     let value = kv.value.as_ref().unwrap().to_owned();
     let payload_type = match String::from_utf8(tag.name().0.to_vec()) {
         Ok(string) => string,
-        Err(_) => return None
+        Err(_) => return None,
     };
-    
-    Some(PayloadTagDescriptor { payload_type, key, value })
+
+    let descriptor = PayloadTagDescriptor {
+        payload_type,
+        key,
+        value,
+    };
+
+    Some(descriptor)
 }
 
 pub fn extract_key_value(start: &BytesStart) -> KeyValuePair<String, String> {

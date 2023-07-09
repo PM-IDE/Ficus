@@ -3,7 +3,7 @@ use super::{
     shared::{XesClassifier, XesEventLogExtension},
     xes_event::XesEventImpl,
 };
-use crate::event_log::core::{event_log::EventLog, trace::Trace, event::EventPayloadValue};
+use crate::event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace};
 use std::{collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
@@ -11,7 +11,7 @@ pub struct XesEventLogImpl {
     globals: HashMap<String, HashMap<String, String>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,
-    properties: HashMap<String, EventPayloadValue>
+    properties: HashMap<String, EventPayloadValue>,
 }
 
 impl XesEventLogImpl {
@@ -56,7 +56,14 @@ impl XesEventLogImpl {
             }
         }
 
-        let log = XesEventLogImpl { traces, globals, extensions, classifiers, properties, };
+        let log = XesEventLogImpl {
+            traces,
+            globals,
+            extensions,
+            classifiers,
+            properties,
+        };
+
         Some(log)
     }
 }

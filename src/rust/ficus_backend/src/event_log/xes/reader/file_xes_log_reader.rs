@@ -1,9 +1,9 @@
 use crate::event_log::xes::{
     constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
-    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty}
+    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty},
 };
 
-use super::{xes_log_trace_reader::TraceXesEventLogIterator, utils};
+use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
 use crate::event_log::xes::constants::*;
 use quick_xml::{events::BytesStart, Reader};
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
@@ -19,7 +19,7 @@ pub enum XesEventLogItem {
     Global(XesGlobal),
     Extension(XesEventLogExtension),
     Classifier(XesClassifier),
-    Property(XesProperty)
+    Property(XesProperty),
 }
 
 impl Iterator for FromFileXesEventLogReader {
@@ -120,7 +120,9 @@ impl FromFileXesEventLogReader {
             _ => None,
         };
 
-        if result.is_some() { return result; }
+        if result.is_some() {
+            return result;
+        }
 
         match utils::read_payload_like_tag(tag) {
             Some(descriptor) => {
@@ -130,10 +132,10 @@ impl FromFileXesEventLogReader {
 
                 match utils::extract_payload_value(payload_type, value) {
                     Some(value) => Some(XesEventLogItem::Property(XesProperty { name: key, value })),
-                    None => None
+                    None => None,
                 }
-            },
-            None => None
+            }
+            None => None,
         }
     }
 
