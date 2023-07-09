@@ -35,16 +35,34 @@ pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogE
 }
 
 fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
-    //todo: refactor this trash
-    let writer = RefCell::new(Writer::new(Cursor::new(Vec::new())));
-    let mut attrs = Vec::new();
+    let writer = RefCell::new(Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2));
 
     {
         let _log_cookie = StartEndElementCookie::new(&writer, LOG_TAG_NAME_STR);
 
+        for ext in log.get_extensions() {
+            let attrs = vec![
+                (NAME_ATTR_NAME_STR, ext.name.as_str()),
+                (URI_ATTR_NAME_STR, ext.uri.as_str()),
+                (PREFIX_ATTR_NAME_STR, ext.prefix.as_str()),
+            ];
+
+            write_empty(&writer, EXTENSION_TAG_NAME_STR, &attrs);
+        }
+
+        for classifier in log.get_classifiers() {
+            let keys = classifier.keys.join(" ");
+            let attrs = vec![
+                (NAME_ATTR_NAME_STR, classifier.name.as_str()),
+                (KEYS_ATTR_NAME_STR, keys.as_str()),
+            ];
+
+            write_empty(&writer, CLASSIFIER_TAG_NAME_STR, &attrs);
+        }
+
         for (scope, defaults) in log.get_globals() {
-            attrs.clear();
-            attrs.push((SCOPE_ATTR_NAME_STR, scope.as_str()));
+            let mut attrs = vec![(SCOPE_ATTR_NAME_STR, scope.as_str())];
+
             let _global_cookie = StartEndElementCookie::new_with_attrs(&writer, GLOBAL_TAG_NAME_STR, &attrs);
 
             for (key, value) in defaults {
@@ -53,24 +71,6 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
                 attrs.push((VALUE_ATTR_NANE_STR, value.as_str()));
                 write_empty(&writer, STRING_TAG_NAME_STR, &attrs);
             }
-        }
-
-        for classifier in log.get_classifiers() {
-            let mut attrs = Vec::new();
-            let keys = classifier.keys.join(" ");
-            attrs.clear();
-            attrs.push((NAME_ATTR_NAME_STR, classifier.name.as_str()));
-            attrs.push((KEYS_ATTR_NAME_STR, keys.as_str()));
-
-            write_empty(&writer, CLASSIFIER_TAG_NAME_STR, &attrs);
-        }
-
-        for ext in log.get_extensions() {
-            attrs.clear();
-            attrs.push((NAME_ATTR_NAME_STR, ext.name.as_str()));
-            attrs.push((URI_ATTR_NAME_STR, ext.uri.as_str()));
-            attrs.push((PREFIX_ATTR_NAME_STR, ext.prefix.as_str()));
-            write_empty(&writer, EXTENSION_TAG_NAME_STR, &attrs);
         }
 
         for trace in log.get_traces() {
@@ -82,30 +82,35 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
             let _trace_cookie = StartEndElementCookie::new(&writer, TRACE_TAG_NAME_STR);
 
             for event in events {
-                let mut attrs = Vec::new();
                 let _event_cookie = StartEndElementCookie::new(&writer, EVENT_TAG_NAME_STR);
 
-                attrs.push((KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR));
-                attrs.push((VALUE_ATTR_NANE_STR, event.get_name()));
+                let attrs = vec![
+                    (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
+                    (VALUE_ATTR_NANE_STR, event.get_name()),
+                ];
+
                 write_empty(&writer, STRING_TAG_NAME_STR, &attrs);
 
-                attrs.clear();
                 let date_string = event.get_timestamp().to_rfc3339();
-                attrs.push((VALUE_ATTR_NANE_STR, date_string.as_str()));
-                attrs.push((KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR));
+                let attrs = vec![
+                    (VALUE_ATTR_NANE_STR, date_string.as_str()),
+                    (KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR),
+                ];
+
                 write_empty(&writer, DATE_TAG_NAME_STR, &attrs);
 
                 if let Some(lifecycle) = event.get_lifecycle() {
-                    let mut attrs = Vec::new();
                     let lifecycle_string = lifecycle.to_string();
-                    attrs.push((VALUE_ATTR_NANE_STR, lifecycle_string.as_str()));
-                    attrs.push((KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR));
+                    let attrs = vec![
+                        (VALUE_ATTR_NANE_STR, lifecycle_string.as_str()),
+                        (KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR),
+                    ];
+
                     write_empty(&writer, STRING_TAG_NAME_STR, &attrs);
                 }
 
                 let payload = event.get_payload();
                 for (key, value) in payload.borrow().iter() {
-                    let mut attrs = Vec::new();
                     let tag_name = match value {
                         EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
                         EventPayloadValue::String(_) => STRING_TAG_NAME_STR,
@@ -114,10 +119,12 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, FromUtf8Error> {
                         EventPayloadValue::Float(_) => FLOAT_TAG_NAME_STR,
                     };
 
-                    attrs.clear();
-                    attrs.push((KEY_ATTR_NAME_STR, key.as_str()));
                     let string_value = value.to_string();
-                    attrs.push((VALUE_ATTR_NANE_STR, string_value.as_str()));
+                    let attrs = vec![
+                        (KEY_ATTR_NAME_STR, key.as_str()),
+                        (VALUE_ATTR_NANE_STR, string_value.as_str()),
+                    ];
+
                     write_empty(&writer, tag_name, &attrs);
                 }
             }
@@ -156,7 +163,6 @@ impl<'a> StartEndElementCookie<'a> {
     fn new(writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>, tag_name: &'a str) -> StartEndElementCookie<'a> {
         let start = quick_xml::events::Event::Start(BytesStart::new(tag_name));
         assert!(writer.borrow_mut().write_event(start).is_ok());
-        assert!(writer.borrow_mut().write_indent().is_ok());
         StartEndElementCookie { tag_name, writer }
     }
 
@@ -172,7 +178,6 @@ impl<'a> StartEndElementCookie<'a> {
 
         let start_event = quick_xml::events::Event::Start(start_tag);
         assert!(writer.borrow_mut().write_event(start_event).is_ok());
-        assert!(writer.borrow_mut().write_indent().is_ok());
         StartEndElementCookie { tag_name, writer }
     }
 }
