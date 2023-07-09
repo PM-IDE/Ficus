@@ -1,10 +1,9 @@
 use crate::event_log::xes::{
     constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
-    shared::{XesClassifier, XesEventLogExtension, XesGlobal},
-    utils,
+    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty}
 };
 
-use super::xes_log_trace_reader::TraceXesEventLogIterator;
+use super::{xes_log_trace_reader::TraceXesEventLogIterator, utils};
 use crate::event_log::xes::constants::*;
 use quick_xml::{events::BytesStart, Reader};
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
@@ -20,6 +19,7 @@ pub enum XesEventLogItem {
     Global(XesGlobal),
     Extension(XesEventLogExtension),
     Classifier(XesClassifier),
+    Property(XesProperty)
 }
 
 impl Iterator for FromFileXesEventLogReader {
@@ -57,13 +57,13 @@ impl Iterator for FromFileXesEventLogReader {
                         },
                         None => continue,
                     },
-                    EXTENSION_TAG_NAME | CLASSIFIER_TAG_NAME => match Self::read_extension_or_classifier(&tag) {
+                    EXTENSION_TAG_NAME | CLASSIFIER_TAG_NAME => match Self::try_read_tag(&tag) {
                         Some(item) => return Some(item),
                         None => continue,
                     },
                     _ => continue,
                 },
-                Ok(quick_xml::events::Event::Empty(tag)) => match Self::read_extension_or_classifier(&tag) {
+                Ok(quick_xml::events::Event::Empty(tag)) => match Self::try_read_tag(&tag) {
                     Some(item) => return Some(item),
                     None => continue,
                 },
@@ -107,8 +107,8 @@ impl FromFileXesEventLogReader {
         scope_name
     }
 
-    fn read_extension_or_classifier(tag: &BytesStart) -> Option<XesEventLogItem> {
-        match tag.name().as_ref() {
+    fn try_read_tag(tag: &BytesStart) -> Option<XesEventLogItem> {
+        let result = match tag.name().as_ref() {
             EXTENSION_TAG_NAME => match Self::read_extension(&tag) {
                 Some(extension) => Some(XesEventLogItem::Extension(extension)),
                 None => None,
@@ -118,6 +118,22 @@ impl FromFileXesEventLogReader {
                 None => None,
             },
             _ => None,
+        };
+
+        if result.is_some() { return result; }
+
+        match utils::read_payload_like_tag(tag) {
+            Some(descriptor) => {
+                let payload_type = descriptor.payload_type.as_str().as_bytes();
+                let key = descriptor.key;
+                let value = descriptor.value.as_str();
+
+                match utils::extract_payload_value(payload_type, value) {
+                    Some(value) => Some(XesEventLogItem::Property(XesProperty { name: key, value })),
+                    None => None
+                }
+            },
+            None => None
         }
     }
 

@@ -3,7 +3,7 @@ use super::{
     shared::{XesClassifier, XesEventLogExtension},
     xes_event::XesEventImpl,
 };
-use crate::event_log::core::{event_log::EventLog, trace::Trace};
+use crate::event_log::core::{event_log::EventLog, trace::Trace, event::EventPayloadValue};
 use std::{collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
@@ -11,6 +11,7 @@ pub struct XesEventLogImpl {
     globals: HashMap<String, HashMap<String, String>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,
+    properties: HashMap<String, EventPayloadValue>
 }
 
 impl XesEventLogImpl {
@@ -25,6 +26,10 @@ impl XesEventLogImpl {
     pub fn get_classifiers(&self) -> &Vec<XesClassifier> {
         &self.classifiers
     }
+
+    pub fn get_properties(&self) -> &HashMap<String, EventPayloadValue> {
+        &self.properties
+    }
 }
 
 impl XesEventLogImpl {
@@ -36,6 +41,7 @@ impl XesEventLogImpl {
         let mut globals = HashMap::new();
         let mut traces = Vec::new();
         let mut classifiers = Vec::new();
+        let mut properties = HashMap::new();
 
         for item in event_log_reader {
             match item {
@@ -46,15 +52,12 @@ impl XesEventLogImpl {
                 XesEventLogItem::Global(global) => _ = globals.insert(global.scope, global.default_values),
                 XesEventLogItem::Extension(extension) => extensions.push(extension),
                 XesEventLogItem::Classifier(classifier) => classifiers.push(classifier),
+                XesEventLogItem::Property(property) => _ = properties.insert(property.name, property.value),
             }
         }
 
-        Some(XesEventLogImpl {
-            traces,
-            globals,
-            extensions,
-            classifiers,
-        })
+        let log = XesEventLogImpl { traces, globals, extensions, classifiers, properties, };
+        Some(log)
     }
 }
 

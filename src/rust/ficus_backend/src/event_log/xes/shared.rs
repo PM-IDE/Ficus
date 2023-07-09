@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::event_log::core::event::EventPayloadValue;
+
 #[derive(Debug, Clone)]
 pub struct XesEventLogExtension {
     pub name: String,
@@ -17,4 +19,10 @@ pub struct XesGlobal {
 pub struct XesClassifier {
     pub name: String,
     pub keys: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct XesProperty {
+    pub name: String,
+    pub value: EventPayloadValue,
 }

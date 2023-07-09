@@ -1,6 +1,9 @@
 use crate::event_log::{
     core::{event::Event, event_log::EventLog, trace::Trace},
-    xes::{reader::file_xes_log_reader::FromFileXesEventLogReader, xes_event_log::XesEventLogImpl},
+    xes::{
+        reader::file_xes_log_reader::FromFileXesEventLogReader, writer::xes_event_log_writer,
+        xes_event_log::XesEventLogImpl,
+    },
 };
 
 mod event_log;
@@ -24,6 +27,11 @@ fn main() {
     println!("Extensions: ");
     for extension in log.get_extensions() {
         println!("{:?}", extension);
+    }
+
+    println!("Properties: ");
+    for property in log.get_properties() {
+        println!("{:?}", property);
     }
 
     println!("Traces: ");

@@ -3,7 +3,7 @@ use crate::event_log::{
         event::EventPayloadValue,
         lifecycle::{Lifecycle, XesStandardLifecycle},
     },
-    xes::{utils, xes_event::XesEventImpl},
+    xes::xes_event::XesEventImpl,
 };
 
 use crate::event_log::xes::constants::*;
@@ -11,6 +11,8 @@ use crate::event_log::xes::constants::*;
 use chrono::{DateTime, Utc};
 use quick_xml::Reader;
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
+
+use super::utils;
 
 pub struct TraceXesEventLogIterator {
     buffer: Vec<u8>,
@@ -80,16 +82,16 @@ impl TraceXesEventLogIterator {
                     _ => continue,
                 },
                 Ok(quick_xml::events::Event::Empty(empty)) => {
-                    let kv = utils::extract_key_value(&empty);
-                    if !kv.value.is_some() || !kv.key.is_some() {
-                        return None;
+                    match utils::read_payload_like_tag(&empty) {
+                        Some(descriptor) => {
+                            let payload_type = descriptor.payload_type.as_str().as_bytes();
+                            let key = descriptor.key.as_str();
+                            let value = descriptor.value.as_str();
+
+                            Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &payload);
+                        }
+                        None => continue,
                     }
-
-                    let key = kv.key.as_ref().unwrap().as_str();
-                    let value = kv.value.as_ref().unwrap().as_str();
-                    let payload_type = empty.name().0;
-
-                    Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &payload);
                 }
                 _ => continue,
             }
@@ -122,37 +124,13 @@ impl TraceXesEventLogIterator {
         lifecycle: &mut Option<Lifecycle>,
         payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>,
     ) -> bool {
-        let payload_value = Self::extract_payload_value(payload_type, value);
+        let payload_value = utils::extract_payload_value(payload_type, value);
         if !payload_value.is_some() {
             return false;
         }
 
         Self::update_event_data(key, payload_value.unwrap(), date, name, lifecycle, &payload);
-
         true
-    }
-
-    fn extract_payload_value(name: &[u8], value: &str) -> Option<EventPayloadValue> {
-        match name {
-            DATE_TAG_NAME => match DateTime::parse_from_rfc3339(value) {
-                Err(_) => None,
-                Ok(date) => Some(EventPayloadValue::Date(date.with_timezone(&Utc))),
-            },
-            INT_TAG_NAME => match value.parse::<i32>() {
-                Err(_) => None,
-                Ok(int_value) => Some(EventPayloadValue::Int(int_value)),
-            },
-            FLOAT_TAG_NAME => match value.parse::<f32>() {
-                Err(_) => None,
-                Ok(float_value) => Some(EventPayloadValue::Float(float_value)),
-            },
-            STRING_TAG_NAME => Some(EventPayloadValue::String(value.to_owned())),
-            BOOLEAN_TAG_NAME => match value.parse::<bool>() {
-                Err(_) => None,
-                Ok(bool_value) => Some(EventPayloadValue::Boolean(bool_value)),
-            },
-            _ => None,
-        }
     }
 
     fn update_event_data(

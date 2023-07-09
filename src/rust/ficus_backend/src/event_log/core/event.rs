@@ -2,7 +2,7 @@ use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum EventPayloadValue {
     Date(DateTime<Utc>),
     String(String),
