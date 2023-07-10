@@ -1,14 +1,15 @@
-use std::{env, fs};
 use std::path::PathBuf;
+use std::{env, fs};
 
 pub fn execute_test_with_gold<T>(gold_file_path: PathBuf, test_func: T)
-    where T : FnOnce() -> String
+where
+    T: FnOnce() -> String,
 {
     let gold_file_dir = gold_file_path.parent().unwrap();
     if !gold_file_dir.exists() {
         fs::create_dir_all(gold_file_dir).ok();
     }
-    
+
     let test_value = test_func();
 
     let write_tmp = || {
@@ -51,7 +52,7 @@ pub fn get_example_logs_gold_path() -> PathBuf {
 
 pub fn get_paths_to_example_logs() -> Vec<PathBuf> {
     let example_logs_dir = get_test_data_sources_path().join("example_logs");
-    
+
     let mut logs = Vec::new();
     for path in fs::read_dir(example_logs_dir).unwrap() {
         let candidate_path = path.unwrap().path();
@@ -59,7 +60,7 @@ pub fn get_paths_to_example_logs() -> Vec<PathBuf> {
             logs.push(candidate_path);
         }
     }
-    
+
     logs
 }
 

@@ -1,6 +1,7 @@
 use crate::event_log::xes::{
     constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
-    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty}, xes_event_log::XesEventLogImpl,
+    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty},
+    xes_event_log::XesEventLogImpl,
 };
 
 use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
@@ -143,10 +144,7 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn try_read_global(
-        reader: &mut Reader<BufReader<File>>,
-        storage: &mut Vec<u8>
-    ) -> Option<HashMap<String, String>> {
+    fn try_read_global(reader: &mut Reader<BufReader<File>>, storage: &mut Vec<u8>) -> Option<HashMap<String, String>> {
         let mut map: Option<HashMap<String, String>> = None;
 
         loop {
