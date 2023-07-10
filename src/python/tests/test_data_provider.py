@@ -12,7 +12,7 @@ def sources_dir() -> str:
 
 
 def gold_dir() -> str:
-    return os.path.join(data_dir(), 'gold')
+    return os.path.join(data_dir(), 'gold', 'python')
 
 
 def example_logs_dir() -> str:
