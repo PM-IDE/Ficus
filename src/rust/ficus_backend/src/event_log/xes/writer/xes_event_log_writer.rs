@@ -26,7 +26,7 @@ pub enum WriteLogError {
 }
 
 pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogError> {
-    match serialize_log(log) {
+    match serialize_event_log(log) {
         Ok(content) => match fs::write(save_path, content) {
             Ok(_) => Ok(()),
             Err(error) => Err(WriteLogError::IOError(error)),
@@ -35,7 +35,7 @@ pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogE
     }
 }
 
-fn serialize_log(log: &XesEventLogImpl) -> Result<String, WriteLogError> {
+pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogError> {
     let writer = RefCell::new(Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2));
 
     {

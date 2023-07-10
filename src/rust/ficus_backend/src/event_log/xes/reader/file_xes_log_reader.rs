@@ -1,6 +1,6 @@
 use crate::event_log::xes::{
     constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
-    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty},
+    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty}, xes_event_log::XesEventLogImpl,
 };
 
 use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
@@ -20,6 +20,10 @@ pub enum XesEventLogItem {
     Extension(XesEventLogExtension),
     Classifier(XesClassifier),
     Property(XesProperty),
+}
+
+pub fn read_event_log(file_path: &str) -> Option<XesEventLogImpl> {
+    XesEventLogImpl::new(FromFileXesEventLogReader::new(file_path)?)
 }
 
 impl Iterator for FromFileXesEventLogReader {
