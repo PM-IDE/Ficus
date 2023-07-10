@@ -10,7 +10,24 @@ pub fn execute_test_with_gold<T>(gold_file_path: PathBuf, test_func: T)
     }
     
     let test_value = test_func();
-    fs::write(gold_file_path, test_value).ok();
+
+    let write_tmp = || {
+        let file_name = gold_file_path.file_name().unwrap().to_str().unwrap();
+        let tmp_file_path = gold_file_dir.join(file_name.to_owned() + ".tmp");
+        fs::write(tmp_file_path, &test_value).ok();
+    };
+
+    if gold_file_path.exists() {
+        let gold_content = String::from_utf8(fs::read(&gold_file_path).ok().unwrap()).ok().unwrap();
+        if gold_content != test_value {
+            write_tmp();
+            panic!("Gold and test are not equal");
+        }
+
+        return;
+    }
+
+    write_tmp();
 }
 
 pub fn get_test_data_path() -> PathBuf {
