@@ -98,8 +98,8 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, WriteLogError> {
 
                 let date_string = event.get_timestamp().to_rfc3339();
                 let attrs = vec![
-                    (VALUE_ATTR_NANE_STR, date_string.as_str()),
                     (KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR),
+                    (VALUE_ATTR_NANE_STR, date_string.as_str()),
                 ];
 
                 write_empty(&writer, DATE_TAG_NAME_STR, &attrs)?;
@@ -107,8 +107,8 @@ fn serialize_log(log: &XesEventLogImpl) -> Result<String, WriteLogError> {
                 if let Some(lifecycle) = event.get_lifecycle() {
                     let lifecycle_string = lifecycle.to_string();
                     let attrs = vec![
-                        (VALUE_ATTR_NANE_STR, lifecycle_string.as_str()),
                         (KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR),
+                        (VALUE_ATTR_NANE_STR, lifecycle_string.as_str()),
                     ];
 
                     write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
