@@ -1,11 +1,14 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::collections::HashMap;
 
 use chrono::Utc;
 
-use crate::{event_log::core::{
-    event::{Event, EventPayloadValue},
-    lifecycle::Lifecycle,
-}, utils::vec_utils};
+use crate::{
+    event_log::core::{
+        event::{Event, EventPayloadValue},
+        lifecycle::Lifecycle,
+    },
+    utils::vec_utils,
+};
 
 pub struct XesEventImpl {
     name: String,

@@ -4,8 +4,8 @@ use super::{
     xes_event::XesEventImpl,
 };
 
+use crate::event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace};
 use crate::utils::vec_utils;
-use crate::{event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace}};
 use std::{collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
