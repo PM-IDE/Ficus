@@ -7,6 +7,7 @@ use crate::event_log::{
 };
 
 mod event_log;
+mod utils;
 
 fn main() {
     let path = r"C:\Users\aeroo\Desktop\Programming\CSharp\pmide\Ficus\src\python\tests\test_data\source\example_logs\exercise1.xes";
@@ -15,7 +16,7 @@ fn main() {
     let log = XesEventLogImpl::new(reader).unwrap();
 
     println!("GLobals: ");
-    for global in log.get_globals() {
+    for global in log.get_ordered_globals() {
         println!("{:?}", global)
     }
 
@@ -30,7 +31,7 @@ fn main() {
     }
 
     println!("Properties: ");
-    for property in log.get_properties() {
+    for property in log.get_ordered_properties() {
         println!("{:?}", property);
     }
 

@@ -2,17 +2,17 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use chrono::Utc;
 
-use crate::event_log::core::{
+use crate::{event_log::core::{
     event::{Event, EventPayloadValue},
     lifecycle::Lifecycle,
-};
+}, utils::vec_utils};
 
 pub struct XesEventImpl {
     name: String,
     timestamp: chrono::DateTime<Utc>,
     lifecycle: Option<Lifecycle>,
 
-    payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+    payload: HashMap<String, EventPayloadValue>,
 }
 
 impl XesEventImpl {
@@ -20,7 +20,7 @@ impl XesEventImpl {
         name: String,
         timestamp: chrono::DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
-        payload: Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+        payload: HashMap<String, EventPayloadValue>,
     ) -> XesEventImpl {
         XesEventImpl {
             name: name.to_owned(),
@@ -47,7 +47,18 @@ impl Event for XesEventImpl {
         }
     }
 
-    fn get_payload(&self) -> Rc<RefCell<HashMap<String, EventPayloadValue>>> {
-        Rc::clone(&self.payload)
+    fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue> {
+        &self.payload
+    }
+
+    fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
+        let mut payload = Vec::new();
+        for (key, value) in self.get_payload_map() {
+            payload.push((key, value));
+        }
+
+        vec_utils::sort_by_first(&mut payload);
+
+        payload
     }
 }

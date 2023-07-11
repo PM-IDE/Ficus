@@ -3,7 +3,9 @@ use super::{
     shared::{XesClassifier, XesEventLogExtension},
     xes_event::XesEventImpl,
 };
-use crate::event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace};
+
+use crate::utils::vec_utils;
+use crate::{event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace}};
 use std::{collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
@@ -15,7 +17,7 @@ pub struct XesEventLogImpl {
 }
 
 impl XesEventLogImpl {
-    pub fn get_globals(&self) -> &HashMap<String, HashMap<String, String>> {
+    pub fn get_globals_map(&self) -> &HashMap<String, HashMap<String, String>> {
         &self.globals
     }
 
@@ -27,8 +29,34 @@ impl XesEventLogImpl {
         &self.classifiers
     }
 
-    pub fn get_properties(&self) -> &HashMap<String, EventPayloadValue> {
+    pub fn get_properties_map(&self) -> &HashMap<String, EventPayloadValue> {
         &self.properties
+    }
+
+    pub fn get_ordered_properties(&self) -> Vec<(&String, &EventPayloadValue)> {
+        let mut properties = Vec::new();
+        for (key, value) in self.get_properties_map() {
+            properties.push((key, value));
+        }
+
+        vec_utils::sort_by_first(&mut properties);
+        properties
+    }
+
+    pub fn get_ordered_globals(&self) -> Vec<(&String, Vec<(&String, &String)>)> {
+        let mut globals = Vec::new();
+        for (key, value) in self.get_globals_map() {
+            let mut defaults = Vec::new();
+            for (default_key, default_value) in value {
+                defaults.push((default_key, default_value));
+            }
+
+            vec_utils::sort_by_first(&mut defaults);
+            globals.push((key, defaults));
+        }
+
+        vec_utils::sort_by_first(&mut globals);
+        globals
     }
 }
 

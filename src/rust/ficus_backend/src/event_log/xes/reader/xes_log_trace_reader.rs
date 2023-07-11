@@ -61,9 +61,9 @@ impl TraceXesEventLogIterator {
         let mut name = None;
         let mut date = None;
         let mut lifecycle = None;
-        let payload = Rc::new(RefCell::new(HashMap::new()));
+        let mut payload = HashMap::new();
 
-        self.set_defaults_value(&mut name, &mut date, &mut lifecycle, &payload);
+        self.set_defaults_value(&mut name, &mut date, &mut lifecycle, &mut payload);
 
         loop {
             match self.reader.borrow_mut().read_event_into(&mut self.buffer) {
@@ -94,7 +94,7 @@ impl TraceXesEventLogIterator {
                             &mut name,
                             &mut date,
                             &mut lifecycle,
-                            &payload,
+                            &mut payload,
                         );
                     }
                     None => continue,
@@ -109,7 +109,7 @@ impl TraceXesEventLogIterator {
         name: &mut Option<String>,
         date: &mut Option<DateTime<Utc>>,
         lifecycle: &mut Option<Lifecycle>,
-        payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+        payload: &mut HashMap<String, EventPayloadValue>,
     ) {
         let globals = self.globals.borrow_mut();
         if !globals.contains_key(EVENT_TAG_NAME_STR) {
@@ -128,14 +128,14 @@ impl TraceXesEventLogIterator {
         name: &mut Option<String>,
         date: &mut Option<DateTime<Utc>>,
         lifecycle: &mut Option<Lifecycle>,
-        payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+        payload: &mut HashMap<String, EventPayloadValue>,
     ) -> bool {
         let payload_value = utils::extract_payload_value(payload_type, value);
         if !payload_value.is_some() {
             return false;
         }
 
-        Self::update_event_data(key, payload_value.unwrap(), date, name, lifecycle, &payload);
+        Self::update_event_data(key, payload_value.unwrap(), date, name, lifecycle, payload);
         true
     }
 
@@ -145,7 +145,7 @@ impl TraceXesEventLogIterator {
         date: &mut Option<DateTime<Utc>>,
         name: &mut Option<String>,
         lifecycle: &mut Option<Lifecycle>,
-        payload: &Rc<RefCell<HashMap<String, EventPayloadValue>>>,
+        payload: &mut HashMap<String, EventPayloadValue>,
     ) {
         match key {
             TIME_TIMESTAMP_STR => {
@@ -167,11 +167,10 @@ impl TraceXesEventLogIterator {
                 }
             }
             _ => {
-                let mut map = payload.borrow_mut();
-                if map.contains_key(key) {
-                    *map.get_mut(key).unwrap() = payload_value;
+                if payload.contains_key(key) {
+                    *payload.get_mut(key).unwrap() = payload_value;
                 } else {
-                    map.insert(key.to_owned(), payload_value);
+                    payload.insert(key.to_owned(), payload_value);
                 }
             }
         }
