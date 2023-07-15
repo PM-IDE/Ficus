@@ -8,18 +8,33 @@ use crate::event_log::core::{
     trace::Trace,
 };
 
+#[derive(Debug)]
 pub struct SimpleEventLog {
     traces: Vec<Rc<SimpleTrace>>,
 }
 
 impl SimpleEventLog {
-    fn new(raw_event_log: &Vec<Vec<&str>>) -> SimpleEventLog {
+    pub fn new(raw_event_log: &Vec<Vec<&str>>) -> SimpleEventLog {
         let mut traces = Vec::new();
         for raw_trace in raw_event_log {
             traces.push(Rc::new(SimpleTrace::new(raw_trace)));
         }
 
         SimpleEventLog { traces }
+    }
+
+    pub fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        let mut raw_log = Vec::new();
+        for trace in &self.traces {
+            let mut events = Vec::new();
+            for event in &trace.events {
+                events.push(event.get_name().to_owned());
+            }
+
+            raw_log.push(events);
+        }
+
+        raw_log
     }
 }
 
@@ -32,6 +47,7 @@ impl EventLog for SimpleEventLog {
     }
 }
 
+#[derive(Debug)]
 pub struct SimpleTrace {
     events: Vec<Rc<SimpleEvent>>,
 }
@@ -47,7 +63,7 @@ impl Trace for SimpleTrace {
 const TRACE_EVENT_START_DATE: DateTime<Utc> = DateTime::<Utc>::MIN_UTC;
 
 impl SimpleTrace {
-    fn new(raw_trace: &Vec<&str>) -> SimpleTrace {
+    pub fn new(raw_trace: &Vec<&str>) -> SimpleTrace {
         let mut events = Vec::new();
         let mut current_date = TRACE_EVENT_START_DATE;
         for raw_event in raw_trace {
@@ -59,13 +75,14 @@ impl SimpleTrace {
     }
 }
 
+#[derive(Debug)]
 pub struct SimpleEvent {
     name: String,
     timestamp: DateTime<Utc>,
 }
 
 impl SimpleEvent {
-    fn new(name: &str, stamp: DateTime<Utc>) -> SimpleEvent {
+    pub fn new(name: &str, stamp: DateTime<Utc>) -> SimpleEvent {
         SimpleEvent {
             name: name.to_owned(),
             timestamp: stamp,
