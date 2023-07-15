@@ -117,7 +117,8 @@ def _draw_traces_diversity_like_diagram_internal(log: MyEventLog,
         ax.legend(ctx.names_to_rects.values(),
                   ctx.names_to_rects.keys(),
                   loc='upper center',
-                  bbox_to_anchor=(0.5, -0.15))
+                  bbox_to_anchor=(0.5, -0.15),
+                  fontsize=20)
 
     y_ticks_count = len(log) * height_scale + 1
     y_ticks = ['' for _ in range(y_ticks_count)]
