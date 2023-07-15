@@ -122,10 +122,31 @@ class SaveAllEventNames(InternalPipelinePart):
 class PrintEventLogInfo(InternalPipelinePart):
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
         info = create_log_information(log(current_input))
+        print("============================================")
         print(f'Number of traces in log: {len(log(current_input))}')
         print(f'Number of events in log: {sum(map(len, log(current_input)))}')
         print(f'Number of low-level event classes in log: {len(info.events_count)}')
+        print("============================================")
+
         return current_input
+
+
+class PrintEventLogInfoBeforeAndAfter(InternalPipelinePart):
+    def __init__(self, operation_name: str, inner_pipeline: Pipeline):
+        self.operation_name = operation_name
+        self.inner_pipeline = inner_pipeline
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        print(f'Operation {self.operation_name} started')
+
+        PrintEventLogInfo().execute(current_input)
+        result = self.inner_pipeline.execute(current_input)
+        PrintEventLogInfo().execute(result)
+
+        print(f'Operation {self.operation_name} finished')
+        print()
+
+        return result
 
 
 class PrintDFG(InternalPipelinePart):
