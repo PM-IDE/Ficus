@@ -64,4 +64,20 @@ impl Event for XesEventImpl {
 
         payload
     }
+
+    fn set_name(&mut self, new_name: &str) {
+        self.name = new_name.to_string();
+    }
+
+    fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
+        self.timestamp = new_timestamp;
+    }
+
+    fn set_lifecycle(&mut self, lifecycle: Lifecycle) {
+        self.lifecycle = Some(lifecycle);
+    }
+
+    fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue) {
+        *self.payload.get_mut(&key).unwrap() = value;
+    }
 }

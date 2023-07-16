@@ -110,4 +110,20 @@ impl Event for SimpleEvent {
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
         panic!("Not supported")
     }
+
+    fn set_name(&mut self, new_name: &str) {
+        self.name = new_name.to_string();
+    }
+
+    fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
+        self.timestamp = new_timestamp;
+    }
+
+    fn set_lifecycle(&mut self, _: Lifecycle) {
+        panic!("Not supported")
+    }
+
+    fn add_or_update_payload(&mut self, _: String, _: EventPayloadValue) {
+        panic!("Not supported")
+    }
 }
