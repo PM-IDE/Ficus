@@ -94,6 +94,7 @@ class DiscoverActivitiesInTraces(InternalPipelinePart):
                                                         activity_filter=self.activity_in_trace_filter,
                                                         should_narrow_activity=self.should_narrow_activity)
 
+        print(f"Discovered {sum(map(len, traces_activities))} activities instances")
         return current_input.with_trace_activities(traces_activities)
 
 
@@ -248,6 +249,7 @@ class DiscoverActivitiesInUnattachedSubTraces(InternalPipelinePart):
                                                          activities_in_trace_filter=self.activities_in_trace_filter,
                                                          should_narrow_activity=self.should_narrow_activity)
 
+        print(f"Discovered {sum(map(len, activities_in_traces))} activities instances")
         return current_input.with_trace_activities(activities_in_traces)
 
 
@@ -403,7 +405,14 @@ class DiscoverActivitiesFromPatterns(InternalPipelinePart):
             DiscoverActivities(activity_level=self.activity_level,
                                class_extractor=self.class_extractor,
                                activity_name_creator=self.activity_name_creator),
+            PrintFoundActivitiesCount()
         ))(current_input)
+
+
+class PrintFoundActivitiesCount(InternalPipelinePart):
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        print(f"Discovered {len(activities(current_input))} activities")
+        return current_input
 
 
 class SaveAllActivitiesNames(InternalPipelinePart):
