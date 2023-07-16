@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::Utc;
+use chrono::{Utc, DateTime};
 
 use crate::{
     event_log::core::{
@@ -12,7 +12,7 @@ use crate::{
 
 pub struct XesEventImpl {
     name: String,
-    timestamp: chrono::DateTime<Utc>,
+    timestamp: DateTime<Utc>,
     lifecycle: Option<Lifecycle>,
 
     payload: HashMap<String, EventPayloadValue>,

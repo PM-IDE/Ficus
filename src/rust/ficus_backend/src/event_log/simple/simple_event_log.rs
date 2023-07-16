@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, cell::RefCell};
 
 use crate::event_log::core::{
     event::{Event, EventPayloadValue},
@@ -10,14 +10,14 @@ use crate::event_log::core::{
 
 #[derive(Debug)]
 pub struct SimpleEventLog {
-    traces: Vec<Rc<SimpleTrace>>,
+    traces: Vec<Rc<RefCell<SimpleTrace>>>,
 }
 
 impl SimpleEventLog {
     pub fn new(raw_event_log: &Vec<Vec<&str>>) -> SimpleEventLog {
         let mut traces = Vec::new();
         for raw_trace in raw_event_log {
-            traces.push(Rc::new(SimpleTrace::new(raw_trace)));
+            traces.push(Rc::new(RefCell::new(SimpleTrace::new(raw_trace))));
         }
 
         SimpleEventLog { traces }
@@ -27,8 +27,8 @@ impl SimpleEventLog {
         let mut raw_log = Vec::new();
         for trace in &self.traces {
             let mut events = Vec::new();
-            for event in &trace.events {
-                events.push(event.get_name().to_owned());
+            for event in &trace.borrow().events {
+                events.push(event.borrow().get_name().to_owned());
             }
 
             raw_log.push(events);
@@ -42,20 +42,20 @@ impl EventLog for SimpleEventLog {
     type TEvent = SimpleEvent;
     type TTrace = SimpleTrace;
 
-    fn get_traces(&self) -> &Vec<Rc<Self::TTrace>> {
+    fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces
     }
 }
 
 #[derive(Debug)]
 pub struct SimpleTrace {
-    events: Vec<Rc<SimpleEvent>>,
+    events: Vec<Rc<RefCell<SimpleEvent>>>,
 }
 
 impl Trace for SimpleTrace {
     type TEvent = SimpleEvent;
 
-    fn get_events(&self) -> &Vec<Rc<Self::TEvent>> {
+    fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events
     }
 }
@@ -67,7 +67,7 @@ impl SimpleTrace {
         let mut events = Vec::new();
         let mut current_date = TRACE_EVENT_START_DATE;
         for raw_event in raw_trace {
-            events.push(Rc::new(SimpleEvent::new(raw_event, current_date)));
+            events.push(Rc::new(RefCell::new(SimpleEvent::new(raw_event, current_date))));
             current_date = current_date + Duration::seconds(1);
         }
 

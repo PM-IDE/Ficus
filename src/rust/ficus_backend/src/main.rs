@@ -38,8 +38,8 @@ fn main() {
     println!("Traces: ");
     for trace in log.get_traces() {
         println!("New trace");
-        for event in trace.get_events() {
-            println!("{}", event.get_name());
+        for event in trace.borrow().get_events() {
+            println!("{}", event.borrow().get_name());
         }
     }
 

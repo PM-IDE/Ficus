@@ -79,6 +79,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
         }
 
         for trace in log.get_traces() {
+            let trace = trace.borrow();
             let events = trace.get_events();
             if events.len() == 0 {
                 continue;
@@ -88,6 +89,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
 
             for event in events {
                 let _event_cookie = StartEndElementCookie::new(&writer, EVENT_TAG_NAME_STR);
+                let event = event.borrow();
 
                 let attrs = vec![
                     (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
