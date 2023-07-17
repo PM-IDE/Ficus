@@ -1,5 +1,5 @@
 use super::event::Event;
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 pub trait Trace {
     type TEvent: Event;

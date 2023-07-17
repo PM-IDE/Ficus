@@ -6,7 +6,7 @@ use super::{
 
 use crate::event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace};
 use crate::utils::vec_utils;
-use std::{collections::HashMap, rc::Rc, cell::RefCell};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
     traces: Vec<Rc<RefCell<XesTraceImpl>>>,

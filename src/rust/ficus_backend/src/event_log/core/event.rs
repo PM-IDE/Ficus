@@ -24,13 +24,13 @@ impl ToString for EventPayloadValue {
 }
 
 pub trait Event {
-    fn get_name(&self) -> &str;
+    fn get_name(&self) -> &String;
     fn get_timestamp(&self) -> DateTime<Utc>;
     fn get_lifecycle(&self) -> Option<Lifecycle>;
     fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue>;
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
 
-    fn set_name(&mut self, new_name: &str);
+    fn set_name(&mut self, new_name: &String);
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>);
     fn set_lifecycle(&mut self, lifecycle: Lifecycle);
     fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue);

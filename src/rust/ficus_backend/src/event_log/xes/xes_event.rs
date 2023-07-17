@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{Utc, DateTime};
+use chrono::{DateTime, Utc};
 
 use crate::{
     event_log::core::{
@@ -35,8 +35,8 @@ impl XesEventImpl {
 }
 
 impl Event for XesEventImpl {
-    fn get_name(&self) -> &str {
-        self.name.as_str()
+    fn get_name(&self) -> &String {
+        &self.name
     }
 
     fn get_timestamp(&self) -> chrono::DateTime<Utc> {
@@ -65,8 +65,8 @@ impl Event for XesEventImpl {
         payload
     }
 
-    fn set_name(&mut self, new_name: &str) {
-        self.name = new_name.to_string();
+    fn set_name(&mut self, new_name: &String) {
+        self.name = new_name.to_owned();
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {

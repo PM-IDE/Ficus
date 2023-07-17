@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use std::{collections::HashMap, rc::Rc, cell::RefCell};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::event_log::core::{
     event::{Event, EventPayloadValue},
@@ -91,8 +91,8 @@ impl SimpleEvent {
 }
 
 impl Event for SimpleEvent {
-    fn get_name(&self) -> &str {
-        self.name.as_str()
+    fn get_name<'a>(&'a self) -> &'a String {
+        &self.name
     }
 
     fn get_timestamp(&self) -> DateTime<Utc> {
@@ -111,8 +111,8 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
-    fn set_name(&mut self, new_name: &str) {
-        self.name = new_name.to_string();
+    fn set_name(&mut self, new_name: &String) {
+        self.name = new_name.to_owned();
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
