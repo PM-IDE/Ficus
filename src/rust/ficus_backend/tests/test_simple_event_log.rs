@@ -5,6 +5,10 @@ use ficus_backend::event_log::{
     simple::simple_event_log::{SimpleEvent, SimpleEventLog},
 };
 
+use test_core::simple_events_logs_provider::create_simple_event_log;
+
+mod test_core;
+
 #[test]
 fn test_simple_event_log_creation() {
     let raw_log = vec![vec!["A", "B", "C"], vec!["A", "B", "C"]];
@@ -36,11 +40,6 @@ fn test_set_date() {
         |event| event.get_timestamp(),
         |event, value| event.set_timestamp(*value),
     )
-}
-
-fn create_simple_event_log() -> SimpleEventLog {
-    let raw_log = vec![vec!["A", "B", "C"], vec!["A", "B", "C"]];
-    SimpleEventLog::new(&raw_log)
 }
 
 fn execute_test_set_test<TValue, TGet, TSet>(
