@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use core::fmt::Debug;
 use ficus_backend::event_log::{
     core::{event::Event, event_log::EventLog, trace::Trace},
@@ -49,7 +49,7 @@ fn execute_test_set_test<TValue, TGet, TSet>(
     get_property: TGet,
     set_property: TSet,
 ) where
-    for<'a> TGet: Fn(&'a SimpleEvent) -> &'a TValue,
+    TGet: Fn(&SimpleEvent) -> &TValue,
     TSet: Fn(&mut SimpleEvent, &TValue) -> (),
     TValue: PartialEq + Debug,
 {

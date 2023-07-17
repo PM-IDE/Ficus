@@ -91,7 +91,7 @@ impl SimpleEvent {
 }
 
 impl Event for SimpleEvent {
-    fn get_name<'a>(&'a self) -> &'a String {
+    fn get_name(&self) -> &String {
         &self.name
     }
 
