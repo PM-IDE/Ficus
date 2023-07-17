@@ -95,8 +95,8 @@ impl Event for SimpleEvent {
         &self.name
     }
 
-    fn get_timestamp(&self) -> DateTime<Utc> {
-        self.timestamp
+    fn get_timestamp(&self) -> &DateTime<Utc> {
+        &self.timestamp
     }
 
     fn get_lifecycle(&self) -> Option<Lifecycle> {
