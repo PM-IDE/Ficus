@@ -18,13 +18,13 @@ impl EventLogInfo {
 
         for trace in log.get_traces() {
             let trace = trace.borrow();
-            let events = trace.borrow().get_events();
+            let events = trace.get_events();
             events_count += events.len();
 
-            for event in trace.get_events() {
+            for event in events {
                 let event = event.borrow();
                 if let Some(count) = map.get_mut(event.get_name()) {
-                    *count = count + 1;
+                    *count += 1usize;
                 } else {
                     map.insert(event.get_name().to_owned(), 1usize);
                 }
