@@ -32,4 +32,13 @@ where
             }
         }
     }
+
+    pub fn to_names_vec(&self) -> Vec<String> {
+        let mut names = Vec::new();
+        for event in &self.events {
+            names.push(event.borrow().get_name().to_owned());
+        }
+
+        names
+    }
 }

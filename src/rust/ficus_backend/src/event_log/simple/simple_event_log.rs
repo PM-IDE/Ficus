@@ -76,6 +76,10 @@ impl Trace for SimpleTrace {
     {
         self.events_holder.remove_events_by(predicate);
     }
+
+    fn to_names_vec(&self) -> Vec<String> {
+        self.events_holder.to_names_vec()
+    }
 }
 
 const TRACE_EVENT_START_DATE: DateTime<Utc> = DateTime::<Utc>::MIN_UTC;

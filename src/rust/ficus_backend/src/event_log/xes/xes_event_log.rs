@@ -148,4 +148,8 @@ impl Trace for XesTraceImpl {
     {
         self.events_holder.remove_events_by(predicate);
     }
+
+    fn to_names_vec(&self) -> Vec<String> {
+        self.events_holder.to_names_vec()
+    }
 }
