@@ -10,7 +10,7 @@ mod event_log;
 mod utils;
 
 fn main() {
-    let path = r"C:\Users\aeroo\Desktop\Programming\CSharp\pmide\Ficus\src\python\tests\test_data\source\example_logs\exercise1.xes";
+    let path = r"/Users/aero/Programming/pmide/Ficus/test_data/source/example_logs/exercise1.xes";
     let reader = FromFileXesEventLogReader::new(path).unwrap();
 
     let log = XesEventLogImpl::new(reader).unwrap();
@@ -42,6 +42,11 @@ fn main() {
             println!("{}", event.borrow().get_name());
         }
     }
+
+    xes_event_log_writer::write_log(
+        &log,
+        r"/Users/aero/Programming/pmide/Ficus/src/rust/ficus_backend/target/debug/log.xes",
+    );
 
     println!("Hello, world!");
 }

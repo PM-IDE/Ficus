@@ -4,13 +4,15 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use crate::event_log::core::{
     event::{Event, EventPayloadValue},
     event_log::EventLog,
+    events_holder::EventsHolder,
     lifecycle::Lifecycle,
     trace::Trace,
+    traces_holder::TracesHolder,
 };
 
 #[derive(Debug)]
 pub struct SimpleEventLog {
-    traces: Vec<Rc<RefCell<SimpleTrace>>>,
+    traces_holder: TracesHolder<SimpleTrace, SimpleEvent>,
 }
 
 impl SimpleEventLog {
@@ -20,14 +22,16 @@ impl SimpleEventLog {
             traces.push(Rc::new(RefCell::new(SimpleTrace::new(raw_trace))));
         }
 
-        SimpleEventLog { traces }
+        SimpleEventLog {
+            traces_holder: TracesHolder::new(traces),
+        }
     }
 
     pub fn to_raw_vector(&self) -> Vec<Vec<String>> {
         let mut raw_log = Vec::new();
-        for trace in &self.traces {
+        for trace in self.traces_holder.get_traces() {
             let mut events = Vec::new();
-            for event in &trace.borrow().events {
+            for event in trace.borrow().get_events() {
                 events.push(event.borrow().get_name().to_owned());
             }
 
@@ -43,20 +47,34 @@ impl EventLog for SimpleEventLog {
     type TTrace = SimpleTrace;
 
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
-        &self.traces
+        &self.traces_holder.get_traces()
+    }
+
+    fn filter_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.traces_holder.filter_events_by(predicate);
     }
 }
 
 #[derive(Debug)]
 pub struct SimpleTrace {
-    events: Vec<Rc<RefCell<SimpleEvent>>>,
+    events_holder: EventsHolder<SimpleEvent>,
 }
 
 impl Trace for SimpleTrace {
     type TEvent = SimpleEvent;
 
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
-        &self.events
+        &self.events_holder.get_events()
+    }
+
+    fn remove_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.events_holder.remove_events_by(predicate);
     }
 }
 
@@ -71,7 +89,9 @@ impl SimpleTrace {
             current_date = current_date + Duration::seconds(1);
         }
 
-        SimpleTrace { events }
+        SimpleTrace {
+            events_holder: EventsHolder::new(events),
+        }
     }
 }
 

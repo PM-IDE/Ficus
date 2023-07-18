@@ -9,7 +9,7 @@ pub struct EventLogInfo {
 }
 
 impl EventLogInfo {
-    pub fn new<TLog>(log: &TLog) -> EventLogInfo
+    pub fn create_from<TLog>(log: &TLog) -> EventLogInfo
     where
         TLog: EventLog,
     {

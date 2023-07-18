@@ -4,12 +4,15 @@ use super::{
     xes_event::XesEventImpl,
 };
 
-use crate::event_log::core::{event::EventPayloadValue, event_log::EventLog, trace::Trace};
+use crate::event_log::core::{
+    event::EventPayloadValue, event_log::EventLog, events_holder::EventsHolder, trace::Trace,
+    traces_holder::TracesHolder,
+};
 use crate::utils::vec_utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
-    traces: Vec<Rc<RefCell<XesTraceImpl>>>,
+    traces_holder: TracesHolder<XesTraceImpl, XesEventImpl>,
     globals: HashMap<String, HashMap<String, String>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,
@@ -85,7 +88,7 @@ impl XesEventLogImpl {
         }
 
         let log = XesEventLogImpl {
-            traces,
+            traces_holder: TracesHolder::new(traces),
             globals,
             extensions,
             classifiers,
@@ -101,12 +104,19 @@ impl EventLog for XesEventLogImpl {
     type TTrace = XesTraceImpl;
 
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
-        &self.traces
+        &self.traces_holder.get_traces()
+    }
+
+    fn filter_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.traces_holder.filter_events_by(predicate);
     }
 }
 
 pub struct XesTraceImpl {
-    events: Vec<Rc<RefCell<XesEventImpl>>>,
+    events_holder: EventsHolder<XesEventImpl>,
 }
 
 impl XesTraceImpl {
@@ -119,7 +129,9 @@ impl XesTraceImpl {
             events.push(Rc::new(RefCell::new(event)));
         }
 
-        Some(XesTraceImpl { events })
+        Some(XesTraceImpl {
+            events_holder: EventsHolder::new(events),
+        })
     }
 }
 
@@ -127,6 +139,13 @@ impl Trace for XesTraceImpl {
     type TEvent = XesEventImpl;
 
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
-        &self.events
+        &self.events_holder.get_events()
+    }
+
+    fn remove_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.events_holder.remove_events_by(predicate);
     }
 }
