@@ -3,8 +3,13 @@ use test_core::simple_events_logs_provider::create_simple_event_log;
 
 use ficus_backend::{
     event_log::core::{event::Event, event_log::EventLog},
-    features::mutations::filtering::{filter_log_by_name, filter_log_by_names},
+    features::mutations::{
+        filtering::{filter_log_by_name, filter_log_by_names},
+        mutations::rename_events,
+    },
 };
+
+use crate::test_core::simple_events_logs_provider::create_simple_event_log2;
 
 mod test_core;
 
@@ -48,4 +53,46 @@ fn test_removing_events5() {
     filter_log_by_names(&mut log, &set);
 
     assert!(log.to_raw_vector().is_empty());
+}
+
+#[test]
+fn test_renaming() {
+    let mut log = create_simple_event_log();
+    rename_events(&mut log, "D", |event| event.get_name() == "A");
+
+    assert_eq!(log.to_raw_vector(), vec![vec!["D", "B", "C"], vec!["D", "B", "C"]])
+}
+
+#[test]
+fn test_renaming2() {
+    let mut log = create_simple_event_log2();
+    rename_events(&mut log, "D", |_| true);
+
+    assert_eq!(
+        log.to_raw_vector(),
+        vec![
+            vec!["D", "D", "D", "D", "D"],
+            vec!["D", "D", "D", "D", "D", "D"],
+            vec!["D", "D", "D", "D", "D", "D", "D", "D"],
+            vec!["D", "D", "D", "D", "D"],
+            vec!["D", "D", "D", "D", "D", "D"],
+        ]
+    );
+}
+
+#[test]
+fn test_renaming2_no_change() {
+    let mut log = create_simple_event_log2();
+    rename_events(&mut log, "D", |_| false);
+
+    assert_eq!(
+        log.to_raw_vector(),
+        vec![
+            vec!["A", "B", "C", "D", "E"],
+            vec!["B", "C", "E", "A", "A", "A"],
+            vec!["A", "E", "C", "B", "B", "B", "E", "A"],
+            vec!["A", "B", "C", "C", "A"],
+            vec!["B", "C", "E", "A", "A", "A"],
+        ]
+    );
 }
