@@ -16,3 +16,19 @@ pub fn create_simple_event_log2() -> SimpleEventLog {
 
     SimpleEventLog::new(&raw_log)
 }
+
+pub fn create_simple_event_log3() -> SimpleEventLog {
+    let raw_log = vec![
+        vec!["A", "B", "C", "D", "E"],
+        vec!["B", "C", "E", "A", "A", "A"],
+        vec!["A", "E", "C", "B", "B", "B", "E", "A"],
+        vec!["A", "B", "C", "C", "A"],
+        vec!["B", "C", "E", "A", "A", "A"],
+        vec!["A", "B", "C", "D", "E"],
+        vec!["A", "B", "C", "C", "A"],
+        vec!["A", "B", "C", "C", "A"],
+        vec!["A", "E", "C", "B", "B", "B", "E", "A"],
+    ];
+
+    SimpleEventLog::new(&raw_log)
+}
