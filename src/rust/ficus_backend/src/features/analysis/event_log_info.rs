@@ -54,6 +54,26 @@ pub struct DfgInfo {
 }
 
 impl DfgInfo {
+    pub fn get_directly_follows_count(&self, pair: &(String, String)) -> usize {
+        match self.dfg_pairs.get(pair) {
+            Some(count) => count.to_owned(),
+            None => 0
+        }
+    }
+
+    pub fn get_followed_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {
+        match self.followed_events.get(event_class) {
+            Some(followers_counts) => Some(followers_counts),
+            None => None
+        }
+    }
+
+    pub fn is_event_with_single_follower(&self, event_class: &String) -> bool {
+        self.events_with_single_follower.contains(event_class)
+    }
+}
+
+impl DfgInfo {
     pub fn new<TLog>(log: &TLog) -> DfgInfo
     where
         TLog: EventLog,
