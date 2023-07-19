@@ -3,10 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use test_core::simple_events_logs_provider::{create_simple_event_log, create_simple_event_log2};
 
 use ficus_backend::{
-    event_log::{
-        core::trace::Trace,
-        simple::simple_event_log::SimpleTrace,
-    },
+    event_log::{core::trace::Trace, simple::simple_event_log::SimpleTrace},
     features::mutations::split::split_by_traces,
 };
 

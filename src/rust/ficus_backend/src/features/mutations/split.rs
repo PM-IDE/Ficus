@@ -36,32 +36,7 @@ where
 
     let mut result = Vec::new();
     for (_, traces) in len_to_traces {
-        if traces.len() == 1 {
-            result.push(traces);
-            continue;
-        }
-
-        let mut groups = create_initial_groups(&traces);
-        let mut index = 0;
-
-        loop {
-            if index >= traces[0].trace.borrow().get_events().len() {
-                break;
-            }
-
-            let (new_groups, all_groups_have_one_trace) = update_groups(&groups, index);
-
-            if all_groups_have_one_trace {
-                break;
-            }
-
-            index += 1;
-            groups = new_groups;
-        }
-
-        for group in groups {
-            result.push(group);
-        }
+        process_traces_group(traces, &mut result);
     }
 
     sort_resulting_variants(result)
@@ -86,6 +61,38 @@ where
     }
 
     len_to_traces
+}
+
+fn process_traces_group<TTrace>(traces: Vec<TracePointer<TTrace>>, result: &mut Vec<Vec<TracePointer<TTrace>>>)
+where
+    TTrace: Trace,
+{
+    if traces.len() == 1 {
+        result.push(traces);
+        return;
+    }
+
+    let mut groups = create_initial_groups(&traces);
+    let mut index = 0;
+
+    loop {
+        if index >= traces[0].trace.borrow().get_events().len() {
+            break;
+        }
+
+        let (new_groups, all_groups_have_one_trace) = update_groups(&groups, index);
+
+        if all_groups_have_one_trace {
+            break;
+        }
+
+        index += 1;
+        groups = new_groups;
+    }
+
+    for group in groups {
+        result.push(group);
+    }
 }
 
 fn create_initial_groups<TTrace>(traces: &Vec<TracePointer<TTrace>>) -> Vec<Vec<TracePointer<TTrace>>> {
