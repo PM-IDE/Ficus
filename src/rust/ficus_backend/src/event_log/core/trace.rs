@@ -10,4 +10,8 @@ pub trait Trace {
     fn remove_events_by<TPred>(&mut self, predicate: TPred)
     where
         TPred: Fn(&Self::TEvent) -> bool;
+
+    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut Self::TEvent);
 }

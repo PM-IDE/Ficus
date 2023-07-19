@@ -36,4 +36,13 @@ where
             }
         }
     }
+
+    pub fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut TEvent),
+    {
+        for trace in &self.traces {
+            trace.borrow_mut().mutate_events(&mutator);
+        }
+    }
 }

@@ -113,6 +113,13 @@ impl EventLog for XesEventLogImpl {
     {
         self.traces_holder.filter_events_by(predicate);
     }
+
+    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut Self::TEvent),
+    {
+        self.traces_holder.mutate_events(mutator);
+    }
 }
 
 pub struct XesTraceImpl {
@@ -151,5 +158,12 @@ impl Trace for XesTraceImpl {
 
     fn to_names_vec(&self) -> Vec<String> {
         self.events_holder.to_names_vec()
+    }
+
+    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut Self::TEvent),
+    {
+        self.events_holder.mutate_events(mutator);
     }
 }

@@ -41,4 +41,13 @@ where
 
         names
     }
+
+    pub fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut TEvent),
+    {
+        for event in &self.events {
+            mutator(&mut event.borrow_mut());
+        }
+    }
 }
