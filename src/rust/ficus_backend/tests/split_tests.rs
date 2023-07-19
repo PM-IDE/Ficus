@@ -4,7 +4,7 @@ use test_core::simple_events_logs_provider::{create_simple_event_log, create_sim
 
 use ficus_backend::{
     event_log::{
-        core::{event::Event, trace::Trace},
+        core::trace::Trace,
         simple::simple_event_log::SimpleTrace,
     },
     features::mutations::split::split_by_traces,

@@ -3,7 +3,7 @@ pub const LOG_TAG_NAME_STR: &str = "log";
 pub const GLOBAL_TAG_NAME_STR: &str = "global";
 pub const KEY_ATTR_NAME_STR: &str = "key";
 pub const KEYS_ATTR_NAME_STR: &str = "keys";
-pub const VALUE_ATTR_NANE_STR: &str = "value";
+pub const VALUE_ATTR_NAME_STR: &str = "value";
 pub const SCOPE_ATTR_NAME_STR: &str = "scope";
 pub const NAME_ATTR_NAME_STR: &str = "name";
 pub const CLASSIFIER_TAG_NAME_STR: &str = "classifier";
@@ -38,7 +38,7 @@ pub const INT_TAG_NAME: &[u8] = INT_TAG_NAME_STR.as_bytes();
 pub const FLOAT_TAG_NAME: &[u8] = FLOAT_TAG_NAME_STR.as_bytes();
 
 pub const KEY_ATTR_NAME: &[u8] = KEY_ATTR_NAME_STR.as_bytes();
-pub const VALUE_ATTR_NAME: &[u8] = VALUE_ATTR_NANE_STR.as_bytes();
+pub const VALUE_ATTR_NAME: &[u8] = VALUE_ATTR_NAME_STR.as_bytes();
 
 pub const TIME_TIMESTAMP_STR: &str = "time:timestamp";
 pub const CONCEPT_NAME_STR: &str = "concept:name";

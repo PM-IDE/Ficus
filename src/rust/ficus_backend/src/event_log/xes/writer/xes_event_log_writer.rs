@@ -73,7 +73,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
             for (key, value) in defaults {
                 attrs.clear();
                 attrs.push((KEY_ATTR_NAME_STR, key.as_str()));
-                attrs.push((VALUE_ATTR_NANE_STR, value.as_str()));
+                attrs.push((VALUE_ATTR_NAME_STR, value.as_str()));
                 write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
             }
         }
@@ -93,7 +93,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
 
                 let attrs = vec![
                     (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
-                    (VALUE_ATTR_NANE_STR, event.get_name()),
+                    (VALUE_ATTR_NAME_STR, event.get_name()),
                 ];
 
                 write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
@@ -101,7 +101,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                 let date_string = event.get_timestamp().to_rfc3339();
                 let attrs = vec![
                     (KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR),
-                    (VALUE_ATTR_NANE_STR, date_string.as_str()),
+                    (VALUE_ATTR_NAME_STR, date_string.as_str()),
                 ];
 
                 write_empty(&writer, DATE_TAG_NAME_STR, &attrs)?;
@@ -110,7 +110,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                     let lifecycle_string = lifecycle.to_string();
                     let attrs = vec![
                         (KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR),
-                        (VALUE_ATTR_NANE_STR, lifecycle_string.as_str()),
+                        (VALUE_ATTR_NAME_STR, lifecycle_string.as_str()),
                     ];
 
                     write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
@@ -144,7 +144,7 @@ fn write_payload_tag(
     };
 
     let string_value = value.to_string();
-    let attrs = vec![(KEY_ATTR_NAME_STR, key), (VALUE_ATTR_NANE_STR, string_value.as_str())];
+    let attrs = vec![(KEY_ATTR_NAME_STR, key), (VALUE_ATTR_NAME_STR, string_value.as_str())];
 
     write_empty(&writer, tag_name, &attrs)
 }
