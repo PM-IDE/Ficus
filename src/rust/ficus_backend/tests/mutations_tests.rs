@@ -1,5 +1,5 @@
 use std::{collections::HashSet, vec};
-use test_core::simple_events_logs_provider::create_simple_event_log;
+use test_core::simple_events_logs_provider::{create_simple_event_log, create_simple_event_log3};
 
 use ficus_backend::{
     event_log::core::{event::Event, event_log::EventLog},
@@ -9,7 +9,7 @@ use ficus_backend::{
     },
 };
 
-use crate::test_core::simple_events_logs_provider::create_simple_event_log2;
+use crate::test_core::simple_events_logs_provider::{create_raw_event_log2, create_simple_event_log2};
 
 mod test_core;
 
@@ -85,14 +85,26 @@ fn test_renaming2_no_change() {
     let mut log = create_simple_event_log2();
     rename_events(&mut log, "D", |_| false);
 
+    assert_eq!(log.to_raw_vector(), create_raw_event_log2());
+}
+
+#[test]
+fn test_renaming3() {
+    let mut log = create_simple_event_log3();
+    rename_events(&mut log, "D", |event| event.get_name() == "E");
+
     assert_eq!(
         log.to_raw_vector(),
         vec![
-            vec!["A", "B", "C", "D", "E"],
-            vec!["B", "C", "E", "A", "A", "A"],
-            vec!["A", "E", "C", "B", "B", "B", "E", "A"],
+            vec!["A", "B", "C", "D", "D"],
+            vec!["B", "C", "D", "A", "A", "A"],
+            vec!["A", "D", "C", "B", "B", "B", "D", "A"],
             vec!["A", "B", "C", "C", "A"],
-            vec!["B", "C", "E", "A", "A", "A"],
+            vec!["B", "C", "D", "A", "A", "A"],
+            vec!["A", "B", "C", "D", "D"],
+            vec!["A", "B", "C", "C", "A"],
+            vec!["A", "B", "C", "C", "A"],
+            vec!["A", "D", "C", "B", "B", "B", "D", "A"],
         ]
     );
 }
