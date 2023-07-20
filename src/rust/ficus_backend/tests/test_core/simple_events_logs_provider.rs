@@ -56,9 +56,11 @@ pub fn create_log_from_filter_out_chaotic_events_with_noise() -> SimpleEventLog 
     let mut raw_log = vec![];
 
     for _ in 0..10 {
-        raw_log.push(vec!["d","v","d","d","a","d","b","c","x","d","d","d","d","d"]);
-        raw_log.push(vec!["a","d","d","d","d","b","d","x","c","d"]);
-        raw_log.push(vec!["d","d","d","v","d","a","x","b","c","d"]);
+        raw_log.push(vec![
+            "d", "v", "d", "d", "a", "d", "b", "c", "x", "d", "d", "d", "d", "d",
+        ]);
+        raw_log.push(vec!["a", "d", "d", "d", "d", "b", "d", "x", "c", "d"]);
+        raw_log.push(vec!["d", "d", "d", "v", "d", "a", "x", "b", "c", "d"]);
     }
 
     SimpleEventLog::new(&raw_log)

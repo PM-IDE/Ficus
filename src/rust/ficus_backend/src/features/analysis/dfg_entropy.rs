@@ -2,9 +2,15 @@ use std::collections::HashMap;
 
 use crate::event_log::core::event_log::EventLog;
 
-use super::{event_log_info::EventLogInfo, constants::{FAKE_EVENT_START_NAME, FAKE_EVENT_END_NAME}};
+use super::{
+    constants::{FAKE_EVENT_END_NAME, FAKE_EVENT_START_NAME},
+    event_log_info::EventLogInfo,
+};
 
-pub fn calculate_default_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f32> where TLog: EventLog {
+pub fn calculate_default_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f32>
+where
+    TLog: EventLog,
+{
     let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let dfg = log_info.get_dfg_info();
         let dfr = dfg.get_directly_follows_count(&(first.to_owned(), second.to_owned()));
@@ -27,7 +33,7 @@ fn calculate_dfg_entropy<TLog, TDfrEntropyCalculator, TDprEntropyCalculator>(
     dfr_calculator: TDfrEntropyCalculator,
     dpr_calculator: TDprEntropyCalculator,
 ) -> HashMap<String, f32>
-where 
+where
     TLog: EventLog,
     TDfrEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f32,
     TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f32,
@@ -35,11 +41,11 @@ where
     let log_info = EventLogInfo::create_from(log, true);
     let mut entropy = HashMap::new();
     let events_names: Vec<&String> = log_info.get_all_event_classes();
-    
+
     let mut dfr_events_names = events_names.clone();
     let fake_end = FAKE_EVENT_END_NAME.to_string();
     dfr_events_names.push(&fake_end);
-    
+
     let mut dpr_events_names = events_names.clone();
     let fake_start = FAKE_EVENT_START_NAME.to_string();
     dpr_events_names.push(&fake_start);

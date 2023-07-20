@@ -3,19 +3,16 @@ use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::Trace;
 use std::collections::{HashMap, HashSet};
 
-use super::constants::{FAKE_EVENT_START_NAME, FAKE_EVENT_END_NAME};
+use super::constants::{FAKE_EVENT_END_NAME, FAKE_EVENT_START_NAME};
 
 pub struct EventLogInfo {
     events_count: usize,
     event_classes_counts: HashMap<String, usize>,
-    dfg_info: DfgInfo
+    dfg_info: DfgInfo,
 }
 
 impl EventLogInfo {
-    pub fn create_from<TLog>(
-        log: &TLog,
-        add_fake_start_end_events: bool,
-    ) -> EventLogInfo
+    pub fn create_from<TLog>(log: &TLog, add_fake_start_end_events: bool) -> EventLogInfo
     where
         TLog: EventLog,
     {
@@ -96,7 +93,7 @@ impl EventLogInfo {
                 dfg_pairs,
                 followed_events,
                 events_with_single_follower,
-            }
+            },
         }
     }
 
@@ -131,14 +128,14 @@ impl DfgInfo {
     pub fn get_directly_follows_count(&self, pair: &(String, String)) -> usize {
         match self.dfg_pairs.get(pair) {
             Some(count) => count.to_owned(),
-            None => 0
+            None => 0,
         }
     }
 
     pub fn get_followed_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {
         match self.followed_events.get(event_class) {
             Some(followers_counts) => Some(followers_counts),
-            None => None
+            None => None,
         }
     }
 

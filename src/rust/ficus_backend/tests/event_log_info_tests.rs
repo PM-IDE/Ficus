@@ -1,4 +1,4 @@
-use ficus_backend::features::analysis::{event_log_info::EventLogInfo, dfg_entropy::calculate_default_dfg_entropy};
+use ficus_backend::features::analysis::{dfg_entropy::calculate_default_dfg_entropy, event_log_info::EventLogInfo};
 use test_core::simple_events_logs_provider::create_simple_event_log;
 
 use crate::test_core::simple_events_logs_provider::create_log_from_filter_out_chaotic_events;
