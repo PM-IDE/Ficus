@@ -27,7 +27,7 @@ impl EventLogInfo {
 
         let mut update_events_counts = |event: &TLog::TEvent| {
             if let Some(count) = events_counts.get_mut(event.get_name()) {
-                *count += 1usize;
+                *count += 1;
             } else {
                 events_counts.insert(event.get_name().to_owned(), 1usize);
             }
@@ -35,8 +35,8 @@ impl EventLogInfo {
 
         let mut update_pairs_count = |first_name: &String, second_name: &String| {
             let pair = (first_name.to_owned(), second_name.to_owned());
-            if dfg_pairs.contains_key(&pair) {
-                (*dfg_pairs.get_mut(&pair).unwrap()) += 1;
+            if let Some(count) = dfg_pairs.get_mut(&pair) {
+                *count += 1;
             } else {
                 dfg_pairs.insert(pair, 1usize);
             }
