@@ -101,6 +101,10 @@ impl EventLogInfo {
         self.events_count
     }
 
+    pub fn get_event_classes_count(&self) -> usize {
+        self.event_classes_counts.len()
+    }
+
     pub fn get_event_count(&self, event_class: &String) -> usize {
         match self.event_classes_counts.get(event_class) {
             Some(value) => value.to_owned(),

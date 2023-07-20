@@ -7,7 +7,35 @@ use super::{
     event_log_info::EventLogInfo,
 };
 
-pub fn calculate_default_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f32>
+pub fn calculate_laplace_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f64>
+where
+    TLog: EventLog,
+{
+    let dfr_or_dpr_calculator = |pair_count, events_count, event_count| {
+        let alpha = 1 as f64 / event_count as f64;
+        let x = alpha + pair_count as f64;
+        let y = alpha * ((events_count + 1) as f64) + event_count as f64;
+        x / y
+    };
+
+    let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
+        let pair = (first.to_owned(), second.to_owned());
+        let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
+        let first_count = log_info.get_event_count(first);
+        dfr_or_dpr_calculator(pair_count, log_info.get_event_classes_count(), first_count)
+    };
+
+    let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
+        let pair = (second.to_owned(), first.to_owned());
+        let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
+        let first_count = log_info.get_event_count(first);
+        dfr_or_dpr_calculator(pair_count, log_info.get_event_classes_count(), first_count)
+    };
+
+    calculate_dfg_entropy(log, dfr_calculator, dpr_calculator)
+}
+
+pub fn calculate_default_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f64>
 where
     TLog: EventLog,
 {
@@ -15,14 +43,14 @@ where
         let dfg = log_info.get_dfg_info();
         let dfr = dfg.get_directly_follows_count(&(first.to_owned(), second.to_owned()));
         let first_count = log_info.get_event_count(first);
-        dfr as f32 / first_count as f32
+        dfr as f64 / first_count as f64
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let dfg = log_info.get_dfg_info();
         let dfr = dfg.get_directly_follows_count(&(second.to_owned(), first.to_owned()));
         let first_count = log_info.get_event_count(first);
-        dfr as f32 / first_count as f32
+        dfr as f64 / first_count as f64
     };
 
     calculate_dfg_entropy(log, dfr_calculator, dpr_calculator)
@@ -32,11 +60,11 @@ fn calculate_dfg_entropy<TLog, TDfrEntropyCalculator, TDprEntropyCalculator>(
     log: &TLog,
     dfr_calculator: TDfrEntropyCalculator,
     dpr_calculator: TDprEntropyCalculator,
-) -> HashMap<String, f32>
+) -> HashMap<String, f64>
 where
     TLog: EventLog,
-    TDfrEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f32,
-    TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f32,
+    TDfrEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
+    TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
 {
     let log_info = EventLogInfo::create_from(log, true);
     let mut entropy = HashMap::new();
@@ -51,12 +79,12 @@ where
     dpr_events_names.push(&fake_start);
 
     for event_name in events_names {
-        let dfr_vector: Vec<f32> = dfr_events_names
+        let dfr_vector: Vec<f64> = dfr_events_names
             .iter()
             .map(|current_name| dfr_calculator(event_name, current_name, &log_info))
             .collect();
 
-        let dpr_vector: Vec<f32> = dpr_events_names
+        let dpr_vector: Vec<f64> = dpr_events_names
             .iter()
             .map(|current_name| dpr_calculator(event_name, current_name, &log_info))
             .collect();
@@ -68,10 +96,10 @@ where
     entropy
 }
 
-fn calculate_entropy(values: &Vec<f32>) -> f32 {
-    let mut entropy = 0f32;
+fn calculate_entropy(values: &Vec<f64>) -> f64 {
+    let mut entropy = 0f64;
     for value in values {
-        if *value != 0f32 {
+        if *value != 0f64 {
             entropy -= value * value.log2();
         }
     }
