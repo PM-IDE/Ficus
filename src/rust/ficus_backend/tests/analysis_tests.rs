@@ -7,7 +7,7 @@ mod test_core;
 #[test]
 fn test_dfg_info() {
     let log = create_simple_event_log();
-    let log_info = EventLogInfo::create_from(&log);
+    let log_info = EventLogInfo::create_from(&log, false);
     let dfg = log_info.get_dfg_info();
 
     assert_eq!(dfg.get_directly_follows_count(&("A".to_string(), "B".to_string())), 2);

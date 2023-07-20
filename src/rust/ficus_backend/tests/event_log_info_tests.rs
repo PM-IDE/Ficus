@@ -1,17 +1,29 @@
-use std::collections::HashMap;
-
-use ficus_backend::features::analysis::event_log_info::EventLogInfo;
+use ficus_backend::features::analysis::{event_log_info::EventLogInfo, dfg_entropy::calculate_default_dfg_entropy};
 use test_core::simple_events_logs_provider::create_simple_event_log;
+
+use crate::test_core::simple_events_logs_provider::create_log_from_filter_out_chaotic_events;
 
 mod test_core;
 
 #[test]
 fn test_event_log_info() {
     let log = create_simple_event_log();
-    let log_info = EventLogInfo::create_from(&log);
+    let log_info = EventLogInfo::create_from(&log, false);
     assert_eq!(log_info.get_events_count(), 6);
 
-    let expected = HashMap::from([("A".to_string(), 2usize), ("B".to_string(), 2), ("C".to_string(), 2)]);
+    assert_eq!(log_info.get_event_count(&"A".to_string()), 2usize);
+    assert_eq!(log_info.get_event_count(&"B".to_string()), 2usize);
+    assert_eq!(log_info.get_event_count(&"C".to_string()), 2usize);
+}
 
-    assert_eq!(log_info.get_event_classes_names(), &expected);
+#[test]
+fn test_dfg_entropy() {
+    let log = create_simple_event_log();
+    println!("{:?}", calculate_default_dfg_entropy(&log));
+}
+
+#[test]
+fn test_dfg_entropy_log_from_paper() {
+    let log = create_log_from_filter_out_chaotic_events();
+    println!("{:?}", calculate_default_dfg_entropy(&log));
 }
