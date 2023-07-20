@@ -1,9 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use ficus_backend::features::analysis::{
     dfg_entropy::{calculate_default_dfg_entropy, calculate_laplace_dfg_entropy},
-    event_log_info::EventLogInfo,
+    event_log_info::{EventLogInfo, EventLogInfoCreationDto},
 };
+use test_core::simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise;
 
 use crate::test_core::simple_events_logs_provider::{
     create_log_from_filter_out_chaotic_events, create_simple_event_log,
@@ -14,7 +15,8 @@ mod test_core;
 #[test]
 fn test_dfg_info() {
     let log = create_simple_event_log();
-    let log_info = EventLogInfo::create_from(&log, false);
+    let creation_dto = EventLogInfoCreationDto::default(&log);
+    let log_info = EventLogInfo::create_from(creation_dto);
     let dfg = log_info.get_dfg_info();
 
     assert_eq!(dfg.get_directly_follows_count(&("A".to_string(), "B".to_string())), 2);
@@ -39,7 +41,26 @@ fn test_dfg_info() {
 #[test]
 fn test_dfg_entropy() {
     let log = create_log_from_filter_out_chaotic_events();
-    let entropies = calculate_default_dfg_entropy(&log);
+    let entropies = calculate_default_dfg_entropy(&log, None);
+    let expected = HashMap::from_iter(vec![
+        ("c".to_string(), 1.8365916681089791),
+        ("b".to_string(), 1.8365916681089791),
+        ("x".to_string(), 3.169925001442312),
+        ("a".to_string(), 0.9182958340544896),
+    ]);
+
+    assert_eq!(entropies, expected);
+}
+
+#[test]
+fn test_dfg_entropy_with_noise() {
+    let log = create_log_from_filter_out_chaotic_events_with_noise();
+    let ignored_events = HashSet::from_iter(vec![
+        "d".to_string(), 
+        "v".to_string(),
+    ]);
+
+    let entropies = calculate_default_dfg_entropy(&log, Some(ignored_events));
     let expected = HashMap::from_iter(vec![
         ("c".to_string(), 1.8365916681089791),
         ("b".to_string(), 1.8365916681089791),
@@ -53,7 +74,27 @@ fn test_dfg_entropy() {
 #[test]
 fn test_dfg_laplace_entropy() {
     let log = create_log_from_filter_out_chaotic_events();
-    let entropies = calculate_laplace_dfg_entropy(&log);
+    let entropies = calculate_laplace_dfg_entropy(&log, None);
+    let expected = HashMap::from_iter(vec![
+        ("c".to_string(), 1.905904975406124),
+        ("b".to_string(), 1.905904975406124),
+        ("x".to_string(), 3.2127002996007796),
+        ("a".to_string(), 1.002726083454847),
+    ]);
+
+    assert_eq!(entropies, expected);
+}
+
+#[test]
+fn test_dfg_laplace_entropy_with_noise() {
+    let log = create_log_from_filter_out_chaotic_events_with_noise();
+    let ignored_events = HashSet::from_iter(vec![
+        "d".to_string(), 
+        "v".to_string(),
+    ]);
+
+    let entropies = calculate_laplace_dfg_entropy(&log, Some(ignored_events));
+
     let expected = HashMap::from_iter(vec![
         ("c".to_string(), 1.905904975406124),
         ("b".to_string(), 1.905904975406124),
