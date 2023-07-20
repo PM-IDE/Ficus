@@ -3,6 +3,8 @@ use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::Trace;
 use std::collections::{HashMap, HashSet};
 
+use super::constants::{FAKE_EVENT_START_NAME, FAKE_EVENT_END_NAME};
+
 pub struct EventLogInfo {
     events_count: usize,
     event_classes_counts: HashMap<String, usize>,
@@ -10,7 +12,10 @@ pub struct EventLogInfo {
 }
 
 impl EventLogInfo {
-    pub fn create_from<TLog>(log: &TLog) -> EventLogInfo
+    pub fn create_from<TLog>(
+        log: &TLog,
+        add_fake_start_end_events: bool,
+    ) -> EventLogInfo
     where
         TLog: EventLog,
     {
@@ -20,6 +25,23 @@ impl EventLogInfo {
         let mut events_count = 0;
         let mut events_counts = HashMap::new();
 
+        let mut update_events_counts = |event: &TLog::TEvent| {
+            if let Some(count) = events_counts.get_mut(event.get_name()) {
+                *count += 1usize;
+            } else {
+                events_counts.insert(event.get_name().to_owned(), 1usize);
+            }
+        };
+
+        let mut update_pairs_count = |first_name: &String, second_name: &String| {
+            let pair = (first_name.to_owned(), second_name.to_owned());
+            if dfg_pairs.contains_key(&pair) {
+                (*dfg_pairs.get_mut(&pair).unwrap()) += 1;
+            } else {
+                dfg_pairs.insert(pair, 1usize);
+            }
+        };
+
         for trace in log.get_traces() {
             let trace = trace.borrow();
             let events = trace.get_events();
@@ -28,27 +50,25 @@ impl EventLogInfo {
 
             for event in events {
                 let event = event.borrow();
-                if let Some(count) = events_counts.get_mut(event.get_name()) {
-                    *count += 1usize;
-                } else {
-                    events_counts.insert(event.get_name().to_owned(), 1usize);
-                }
+                update_events_counts(&event);
 
                 let current_name = event.get_name().to_owned();
                 if prev_event_name.is_none() {
                     prev_event_name = Some(current_name.to_owned());
+                    if add_fake_start_end_events {
+                        update_pairs_count(&FAKE_EVENT_START_NAME.to_string(), &current_name);
+                    }
+
                     continue;
                 }
 
                 let prev_name = prev_event_name.unwrap();
-                let pair = (prev_name.to_owned(), current_name.to_owned());
-                if dfg_pairs.contains_key(&pair) {
-                    (*dfg_pairs.get_mut(&pair).unwrap()) += 1;
-                } else {
-                    dfg_pairs.insert(pair, 1usize);
-                }
-
+                update_pairs_count(&prev_name, &current_name);
                 prev_event_name = Some(event.get_name().to_owned());
+            }
+
+            if add_fake_start_end_events && prev_event_name.is_some() {
+                update_pairs_count(&prev_event_name.unwrap(), &FAKE_EVENT_END_NAME.to_string());
             }
         }
 
@@ -84,12 +104,19 @@ impl EventLogInfo {
         self.events_count
     }
 
-    pub fn get_event_classes_names(&self) -> &HashMap<String, usize> {
-        &self.event_classes_counts
+    pub fn get_event_count(&self, event_class: &String) -> usize {
+        match self.event_classes_counts.get(event_class) {
+            Some(value) => value.to_owned(),
+            None => 0,
+        }
     }
 
     pub fn get_dfg_info(&self) -> &DfgInfo {
         &self.dfg_info
+    }
+
+    pub fn get_all_event_classes(&self) -> Vec<&String> {
+        self.event_classes_counts.keys().into_iter().collect()
     }
 }
 
