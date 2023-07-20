@@ -11,22 +11,66 @@ pub struct EventLogInfo {
     dfg_info: DfgInfo,
 }
 
+pub struct EventLogInfoCreationDto<'a, TLog>
+where
+    TLog: EventLog,
+{
+    log: &'a TLog,
+    add_fake_start_end_events: bool,
+    ignored_events: Option<HashSet<String>>,
+}
+
+impl<'a, TLog> EventLogInfoCreationDto<'a, TLog>
+where
+    TLog: EventLog,
+{
+    pub fn default(log: &'a TLog) -> Self {
+        EventLogInfoCreationDto {
+            log,
+            add_fake_start_end_events: false,
+            ignored_events: None,
+        }
+    }
+
+    pub fn default_fake_events(log: &'a TLog) -> Self {
+        EventLogInfoCreationDto {
+            log,
+            add_fake_start_end_events: true,
+            ignored_events: None,
+        }
+    }
+
+    pub fn default_fake_ignored(log: &'a TLog, ignored_events: Option<HashSet<String>>) -> Self {
+        EventLogInfoCreationDto {
+            log,
+            add_fake_start_end_events: true,
+            ignored_events: ignored_events,
+        }
+    }
+}
+
 impl EventLogInfo {
-    pub fn create_from<TLog>(log: &TLog, add_fake_start_end_events: bool) -> EventLogInfo
+    pub fn create_from<'a, TLog>(creation_dto: EventLogInfoCreationDto<'a, TLog>) -> EventLogInfo
     where
         TLog: EventLog,
     {
+        let EventLogInfoCreationDto {
+            log,
+            add_fake_start_end_events,
+            ignored_events,
+        } = creation_dto;
+
         let mut dfg_pairs = HashMap::new();
         let mut followed_events: HashMap<String, HashMap<String, usize>> = HashMap::new();
         let mut events_with_single_follower = HashSet::new();
         let mut events_count = 0;
         let mut events_counts = HashMap::new();
 
-        let mut update_events_counts = |event: &TLog::TEvent| {
-            if let Some(count) = events_counts.get_mut(event.get_name()) {
+        let mut update_events_counts = |event_name: &String| {
+            if let Some(count) = events_counts.get_mut(event_name) {
                 *count += 1;
             } else {
-                events_counts.insert(event.get_name().to_owned(), 1usize);
+                events_counts.insert(event_name.to_owned(), 1usize);
             }
         };
 
@@ -47,9 +91,16 @@ impl EventLogInfo {
 
             for event in events {
                 let event = event.borrow();
-                update_events_counts(&event);
-
                 let current_name = event.get_name().to_owned();
+
+                if let Some(ignored_events) = &ignored_events {
+                    if ignored_events.contains(&current_name) {
+                        continue;
+                    }
+                }
+
+                update_events_counts(&current_name);
+
                 if prev_event_name.is_none() {
                     prev_event_name = Some(current_name.to_owned());
                     if add_fake_start_end_events {

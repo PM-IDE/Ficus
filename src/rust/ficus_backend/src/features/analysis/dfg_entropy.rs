@@ -1,13 +1,16 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::event_log::core::event_log::EventLog;
 
 use super::{
     constants::{FAKE_EVENT_END_NAME, FAKE_EVENT_START_NAME},
-    event_log_info::EventLogInfo,
+    event_log_info::{EventLogInfo, EventLogInfoCreationDto},
 };
 
-pub fn calculate_laplace_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f64>
+pub fn calculate_laplace_dfg_entropy<TLog>(
+    log: &TLog,
+    ignored_events: Option<HashSet<String>>
+) -> HashMap<String, f64>
 where
     TLog: EventLog,
 {
@@ -32,10 +35,15 @@ where
         dfr_or_dpr_calculator(pair_count, log_info.get_event_classes_count(), first_count)
     };
 
-    calculate_dfg_entropy(log, dfr_calculator, dpr_calculator)
+    let creation_dto = EventLogInfoCreationDto::default_fake_ignored(log, ignored_events);
+    let log_info = EventLogInfo::create_from(creation_dto);
+    calculate_dfg_entropy(&log_info, dfr_calculator, dpr_calculator)
 }
 
-pub fn calculate_default_dfg_entropy<TLog>(log: &TLog) -> HashMap<String, f64>
+pub fn calculate_default_dfg_entropy<TLog>(
+    log: &TLog, 
+    ignored_events: Option<HashSet<String>>
+) -> HashMap<String, f64>
 where
     TLog: EventLog,
 {
@@ -53,20 +61,20 @@ where
         dfr as f64 / first_count as f64
     };
 
-    calculate_dfg_entropy(log, dfr_calculator, dpr_calculator)
+    let creation_dto = EventLogInfoCreationDto::default_fake_ignored(log, ignored_events);
+    let log_info = EventLogInfo::create_from(creation_dto);
+    calculate_dfg_entropy(&log_info, dfr_calculator, dpr_calculator)
 }
 
-fn calculate_dfg_entropy<TLog, TDfrEntropyCalculator, TDprEntropyCalculator>(
-    log: &TLog,
+fn calculate_dfg_entropy<TDfrEntropyCalculator, TDprEntropyCalculator>(
+    log_info: &EventLogInfo,
     dfr_calculator: TDfrEntropyCalculator,
     dpr_calculator: TDprEntropyCalculator,
 ) -> HashMap<String, f64>
 where
-    TLog: EventLog,
     TDfrEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
     TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
 {
-    let log_info = EventLogInfo::create_from(log, true);
     let mut entropy = HashMap::new();
     let events_names: Vec<&String> = log_info.get_all_event_classes();
 
