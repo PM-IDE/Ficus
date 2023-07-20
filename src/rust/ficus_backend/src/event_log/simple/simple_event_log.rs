@@ -4,7 +4,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use crate::event_log::core::{
     event::{Event, EventPayloadValue},
     event_log::EventLog,
-    events_holder::EventsHolder,
+    events_holder::{EventSequenceInfo, EventsHolder},
     lifecycle::Lifecycle,
     trace::Trace,
     traces_holder::TracesHolder,
@@ -45,6 +45,7 @@ impl SimpleEventLog {
 impl EventLog for SimpleEventLog {
     type TEvent = SimpleEvent;
     type TTrace = SimpleTrace;
+    type TTraceInfo = EventSequenceInfo;
 
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces_holder.get_traces()
@@ -72,6 +73,7 @@ pub struct SimpleTrace {
 
 impl Trace for SimpleTrace {
     type TEvent = SimpleEvent;
+    type TTraceInfo = EventSequenceInfo;
 
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
@@ -93,6 +95,10 @@ impl Trace for SimpleTrace {
         TMutator: Fn(&mut Self::TEvent),
     {
         self.events_holder.mutate_events(mutator);
+    }
+
+    fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo {
+        &self.events_holder.get_event_sequence_info()
     }
 }
 

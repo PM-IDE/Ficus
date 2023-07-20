@@ -1,6 +1,6 @@
-use crate::event_log::core::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::Trace;
+use crate::{event_log::core::event::Event, utils::hash_map_utils::increase_in_map};
 use std::collections::{HashMap, HashSet};
 
 use super::constants::{FAKE_EVENT_END_NAME, FAKE_EVENT_START_NAME};
@@ -67,20 +67,12 @@ impl EventLogInfo {
         let mut events_counts = HashMap::new();
 
         let mut update_events_counts = |event_name: &String| {
-            if let Some(count) = events_counts.get_mut(event_name) {
-                *count += 1;
-            } else {
-                events_counts.insert(event_name.to_owned(), 1usize);
-            }
+            increase_in_map(&mut events_counts, event_name);
         };
 
         let mut update_pairs_count = |first_name: &String, second_name: &String| {
             let pair = (first_name.to_owned(), second_name.to_owned());
-            if let Some(count) = dfg_pairs.get_mut(&pair) {
-                *count += 1;
-            } else {
-                dfg_pairs.insert(pair, 1usize);
-            }
+            increase_in_map(&mut dfg_pairs, &pair);
         };
 
         for trace in log.get_traces() {

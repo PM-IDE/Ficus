@@ -1,10 +1,13 @@
+use super::{
+    event::Event,
+    trace::{Trace, TraceInfo},
+};
 use std::{cell::RefCell, rc::Rc};
-
-use super::{event::Event, trace::Trace};
 
 pub trait EventLog {
     type TEvent: Event;
-    type TTrace: Trace<TEvent = Self::TEvent>;
+    type TTraceInfo: TraceInfo;
+    type TTrace: Trace<TEvent = Self::TEvent, TTraceInfo = Self::TTraceInfo>;
 
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
 
