@@ -1,7 +1,7 @@
 import os.path
 
 from ..test_data_provider import sources_dir
-from ...ficus.analysis.event_log_analysis import calculate_default_entropies
+from ...ficus.analysis.event_log_analysis_entropy import calculate_default_entropies, calculate_laplace_entropies
 from ...ficus.log.functions import read_log_from_xes
 from ...tests import log_creators
 
@@ -27,6 +27,20 @@ def test_log_from_paper():
         'b': 1.8365916681089791,
         'c': 1.8365916681089791,
         'x': 3.169925001442312
+    }
+
+    assert len(expected_result) == len(entropy)
+    assert entropy == expected_result
+
+
+def test_log_from_paper_laplace():
+    log = log_creators.create_log_from_filter_out_chaotic_events()
+    entropy = calculate_laplace_entropies(log)
+    expected_result = {
+        'a': 1.002726083454847,
+        'b': 1.905904975406124,
+        'c': 1.905904975406124,
+        'x': 3.2127002996007796
     }
 
     assert len(expected_result) == len(entropy)
