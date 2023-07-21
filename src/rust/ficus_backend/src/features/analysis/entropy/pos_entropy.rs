@@ -1,9 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{
-    event_log::core::{event::Event, event_log::EventLog, trace::Trace},
-    features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto},
-};
+use crate::event_log::core::{event::Event, event_log::EventLog, trace::Trace};
 
 use super::shared::{calcualte_max_vector_length, calculate_entropies, calculate_pos_entropy};
 

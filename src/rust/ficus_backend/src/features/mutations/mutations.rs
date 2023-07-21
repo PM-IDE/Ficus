@@ -7,7 +7,7 @@ where
     TFilter: Fn(&TEvent) -> bool,
 {
     log.mutate_events(|event| {
-        if filter(&event) {
+        if filter(event) {
             event.set_name(&new_name.to_owned())
         }
     })

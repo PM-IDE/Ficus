@@ -17,7 +17,7 @@ where
 {
     log: &'a TLog,
     add_fake_start_end_events: bool,
-    ignored_events: Option<HashSet<String>>,
+    ignored_events: Option<&'a HashSet<String>>,
 }
 
 impl<'a, TLog> EventLogInfoCreationDto<'a, TLog>
@@ -40,7 +40,7 @@ where
         }
     }
 
-    pub fn default_fake_ignored(log: &'a TLog, ignored_events: Option<HashSet<String>>) -> Self {
+    pub fn default_fake_ignored(log: &'a TLog, ignored_events: Option<&'a HashSet<String>>) -> Self {
         EventLogInfoCreationDto {
             log,
             add_fake_start_end_events: true,
@@ -85,7 +85,7 @@ impl EventLogInfo {
                 let event = event.borrow();
                 let current_name = event.get_name().to_owned();
 
-                if let Some(ignored_events) = &ignored_events {
+                if let Some(ignored_events) = ignored_events {
                     if ignored_events.contains(&current_name) {
                         continue;
                     }

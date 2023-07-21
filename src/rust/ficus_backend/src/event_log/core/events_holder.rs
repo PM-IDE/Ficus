@@ -1,9 +1,6 @@
 use lazycell::LazyCell;
 
-use crate::{
-    event_log::xes::reader::xes_log_trace_reader::TraceXesEventLogIterator,
-    utils::hash_map_utils::{add_to_list_in_map, increase_in_map},
-};
+use crate::utils::hash_map_utils::{add_to_list_in_map, increase_in_map};
 
 use super::{
     event::Event,
@@ -77,7 +74,7 @@ where
 
     pub fn get_or_create_events_positions(&mut self) -> &EventsPositions {
         if !self.events_positions.filled() {
-            self.events_positions.fill(EventsPositions::new(self));
+            self.events_positions.fill(EventsPositions::new(self)).ok();
         }
 
         self.events_positions.borrow().unwrap()

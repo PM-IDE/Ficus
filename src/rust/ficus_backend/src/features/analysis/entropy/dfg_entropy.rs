@@ -8,7 +8,7 @@ use crate::{
     },
 };
 
-pub fn calculate_laplace_dfg_entropy<TLog>(log: &TLog, ignored_events: Option<HashSet<String>>) -> HashMap<String, f64>
+pub fn calculate_laplace_dfg_entropy<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> HashMap<String, f64>
 where
     TLog: EventLog,
 {
@@ -38,7 +38,7 @@ where
     calculate_dfg_entropy(&log_info, dfr_calculator, dpr_calculator)
 }
 
-pub fn calculate_default_dfg_entropy<TLog>(log: &TLog, ignored_events: Option<HashSet<String>>) -> HashMap<String, f64>
+pub fn calculate_default_dfg_entropy<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> HashMap<String, f64>
 where
     TLog: EventLog,
 {

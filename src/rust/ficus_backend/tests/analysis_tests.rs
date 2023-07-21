@@ -58,7 +58,7 @@ fn test_dfg_entropy_with_noise() {
     let log = create_log_from_filter_out_chaotic_events_with_noise();
     let ignored_events = HashSet::from_iter(vec!["d".to_string(), "v".to_string()]);
 
-    let entropies = calculate_default_dfg_entropy(&log, Some(ignored_events));
+    let entropies = calculate_default_dfg_entropy(&log, Some(&ignored_events));
     let expected = HashMap::from_iter(vec![
         ("c".to_string(), 1.8365916681089791),
         ("b".to_string(), 1.8365916681089791),
@@ -88,7 +88,7 @@ fn test_dfg_laplace_entropy_with_noise() {
     let log = create_log_from_filter_out_chaotic_events_with_noise();
     let ignored_events = HashSet::from_iter(vec!["d".to_string(), "v".to_string()]);
 
-    let entropies = calculate_laplace_dfg_entropy(&log, Some(ignored_events));
+    let entropies = calculate_laplace_dfg_entropy(&log, Some(&ignored_events));
 
     let expected = HashMap::from_iter(vec![
         ("c".to_string(), 1.905904975406124),
