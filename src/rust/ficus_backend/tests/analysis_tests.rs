@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
 use ficus_backend::features::analysis::{
-    dfg_entropy::{calculate_default_dfg_entropy, calculate_laplace_dfg_entropy},
+    entropy::dfg_entropy::{calculate_default_dfg_entropy, calculate_laplace_dfg_entropy},
+    entropy::{pos_entropy::calculate_pos_entropies, pos_entropy_fast::calculate_pos_entropies_fast},
     event_log_info::{EventLogInfo, EventLogInfoCreationDto},
-    pos_entropy::{calculate_pos_entropies, calculate_pos_entropy_for_event},
 };
 use test_core::simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise;
 
@@ -120,6 +120,36 @@ fn test_pos_entropy_with_noise() {
     let ignored_events = HashSet::from_iter(vec!["d".to_string(), "v".to_string()]);
 
     let entropies = calculate_pos_entropies(&log, &Some(ignored_events));
+    let expected = HashMap::from_iter(vec![
+        ("c".to_string(), 0.2211099839259014),
+        ("b".to_string(), 0.2211099839259014),
+        ("x".to_string(), 0.3230075074711545),
+        ("a".to_string(), 0.0),
+    ]);
+
+    assert_eq!(entropies, expected);
+}
+
+#[test]
+fn test_pos_entropy_fast() {
+    let log = create_log_from_filter_out_chaotic_events();
+    let entropies = calculate_pos_entropies_fast(&log, None);
+    let expected = HashMap::from_iter(vec![
+        ("c".to_string(), 0.2211099839259014),
+        ("b".to_string(), 0.2211099839259014),
+        ("x".to_string(), 0.3230075074711545),
+        ("a".to_string(), 0.0),
+    ]);
+
+    assert_eq!(entropies, expected);
+}
+
+#[test]
+fn test_pos_entropy_fast_with_noise() {
+    let log = create_log_from_filter_out_chaotic_events_with_noise();
+    let ignored_events = HashSet::from_iter(vec!["d".to_string(), "v".to_string()]);
+
+    let entropies = calculate_pos_entropies_fast(&log, Some(&ignored_events));
     let expected = HashMap::from_iter(vec![
         ("c".to_string(), 0.2211099839259014),
         ("b".to_string(), 0.2211099839259014),
