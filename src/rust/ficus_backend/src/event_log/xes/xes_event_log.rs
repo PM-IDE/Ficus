@@ -7,7 +7,7 @@ use super::{
 use crate::event_log::core::{
     event::EventPayloadValue,
     event_log::EventLog,
-    events_holder::{EventSequenceInfo, EventsHolder},
+    events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
     trace::Trace,
     traces_holder::TracesHolder,
 };
@@ -149,6 +149,7 @@ impl XesTraceImpl {
 impl Trace for XesTraceImpl {
     type TEvent = XesEventImpl;
     type TTraceInfo = EventSequenceInfo;
+    type TTracePositions = EventsPositions;
 
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
@@ -173,6 +174,10 @@ impl Trace for XesTraceImpl {
     }
 
     fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo {
-        &self.events_holder.get_event_sequence_info()
+        self.events_holder.get_or_create_event_sequence_info()
+    }
+
+    fn get_or_create_events_positions(&mut self) -> &Self::TTracePositions {
+        self.events_holder.get_or_create_events_positions()
     }
 }

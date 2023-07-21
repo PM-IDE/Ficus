@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.26"
 quick-xml = "0.29.0"
+lazycell = "1.3"

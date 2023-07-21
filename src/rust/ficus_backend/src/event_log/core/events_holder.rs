@@ -1,6 +1,14 @@
-use crate::utils::hash_map_utils::increase_in_map;
+use lazycell::LazyCell;
 
-use super::{event::Event, trace::TraceInfo};
+use crate::{
+    event_log::xes::reader::xes_log_trace_reader::TraceXesEventLogIterator,
+    utils::hash_map_utils::{add_to_list_in_map, increase_in_map},
+};
+
+use super::{
+    event::Event,
+    trace::{TraceEventsPositions, TraceInfo},
+};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug)]
@@ -9,7 +17,8 @@ where
     TEvent: Event,
 {
     events: Vec<Rc<RefCell<TEvent>>>,
-    events_sequence_info: Option<EventSequenceInfo>,
+    events_sequence_info: LazyCell<EventSequenceInfo>,
+    events_positions: LazyCell<EventsPositions>,
 }
 
 impl<TEvent> EventsHolder<TEvent>
@@ -19,7 +28,8 @@ where
     pub fn new(events: Vec<Rc<RefCell<TEvent>>>) -> EventsHolder<TEvent> {
         EventsHolder {
             events,
-            events_sequence_info: None,
+            events_sequence_info: LazyCell::new(),
+            events_positions: LazyCell::new(),
         }
     }
 
@@ -57,16 +67,20 @@ where
         }
     }
 
-    pub fn get_event_sequence_info(&mut self) -> &EventSequenceInfo {
-        //todo: invalidate on changes
-        if self.events_sequence_info.is_some() {
-            return self.events_sequence_info.as_ref().unwrap();
+    pub fn get_or_create_event_sequence_info(&mut self) -> &EventSequenceInfo {
+        if !self.events_sequence_info.filled() {
+            self.events_sequence_info.fill(EventSequenceInfo::new(self)).ok();
         }
 
-        let info = EventSequenceInfo::new(&self);
-        self.events_sequence_info = Some(info);
+        self.events_sequence_info.borrow().unwrap()
+    }
 
-        self.events_sequence_info.as_ref().unwrap()
+    pub fn get_or_create_events_positions(&mut self) -> &EventsPositions {
+        if !self.events_positions.filled() {
+            self.events_positions.fill(EventsPositions::new(self));
+        }
+
+        self.events_positions.borrow().unwrap()
     }
 }
 
@@ -100,5 +114,33 @@ impl EventSequenceInfo {
             events_counts,
             events_count: events_holder.get_events().len(),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct EventsPositions {
+    positions: HashMap<String, Vec<usize>>,
+}
+
+impl EventsPositions {
+    pub fn new<TEvent>(events: &EventsHolder<TEvent>) -> EventsPositions
+    where
+        TEvent: Event,
+    {
+        let mut positions = HashMap::new();
+        let mut index = 0;
+
+        for event in events.get_events() {
+            add_to_list_in_map(&mut positions, event.borrow().get_name(), index);
+            index += 1;
+        }
+
+        EventsPositions { positions }
+    }
+}
+
+impl TraceEventsPositions for EventsPositions {
+    fn get_event_positions(&self, event_class: &String) -> Option<&Vec<usize>> {
+        self.positions.get(event_class)
     }
 }
