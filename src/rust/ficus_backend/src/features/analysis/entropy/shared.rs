@@ -8,7 +8,7 @@ use crate::{
     features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto},
 };
 
-pub fn calcualte_max_vector_length<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> usize
+pub fn calculate_max_vector_length<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> usize
 where
     TLog: EventLog,
 {

@@ -44,7 +44,7 @@ where
         EventLogInfoCreationDto {
             log,
             add_fake_start_end_events: true,
-            ignored_events: ignored_events,
+            ignored_events,
         }
     }
 }

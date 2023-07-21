@@ -5,7 +5,7 @@ use crate::event_log::core::{
     trace::{Trace, TraceEventsPositions},
 };
 
-use super::shared::{calcualte_max_vector_length, calculate_entropies, calculate_pos_entropy};
+use super::shared::{calculate_max_vector_length, calculate_entropies, calculate_pos_entropy};
 
 pub fn calculate_pos_entropies_fast<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> HashMap<String, f64>
 where
@@ -22,7 +22,7 @@ pub fn calculate_pos_entropy_for_event_fast<TLog>(
 where
     TLog: EventLog,
 {
-    let vector_length = calcualte_max_vector_length(log, ignored_events);
+    let vector_length = calculate_max_vector_length(log, ignored_events);
     let mut probabilities = vec![0f64; vector_length];
 
     let mut non_empty_traces_count = 0;
