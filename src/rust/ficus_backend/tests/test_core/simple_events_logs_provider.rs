@@ -72,3 +72,13 @@ pub fn create_log_from_taxonomy_of_patterns() -> SimpleEventLog {
     ]];
     SimpleEventLog::new(&raw_log)
 }
+
+pub fn create_no_tandem_array_log() -> SimpleEventLog {
+    let raw_log = vec![vec!["a", "b", "c", "d"]];
+    SimpleEventLog::new(&raw_log)
+}
+
+pub fn create_one_tandem_array_log() -> SimpleEventLog {
+    let raw_log = vec![vec!["a", "b", "a", "b", "c", "d"]];
+    SimpleEventLog::new(&raw_log)
+}

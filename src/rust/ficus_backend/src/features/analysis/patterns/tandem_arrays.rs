@@ -70,7 +70,7 @@ pub fn find_maximal_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length: 
         visited.clear();
         let mut trace_tandem_arrays = Vec::new();
 
-        for length in 2..max_tandem_array_length {
+        for length in 2..(max_tandem_array_length.min(trace.len())) {
             for i in 0..(trace.len() - length) {
                 let sub_array_hash = calculate_poly_hash_for_collection(&trace[i..(i + length)]);
                 if visited.contains(&sub_array_hash) {
