@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use super::{event::Event, trace::Trace};
+use super::{event::Event, event_hasher::EventHasher, trace::Trace};
 
 #[derive(Debug)]
 pub struct TracesHolder<TTrace, TEvent>
@@ -44,5 +44,22 @@ where
         for trace in &self.traces {
             trace.borrow_mut().mutate_events(&mutator);
         }
+    }
+
+    pub fn to_hashes_vectors<THasher>(&self) -> Vec<Vec<u64>>
+    where
+        THasher: EventHasher<TEvent>,
+    {
+        let mut hashes = Vec::new();
+        for trace in &self.traces {
+            let mut trace_hashes = Vec::new();
+            for event in trace.borrow().get_events() {
+                trace_hashes.push(THasher::hash(&event.borrow()));
+            }
+
+            hashes.push(trace_hashes);
+        }
+
+        hashes
     }
 }

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::event_log::core::{event::Event, event_log::EventLog, trace::Trace};
 
-use super::shared::{calculate_max_vector_length, calculate_entropies, calculate_pos_entropy};
+use super::shared::{calculate_entropies, calculate_max_vector_length, calculate_pos_entropy};
 
 pub fn calculate_pos_entropies<TLog>(log: &TLog, ignored_events: &Option<HashSet<String>>) -> HashMap<String, f64>
 where

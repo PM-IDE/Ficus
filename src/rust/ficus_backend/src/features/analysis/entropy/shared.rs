@@ -53,10 +53,10 @@ where
 
 pub fn calculate_pos_entropy(probabilities: &mut Vec<f64>, traces_count: f64) -> f64 {
     for i in 0..probabilities.len() {
-        probabilities[i] = probabilities[i] / traces_count as f64;
+        probabilities[i] = probabilities[i] / traces_count;
     }
 
-    let log = (traces_count as f64).log2();
+    let log = traces_count.log2();
     let mut non_zero_count = 0;
 
     let sum: f64 = probabilities

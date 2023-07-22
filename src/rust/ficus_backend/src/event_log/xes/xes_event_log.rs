@@ -6,6 +6,7 @@ use super::{
 
 use crate::event_log::core::{
     event::EventPayloadValue,
+    event_hasher::EventHasher,
     event_log::EventLog,
     events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
     trace::Trace,
@@ -123,6 +124,13 @@ impl EventLog for XesEventLogImpl {
         TMutator: Fn(&mut Self::TEvent),
     {
         self.traces_holder.mutate_events(mutator);
+    }
+
+    fn to_hashes_event_log<THasher>(&self) -> Vec<Vec<u64>>
+    where
+        THasher: EventHasher<Self::TEvent>,
+    {
+        self.traces_holder.to_hashes_vectors::<THasher>()
     }
 }
 

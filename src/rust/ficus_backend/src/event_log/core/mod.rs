@@ -1,4 +1,5 @@
 pub mod event;
+pub mod event_hasher;
 pub mod event_log;
 pub mod events_holder;
 pub mod lifecycle;

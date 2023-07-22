@@ -5,7 +5,7 @@ use crate::event_log::core::{
     trace::{Trace, TraceEventsPositions},
 };
 
-use super::shared::{calculate_max_vector_length, calculate_entropies, calculate_pos_entropy};
+use super::shared::{calculate_entropies, calculate_max_vector_length, calculate_pos_entropy};
 
 pub fn calculate_pos_entropies_fast<TLog>(log: &TLog, ignored_events: Option<&HashSet<String>>) -> HashMap<String, f64>
 where
@@ -29,7 +29,7 @@ where
     let mut ordered_positions_of_ignored_events: Vec<usize> = Vec::new();
 
     for trace in log.get_traces() {
-        let trace_lenghth = trace.borrow().get_events().len();
+        let trace_length = trace.borrow().get_events().len();
         let mut trace = trace.borrow_mut();
 
         let positions = trace.get_or_create_events_positions();
@@ -44,7 +44,7 @@ where
             }
         }
 
-        if ordered_positions_of_ignored_events.len() == trace_lenghth {
+        if ordered_positions_of_ignored_events.len() == trace_length {
             continue;
         }
 
