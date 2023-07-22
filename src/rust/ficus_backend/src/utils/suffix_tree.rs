@@ -17,7 +17,13 @@ where
     TElement: Eq + PartialEq + Hash + Copy,
 {
     pub fn create_default() -> Self {
-        Self { left: 0, right: 0, link: None, parent: None, children: HashMap::new() }
+        Self {
+            left: 0,
+            right: 0,
+            link: None,
+            parent: None,
+            children: HashMap::new(),
+        }
     }
 
     fn edge_len(&self) -> usize {
@@ -77,6 +83,13 @@ where
         }
     }
 
+    pub fn dump_nodes(&self) -> Vec<(usize, usize, Option<usize>, Option<usize>)> {
+        (&self.nodes)
+            .into_iter()
+            .map(|node| (node.left(), node.right(), node.parent, node.link))
+            .collect()
+    }
+
     pub fn build_tree(&mut self) {
         let mut state = BuildState {
             pos: 0,
@@ -96,8 +109,8 @@ where
                 self.nodes.push(Node {
                     left: pos,
                     right: self.slice.len(),
-                    link: Some(mid),
-                    parent: None,
+                    link: None,
+                    parent: Some(mid),
                     children: HashMap::new(),
                 });
 
@@ -185,7 +198,7 @@ where
 
         let element = self.slice.get(current_node_left + current_state.pos).unwrap();
         self.nodes[index].update_child(element, current_index);
-        
+
         self.nodes[current_index].update_parent(index);
         self.nodes[current_index].left += current_state.pos;
 
