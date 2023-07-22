@@ -1,7 +1,11 @@
 use std::fs;
 
 use ficus_backend::utils::suffix_tree::SuffixTree;
-use test_core::{test_paths::{get_paths_to_suffix_tree_string, create_suffix_tree_gold_file_path}, gold_based_test::execute_test_with_gold, simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise};
+use test_core::{
+    gold_based_test::execute_test_with_gold,
+    simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise,
+    test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
+};
 mod test_core;
 
 #[test]
@@ -156,12 +160,12 @@ fn test_suffix_tree_against_ref_impl() {
             for node in tree.dump_nodes() {
                 let parent = match node.2 {
                     Some(value) => value as i64,
-                    None => -1
+                    None => -1,
                 };
 
                 let link = match node.3 {
                     Some(value) => value as i64,
-                    None => -1
+                    None => -1,
                 };
 
                 let serialized_node = format!("({} {} {} {})\n", node.0, node.1, parent, link);
