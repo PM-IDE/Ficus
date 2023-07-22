@@ -1,4 +1,8 @@
+use std::fs;
+
 use ficus_backend::utils::suffix_tree::SuffixTree;
+use test_core::{test_paths::{get_paths_to_suffix_tree_string, create_suffix_tree_gold_file_path}, gold_based_test::execute_test_with_gold, simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise};
+mod test_core;
 
 #[test]
 pub fn test_suffix_tree_nodes() {
@@ -137,4 +141,34 @@ pub fn test_suffix_tree_nodes3() {
             (45, 46, Some(20), None)
         ]
     );
+}
+
+#[test]
+fn test_suffix_tree_against_ref_impl() {
+    for file_path in get_paths_to_suffix_tree_string() {
+        let file_name = file_path.file_stem().unwrap().to_str().unwrap();
+        execute_test_with_gold(create_suffix_tree_gold_file_path(file_name), || {
+            let file_string = fs::read_to_string(file_path).ok().unwrap();
+            let mut tree = SuffixTree::new(file_string.as_bytes());
+            tree.build_tree();
+
+            let mut test_value = String::new();
+            for node in tree.dump_nodes() {
+                let parent = match node.2 {
+                    Some(value) => value as i64,
+                    None => -1
+                };
+
+                let link = match node.3 {
+                    Some(value) => value as i64,
+                    None => -1
+                };
+
+                let serialized_node = format!("({} {} {} {})\n", node.0, node.1, parent, link);
+                test_value.push_str(serialized_node.as_str());
+            }
+
+            test_value
+        });
+    }
 }
