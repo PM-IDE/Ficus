@@ -1,6 +1,9 @@
 use std::fs;
 
-use ficus_backend::utils::suffix_tree::{suffix_tree::SuffixTree, suffix_tree_slice::{SingleWordSuffixTreeSlice, MultipleWordsSuffixTreeSlice}};
+use ficus_backend::utils::suffix_tree::{
+    suffix_tree::SuffixTree,
+    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
+};
 use test_core::{
     gold_based_test::execute_test_with_gold,
     test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
@@ -96,6 +99,42 @@ fn test_multiple_words_suffix_tree_slice() {
     tree.build_tree();
 
     println!("{:?}", tree.dump_nodes());
+}
+
+#[test]
+fn test_patterns_search() {
+    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    assert_eq!(tree.find_patterns("abc".as_bytes()).unwrap(), [(0, 3), (5, 8), (9, 12)]);
+}
+
+#[test]
+fn test_patterns_search2() {
+    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    assert_eq!(tree.find_patterns("badb".as_bytes()).unwrap(), [(14, 18)]);
+}
+
+#[test]
+fn test_patterns_search3() {
+    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    assert_eq!(tree.find_patterns("a".as_bytes()).unwrap(), [(0, 1), (5, 6), (9, 10)]);
+}
+
+#[test]
+fn test_patterns_search4() {
+    let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    assert_eq!(tree.find_patterns("xa".as_bytes()).unwrap(), [(0, 2), (3, 5)]);
 }
 
 #[test]
