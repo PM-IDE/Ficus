@@ -9,7 +9,7 @@ where
     right: usize,
     link: Option<usize>,
     parent: Option<usize>,
-    children: HashMap<TElement, usize>,
+    children: HashMap<Option<TElement>, usize>,
 }
 
 impl<TElement> Node<TElement>
@@ -34,7 +34,7 @@ where
         self.right - self.left
     }
 
-    fn update_child(&mut self, element: &TElement, new_child: usize) {
+    fn update_child(&mut self, element: &Option<TElement>, new_child: usize) {
         if self.children.contains_key(element) {
             *self.children.get_mut(element).unwrap() = new_child;
         } else {
@@ -46,7 +46,7 @@ where
         self.parent = Some(new_parent);
     }
 
-    fn go(&mut self, element: &TElement) -> Option<usize> {
+    fn go(&mut self, element: &Option<TElement>) -> Option<usize> {
         match self.children.get(element) {
             Some(next) => Some(*next),
             None => None,
@@ -66,7 +66,7 @@ pub struct SuffixTree<'a, TElement>
 where
     TElement: Eq + Hash + Copy,
 {
-    slice: &'a [TElement],
+    slice: SuffixTreeSlice<'a, TElement>,
     nodes: Vec<Node<TElement>>,
 }
 
@@ -96,7 +96,7 @@ where
             let element = if suffix_length + 1 > self.slice.len() {
                 None
             } else {
-                Some(self.slice[self.slice.len() - suffix_length - 1])
+                self.slice.get(self.slice.len() - suffix_length - 1)
             };
 
             nodes_to_awc.insert(index, HashSet::from_iter(vec![(element)]));
@@ -111,7 +111,7 @@ where
 
         nodes_to_awc.insert(index, child_set);
 
-        if suffix_length != 0 {
+        if suffix_length > 1 {
             for (_, first_child) in &node.children {
                 for (_, second_child) in &node.children {
                     if first_child == second_child {
@@ -135,13 +135,45 @@ struct BuildState {
     pub node_index: Option<usize>,
 }
 
+struct SuffixTreeSlice<'a, TElement>
+where
+    TElement: PartialEq,
+{
+    slice: &'a [TElement],
+}
+
+impl<'a, TElement> SuffixTreeSlice<'a, TElement>
+where
+    TElement: PartialEq + Copy,
+{
+    fn equals(&self, first: usize, second: usize) -> bool {
+        if first >= self.slice.len() || second >= self.slice.len() {
+            return false;
+        }
+
+        self.slice[first] == self.slice[second]
+    }
+
+    fn len(&self) -> usize {
+        self.slice.len() + 1
+    }
+
+    fn get(&self, index: usize) -> Option<TElement> {
+        if index >= self.slice.len() {
+            None
+        } else {
+            Some(*self.slice.get(index).unwrap())
+        }
+    }
+}
+
 impl<'a, TElement> SuffixTree<'a, TElement>
 where
     TElement: Eq + PartialEq + Hash + Copy,
 {
     pub fn new(slice: &'a [TElement]) -> Self {
         Self {
-            slice,
+            slice: SuffixTreeSlice { slice },
             nodes: vec![Node::create_default()],
         }
     }
@@ -180,7 +212,7 @@ where
                 self.nodes
                     .get_mut(mid)
                     .unwrap()
-                    .update_child(self.slice.get(pos).unwrap(), leaf_index);
+                    .update_child(&self.slice.get(pos), leaf_index);
 
                 state.node_index = Some(self.get_link(mid));
                 state.pos = self.nodes.get(state.node_index.unwrap()).unwrap().edge_len();
@@ -197,7 +229,7 @@ where
             let current_node = self.nodes.get_mut(current_state.node_index.unwrap()).unwrap();
             if current_state.pos == current_node.edge_len() {
                 current_state = BuildState {
-                    node_index: current_node.go(self.slice.get(left).unwrap()),
+                    node_index: current_node.go(&self.slice.get(left)),
                     pos: 0,
                 };
 
@@ -208,7 +240,7 @@ where
                 continue;
             }
 
-            if self.slice[current_node.left() + current_state.pos] != self.slice[left] {
+            if !self.slice.equals(current_node.left() + current_state.pos, left) {
                 return BuildState {
                     node_index: None,
                     pos: 0,
@@ -257,10 +289,10 @@ where
 
         self.nodes.push(new_node);
 
-        self.nodes[current_node_parent.unwrap()].update_child(self.slice.get(current_node_left).unwrap(), index);
+        self.nodes[current_node_parent.unwrap()].update_child(&self.slice.get(current_node_left), index);
 
-        let element = self.slice.get(current_node_left + current_state.pos).unwrap();
-        self.nodes[index].update_child(element, current_index);
+        let element = self.slice.get(current_node_left + current_state.pos);
+        self.nodes[index].update_child(&element, current_index);
 
         self.nodes[current_index].update_parent(index);
         self.nodes[current_index].left += current_state.pos;
