@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 struct Node<TElement>
@@ -24,6 +24,10 @@ where
             parent: None,
             children: HashMap::new(),
         }
+    }
+
+    fn is_leaf(&self) -> bool {
+        self.children.is_empty()
     }
 
     fn edge_len(&self) -> usize {
@@ -60,10 +64,69 @@ where
 
 pub struct SuffixTree<'a, TElement>
 where
-    TElement: Eq + PartialEq + Hash + Copy,
+    TElement: Eq + Hash + Copy,
 {
     slice: &'a [TElement],
     nodes: Vec<Node<TElement>>,
+}
+
+impl<'a, TElement> SuffixTree<'a, TElement>
+where
+    TElement: Eq + Hash + Copy,
+{
+    pub fn calculate_maximal_repeats(&self) -> HashSet<(usize, usize)> {
+        let mut maximal_repeats = HashSet::new();
+        let mut nodes_to_awc = HashMap::new();
+        self.dfs(0, 0, &mut nodes_to_awc, &mut maximal_repeats);
+
+        maximal_repeats
+    }
+
+    fn dfs(
+        &self,
+        index: usize,
+        mut suffix_length: usize,
+        nodes_to_awc: &mut HashMap<usize, HashSet<Option<TElement>>>,
+        maximal_repeats: &mut HashSet<(usize, usize)>,
+    ) {
+        let node = self.nodes.get(index).unwrap();
+        suffix_length += node.edge_len();
+
+        if node.is_leaf() {
+            let element = if suffix_length + 1 > self.slice.len() {
+                None
+            } else {
+                Some(self.slice[self.slice.len() - suffix_length - 1])
+            };
+
+            nodes_to_awc.insert(index, HashSet::from_iter(vec![(element)]));
+            return;
+        }
+
+        let mut child_set = HashSet::new();
+        for (_, child_index) in &node.children {
+            self.dfs(*child_index, suffix_length, nodes_to_awc, maximal_repeats);
+            child_set.extend(nodes_to_awc.get(child_index).unwrap());
+        }
+
+        nodes_to_awc.insert(index, child_set);
+
+        if suffix_length != 0 {
+            for (_, first_child) in &node.children {
+                for (_, second_child) in &node.children {
+                    if first_child == second_child {
+                        continue;
+                    }
+
+                    let first_set = nodes_to_awc.get(first_child).unwrap();
+                    let second_set = nodes_to_awc.get(second_child).unwrap();
+                    if first_set != second_set {
+                        maximal_repeats.insert((node.right - suffix_length, suffix_length));
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
