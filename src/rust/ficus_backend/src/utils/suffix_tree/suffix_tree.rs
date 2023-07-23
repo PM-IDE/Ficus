@@ -70,6 +70,8 @@ where
         suffix_length -= &self.nodes[current_node_index].edge_len();
         self.dfs_pattern_search(current_node_index, &mut patterns, pattern.len(), suffix_length);
 
+        patterns.sort();
+        
         Some(patterns)
     }
 
@@ -83,10 +85,10 @@ where
         let node = self.nodes.get(index).unwrap();
         suffix_length += node.edge_len();
         
-        let left = node.right - suffix_length;
-        patterns.push((left, left + pattern_length));
-
         if node.is_leaf() {
+            let left = node.right - suffix_length;
+            patterns.push((left, left + pattern_length));
+
             return;
         }
 
