@@ -17,10 +17,13 @@ where
     TElement: Eq + Hash + Copy,
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
-    pub fn calculate_maximal_repeats(&self) -> HashSet<(usize, usize)> {
+    pub fn calculate_maximal_repeats(&self) -> Vec<(usize, usize)> {
         let mut maximal_repeats = HashSet::new();
         let mut nodes_to_awc = HashMap::new();
         self.dfs(0, 0, &mut nodes_to_awc, &mut maximal_repeats);
+
+        let mut maximal_repeats: Vec<(usize, usize)> = maximal_repeats.into_iter().collect();
+        maximal_repeats.sort();
 
         maximal_repeats
     }
@@ -54,7 +57,7 @@ where
 
         nodes_to_awc.insert(index, child_set);
 
-        if suffix_length > 1 {
+        if suffix_length != 0 {
             for (_, first_child) in &node.children {
                 for (_, second_child) in &node.children {
                     if first_child == second_child {

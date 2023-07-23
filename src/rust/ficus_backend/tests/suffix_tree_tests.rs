@@ -48,8 +48,41 @@ fn test_maximal_repeats() {
     let mut tree = SuffixTree::new("djksadlasdjaslkdj".as_bytes());
     tree.build_tree();
 
-    println!("{:?}", tree.dump_nodes());
-    println!("{:?}", tree.calculate_maximal_repeats());
+    assert_eq!(
+        tree.calculate_maximal_repeats(),
+        [(0, 1), (0, 2), (2, 1), (3, 1), (4, 1), (6, 1), (7, 2)]
+    )
+}
+
+#[test]
+fn test_maximal_repeats2() {
+    let mut tree = SuffixTree::new("abcdxabcyabcz".as_bytes());
+    tree.build_tree();
+
+    assert_eq!(tree.calculate_maximal_repeats(), [(0, 3)])
+}
+
+#[test]
+fn test_maximal_repeats3() {
+    let mut tree = SuffixTree::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    tree.build_tree();
+
+    assert_eq!(
+        tree.calculate_maximal_repeats(),
+        [
+            (0, 1),
+            (0, 2),
+            (3, 1),
+            (3, 3),
+            (4, 1),
+            (4, 2),
+            (7, 2),
+            (8, 1),
+            (9, 1),
+            (10, 2),
+            (17, 2)
+        ]
+    )
 }
 
 #[test]
