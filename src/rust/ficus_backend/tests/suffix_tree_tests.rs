@@ -1,6 +1,6 @@
 use std::fs;
 
-use ficus_backend::utils::suffix_tree::SuffixTree;
+use ficus_backend::utils::suffix_tree::suffix_tree::SuffixTree;
 use test_core::{
     gold_based_test::execute_test_with_gold,
     test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},

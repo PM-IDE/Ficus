@@ -1,66 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
-struct Node<TElement>
-where
-    TElement: Eq + PartialEq + Hash + Copy,
-{
-    left: usize,
-    right: usize,
-    link: Option<usize>,
-    parent: Option<usize>,
-    children: HashMap<Option<TElement>, usize>,
-}
-
-impl<TElement> Node<TElement>
-where
-    TElement: Eq + PartialEq + Hash + Copy,
-{
-    pub fn create_default() -> Self {
-        Self {
-            left: 0,
-            right: 0,
-            link: None,
-            parent: None,
-            children: HashMap::new(),
-        }
-    }
-
-    fn is_leaf(&self) -> bool {
-        self.children.is_empty()
-    }
-
-    fn edge_len(&self) -> usize {
-        self.right - self.left
-    }
-
-    fn update_child(&mut self, element: &Option<TElement>, new_child: usize) {
-        if self.children.contains_key(element) {
-            *self.children.get_mut(element).unwrap() = new_child;
-        } else {
-            self.children.insert(*element, new_child);
-        }
-    }
-
-    fn update_parent(&mut self, new_parent: usize) {
-        self.parent = Some(new_parent);
-    }
-
-    fn go(&mut self, element: &Option<TElement>) -> Option<usize> {
-        match self.children.get(element) {
-            Some(next) => Some(*next),
-            None => None,
-        }
-    }
-
-    fn left(&self) -> usize {
-        self.left
-    }
-
-    fn right(&self) -> usize {
-        self.right
-    }
-}
+use super::node::Node;
+use super::suffix_tree_slice::SuffixTreeSlice;
 
 pub struct SuffixTree<'a, TElement>
 where
@@ -136,38 +78,6 @@ struct BuildState {
     pub node_index: Option<usize>,
 }
 
-struct SuffixTreeSlice<'a, TElement>
-where
-    TElement: PartialEq,
-{
-    slice: &'a [TElement],
-}
-
-impl<'a, TElement> SuffixTreeSlice<'a, TElement>
-where
-    TElement: PartialEq + Copy,
-{
-    fn equals(&self, first: usize, second: usize) -> bool {
-        if first >= self.slice.len() || second >= self.slice.len() {
-            return false;
-        }
-
-        self.slice[first] == self.slice[second]
-    }
-
-    fn len(&self) -> usize {
-        self.slice.len() + 1
-    }
-
-    fn get(&self, index: usize) -> Option<TElement> {
-        if index >= self.slice.len() {
-            None
-        } else {
-            Some(*self.slice.get(index).unwrap())
-        }
-    }
-}
-
 impl<'a, TElement> SuffixTree<'a, TElement>
 where
     TElement: Eq + PartialEq + Hash + Copy,
@@ -182,7 +92,7 @@ where
     pub fn dump_nodes(&self) -> Vec<(usize, usize, Option<usize>, Option<usize>)> {
         (&self.nodes)
             .into_iter()
-            .map(|node| (node.left(), node.right(), node.parent, node.link))
+            .map(|node| (node.left, node.right, node.parent, node.link))
             .collect()
     }
 
@@ -241,7 +151,7 @@ where
                 continue;
             }
 
-            if !self.slice.equals(current_node.left() + current_state.pos, left) {
+            if !self.slice.equals(current_node.left + current_state.pos, left) {
                 return BuildState {
                     node_index: None,
                     pos: 0,
@@ -268,7 +178,7 @@ where
     fn split(&mut self, current_state: BuildState) -> Option<usize> {
         let current_index = current_state.node_index.unwrap();
         let current_node = self.nodes.get(current_index).unwrap();
-        let current_node_left = current_node.left();
+        let current_node_left = current_node.left;
         let current_node_parent = current_node.parent;
 
         if current_state.pos == current_node.edge_len() {
@@ -295,7 +205,7 @@ where
         let element = self.slice.get(current_node_left + current_state.pos);
         self.nodes[index].update_child(&element, current_index);
 
-        self.nodes[current_index].update_parent(index);
+        self.nodes[current_index].parent = Some(index);
         self.nodes[current_index].left += current_state.pos;
 
         Some(index)
@@ -304,8 +214,8 @@ where
     fn get_link(&mut self, node_index: usize) -> usize {
         let node = self.nodes.get_mut(node_index).unwrap();
         let node_parent = node.parent;
-        let node_right = node.right();
-        let node_left = node.left();
+        let node_right = node.right;
+        let node_left = node.left;
 
         if node.link.is_some() {
             return node.link.unwrap();
