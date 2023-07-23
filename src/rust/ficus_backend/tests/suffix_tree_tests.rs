@@ -53,7 +53,7 @@ fn test_maximal_repeats() {
     tree.build_tree();
 
     assert_eq!(
-        tree.calculate_maximal_repeats(),
+        tree.find_maximal_repeats(),
         [(0, 1), (0, 2), (2, 3), (3, 4), (4, 5), (6, 7), (7, 9)],
     )
 }
@@ -64,7 +64,7 @@ fn test_maximal_repeats2() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(tree.calculate_maximal_repeats(), [(0, 3)])
+    assert_eq!(tree.find_maximal_repeats(), [(0, 3)])
 }
 
 #[test]
@@ -74,7 +74,7 @@ fn test_maximal_repeats3() {
     tree.build_tree();
 
     assert_eq!(
-        tree.calculate_maximal_repeats(),
+        tree.find_maximal_repeats(),
         [
             (0, 1),
             (0, 2),
@@ -97,7 +97,7 @@ fn test_maximal_repeats4() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(tree.calculate_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
+    assert_eq!(tree.find_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
 }
 
 #[test]
@@ -106,7 +106,7 @@ fn test_maximal_repeats5() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(tree.calculate_maximal_repeats(), [(0, 4), (2, 3)])
+    assert_eq!(tree.find_maximal_repeats(), [(0, 4), (2, 3)])
 }
 
 #[test]

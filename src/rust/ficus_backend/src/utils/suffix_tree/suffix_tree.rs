@@ -19,11 +19,11 @@ where
     TSlice: SuffixTreeSlice<TElement>,
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
-    pub fn calculate_maximal_repeats(&self) -> Vec<(usize, usize)> {
+    pub fn find_maximal_repeats(&self) -> Vec<(usize, usize)> {
         let mut maximal_repeats = HashSet::new();
         let mut nodes_to_awc = HashMap::new();
         let mut nodes_any_suffix_len = HashMap::new();
-        self.dfs(0, 0, &mut nodes_to_awc, &mut nodes_any_suffix_len, &mut maximal_repeats);
+        self.dfs_maximal_repeats(0, 0, &mut nodes_to_awc, &mut nodes_any_suffix_len, &mut maximal_repeats);
 
         let mut maximal_repeats: Vec<(usize, usize)> = maximal_repeats.into_iter().collect();
         maximal_repeats.sort();
@@ -44,7 +44,7 @@ where
     }
 
     pub fn find_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
-        let maximal_repeats = self.calculate_maximal_repeats();
+        let maximal_repeats = self.find_maximal_repeats();
         let mut slices = Vec::new();
         for repeat in &maximal_repeats {
             let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
@@ -137,7 +137,7 @@ where
         }
     }
 
-    fn dfs(
+    fn dfs_maximal_repeats(
         &self,
         index: usize,
         mut suffix_length: usize,
@@ -162,7 +162,7 @@ where
 
         let mut child_set = HashSet::new();
         for (_, child_index) in &node.children {
-            self.dfs(
+            self.dfs_maximal_repeats(
                 *child_index,
                 suffix_length,
                 nodes_to_awc,
@@ -193,7 +193,7 @@ where
                     if first_set != second_set {
                         let first_child_suffix_len = nodes_to_any_suffix_len[first_child];
                         let start = self.slice.len() - first_child_suffix_len;
-                        
+
                         maximal_repeats.insert((start, start + suffix_length));
                     }
                 }
