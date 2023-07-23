@@ -5,6 +5,7 @@ where
     fn equals(&self, first: usize, second: usize) -> bool;
     fn len(&self) -> usize;
     fn get(&self, index: usize) -> Option<TElement>;
+    fn sub_slice(&self, start: usize, end: usize) -> &[TElement];
 }
 
 pub struct SingleWordSuffixTreeSlice<'a, TElement>
@@ -45,6 +46,10 @@ where
         } else {
             Some(*self.slice.get(index).unwrap())
         }
+    }
+
+    fn sub_slice(&self, start: usize, end: usize) -> &[TElement] {
+        &self.slice[start..end]
     }
 }
 
@@ -98,5 +103,9 @@ where
 
         len += self.words.len();
         len
+    }
+
+    fn sub_slice(&self, start: usize, end: usize) -> &[TElement] {
+        panic!();
     }
 }

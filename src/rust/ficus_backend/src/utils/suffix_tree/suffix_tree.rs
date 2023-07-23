@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 use super::node::Node;
-use super::suffix_tree_slice::SuffixTreeSlice;
+use super::suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SuffixTreeSlice};
 
 pub struct SuffixTree<'a, TElement, TSlice>
 where
@@ -22,12 +22,52 @@ where
     pub fn calculate_maximal_repeats(&self) -> Vec<(usize, usize)> {
         let mut maximal_repeats = HashSet::new();
         let mut nodes_to_awc = HashMap::new();
-        self.dfs(0, 0, &mut nodes_to_awc, &mut maximal_repeats);
+        let mut nodes_any_suffix_len = HashMap::new();
+        self.dfs(0, 0, &mut nodes_to_awc, &mut nodes_any_suffix_len, &mut maximal_repeats);
 
         let mut maximal_repeats: Vec<(usize, usize)> = maximal_repeats.into_iter().collect();
         maximal_repeats.sort();
 
-        maximal_repeats
+        let mut seen = HashSet::new();
+        let mut filtered_repeats = Vec::new();
+        for repeat in &maximal_repeats {
+            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
+            if seen.contains(sub_slice) {
+                continue;
+            }
+
+            seen.insert(sub_slice);
+            filtered_repeats.push(*repeat);
+        }
+
+        filtered_repeats
+    }
+
+    pub fn find_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
+        let maximal_repeats = self.calculate_maximal_repeats();
+        let mut slices = Vec::new();
+        for repeat in &maximal_repeats {
+            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
+            slices.push(sub_slice);
+        }
+
+        let mul_slice = MultipleWordsSuffixTreeSlice::new(slices);
+        let mut repeats_tree = SuffixTree::new(&mul_slice);
+        repeats_tree.build_tree();
+
+        let mut super_maximal_repeats = Vec::new();
+        for repeat in &maximal_repeats {
+            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
+            let patterns = repeats_tree.find_patterns(sub_slice);
+
+            if let Some(patterns) = patterns {
+                if patterns.len() == 1 {
+                    super_maximal_repeats.push((repeat.0, repeat.1));
+                }
+            }
+        }
+
+        super_maximal_repeats
     }
 
     pub fn find_patterns(&self, pattern: &[TElement]) -> Option<Vec<(usize, usize)>> {
@@ -102,6 +142,7 @@ where
         index: usize,
         mut suffix_length: usize,
         nodes_to_awc: &mut HashMap<usize, HashSet<Option<TElement>>>,
+        nodes_to_any_suffix_len: &mut HashMap<usize, usize>,
         maximal_repeats: &mut HashSet<(usize, usize)>,
     ) {
         let node = self.nodes.get(index).unwrap();
@@ -114,21 +155,35 @@ where
                 self.slice.get(self.slice.len() - suffix_length - 1)
             };
 
+            nodes_to_any_suffix_len.insert(index, suffix_length);
             nodes_to_awc.insert(index, HashSet::from_iter(vec![(element)]));
             return;
         }
 
         let mut child_set = HashSet::new();
         for (_, child_index) in &node.children {
-            self.dfs(*child_index, suffix_length, nodes_to_awc, maximal_repeats);
+            self.dfs(
+                *child_index,
+                suffix_length,
+                nodes_to_awc,
+                nodes_to_any_suffix_len,
+                maximal_repeats,
+            );
+
             child_set.extend(nodes_to_awc.get(child_index).unwrap());
         }
 
         nodes_to_awc.insert(index, child_set);
 
+        let mut children: Vec<&usize> = node.children.values().into_iter().collect();
+        children.sort();
+
+        let child_suffix_len = nodes_to_any_suffix_len[children[0]];
+        nodes_to_any_suffix_len.insert(index, child_suffix_len);
+
         if suffix_length != 0 {
-            for (_, first_child) in &node.children {
-                for (_, second_child) in &node.children {
+            for first_child in &children {
+                for second_child in &children {
                     if first_child == second_child {
                         continue;
                     }
@@ -136,7 +191,10 @@ where
                     let first_set = nodes_to_awc.get(first_child).unwrap();
                     let second_set = nodes_to_awc.get(second_child).unwrap();
                     if first_set != second_set {
-                        maximal_repeats.insert((node.right - suffix_length, suffix_length));
+                        let first_child_suffix_len = nodes_to_any_suffix_len[first_child];
+                        let start = self.slice.len() - first_child_suffix_len;
+                        
+                        maximal_repeats.insert((start, start + suffix_length));
                     }
                 }
             }
