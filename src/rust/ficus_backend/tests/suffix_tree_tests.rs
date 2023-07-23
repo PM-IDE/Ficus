@@ -7,6 +7,7 @@ use test_core::{
 };
 mod test_core;
 
+//ref impl: http://e-maxx.ru/algo/ukkonen
 #[test]
 fn test_suffix_tree_against_ref_impl() {
     for file_path in get_paths_to_suffix_tree_string() {

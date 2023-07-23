@@ -74,6 +74,7 @@ impl<'a, TElement> SuffixTree<'a, TElement>
 where
     TElement: Eq + Hash + Copy,
 {
+    //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
     pub fn calculate_maximal_repeats(&self) -> HashSet<(usize, usize)> {
         let mut maximal_repeats = HashSet::new();
         let mut nodes_to_awc = HashMap::new();
