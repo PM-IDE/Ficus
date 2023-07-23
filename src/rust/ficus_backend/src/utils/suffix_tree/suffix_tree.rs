@@ -4,17 +4,19 @@ use std::hash::Hash;
 use super::node::Node;
 use super::suffix_tree_slice::SuffixTreeSlice;
 
-pub struct SuffixTree<'a, TElement>
+pub struct SuffixTree<'a, TElement, TSlice>
 where
     TElement: Eq + Hash + Copy,
+    TSlice: SuffixTreeSlice<TElement>,
 {
-    slice: SuffixTreeSlice<'a, TElement>,
+    slice: &'a TSlice,
     nodes: Vec<Node<TElement>>,
 }
 
-impl<'a, TElement> SuffixTree<'a, TElement>
+impl<'a, TElement, TSlice> SuffixTree<'a, TElement, TSlice>
 where
     TElement: Eq + Hash + Copy,
+    TSlice: SuffixTreeSlice<TElement>,
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
     pub fn calculate_maximal_repeats(&self) -> Vec<(usize, usize)> {
@@ -81,13 +83,14 @@ struct BuildState {
     pub node_index: Option<usize>,
 }
 
-impl<'a, TElement> SuffixTree<'a, TElement>
+impl<'a, TElement, TSlice> SuffixTree<'a, TElement, TSlice>
 where
     TElement: Eq + PartialEq + Hash + Copy,
+    TSlice: SuffixTreeSlice<TElement>,
 {
-    pub fn new(slice: &'a [TElement]) -> Self {
+    pub fn new(slice: &'a TSlice) -> Self {
         Self {
-            slice: SuffixTreeSlice { slice },
+            slice,
             nodes: vec![Node::create_default()],
         }
     }

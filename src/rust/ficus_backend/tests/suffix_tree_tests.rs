@@ -1,6 +1,6 @@
 use std::fs;
 
-use ficus_backend::utils::suffix_tree::suffix_tree::SuffixTree;
+use ficus_backend::utils::suffix_tree::{suffix_tree::SuffixTree, suffix_tree_slice::{SingleWordSuffixTreeSlice, MultipleWordsSuffixTreeSlice}};
 use test_core::{
     gold_based_test::execute_test_with_gold,
     test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
@@ -18,8 +18,8 @@ fn test_suffix_tree_against_ref_impl() {
             //remove last symbol as it is non-existing symbol for ref impl, but our impl
             //adds at implicitly
             file_string.remove(file_string.len() - 1);
-
-            let mut tree = SuffixTree::new(file_string.as_bytes());
+            let slice = SingleWordSuffixTreeSlice::new(file_string.as_bytes());
+            let mut tree = SuffixTree::new(&slice);
             tree.build_tree();
 
             let mut test_value = String::new();
@@ -45,7 +45,8 @@ fn test_suffix_tree_against_ref_impl() {
 
 #[test]
 fn test_maximal_repeats() {
-    let mut tree = SuffixTree::new("djksadlasdjaslkdj".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new("djksadlasdjaslkdj".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -56,7 +57,8 @@ fn test_maximal_repeats() {
 
 #[test]
 fn test_maximal_repeats2() {
-    let mut tree = SuffixTree::new("abcdxabcyabcz".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.calculate_maximal_repeats(), [(0, 3)])
@@ -64,7 +66,8 @@ fn test_maximal_repeats2() {
 
 #[test]
 fn test_maximal_repeats3() {
-    let mut tree = SuffixTree::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -86,8 +89,19 @@ fn test_maximal_repeats3() {
 }
 
 #[test]
+fn test_multiple_words_suffix_tree_slice() {
+    let slices = vec!["abc".as_bytes(), "fsd".as_bytes()];
+    let slice = MultipleWordsSuffixTreeSlice::new(slices);
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    println!("{:?}", tree.dump_nodes());
+}
+
+#[test]
 pub fn test_suffix_tree_nodes() {
-    let mut tree = SuffixTree::new("xabxac".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -109,7 +123,8 @@ pub fn test_suffix_tree_nodes() {
 
 #[test]
 pub fn test_suffix_tree_nodes2() {
-    let mut tree = SuffixTree::new("dasdasdasasasdasdasasd".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new("dasdasdasasasdasdasasd".as_bytes());
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -164,7 +179,9 @@ pub fn test_suffix_tree_nodes2() {
 
 #[test]
 pub fn test_suffix_tree_nodes3() {
-    let mut tree = SuffixTree::new("asjkldhoiufjaksdjkasfgahabvasdrfaoasdfuabjikdu".as_bytes());
+    let string = "asjkldhoiufjaksdjkasfgahabvasdrfaoasdfuabjikdu".as_bytes();
+    let slice = SingleWordSuffixTreeSlice::new(string);
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
