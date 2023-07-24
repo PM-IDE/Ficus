@@ -1,48 +1,69 @@
-use std::collections::{VecDeque, HashSet};
+use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Interval<TElement> where TElement: PartialEq + Ord + Copy + Hash {
+pub struct Interval<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
     pub left: TElement,
     pub right: TElement,
 }
 
-impl<TElement> Hash for Interval<TElement> where TElement: PartialEq + Ord + Copy + Hash {
+impl<TElement> Hash for Interval<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.left.hash(state);
         self.right.hash(state);
     }
 }
 
-impl<TElement> Interval<TElement> where TElement: PartialEq + Ord + Copy + Hash {
+impl<TElement> Interval<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
     pub fn new(left: TElement, right: TElement) -> Interval<TElement> {
         Interval { left, right }
     }
 }
 
-impl<TElement> Interval<TElement> where TElement: PartialEq + Ord + Copy + Hash {
+impl<TElement> Interval<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
     pub fn contains(&self, point: TElement) -> bool {
         self.left <= point && point <= self.right
     }
 }
 
-struct Node<TElement> where TElement: PartialEq + Ord + Copy + Hash {
+struct Node<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
     pub left_child: Option<usize>,
     pub right_child: Option<usize>,
     pub center: TElement,
-    pub intervals: Vec<Interval<TElement>>
+    pub intervals: Vec<Interval<TElement>>,
 }
 
-pub struct IntervalTree<TElement> where TElement: PartialEq + Ord + Copy + Hash {
-    nodes: Vec<Node<TElement>>
+pub struct IntervalTree<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
+    nodes: Vec<Node<TElement>>,
 }
 
 enum ChildOrientation {
     Left,
-    Right
+    Right,
 }
 
-impl<TElement> IntervalTree<TElement> where TElement: Eq + Ord + Copy + Hash {
+impl<TElement> IntervalTree<TElement>
+where
+    TElement: Eq + Ord + Copy + Hash,
+{
     pub fn new(intervals: Vec<Interval<TElement>>) -> IntervalTree<TElement> {
         let mut nodes: Vec<Node<TElement>> = vec![];
         let mut queue: VecDeque<(Option<(usize, ChildOrientation)>, Vec<Interval<TElement>>)> = VecDeque::new();
@@ -56,7 +77,7 @@ impl<TElement> IntervalTree<TElement> where TElement: Eq + Ord + Copy + Hash {
             let mut left_intervals = vec![];
             let mut right_intervals = vec![];
             let mut node_intervals = vec![];
-            
+
             for interval in &current_intervals {
                 if interval.right < center {
                     left_intervals.push(*interval);
@@ -67,7 +88,12 @@ impl<TElement> IntervalTree<TElement> where TElement: Eq + Ord + Copy + Hash {
                 }
             }
 
-            let node = Node { left_child: None, right_child: None, center, intervals: node_intervals };
+            let node = Node {
+                left_child: None,
+                right_child: None,
+                center,
+                intervals: node_intervals,
+            };
             let node_index = nodes.len();
 
             if let Some((parent, orientation)) = parent_child {
@@ -96,9 +122,9 @@ impl<TElement> IntervalTree<TElement> where TElement: Eq + Ord + Copy + Hash {
         result.into_iter().collect()
     }
 
-    pub fn search_interval<TIterator>(&self, interval_iter: TIterator) -> Vec<Interval<TElement>> 
-    where 
-        TIterator: Iterator<Item = TElement> 
+    pub fn search_interval<TIterator>(&self, interval_iter: TIterator) -> Vec<Interval<TElement>>
+    where
+        TIterator: Iterator<Item = TElement>,
     {
         let mut result = HashSet::new();
         for element in interval_iter {
