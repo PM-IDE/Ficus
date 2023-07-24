@@ -48,6 +48,20 @@ where
     pub intervals: Vec<Interval<TElement>>,
 }
 
+impl<TElement> Node<TElement>
+where
+    TElement: PartialEq + Ord + Copy + Hash,
+{
+    fn new(center: TElement, intervals: Vec<Interval<TElement>>) -> Node<TElement> {
+        Node {
+            left_child: None,
+            right_child: None,
+            center,
+            intervals,
+        }
+    }
+}
+
 pub struct IntervalTree<TElement>
 where
     TElement: PartialEq + Ord + Copy + Hash,
@@ -88,12 +102,7 @@ where
                 }
             }
 
-            let node = Node {
-                left_child: None,
-                right_child: None,
-                center,
-                intervals: node_intervals,
-            };
+            let node = Node::new(center, node_intervals);
             let node_index = nodes.len();
 
             if let Some((parent, orientation)) = parent_child {
@@ -119,7 +128,15 @@ where
     pub fn search_point(&self, point: TElement) -> Vec<Interval<TElement>> {
         let mut result = HashSet::new();
         self.search_internal(0, point, &mut result);
-        result.into_iter().collect()
+
+        Self::to_ordered_vec(result)
+    }
+
+    fn to_ordered_vec(set: HashSet<Interval<TElement>>) -> Vec<Interval<TElement>> {
+        let mut result: Vec<Interval<TElement>> = set.into_iter().collect();
+        result.sort_by(|first, second| first.left.cmp(&second.left));
+
+        result
     }
 
     pub fn search_interval<TIterator>(&self, interval_iter: TIterator) -> Vec<Interval<TElement>>
@@ -131,10 +148,10 @@ where
             self.search_internal(0, element, &mut result);
         }
 
-        result.into_iter().collect()
+        Self::to_ordered_vec(result)
     }
 
-    pub fn search_internal(&self, node_index: usize, point: TElement, result: &mut HashSet<Interval<TElement>>) {
+    fn search_internal(&self, node_index: usize, point: TElement, result: &mut HashSet<Interval<TElement>>) {
         let node = &self.nodes[node_index];
         for interval in &node.intervals {
             if interval.contains(point) {
