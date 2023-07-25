@@ -60,6 +60,9 @@ class MyEventsSequence(Sequence):
     def append(self, new_event: MyEvent):
         self.raw_events.append(new_event)
 
+    def insert(self, new_event: MyEvent, index: int):
+        self.raw_events.insert(index, new_event)
+
     def __hash__(self):
         return calculate_poly_hash_for_collection(self.raw_events)
 

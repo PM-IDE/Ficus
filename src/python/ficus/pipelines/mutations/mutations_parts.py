@@ -85,3 +85,17 @@ class RemoveLifecycleTransitionsAttributes(InternalPipelinePart):
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
         remove_lifecycle_attribute(log(current_input))
         return current_input
+
+
+class AddArtificialStartEndEvents(InternalPipelinePart):
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        for trace in log(current_input):
+            fake_end_event = MyEvent()
+            fake_end_event[concept_name] = "ARTIFICIAL_END"
+            trace.append(fake_end_event)
+
+            fake_start_event = MyEvent()
+            fake_start_event[concept_name] = "ARTIFICIAL_START"
+            trace.insert(fake_start_event, 0)
+
+        return current_input
