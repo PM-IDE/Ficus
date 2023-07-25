@@ -1,19 +1,23 @@
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+use std::rc::Rc;
+
+use crate::utils::interval_tree::interval_tree::{Interval, IntervalTree};
 
 use super::node::Node;
 use super::suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SuffixTreeSlice};
 
-pub struct SuffixTree<'a, TElement, TSlice>
+pub struct SuffixTree<TElement, TSlice>
 where
     TElement: Eq + Hash + Copy,
     TSlice: SuffixTreeSlice<TElement>,
 {
-    slice: &'a TSlice,
-    nodes: Vec<Node<TElement>>,
+    slice: Rc<Box<TSlice>>,
+    nodes: Rc<RefCell<Vec<Node<TElement>>>>,
 }
 
-impl<'a, TElement, TSlice> SuffixTree<'a, TElement, TSlice>
+impl<TElement, TSlice> SuffixTree<TElement, TSlice>
 where
     TElement: Eq + Hash + Copy,
     TSlice: SuffixTreeSlice<TElement>,
@@ -44,21 +48,12 @@ where
     }
 
     pub fn find_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
-        let maximal_repeats = self.find_maximal_repeats();
-        let mut slices = Vec::new();
-        for repeat in &maximal_repeats {
-            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-            slices.push(sub_slice);
-        }
-
-        let mul_slice = MultipleWordsSuffixTreeSlice::new(slices);
-        let mut repeats_tree = SuffixTree::new(&mul_slice);
-        repeats_tree.build_tree();
+        let (maximal_repeats, maximal_repeats_tree) = self.find_maximal_repeats_and_build_suffix_tree();
 
         let mut super_maximal_repeats = Vec::new();
-        for repeat in &maximal_repeats {
+        for repeat in maximal_repeats {
             let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-            let patterns = repeats_tree.find_patterns(sub_slice);
+            let patterns = maximal_repeats_tree.find_patterns(sub_slice);
 
             if let Some(patterns) = patterns {
                 if patterns.len() == 1 {
@@ -70,23 +65,80 @@ where
         super_maximal_repeats
     }
 
+    fn find_maximal_repeats_and_build_suffix_tree(
+        &self,
+    ) -> (
+        Vec<(usize, usize)>,
+        SuffixTree<TElement, MultipleWordsSuffixTreeSlice<TElement>>,
+    ) {
+        let found_maximal_repeats = self.find_maximal_repeats();
+        let mut slices = Vec::new();
+        for repeat in &found_maximal_repeats {
+            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
+            slices.push(sub_slice);
+        }
+
+        let slice = MultipleWordsSuffixTreeSlice::new(slices);
+        let mut suffix_tree = SuffixTree::new(Rc::new(Box::new(slice)));
+        suffix_tree.build_tree();
+
+        (found_maximal_repeats, suffix_tree)
+    }
+
+    pub fn find_near_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
+        let (maximal_repeats, maximal_repeats_tree) = self.find_maximal_repeats_and_build_suffix_tree();
+
+        let mut intervals = vec![];
+        for index in 0..maximal_repeats.len() {
+            let repeat = maximal_repeats[index];
+            let repeat_positions = maximal_repeats_tree.find_patterns(self.slice.sub_slice(repeat.0, repeat.1));
+
+            if let Some(repeat_positions) = repeat_positions {
+                for repeat_pos in repeat_positions {
+                    intervals.push(Interval::new_with_data(repeat_pos.0, repeat_pos.1, Some(index)));
+                }
+            }
+        }
+
+        let mut visited = HashSet::new();
+        let mut near_super_maximal_repeats = vec![];
+        let mut interval_tree = IntervalTree::new(intervals.clone(), |left, right| *left..*right);
+
+        intervals.sort_by(|first, second| (first.right - first.left).cmp(&(second.right - second.left)));
+        for interval in intervals {
+            if visited.contains(&interval) {
+                continue;
+            }
+
+            visited.insert(interval);
+            near_super_maximal_repeats.push((interval.left, interval.right));
+            for envelope in interval_tree.search_envelopes(interval.left, interval.right) {
+                visited.insert(envelope);
+            }
+        }
+
+        near_super_maximal_repeats
+    }
+
     pub fn find_patterns(&self, pattern: &[TElement]) -> Option<Vec<(usize, usize)>> {
         let mut current_node_index = 0;
         let mut pattern_index = 0;
         let mut suffix_length = 0;
+
+        let nodes = self.nodes.borrow();
 
         loop {
             if pattern_index == pattern.len() {
                 break;
             }
 
-            let current_node = &self.nodes[current_node_index];
+            let current_node = nodes.get(current_node_index).unwrap();
             if !current_node.children.contains_key(&Some(pattern[pattern_index])) {
                 return None;
             }
 
             let child_index = current_node.children.get(&Some(pattern[pattern_index])).unwrap();
-            let child_node = self.nodes.get(*child_index).unwrap();
+            let child_node = nodes.get(*child_index).unwrap();
 
             for i in child_node.left..child_node.right {
                 if pattern_index == pattern.len() {
@@ -107,7 +159,7 @@ where
 
         let mut patterns = Vec::new();
 
-        suffix_length -= &self.nodes[current_node_index].edge_len();
+        suffix_length -= nodes.get(current_node_index).unwrap().edge_len();
         self.dfs_pattern_search(current_node_index, &mut patterns, pattern.len(), suffix_length);
 
         patterns.sort();
@@ -122,7 +174,8 @@ where
         pattern_length: usize,
         mut suffix_length: usize,
     ) {
-        let node = self.nodes.get(index).unwrap();
+        let nodes = self.nodes.borrow();
+        let node = nodes.get(index).unwrap();
         suffix_length += node.edge_len();
 
         if node.is_leaf() {
@@ -145,7 +198,8 @@ where
         nodes_to_any_suffix_len: &mut HashMap<usize, usize>,
         maximal_repeats: &mut HashSet<(usize, usize)>,
     ) {
-        let node = self.nodes.get(index).unwrap();
+        let nodes = self.nodes.borrow();
+        let node = nodes.get(index).unwrap();
         suffix_length += node.edge_len();
 
         if node.is_leaf() {
@@ -208,23 +262,25 @@ struct BuildState {
     pub node_index: Option<usize>,
 }
 
-impl<'a, TElement, TSlice> SuffixTree<'a, TElement, TSlice>
+impl<TElement, TSlice> SuffixTree<TElement, TSlice>
 where
     TElement: Eq + PartialEq + Hash + Copy,
     TSlice: SuffixTreeSlice<TElement>,
 {
-    pub fn new(slice: &'a TSlice) -> Self {
+    pub fn new(slice: Rc<Box<TSlice>>) -> Self {
         Self {
             slice,
-            nodes: vec![Node::create_default()],
+            nodes: Rc::new(RefCell::new(vec![Node::create_default()])),
         }
     }
 
     pub fn dump_nodes(&self) -> Vec<(usize, usize, Option<usize>, Option<usize>)> {
-        (&self.nodes)
-            .into_iter()
-            .map(|node| (node.left, node.right, node.parent, node.link))
-            .collect()
+        let mut dump = vec![];
+        for node in self.nodes.borrow().iter() {
+            dump.push((node.left, node.right, node.parent, node.link));
+        }
+
+        dump
     }
 
     pub fn build_tree(&mut self) {
@@ -242,8 +298,8 @@ where
                 }
 
                 let mid = self.split(state).unwrap();
-                let leaf_index = self.nodes.len();
-                self.nodes.push(Node {
+                let leaf_index = self.nodes.borrow().len();
+                self.nodes.borrow_mut().push(Node {
                     left: pos,
                     right: self.slice.len(),
                     link: None,
@@ -252,12 +308,13 @@ where
                 });
 
                 self.nodes
+                    .borrow_mut()
                     .get_mut(mid)
                     .unwrap()
                     .update_child(&self.slice.get(pos), leaf_index);
 
                 state.node_index = Some(self.get_link(mid));
-                state.pos = self.nodes.get(state.node_index.unwrap()).unwrap().edge_len();
+                state.pos = self.nodes.borrow().get(state.node_index.unwrap()).unwrap().edge_len();
 
                 if mid == 0 {
                     break;
@@ -267,8 +324,9 @@ where
     }
 
     fn go(&mut self, mut current_state: BuildState, mut left: usize, right: usize) -> BuildState {
+        let mut nodes = self.nodes.borrow_mut();
         while left < right {
-            let current_node = self.nodes.get_mut(current_state.node_index.unwrap()).unwrap();
+            let current_node = nodes.get_mut(current_state.node_index.unwrap()).unwrap();
             if current_state.pos == current_node.edge_len() {
                 current_state = BuildState {
                     node_index: current_node.go(&self.slice.get(left)),
@@ -308,11 +366,19 @@ where
 
     fn split(&mut self, current_state: BuildState) -> Option<usize> {
         let current_index = current_state.node_index.unwrap();
-        let current_node = self.nodes.get(current_index).unwrap();
-        let current_node_left = current_node.left;
-        let current_node_parent = current_node.parent;
+        let current_node_left;
+        let current_node_parent;
+        let edge_len;
 
-        if current_state.pos == current_node.edge_len() {
+        {
+            let nodes = self.nodes.borrow();
+            let current_node = nodes.get(current_index).unwrap();
+            current_node_left = current_node.left;
+            current_node_parent = current_node.parent;
+            edge_len = current_node.edge_len();
+        }
+
+        if current_state.pos == edge_len {
             return Some(current_index);
         }
 
@@ -320,7 +386,7 @@ where
             return current_node_parent;
         }
 
-        let index = self.nodes.len();
+        let index = self.nodes.borrow().len();
         let new_node = Node {
             parent: current_node_parent,
             left: current_node_left,
@@ -329,27 +395,36 @@ where
             link: None,
         };
 
-        self.nodes.push(new_node);
+        self.nodes.borrow_mut().push(new_node);
 
-        self.nodes[current_node_parent.unwrap()].update_child(&self.slice.get(current_node_left), index);
+        self.nodes.borrow_mut()[current_node_parent.unwrap()].update_child(&self.slice.get(current_node_left), index);
 
         let element = self.slice.get(current_node_left + current_state.pos);
-        self.nodes[index].update_child(&element, current_index);
+        self.nodes.borrow_mut()[index].update_child(&element, current_index);
 
-        self.nodes[current_index].parent = Some(index);
-        self.nodes[current_index].left += current_state.pos;
+        self.nodes.borrow_mut()[current_index].parent = Some(index);
+        self.nodes.borrow_mut()[current_index].left += current_state.pos;
 
         Some(index)
     }
 
     fn get_link(&mut self, node_index: usize) -> usize {
-        let node = self.nodes.get_mut(node_index).unwrap();
-        let node_parent = node.parent;
-        let node_right = node.right;
-        let node_left = node.left;
+        let node_parent;
+        let node_right;
+        let node_left;
+        let node_link;
 
-        if node.link.is_some() {
-            return node.link.unwrap();
+        {
+            let nodes = self.nodes.borrow();
+            let node = nodes.get(node_index).unwrap();
+            node_parent = node.parent;
+            node_right = node.right;
+            node_left = node.left;
+            node_link = node.link;
+        }
+
+        if node_link.is_some() {
+            return node_link.unwrap();
         }
 
         if node_parent.is_none() {
@@ -358,16 +433,20 @@ where
 
         let to = self.get_link(node_parent.unwrap());
 
-        let state = BuildState {
-            node_index: Some(to),
-            pos: self.nodes[to].edge_len(),
-        };
+        let state;
+        {
+            let nodes = self.nodes.borrow();
+            state = BuildState {
+                node_index: Some(to),
+                pos: nodes[to].edge_len(),
+            };
+        }
 
         let left = node_left + (if node_parent.unwrap() == 0 { 1 } else { 0 });
         let next = self.go(state, left, node_right);
         let link = self.split(next);
 
-        self.nodes.get_mut(node_index).unwrap().link = link;
+        self.nodes.borrow_mut().get_mut(node_index).unwrap().link = link;
 
         link.unwrap()
     }

@@ -3,7 +3,7 @@ use ficus_backend::utils::interval_tree::interval_tree::{Interval, IntervalTree}
 #[test]
 fn interval_tree_test() {
     let intervals = vec![
-        Interval::new(1, 4),
+        Interval::<i32, usize>::new(1, 4),
         Interval::new(5, 6),
         Interval::new(9, 10),
         Interval::new(2, 3),
@@ -15,43 +15,110 @@ fn interval_tree_test() {
 
     assert_eq!(
         tree.search_overlaps_for_point(5),
-        [Interval { left: -5, right: 10 }, Interval { left: 5, right: 6 }]
+        [Interval::new(-5, 10), Interval::new(5, 6)]
     );
 
     assert_eq!(
         tree.search_overlaps_for_point(2),
         [
-            Interval { left: -5, right: 10 },
-            Interval { left: -1, right: 3 },
-            Interval { left: 1, right: 4 },
-            Interval { left: 2, right: 3 }
+            Interval {
+                left: -5,
+                right: 10,
+                data: None
+            },
+            Interval {
+                left: -1,
+                right: 3,
+                data: None
+            },
+            Interval {
+                left: 1,
+                right: 4,
+                data: None
+            },
+            Interval {
+                left: 2,
+                right: 3,
+                data: None
+            }
         ]
     );
 
     assert_eq!(
         tree.search_overlaps_for_interval(1, 3),
         [
-            Interval { left: -5, right: 10 },
-            Interval { left: -1, right: 3 },
-            Interval { left: 1, right: 4 },
-            Interval { left: 2, right: 3 }
+            Interval {
+                left: -5,
+                right: 10,
+                data: None
+            },
+            Interval {
+                left: -1,
+                right: 3,
+                data: None
+            },
+            Interval {
+                left: 1,
+                right: 4,
+                data: None
+            },
+            Interval {
+                left: 2,
+                right: 3,
+                data: None
+            }
         ]
     );
 
     assert_eq!(
         tree.search_overlaps_for_interval(1, 10),
         [
-            Interval { left: -5, right: 10 },
-            Interval { left: -1, right: 3 },
-            Interval { left: 1, right: 4 },
-            Interval { left: 2, right: 3 },
-            Interval { left: 5, right: 6 },
-            Interval { left: 9, right: 10 }
+            Interval {
+                left: -5,
+                right: 10,
+                data: None
+            },
+            Interval {
+                left: -1,
+                right: 3,
+                data: None
+            },
+            Interval {
+                left: 1,
+                right: 4,
+                data: None
+            },
+            Interval {
+                left: 2,
+                right: 3,
+                data: None
+            },
+            Interval {
+                left: 5,
+                right: 6,
+                data: None
+            },
+            Interval {
+                left: 9,
+                right: 10,
+                data: None
+            }
         ]
     );
 
     assert_eq!(
         tree.search_envelopes(1, 4),
-        [Interval { left: 1, right: 4 }, Interval { left: 2, right: 3 }]
+        [
+            Interval {
+                left: 1,
+                right: 4,
+                data: None
+            },
+            Interval {
+                left: 2,
+                right: 3,
+                data: None
+            }
+        ]
     );
 }
