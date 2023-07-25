@@ -119,6 +119,72 @@ fn test_super_maximal_repeats() {
 }
 
 #[test]
+fn test_near_super_maximal_repeats() {
+    let slice = SingleWordSuffixTreeSlice::new("aabcdbbcda".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (2, 3), (4, 7)])
+}
+
+#[test]
+fn test_near_super_maximal_repeats2() {
+    let slice = SingleWordSuffixTreeSlice::new("dabcdabcbb".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (5, 6)])
+}
+
+#[test]
+fn test_near_super_maximal_repeats3() {
+    let slice = SingleWordSuffixTreeSlice::new("bbbcdbbbccaa".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(
+        tree.find_near_super_maximal_repeats(),
+        [(0, 1), (2, 4), (5, 9), (10, 11), (12, 13)]
+    )
+}
+
+#[test]
+fn test_near_super_maximal_repeats4() {
+    let slice = SingleWordSuffixTreeSlice::new("aaadabbccc".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(
+        tree.find_near_super_maximal_repeats(),
+        [(0, 1), (2, 4), (5, 6), (7, 8), (9, 11)]
+    )
+}
+
+#[test]
+fn test_near_super_maximal_repeats6() {
+    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(
+        tree.find_near_super_maximal_repeats(),
+        [
+            (0, 1),
+            (2, 4),
+            (5, 6),
+            (7, 10),
+            (11, 12),
+            (13, 15),
+            (16, 18),
+            (19, 20),
+            (21, 22),
+            (23, 25),
+            (26, 28)
+        ]
+    )
+}
+
+#[test]
 fn test_multiple_words_suffix_tree_slice() {
     let slices = vec!["abc".as_bytes(), "fsd".as_bytes()];
     let slice = MultipleWordsSuffixTreeSlice::new(slices);
