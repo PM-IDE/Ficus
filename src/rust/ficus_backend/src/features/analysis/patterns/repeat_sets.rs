@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::{HashMap, HashSet}, ops::RangeBounds, rc::Rc, cell::RefCell};
 
 use crate::utils::hash_utils::calculate_poly_hash_for_collection;
 
@@ -43,4 +43,109 @@ pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTrace
     }
 
     result
+}
+
+pub struct ActivityNode {
+    pub repeat_set: SubArrayWithTraceIndex,
+    pub event_classes: HashSet<u64>,
+    pub children: Vec<Rc<RefCell<ActivityNode>>>
+}
+
+impl ActivityNode {
+    fn len(&self) -> usize {
+        self.event_classes.len()
+    }
+
+    fn contains_other(&self, other_node: &ActivityNode) -> bool {
+        self.event_classes.is_superset(&other_node.event_classes)
+    }
+}
+
+pub fn build_repeat_set_tree(log: &Vec<Vec<u64>>, repeats: Vec<SubArrayWithTraceIndex>) -> Vec<Rc<RefCell<ActivityNode>>> {
+    if repeats.len() == 0 {
+        return vec![];
+    }
+
+    let extract_events_set = |repeat_set: &SubArrayWithTraceIndex| -> HashSet<u64> {
+        let trace = log.get(repeat_set.trace_index).unwrap();
+        let mut set = HashSet::new();
+        let array = repeat_set.sub_array;
+        for index in array.start_index..(array.start_index + array.length) {
+            set.insert(trace[index]);
+        }
+
+        set
+    };
+
+    let create_activity_node = |repeat_set: &SubArrayWithTraceIndex| {
+        let events_set = extract_events_set(repeat_set);
+        Rc::new(RefCell::new(ActivityNode { repeat_set: *repeat_set, event_classes: events_set, children: vec![] }))
+    };
+
+    let mut activity_nodes = repeats
+        .into_iter()
+        .map(|repeat| create_activity_node(&repeat))
+        .collect::<Vec<Rc<RefCell<ActivityNode>>>>();
+
+    activity_nodes.sort_by(|first, second| second.borrow().len().cmp(&first.borrow().len()));
+    let max_length = activity_nodes[0].borrow().len();
+    let mut top_level_nodes = vec![Rc::clone(&activity_nodes[0])];
+    let mut next_length_index = 1;
+
+    for i in 1..activity_nodes.len() {
+        let node_ptr = &activity_nodes[i];
+        if node_ptr.borrow().len() != max_length {
+            next_length_index = i;
+            break;
+        }
+
+        top_level_nodes.push(Rc::clone(node_ptr));
+    }
+
+    if top_level_nodes.len() == activity_nodes.len() {
+        return top_level_nodes;
+    }
+
+    let mut nodes_by_level: Vec<Vec<Rc<RefCell<ActivityNode>>>> = vec![];
+    let mut current_length = max_length - 1;
+
+    for i in next_length_index..activity_nodes.len() {
+        let current_node_ptr = activity_nodes.get(i).unwrap();
+        let current_node = current_node_ptr.borrow();
+
+        if current_node.len() < current_length {
+            current_length = current_length - 1;
+            nodes_by_level.push(vec![]);
+        }
+
+        let mut found_any_match = false;
+        'this_loop: for level_index in (0..(nodes_by_level.len() - 2)).rev() {
+            for activity_node in nodes_by_level.get(level_index).unwrap() {
+                let mut activity_node = activity_node.borrow_mut();
+                if activity_node.contains_other(&current_node) {
+                    activity_node.children.push(Rc::clone(current_node_ptr));
+                    found_any_match = true;
+                    break 'this_loop;
+                }
+            }
+        }
+
+        if !found_any_match {
+            for top_level_node_ptr in &top_level_nodes {
+                let mut top_level_node = top_level_node_ptr.borrow_mut();
+                if top_level_node.contains_other(&current_node) && !Rc::ptr_eq(top_level_node_ptr, current_node_ptr) {
+                    top_level_node.children.push(Rc::clone(current_node_ptr));
+                    found_any_match = true;
+                    break;
+                }
+            }
+        }
+
+        nodes_by_level.last_mut().unwrap().push(Rc::clone(current_node_ptr));
+        if !found_any_match {
+            top_level_nodes.push(Rc::clone(current_node_ptr));
+        }
+    }
+
+    top_level_nodes
 }
