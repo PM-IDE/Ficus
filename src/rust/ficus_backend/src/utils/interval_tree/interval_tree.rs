@@ -11,8 +11,8 @@ where
     TElementIterator: Iterator<Item = TElement>,
     TData: PartialEq + Eq + Copy,
 {
-    nodes: Vec<Node<TElement, TData>>,
-    boundaries: Vec<TElement>,
+    nodes: Box<Vec<Node<TElement, TData>>>,
+    boundaries: Box<Vec<TElement>>,
     range_creator: TRangeCreator,
 }
 
@@ -29,14 +29,20 @@ where
     TData: PartialEq + Eq + Copy,
 {
     pub fn new(
-        intervals: Vec<Interval<TElement, TData>>,
+        intervals: &Vec<Interval<TElement, TData>>,
         range_creator: TRangeCreator,
     ) -> IntervalTree<TElement, TRangeCreator, TElementIterator, TData> {
-        let mut nodes: Vec<Node<TElement, TData>> = vec![];
-        let mut boundaries = Vec::new();
+        let mut nodes: Box<Vec<Node<TElement, TData>>> = Box::new(vec![]);
+        let mut boundaries = Box::new(vec![]);
 
-        let mut queue: VecDeque<(Option<(usize, ChildOrientation)>, Vec<Interval<TElement, TData>>)> = VecDeque::new();
-        queue.push_back((None, intervals));
+        let mut queue: VecDeque<(Option<(usize, ChildOrientation)>, Vec<&Interval<TElement, TData>>)> = VecDeque::new();
+        
+        let mut current_intervals = vec![];
+        for interval in intervals {
+            current_intervals.push(interval);
+        }
+
+        queue.push_back((None, current_intervals));
 
         while !queue.is_empty() {
             let (parent_child, mut current_intervals) = queue.pop_front().unwrap();
@@ -47,14 +53,14 @@ where
             let mut right_intervals = vec![];
             let mut node_intervals = vec![];
 
-            for interval in &current_intervals {
+            for interval in current_intervals {
                 boundaries.push(interval.left);
                 boundaries.push(interval.right);
 
                 if interval.right < center {
-                    left_intervals.push(*interval);
+                    left_intervals.push(interval);
                 } else if interval.left > center {
-                    right_intervals.push(*interval);
+                    right_intervals.push(interval);
                 } else {
                     node_intervals.push(*interval);
                 }
@@ -167,7 +173,7 @@ where
 
     pub fn dump_nodes(&self) -> Vec<(Option<usize>, Option<usize>, TElement, Vec<Interval<TElement, TData>>)> {
         let mut nodes = vec![];
-        for node in &self.nodes {
+        for node in self.nodes.as_ref() {
             nodes.push((node.left_child, node.right_child, node.center, node.intervals.to_vec()));
         }
 

@@ -103,7 +103,7 @@ where
 
         let mut visited = HashSet::new();
         let mut near_super_maximal_repeats = vec![];
-        let mut interval_tree = IntervalTree::new(intervals.clone(), |left, right| *left..*right);
+        let mut interval_tree = IntervalTree::new(&intervals, |left, right| *left..*right);
 
         intervals.sort_by(|first, second| (second.right - second.left).cmp(&(first.right - first.left)));
         for interval in intervals {
