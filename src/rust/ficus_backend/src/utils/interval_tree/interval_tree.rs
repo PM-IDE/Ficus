@@ -36,7 +36,7 @@ where
         let mut boundaries = Box::new(vec![]);
 
         let mut queue: VecDeque<(Option<(usize, ChildOrientation)>, Vec<&Interval<TElement, TData>>)> = VecDeque::new();
-        
+
         let mut current_intervals = vec![];
         for interval in intervals {
             current_intervals.push(interval);
