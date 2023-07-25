@@ -202,7 +202,7 @@ def _do_build_repeat_set_tree(hashes_traces: list[list[int]],
     next_length_index = 1
     for i in range(1, len(activity_nodes)):
         activity_node = activity_nodes[i]
-        if activity_node.length != next_length_index:
+        if activity_node.length != max_length:
             next_length_index = i
             break
 
