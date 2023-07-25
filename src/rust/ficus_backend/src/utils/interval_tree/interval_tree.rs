@@ -62,11 +62,15 @@ where
     }
 }
 
-pub struct IntervalTree<TElement>
+pub struct IntervalTree<TElement, TRangeCreator, TElementIterator>
 where
     TElement: PartialEq + Ord + Copy + Hash,
+    TRangeCreator: Fn(&TElement, &TElement) -> TElementIterator,
+    TElementIterator: Iterator<Item = TElement>,
 {
     nodes: Vec<Node<TElement>>,
+    boundaries: Vec<TElement>,
+    range_creator: TRangeCreator,
 }
 
 enum ChildOrientation {
@@ -74,12 +78,19 @@ enum ChildOrientation {
     Right,
 }
 
-impl<TElement> IntervalTree<TElement>
+impl<TElement, TRangeCreator, TElementIterator> IntervalTree<TElement, TRangeCreator, TElementIterator>
 where
-    TElement: Eq + Ord + Copy + Hash,
+    TElement: PartialEq + Ord + Copy + Hash,
+    TRangeCreator: Fn(&TElement, &TElement) -> TElementIterator,
+    TElementIterator: Iterator<Item = TElement>,
 {
-    pub fn new(intervals: Vec<Interval<TElement>>) -> IntervalTree<TElement> {
+    pub fn new(
+        intervals: Vec<Interval<TElement>>,
+        range_creator: TRangeCreator,
+    ) -> IntervalTree<TElement, TRangeCreator, TElementIterator> {
         let mut nodes: Vec<Node<TElement>> = vec![];
+        let mut boundaries = Vec::new();
+
         let mut queue: VecDeque<(Option<(usize, ChildOrientation)>, Vec<Interval<TElement>>)> = VecDeque::new();
         queue.push_back((None, intervals));
 
@@ -93,6 +104,9 @@ where
             let mut node_intervals = vec![];
 
             for interval in &current_intervals {
+                boundaries.push(interval.left);
+                boundaries.push(interval.right);
+
                 if interval.right < center {
                     left_intervals.push(*interval);
                 } else if interval.left > center {
@@ -122,29 +136,64 @@ where
             }
         }
 
-        IntervalTree { nodes }
+        IntervalTree {
+            nodes,
+            boundaries,
+            range_creator,
+        }
     }
 
-    pub fn search_point(&self, point: TElement) -> Vec<Interval<TElement>> {
+    pub fn search_overlaps_for_point(&self, point: TElement) -> Vec<Interval<TElement>> {
         let mut result = HashSet::new();
         self.search_internal(0, point, &mut result);
 
         Self::to_ordered_vec(result)
     }
 
-    fn to_ordered_vec(set: HashSet<Interval<TElement>>) -> Vec<Interval<TElement>> {
+    pub fn search_envelopes(&mut self, left: TElement, right: TElement) -> Vec<Interval<TElement>> {
+        if left >= right {
+            return vec![];
+        }
+
+        let mut result = HashSet::new();
+        self.search_internal(0, left, &mut result);
+
+        self.boundaries.sort();
+
+        let left_boundary = match self.boundaries.binary_search(&left) {
+            Ok(value) => value,
+            Err(value) => value,
+        };
+
+        let right_boundary = match self.boundaries.binary_search(&right) {
+            Ok(value) => value,
+            Err(value) => value,
+        };
+
+        for element in &self.boundaries[left_boundary..right_boundary] {
+            self.search_internal(0, *element, &mut result);
+        }
+
+        Self::to_ordered_vec(
+            result
+                .into_iter()
+                .filter(|interval| interval.left >= left && interval.right <= right),
+        )
+    }
+
+    fn to_ordered_vec<TIterator>(set: TIterator) -> Vec<Interval<TElement>>
+    where
+        TIterator: IntoIterator<Item = Interval<TElement>>,
+    {
         let mut result: Vec<Interval<TElement>> = set.into_iter().collect();
         result.sort_by(|first, second| first.left.cmp(&second.left));
 
         result
     }
 
-    pub fn search_interval<TIterator>(&self, interval_iter: TIterator) -> Vec<Interval<TElement>>
-    where
-        TIterator: Iterator<Item = TElement>,
-    {
+    pub fn search_overlaps_for_interval(&self, left: TElement, right: TElement) -> Vec<Interval<TElement>> {
         let mut result = HashSet::new();
-        for element in interval_iter {
+        for element in (self.range_creator)(&left, &right) {
             self.search_internal(0, element, &mut result);
         }
 

@@ -11,15 +11,15 @@ fn interval_tree_test() {
         Interval::new(-5, 10),
     ];
 
-    let tree = IntervalTree::new(intervals);
+    let mut tree = IntervalTree::new(intervals, |left, right| *left..*right);
 
     assert_eq!(
-        tree.search_point(5),
+        tree.search_overlaps_for_point(5),
         [Interval { left: -5, right: 10 }, Interval { left: 5, right: 6 }]
     );
 
     assert_eq!(
-        tree.search_point(2),
+        tree.search_overlaps_for_point(2),
         [
             Interval { left: -5, right: 10 },
             Interval { left: -1, right: 3 },
@@ -29,7 +29,7 @@ fn interval_tree_test() {
     );
 
     assert_eq!(
-        tree.search_interval(1..3),
+        tree.search_overlaps_for_interval(1, 3),
         [
             Interval { left: -5, right: 10 },
             Interval { left: -1, right: 3 },
@@ -39,7 +39,7 @@ fn interval_tree_test() {
     );
 
     assert_eq!(
-        tree.search_interval(1..10),
+        tree.search_overlaps_for_interval(1, 10),
         [
             Interval { left: -5, right: 10 },
             Interval { left: -1, right: 3 },
@@ -48,5 +48,10 @@ fn interval_tree_test() {
             Interval { left: 5, right: 6 },
             Interval { left: 9, right: 10 }
         ]
+    );
+
+    assert_eq!(
+        tree.search_envelopes(1, 4),
+        [Interval { left: 1, right: 4 }, Interval { left: 2, right: 3 }]
     );
 }
