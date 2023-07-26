@@ -112,7 +112,10 @@ where
             }
 
             visited.insert(interval);
-            near_super_maximal_repeats.push((interval.left, interval.right));
+
+            let associated_repeat = maximal_repeats.get(interval.data.unwrap()).unwrap();
+            near_super_maximal_repeats.push((associated_repeat.0, associated_repeat.1));
+
             for envelope in interval_tree.search_envelopes(interval.left, interval.right) {
                 visited.insert(envelope);
             }
@@ -182,7 +185,7 @@ where
         suffix_length += node.edge_len();
 
         if node.is_leaf() {
-            let left = node.right - suffix_length;
+            let left = self.slice.len() - suffix_length;
             patterns.push((left, left + pattern_length));
 
             return;
