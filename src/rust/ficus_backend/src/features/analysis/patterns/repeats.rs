@@ -1,6 +1,6 @@
 use std::{rc::Rc, vec};
 
-use crate::utils::suffix_tree::{self, suffix_tree::SuffixTree, suffix_tree_slice::SingleWordSuffixTreeSlice};
+use crate::utils::suffix_tree::{suffix_tree::SuffixTree, suffix_tree_slice::SingleWordSuffixTreeSlice};
 
 use super::tandem_arrays::SubArrayInTraceInfo;
 

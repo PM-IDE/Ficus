@@ -20,6 +20,10 @@ impl SubArrayInTraceInfo {
     pub fn get_length(&self) -> &usize {
         &self.length
     }
+
+    pub fn dump(&self) -> (usize, usize) {
+        (self.start_index, self.length)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -36,10 +40,27 @@ impl TandemArrayInfo {
     pub fn get_repeat_count(&self) -> &usize {
         &self.repeat_count
     }
+
+    pub fn dump(&self) -> (usize, usize, usize) {
+        (self.sub_array.start_index, self.sub_array.length, self.repeat_count)
+    }
 }
 
-pub fn find_primitive_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length: usize) -> Vec<Vec<TandemArrayInfo>> {
-    let maximal_arrays = find_maximal_tandem_arrays(log, max_tandem_array_length);
+pub fn find_primitive_tandem_arrays(
+    log: &Vec<Vec<u64>>,
+    max_tandem_array_length: usize,
+) -> Vec<Vec<SubArrayInTraceInfo>> {
+    find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
+        .into_iter()
+        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+        .collect()
+}
+
+pub fn find_primitive_tandem_arrays_with_length(
+    log: &Vec<Vec<u64>>,
+    max_tandem_array_length: usize,
+) -> Vec<Vec<TandemArrayInfo>> {
+    let maximal_arrays = find_maximal_tandem_arrays_with_length(log, max_tandem_array_length);
     let mut primitive_arrays = Vec::new();
 
     for (trace_arrays, trace) in maximal_arrays.into_iter().zip(log) {
@@ -64,7 +85,20 @@ pub fn find_primitive_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length
     primitive_arrays
 }
 
-pub fn find_maximal_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length: usize) -> Vec<Vec<TandemArrayInfo>> {
+pub fn find_maximal_tandem_arrays(
+    log: &Vec<Vec<u64>>,
+    max_tandem_array_length: usize,
+) -> Vec<Vec<SubArrayInTraceInfo>> {
+    find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
+        .into_iter()
+        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+        .collect()
+}
+
+pub fn find_maximal_tandem_arrays_with_length(
+    log: &Vec<Vec<u64>>,
+    max_tandem_array_length: usize,
+) -> Vec<Vec<TandemArrayInfo>> {
     let mut result = Vec::new();
     let mut visited = HashSet::new();
 

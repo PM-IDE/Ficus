@@ -1,10 +1,14 @@
-use std::{collections::{HashMap, HashSet}, ops::RangeBounds, rc::Rc, cell::RefCell};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use crate::utils::hash_utils::calculate_poly_hash_for_collection;
 
 use super::tandem_arrays::SubArrayInTraceInfo;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct SubArrayWithTraceIndex {
     pub sub_array: SubArrayInTraceInfo,
     pub trace_index: usize,
@@ -13,6 +17,10 @@ pub struct SubArrayWithTraceIndex {
 impl SubArrayWithTraceIndex {
     pub fn new(sub_array: SubArrayInTraceInfo, trace_index: usize) -> Self {
         Self { sub_array, trace_index }
+    }
+
+    pub fn dump(&self) -> (usize, usize, usize) {
+        (self.sub_array.start_index, self.sub_array.length, self.trace_index)
     }
 }
 
@@ -42,13 +50,21 @@ pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTrace
         result.push(*repeat_set);
     }
 
+    result.sort_by(|first, second| {
+        if first.trace_index == second.trace_index {
+            first.sub_array.start_index.cmp(&second.sub_array.start_index)
+        } else {
+            first.trace_index.cmp(&second.trace_index)
+        }
+    });
+
     result
 }
 
 pub struct ActivityNode {
     pub repeat_set: SubArrayWithTraceIndex,
     pub event_classes: HashSet<u64>,
-    pub children: Vec<Rc<RefCell<ActivityNode>>>
+    pub children: Vec<Rc<RefCell<ActivityNode>>>,
 }
 
 impl ActivityNode {
@@ -61,7 +77,10 @@ impl ActivityNode {
     }
 }
 
-pub fn build_repeat_set_tree(log: &Vec<Vec<u64>>, repeats: Vec<SubArrayWithTraceIndex>) -> Vec<Rc<RefCell<ActivityNode>>> {
+pub fn build_repeat_set_tree_from_repeats(
+    log: &Vec<Vec<u64>>,
+    repeats: Vec<SubArrayWithTraceIndex>,
+) -> Vec<Rc<RefCell<ActivityNode>>> {
     if repeats.len() == 0 {
         return vec![];
     }
@@ -79,7 +98,11 @@ pub fn build_repeat_set_tree(log: &Vec<Vec<u64>>, repeats: Vec<SubArrayWithTrace
 
     let create_activity_node = |repeat_set: &SubArrayWithTraceIndex| {
         let events_set = extract_events_set(repeat_set);
-        Rc::new(RefCell::new(ActivityNode { repeat_set: *repeat_set, event_classes: events_set, children: vec![] }))
+        Rc::new(RefCell::new(ActivityNode {
+            repeat_set: *repeat_set,
+            event_classes: events_set,
+            children: vec![],
+        }))
     };
 
     let mut activity_nodes = repeats
