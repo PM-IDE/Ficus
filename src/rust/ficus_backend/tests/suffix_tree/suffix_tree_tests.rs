@@ -5,7 +5,14 @@ use ficus_backend::utils::suffix_tree::{
     suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
 };
 
-use crate::test_core::{test_paths::{get_paths_to_suffix_tree_string, create_suffix_tree_gold_file_path}, gold_based_test::execute_test_with_gold, simple_events_logs_provider::{create_max_repeats_trace_1, create_max_repeats_trace_2, create_max_repeats_trace_3, create_max_repeats_trace_4, create_max_repeats_trace_5}};
+use crate::test_core::{
+    gold_based_test::execute_test_with_gold,
+    simple_events_logs_provider::{
+        create_max_repeats_trace_1, create_max_repeats_trace_2, create_max_repeats_trace_3, create_max_repeats_trace_4,
+        create_max_repeats_trace_5,
+    },
+    test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
+};
 
 //ref impl: http://e-maxx.ru/algo/ukkonen
 #[test]
@@ -116,12 +123,21 @@ fn test_super_maximal_repeats() {
 }
 
 #[test]
+fn test_super_maximal_repeats3() {
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(tree.find_super_maximal_repeats(), [(0, 4), (10, 11)])
+}
+
+#[test]
 fn test_near_super_maximal_repeats() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (2, 3), (4, 7)])
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
 }
 
 #[test]
@@ -130,7 +146,7 @@ fn test_near_super_maximal_repeats2() {
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (5, 6)])
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (2, 3)])
 }
 
 #[test]
@@ -139,9 +155,10 @@ fn test_near_super_maximal_repeats3() {
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
+    println!("{:?}", create_max_repeats_trace_3());
     assert_eq!(
         tree.find_near_super_maximal_repeats(),
-        [(0, 1), (2, 4), (5, 9), (10, 11), (12, 13)]
+        [(0, 1), (0, 2), (0, 4), (3, 4), (10, 11)]
     )
 }
 
@@ -153,7 +170,7 @@ fn test_near_super_maximal_repeats4() {
 
     assert_eq!(
         tree.find_near_super_maximal_repeats(),
-        [(0, 1), (2, 4), (5, 6), (7, 8), (9, 11)]
+        [(0, 1), (0, 2), (5, 6), (7, 8), (7, 9)]
     )
 }
 
@@ -167,16 +184,16 @@ fn test_near_super_maximal_repeats6() {
         tree.find_near_super_maximal_repeats(),
         [
             (0, 1),
-            (2, 4),
-            (5, 6),
-            (7, 10),
-            (11, 12),
-            (13, 15),
-            (16, 18),
-            (19, 20),
-            (21, 22),
-            (23, 25),
-            (26, 28)
+            (0, 2),
+            (3, 4),
+            (3, 6),
+            (4, 5),
+            (4, 6),
+            (7, 9),
+            (8, 9),
+            (9, 10),
+            (10, 12),
+            (17, 19)
         ]
     )
 }
@@ -227,6 +244,18 @@ fn test_patterns_search4() {
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("xa".as_bytes()).unwrap(), [(0, 2), (3, 5)]);
+}
+
+#[test]
+fn test_patterns_search5() {
+    let slice = SingleWordSuffixTreeSlice::new("bbbcdbbbccaa".as_bytes());
+    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    tree.build_tree();
+
+    assert_eq!(
+        tree.find_patterns("bb".as_bytes()).unwrap(),
+        [(0, 2), (1, 3), (5, 7), (6, 8)]
+    );
 }
 
 #[test]
