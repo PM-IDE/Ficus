@@ -26,16 +26,25 @@ impl SubArrayWithTraceIndex {
 
 pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTraceInfo>>) -> Vec<SubArrayWithTraceIndex> {
     let mut repeat_sets = HashMap::new();
+    let mut set = HashSet::new();
+    let mut vec: Vec<u64> = vec![];
     let mut trace_index = 0;
 
     for (trace, trace_patterns) in log.into_iter().zip(patterns) {
         for pattern in trace_patterns {
             let start = pattern.start_index;
             let end = start + pattern.length;
-            let mut sub_trace = trace[start..end].to_vec();
-            sub_trace.sort();
 
-            let hash = calculate_poly_hash_for_collection(sub_trace.as_slice());
+            set.clear();
+            for element in &trace[start..end] {
+                set.insert(*element);
+            }
+
+            vec.clear();
+            vec.extend(&set);
+            vec.sort();
+
+            let hash = calculate_poly_hash_for_collection(vec.as_slice());
 
             if !repeat_sets.contains_key(&hash) {
                 repeat_sets.insert(hash, SubArrayWithTraceIndex::new(*pattern, trace_index));
