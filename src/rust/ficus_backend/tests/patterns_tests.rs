@@ -1,10 +1,14 @@
 use ficus_backend::{
     event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
-    features::analysis::patterns::tandem_arrays::{find_maximal_tandem_arrays, TandemArrayInfo},
+    features::analysis::patterns::tandem_arrays::{
+        find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, TandemArrayInfo,
+    },
 };
 use test_core::simple_events_logs_provider::create_log_from_taxonomy_of_patterns;
 
-use crate::test_core::simple_events_logs_provider::{create_no_tandem_array_log, create_one_tandem_array_log};
+use crate::test_core::simple_events_logs_provider::{
+    create_log_for_max_repeats2, create_no_tandem_array_log, create_one_tandem_array_log,
+};
 
 mod test_core;
 
@@ -12,7 +16,7 @@ mod test_core;
 fn test_tandem_arrays_from_paper() {
     let log = create_log_from_taxonomy_of_patterns();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays(&hashes, 10);
+    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
     assert_eq!(
         get_first_trace_tuples(tandem_arrays),
@@ -20,23 +24,15 @@ fn test_tandem_arrays_from_paper() {
     );
 }
 
-fn to_tuple(array: &TandemArrayInfo) -> (usize, usize, usize) {
-    (
-        *array.get_sub_array_info().get_start_index(),
-        *array.get_sub_array_info().get_length(),
-        *array.get_repeat_count(),
-    )
-}
-
 fn get_first_trace_tuples(tandem_arrays: Vec<Vec<TandemArrayInfo>>) -> Vec<(usize, usize, usize)> {
-    tandem_arrays[0].iter().map(|array| to_tuple(array)).collect()
+    tandem_arrays[0].iter().map(|array| array.dump()).collect()
 }
 
 #[test]
 fn test_no_tandem_arrays() {
     let log = create_no_tandem_array_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays(&hashes, 10);
+    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
     assert_eq!(get_first_trace_tuples(tandem_arrays), []);
 }
@@ -45,7 +41,17 @@ fn test_no_tandem_arrays() {
 fn test_one_tandem_array() {
     let log = create_one_tandem_array_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays(&hashes, 10);
+    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
     assert_eq!(get_first_trace_tuples(tandem_arrays), [(0, 2, 2)]);
+}
+
+#[test]
+fn test_tandem_arrays2() {
+    let log = create_log_for_max_repeats2();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+
+    let tandem_arrays = find_primitive_tandem_arrays_with_length(&hashes, 10);
+
+    assert_eq!(get_first_trace_tuples(tandem_arrays), [(0, 4, 2)]);
 }

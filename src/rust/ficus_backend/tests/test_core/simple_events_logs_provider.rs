@@ -82,3 +82,59 @@ pub fn create_one_tandem_array_log() -> SimpleEventLog {
     let raw_log = vec![vec!["a", "b", "a", "b", "c", "d"]];
     SimpleEventLog::new(&raw_log)
 }
+
+pub fn create_max_repeats_trace_1() -> &'static [u8] {
+    "aabcdbbcda".as_bytes()
+}
+
+pub fn create_max_repeats_trace_2() -> &'static [u8] {
+    "dabcdabcbb".as_bytes()
+}
+
+pub fn create_max_repeats_trace_3() -> &'static [u8] {
+    "bbbcdbbbccaa".as_bytes()
+}
+
+pub fn create_max_repeats_trace_4() -> &'static [u8] {
+    "aaadabbccc".as_bytes()
+}
+
+pub fn create_max_repeats_trace_5() -> &'static [u8] {
+    "aaacdcdcbedbccbadbdebdc".as_bytes()
+}
+
+pub fn create_log_for_max_repeats1() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"]])
+}
+
+pub fn create_log_for_max_repeats2() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"]])
+}
+
+pub fn create_log_for_max_repeats3() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"]])
+}
+
+pub fn create_log_for_max_repeats4() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"]])
+}
+
+pub fn create_log_for_max_repeats5() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec![
+        "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b", "d",
+        "c",
+    ]])
+}
+
+pub fn create_maximal_repeats_log() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+        vec!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+        vec!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+        vec!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+        vec![
+            "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b",
+            "d", "c",
+        ],
+    ])
+}

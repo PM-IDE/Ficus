@@ -8,6 +8,11 @@ use test_core::{
     gold_based_test::execute_test_with_gold,
     test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
 };
+
+use crate::test_core::simple_events_logs_provider::{
+    create_log_for_max_repeats1, create_max_repeats_trace_1, create_max_repeats_trace_2, create_max_repeats_trace_3,
+    create_max_repeats_trace_4, create_max_repeats_trace_5,
+};
 mod test_core;
 
 //ref impl: http://e-maxx.ru/algo/ukkonen
@@ -93,7 +98,7 @@ fn test_maximal_repeats3() {
 
 #[test]
 fn test_maximal_repeats4() {
-    let slice = SingleWordSuffixTreeSlice::new("aabcdbbcda".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -102,7 +107,7 @@ fn test_maximal_repeats4() {
 
 #[test]
 fn test_maximal_repeats5() {
-    let slice = SingleWordSuffixTreeSlice::new("dabcdabcbb".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -111,7 +116,7 @@ fn test_maximal_repeats5() {
 
 #[test]
 fn test_super_maximal_repeats() {
-    let slice = SingleWordSuffixTreeSlice::new("aabcdbbcda".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -120,7 +125,7 @@ fn test_super_maximal_repeats() {
 
 #[test]
 fn test_near_super_maximal_repeats() {
-    let slice = SingleWordSuffixTreeSlice::new("aabcdbbcda".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -129,7 +134,7 @@ fn test_near_super_maximal_repeats() {
 
 #[test]
 fn test_near_super_maximal_repeats2() {
-    let slice = SingleWordSuffixTreeSlice::new("dabcdabcbb".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -138,7 +143,7 @@ fn test_near_super_maximal_repeats2() {
 
 #[test]
 fn test_near_super_maximal_repeats3() {
-    let slice = SingleWordSuffixTreeSlice::new("bbbcdbbbccaa".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -150,7 +155,7 @@ fn test_near_super_maximal_repeats3() {
 
 #[test]
 fn test_near_super_maximal_repeats4() {
-    let slice = SingleWordSuffixTreeSlice::new("aaadabbccc".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_4());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -162,7 +167,7 @@ fn test_near_super_maximal_repeats4() {
 
 #[test]
 fn test_near_super_maximal_repeats6() {
-    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
@@ -207,7 +212,7 @@ fn test_patterns_search() {
 
 #[test]
 fn test_patterns_search2() {
-    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
+    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
     let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
     tree.build_tree();
 
