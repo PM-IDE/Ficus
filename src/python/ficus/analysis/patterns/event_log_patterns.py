@@ -197,6 +197,7 @@ def _do_build_repeat_set_tree(hashes_traces: list[list[int]],
 
     activity_nodes = sorted(list(map(create_activity_node, repeat_sets)), key=lambda x: x.length, reverse=True)
     max_length = activity_nodes[0].length
+    current_length = max_length
     top_level_nodes = [activity_nodes[0]]
 
     next_length_index = 1
@@ -204,6 +205,7 @@ def _do_build_repeat_set_tree(hashes_traces: list[list[int]],
         activity_node = activity_nodes[i]
         if activity_node.length != max_length:
             next_length_index = i
+            current_length = activity_node.length
             break
 
         top_level_nodes.append(activity_node)
@@ -212,12 +214,11 @@ def _do_build_repeat_set_tree(hashes_traces: list[list[int]],
         return top_level_nodes
 
     nodes_by_level = [[]]
-    current_length = max_length - 1
 
     for i in range(next_length_index, len(activity_nodes)):
         current_activity_node = activity_nodes[i]
         if current_activity_node.length < current_length:
-            current_length = current_length - 1
+            current_length = current_activity_node.length
             nodes_by_level.append([])
 
         found_any_match = False
