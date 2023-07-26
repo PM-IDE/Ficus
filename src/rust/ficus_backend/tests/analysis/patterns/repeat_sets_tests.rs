@@ -8,8 +8,6 @@ use ficus_backend::{
 
 use crate::test_core::simple_events_logs_provider::create_maximal_repeats_log;
 
-mod test_core;
-
 #[test]
 fn test_repeat_sets() {
     let log = create_maximal_repeats_log();

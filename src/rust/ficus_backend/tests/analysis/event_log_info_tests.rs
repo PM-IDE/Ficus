@@ -1,7 +1,6 @@
 use ficus_backend::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use test_core::simple_events_logs_provider::create_simple_event_log;
 
-mod test_core;
+use crate::test_core::simple_events_logs_provider::create_simple_event_log;
 
 #[test]
 fn test_event_log_info() {

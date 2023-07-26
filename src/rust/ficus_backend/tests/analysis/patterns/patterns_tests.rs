@@ -4,13 +4,11 @@ use ficus_backend::{
         find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, TandemArrayInfo,
     },
 };
-use test_core::simple_events_logs_provider::create_log_from_taxonomy_of_patterns;
 
 use crate::test_core::simple_events_logs_provider::{
-    create_log_for_max_repeats2, create_no_tandem_array_log, create_one_tandem_array_log,
+    create_log_for_max_repeats2, create_log_from_taxonomy_of_patterns, create_no_tandem_array_log,
+    create_one_tandem_array_log,
 };
-
-mod test_core;
 
 #[test]
 fn test_tandem_arrays_from_paper() {

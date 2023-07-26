@@ -5,13 +5,11 @@ use ficus_backend::features::analysis::{
     entropy::{pos_entropy::calculate_pos_entropies, pos_entropy_fast::calculate_pos_entropies_fast},
     event_log_info::{EventLogInfo, EventLogInfoCreationDto},
 };
-use test_core::simple_events_logs_provider::create_log_from_filter_out_chaotic_events_with_noise;
 
 use crate::test_core::simple_events_logs_provider::{
-    create_log_from_filter_out_chaotic_events, create_simple_event_log,
+    create_log_from_filter_out_chaotic_events, create_log_from_filter_out_chaotic_events_with_noise,
+    create_simple_event_log,
 };
-
-mod test_core;
 
 #[test]
 fn test_dfg_info() {

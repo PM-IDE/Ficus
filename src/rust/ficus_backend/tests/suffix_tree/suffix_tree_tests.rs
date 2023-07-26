@@ -4,16 +4,8 @@ use ficus_backend::utils::suffix_tree::{
     suffix_tree::SuffixTree,
     suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
 };
-use test_core::{
-    gold_based_test::execute_test_with_gold,
-    test_paths::{create_suffix_tree_gold_file_path, get_paths_to_suffix_tree_string},
-};
 
-use crate::test_core::simple_events_logs_provider::{
-    create_log_for_max_repeats1, create_max_repeats_trace_1, create_max_repeats_trace_2, create_max_repeats_trace_3,
-    create_max_repeats_trace_4, create_max_repeats_trace_5,
-};
-mod test_core;
+use crate::test_core::{test_paths::{get_paths_to_suffix_tree_string, create_suffix_tree_gold_file_path}, gold_based_test::execute_test_with_gold, simple_events_logs_provider::{create_max_repeats_trace_1, create_max_repeats_trace_2, create_max_repeats_trace_3, create_max_repeats_trace_4, create_max_repeats_trace_5}};
 
 //ref impl: http://e-maxx.ru/algo/ukkonen
 #[test]

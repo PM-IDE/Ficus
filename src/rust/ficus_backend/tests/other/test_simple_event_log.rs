@@ -5,11 +5,7 @@ use ficus_backend::event_log::{
     simple::simple_event_log::{SimpleEvent, SimpleEventLog},
 };
 
-use test_core::simple_events_logs_provider::create_simple_event_log;
-
-use crate::test_core::simple_events_logs_provider::create_raw_event_log;
-
-mod test_core;
+use crate::test_core::simple_events_logs_provider::{create_raw_event_log, create_simple_event_log};
 
 #[test]
 fn test_simple_event_log_creation() {

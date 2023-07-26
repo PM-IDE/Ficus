@@ -1,5 +1,4 @@
 use std::{collections::HashSet, vec};
-use test_core::simple_events_logs_provider::{create_simple_event_log, create_simple_event_log3};
 
 use ficus_backend::{
     event_log::core::{event::Event, event_log::EventLog},
@@ -9,9 +8,9 @@ use ficus_backend::{
     },
 };
 
-use crate::test_core::simple_events_logs_provider::{create_raw_event_log2, create_simple_event_log2};
-
-mod test_core;
+use crate::test_core::simple_events_logs_provider::{
+    create_raw_event_log2, create_simple_event_log, create_simple_event_log2, create_simple_event_log3,
+};
 
 #[test]
 fn test_removing_events() {

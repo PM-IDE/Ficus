@@ -1,9 +1,8 @@
 use ficus_backend::event_log::xes::reader::file_xes_log_reader::read_event_log;
 use ficus_backend::event_log::xes::writer::xes_event_log_writer::serialize_event_log;
-use test_core::gold_based_test::execute_test_with_gold;
-use test_core::test_paths::{create_example_log_gold_file_path, get_paths_to_example_logs};
 
-mod test_core;
+use crate::test_core::gold_based_test::execute_test_with_gold;
+use crate::test_core::test_paths::{create_example_log_gold_file_path, get_paths_to_example_logs};
 
 #[test]
 fn test_read_write_xes() {
