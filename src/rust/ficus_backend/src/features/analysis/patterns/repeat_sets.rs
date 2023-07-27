@@ -164,7 +164,6 @@ pub fn build_repeat_set_tree_from_repeats(
                 }
             }
         }
-    
 
         if !found_any_match {
             for top_level_node_ptr in &top_level_nodes {
@@ -191,6 +190,12 @@ pub struct ActivityInTraceInfo {
     pub node: Rc<RefCell<ActivityNode>>,
     pub start_pos: usize,
     pub length: usize,
+}
+
+impl ActivityInTraceInfo {
+    pub fn dump(&self) -> (usize, usize) {
+        (self.start_pos, self.start_pos + self.length)
+    }
 }
 
 pub fn extract_activities_instances(
@@ -242,7 +247,13 @@ pub fn extract_activities_instances(
                 continue;
             }
 
-            if current_activity.as_ref().unwrap().borrow().event_classes.contains(&event_hash) {
+            if current_activity
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .event_classes
+                .contains(&event_hash)
+            {
                 let mut new_set = current_event_classes.clone();
                 new_set.insert(event_hash);
 

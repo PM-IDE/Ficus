@@ -1,7 +1,7 @@
 use ficus_backend::{
     event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::{
-        patterns::{find_repeats, PatternsKind},
+        entry_points::{find_repeats, PatternsKind},
         repeat_sets::SubArrayWithTraceIndex,
     },
 };
