@@ -222,7 +222,7 @@ def _do_build_repeat_set_tree(hashes_traces: list[list[int]],
             nodes_by_level.append([])
 
         found_any_match = False
-        for level_index in range(len(nodes_by_level) - 2, -1, -1):
+        for level_index in range(len(nodes_by_level) - 1, -1, -1):
             for activity_node in nodes_by_level[level_index]:
                 if activity_node.contains_other(current_activity_node) and activity_node != current_activity_node:
                     activity_node.child_nodes.append(current_activity_node)
