@@ -13,7 +13,7 @@ fn test_repeat_sets_primitive_tandem_arrays() {
     let log = create_maximal_repeats_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let repeats = find_repeats(&hashes, PatternsKind::PrimitiveTandemArrays(20));
-    assert_eq!(get_first_trace_repeat(&repeats), [(0, 4, 1), (3, 2, 4)]);
+    assert_eq!(get_first_trace_repeat(&repeats.borrow()), [(0, 4, 1), (3, 2, 4)]);
 }
 
 fn get_first_trace_repeat(repeats: &Vec<SubArrayWithTraceIndex>) -> Vec<(usize, usize, usize)> {
@@ -27,7 +27,7 @@ fn test_repeat_sets_super_maximal_repeats() {
     let repeats = find_repeats(&hashes, PatternsKind::SuperMaximalRepeats);
 
     assert_eq!(
-        get_first_trace_repeat(&repeats),
+        get_first_trace_repeat(&repeats.borrow()),
         [
             (0, 1, 0),
             (2, 3, 0),
@@ -49,7 +49,7 @@ fn test_repeat_sets_near_super_maximal_repeats() {
     let repeats = find_repeats(&hashes, PatternsKind::NearSuperMaximalRepeats);
 
     assert_eq!(
-        get_first_trace_repeat(&repeats),
+        get_first_trace_repeat(&repeats.borrow()),
         [
             (0, 1, 0),
             (2, 1, 0),

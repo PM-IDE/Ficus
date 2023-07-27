@@ -14,7 +14,7 @@ fn test_activity_instances() {
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
 
     let activities = discover_activities_instances(&hashes, PatternsKind::PrimitiveTandemArrays(20));
-    let activities = dump_activities(&activities);
+    let activities = dump_activities(&activities.borrow());
     assert_eq!(activities, [[(2, 17), (17, 19)]]);
 }
 
@@ -31,6 +31,15 @@ fn test_activity_instances1() {
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
 
     let activities = discover_activities_instances(&hashes, PatternsKind::PrimitiveTandemArrays(20));
-    let activities = dump_activities(&activities);
-    assert_eq!(activities, vec![vec![(0, 10)], vec![(0, 10)], vec![(0, 12)], vec![(0, 10)], vec![(0, 10), (10, 20), (20, 23)]]);
+    let activities = dump_activities(&activities.borrow());
+    assert_eq!(
+        activities,
+        vec![
+            vec![(0, 10)],
+            vec![(0, 10)],
+            vec![(0, 12)],
+            vec![(0, 10)],
+            vec![(0, 10), (10, 20), (20, 23)]
+        ]
+    );
 }

@@ -24,13 +24,16 @@ impl SubArrayWithTraceIndex {
     }
 }
 
-pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTraceInfo>>) -> Vec<SubArrayWithTraceIndex> {
+pub fn build_repeat_sets(
+    log: &Vec<Vec<u64>>,
+    patterns: &Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>>,
+) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>> {
     let mut repeat_sets = HashMap::new();
     let mut set = HashSet::new();
     let mut vec: Vec<u64> = vec![];
     let mut trace_index = 0;
 
-    for (trace, trace_patterns) in log.into_iter().zip(patterns) {
+    for (trace, trace_patterns) in log.into_iter().zip(patterns.borrow().iter()) {
         for pattern in trace_patterns {
             let start = pattern.start_index;
             let end = start + pattern.length;
@@ -61,13 +64,17 @@ pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTrace
 
     result.sort_by(|first, second| {
         if first.trace_index == second.trace_index {
-            first.sub_array.start_index.cmp(&second.sub_array.start_index)
+            if first.sub_array.start_index != second.sub_array.start_index {
+                first.sub_array.start_index.cmp(&second.sub_array.start_index)
+            } else {
+                first.sub_array.length.cmp(&second.sub_array.length)
+            }
         } else {
             first.trace_index.cmp(&second.trace_index)
         }
     });
 
-    result
+    Rc::new(RefCell::new(result))
 }
 
 #[derive(Debug)]
@@ -89,10 +96,11 @@ impl ActivityNode {
 
 pub fn build_repeat_set_tree_from_repeats(
     log: &Vec<Vec<u64>>,
-    repeats: Vec<SubArrayWithTraceIndex>,
-) -> Vec<Rc<RefCell<ActivityNode>>> {
+    repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
+) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>> {
+    let repeats = repeats.borrow();
     if repeats.len() == 0 {
-        return vec![];
+        return Rc::new(RefCell::new(vec![]));
     }
 
     let extract_events_set = |repeat_set: &SubArrayWithTraceIndex| -> HashSet<u64> {
@@ -116,13 +124,14 @@ pub fn build_repeat_set_tree_from_repeats(
     };
 
     let mut activity_nodes = repeats
-        .into_iter()
+        .iter()
         .map(|repeat| create_activity_node(&repeat))
         .collect::<Vec<Rc<RefCell<ActivityNode>>>>();
 
     activity_nodes.sort_by(|first, second| second.borrow().len().cmp(&first.borrow().len()));
     let max_length = activity_nodes[0].borrow().len();
-    let mut top_level_nodes = vec![Rc::clone(&activity_nodes[0])];
+    let top_level_nodes_ptr = Rc::new(RefCell::new(vec![Rc::clone(&activity_nodes[0])]));
+    let top_level_nodes = &mut top_level_nodes_ptr.borrow_mut();
     let mut next_length_index = 1;
     let mut current_length = max_length;
 
@@ -138,7 +147,7 @@ pub fn build_repeat_set_tree_from_repeats(
     }
 
     if top_level_nodes.len() == activity_nodes.len() {
-        return top_level_nodes;
+        return Rc::clone(&top_level_nodes_ptr);
     }
 
     let mut nodes_by_level: Vec<Vec<Rc<RefCell<ActivityNode>>>> = vec![vec![]];
@@ -166,7 +175,7 @@ pub fn build_repeat_set_tree_from_repeats(
         }
 
         if !found_any_match {
-            for top_level_node_ptr in &top_level_nodes {
+            for top_level_node_ptr in top_level_nodes.iter() {
                 let mut top_level_node = top_level_node_ptr.borrow_mut();
                 if top_level_node.contains_other(&current_node) && !Rc::ptr_eq(top_level_node_ptr, current_node_ptr) {
                     top_level_node.children.push(Rc::clone(current_node_ptr));
@@ -182,7 +191,7 @@ pub fn build_repeat_set_tree_from_repeats(
         }
     }
 
-    top_level_nodes
+    Rc::clone(&top_level_nodes_ptr)
 }
 
 #[derive(Debug)]
@@ -200,11 +209,12 @@ impl ActivityInTraceInfo {
 
 pub fn extract_activities_instances(
     log: &Vec<Vec<u64>>,
-    activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
+    activities: Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>,
     should_narrow: bool,
-) -> Vec<Vec<ActivityInTraceInfo>> {
-    let activities_by_size = split_activities_nodes_by_size(activities);
-    let mut result = vec![];
+) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>> {
+    let activities_by_size = split_activities_nodes_by_size(&mut activities.borrow_mut());
+    let result_ptr = Rc::new(RefCell::new(vec![]));
+    let result = &mut result_ptr.borrow_mut();
 
     for trace in log {
         let mut trace_activities = vec![];
@@ -227,7 +237,7 @@ pub fn extract_activities_instances(
             let event_hash = trace[index.unwrap()];
             if current_activity.is_none() {
                 let mut found_activity = false;
-                for activities in &activities_by_size {
+                for activities in activities_by_size.borrow().iter() {
                     for activity in activities {
                         if activity.borrow().event_classes.contains(&event_hash) {
                             current_activity = Some(Rc::clone(activity));
@@ -258,7 +268,7 @@ pub fn extract_activities_instances(
                 new_set.insert(event_hash);
 
                 let mut found_new_set = false;
-                for activities_set in &activities_by_size {
+                for activities_set in activities_by_size.borrow().iter() {
                     if activities_set.len() == 0
                         || activities_set[0].borrow().len() < current_activity.as_ref().unwrap().borrow().len()
                     {
@@ -321,19 +331,20 @@ pub fn extract_activities_instances(
         result.push(trace_activities);
     }
 
-    result
+    Rc::clone(&result_ptr)
 }
 
 fn split_activities_nodes_by_size(
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
-) -> Vec<Vec<Rc<RefCell<ActivityNode>>>> {
+) -> Rc<RefCell<Vec<Vec<Rc<RefCell<ActivityNode>>>>>> {
     if activities.is_empty() {
-        return vec![];
+        return Rc::new(RefCell::new(vec![]));
     }
 
     activities.sort_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
     let mut current_length = activities[0].borrow().len();
-    let mut result = vec![vec![Rc::clone(activities.get(0).unwrap())]];
+    let result_ptr = Rc::new(RefCell::new(vec![vec![Rc::clone(activities.get(0).unwrap())]]));
+    let result = &mut result_ptr.borrow_mut();
 
     for activity in activities.iter() {
         if activity.borrow().len() != current_length {
@@ -344,7 +355,7 @@ fn split_activities_nodes_by_size(
         result.last_mut().unwrap().push(Rc::clone(activity));
     }
 
-    result
+    Rc::clone(&result_ptr)
 }
 
 fn narrow_activity(node_ptr: &Rc<RefCell<ActivityNode>>, activities_set: &HashSet<u64>) -> Rc<RefCell<ActivityNode>> {

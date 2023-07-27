@@ -1,4 +1,8 @@
-use std::collections::HashSet;
+use std::{
+    cell::{Ref, RefCell},
+    collections::HashSet,
+    rc::Rc,
+};
 
 use crate::utils::hash_utils::calculate_poly_hash_for_collection;
 
@@ -49,21 +53,25 @@ impl TandemArrayInfo {
 pub fn find_primitive_tandem_arrays(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
-    find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
-        .into_iter()
-        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
-        .collect()
+) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
+    Rc::new(RefCell::new(
+        find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
+            .borrow()
+            .iter()
+            .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+            .collect(),
+    ))
 }
 
 pub fn find_primitive_tandem_arrays_with_length(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Vec<Vec<TandemArrayInfo>> {
+) -> Rc<RefCell<Vec<Vec<TandemArrayInfo>>>> {
     let maximal_arrays = find_maximal_tandem_arrays_with_length(log, max_tandem_array_length);
-    let mut primitive_arrays = Vec::new();
+    let primitive_arrays_ptr = Rc::new(RefCell::new(vec![]));
+    let primitive_arrays = &mut primitive_arrays_ptr.borrow_mut();
 
-    for (trace_arrays, trace) in maximal_arrays.into_iter().zip(log) {
+    for (trace_arrays, trace) in maximal_arrays.borrow().iter().zip(log) {
         let mut traces_primitive_arrays = Vec::new();
         for array in trace_arrays {
             let mut is_primitive = true;
@@ -75,31 +83,35 @@ pub fn find_primitive_tandem_arrays_with_length(
             }
 
             if is_primitive {
-                traces_primitive_arrays.push(array);
+                traces_primitive_arrays.push(*array);
             }
         }
 
         primitive_arrays.push(traces_primitive_arrays);
     }
 
-    primitive_arrays
+    Rc::clone(&primitive_arrays_ptr)
 }
 
 pub fn find_maximal_tandem_arrays(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
-    find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
-        .into_iter()
-        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
-        .collect()
+) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
+    Rc::new(RefCell::new(
+        find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
+            .borrow()
+            .iter()
+            .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+            .collect(),
+    ))
 }
 
 pub fn find_maximal_tandem_arrays_with_length(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Vec<Vec<TandemArrayInfo>> {
-    let mut result = Vec::new();
+) -> Rc<RefCell<Vec<Vec<TandemArrayInfo>>>> {
+    let result_ptr = Rc::new(RefCell::new(vec![]));
+    let result = &mut result_ptr.borrow_mut();
     let mut visited = HashSet::new();
 
     for trace in log {
@@ -123,7 +135,7 @@ pub fn find_maximal_tandem_arrays_with_length(
         result.push(trace_tandem_arrays);
     }
 
-    result
+    Rc::clone(&result_ptr)
 }
 
 fn try_extract_tandem_array(trace: &Vec<u64>, start_index: usize, length: usize) -> Option<TandemArrayInfo> {
