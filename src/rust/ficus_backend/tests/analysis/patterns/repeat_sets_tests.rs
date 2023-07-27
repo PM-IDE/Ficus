@@ -1,12 +1,14 @@
+use std::{cell::RefCell, rc::Rc};
+
 use ficus_backend::{
     event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::{
-        entry_points::{find_repeats, PatternsKind},
-        repeat_sets::SubArrayWithTraceIndex,
+        entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
+        repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
     },
 };
 
-use crate::test_core::simple_events_logs_provider::create_maximal_repeats_log;
+use crate::test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log};
 
 #[test]
 fn test_repeat_sets_primitive_tandem_arrays() {
@@ -61,6 +63,86 @@ fn test_repeat_sets_near_super_maximal_repeats() {
             (4, 1, 4),
             (9, 1, 4),
             (10, 2, 4)
+        ]
+    );
+}
+
+#[test]
+fn test_repeat_set_tree() {
+    let log = create_log_from_taxonomy_of_patterns();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20));
+
+    assert_eq!(
+        get_top_level_activities_event_classes(&repeats.borrow()),
+        [[3102445089172487244, 8186225505942432243, 16993177596579750922]]
+    );
+}
+
+fn get_top_level_activities_event_classes(activities: &Vec<Rc<RefCell<ActivityNode>>>) -> Vec<Vec<u64>> {
+    activities
+        .iter()
+        .map(|node| {
+            let mut vec: Vec<u64> = Vec::from_iter(node.borrow().event_classes.iter().map(|event_class| *event_class));
+            vec.sort();
+            vec
+        })
+        .collect()
+}
+
+#[test]
+fn test_repeat_set_tree2() {
+    let log = create_maximal_repeats_log();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20));
+
+    assert_eq!(
+        get_top_level_activities_event_classes(&repeats.borrow()),
+        [[
+            3102445089172487244,
+            7393736521911212725,
+            8186225505942432243,
+            16993177596579750922
+        ]]
+    );
+}
+
+#[test]
+fn test_repeat_set_tree3() {
+    let log = create_maximal_repeats_log();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::SuperMaximalRepeats);
+
+    assert_eq!(
+        get_top_level_activities_event_classes(&repeats.borrow()),
+        [
+            vec![
+                3102445089172487244,
+                7393736521911212725,
+                8186225505942432243,
+                16993177596579750922
+            ],
+            vec![16528679900032520146]
+        ]
+    );
+}
+
+#[test]
+fn test_repeat_set_tree4() {
+    let log = create_maximal_repeats_log();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::MaximalRepeats);
+
+    assert_eq!(
+        get_top_level_activities_event_classes(&repeats.borrow()),
+        [
+            vec![
+                3102445089172487244,
+                7393736521911212725,
+                8186225505942432243,
+                16993177596579750922
+            ],
+            vec![16528679900032520146]
         ]
     );
 }

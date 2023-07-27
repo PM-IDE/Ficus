@@ -33,7 +33,10 @@ pub fn find_repeats(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<RefC
     build_repeat_sets(log, &patterns)
 }
 
-pub fn build_repeat_set_tree(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>> {
+pub fn build_repeat_set_tree(
+    log: &Vec<Vec<u64>>,
+    patterns_kind: PatternsKind,
+) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>> {
     let repeats = find_repeats(log, patterns_kind);
     build_repeat_set_tree_from_repeats(log, &repeats)
 }
