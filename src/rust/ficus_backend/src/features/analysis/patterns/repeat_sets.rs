@@ -70,6 +70,7 @@ pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTrace
     result
 }
 
+#[derive(Debug)]
 pub struct ActivityNode {
     pub repeat_set: SubArrayWithTraceIndex,
     pub event_classes: HashSet<u64>,
@@ -123,11 +124,13 @@ pub fn build_repeat_set_tree_from_repeats(
     let max_length = activity_nodes[0].borrow().len();
     let mut top_level_nodes = vec![Rc::clone(&activity_nodes[0])];
     let mut next_length_index = 1;
+    let mut current_length = max_length;
 
     for i in 1..activity_nodes.len() {
         let node_ptr = &activity_nodes[i];
         if node_ptr.borrow().len() != max_length {
             next_length_index = i;
+            current_length = node_ptr.borrow().len();
             break;
         }
 
@@ -138,20 +141,20 @@ pub fn build_repeat_set_tree_from_repeats(
         return top_level_nodes;
     }
 
-    let mut nodes_by_level: Vec<Vec<Rc<RefCell<ActivityNode>>>> = vec![];
-    let mut current_length = max_length - 1;
+    let mut nodes_by_level: Vec<Vec<Rc<RefCell<ActivityNode>>>> = vec![vec![]];
 
     for i in next_length_index..activity_nodes.len() {
         let current_node_ptr = activity_nodes.get(i).unwrap();
         let current_node = current_node_ptr.borrow();
 
         if current_node.len() < current_length {
-            current_length = current_length - 1;
+            current_length = current_node.len();
             nodes_by_level.push(vec![]);
         }
 
         let mut found_any_match = false;
-        'this_loop: for level_index in (0..(nodes_by_level.len() - 2)).rev() {
+
+        'this_loop: for level_index in (0..(nodes_by_level.len() - 1)).rev() {
             for activity_node in nodes_by_level.get(level_index).unwrap() {
                 let mut activity_node = activity_node.borrow_mut();
                 if activity_node.contains_other(&current_node) {
@@ -161,6 +164,7 @@ pub fn build_repeat_set_tree_from_repeats(
                 }
             }
         }
+    
 
         if !found_any_match {
             for top_level_node_ptr in &top_level_nodes {
@@ -182,6 +186,7 @@ pub fn build_repeat_set_tree_from_repeats(
     top_level_nodes
 }
 
+#[derive(Debug)]
 pub struct ActivityInTraceInfo {
     pub node: Rc<RefCell<ActivityNode>>,
     pub start_pos: usize,
@@ -280,7 +285,7 @@ pub fn extract_activities_instances(
                     current_activity = None;
                     current_event_classes.clear();
                     last_activity_start_index = None;
-                    index = None;
+                    *index.as_mut().unwrap() -= 1;
                 }
             } else {
                 current_event_classes.insert(event_hash);
