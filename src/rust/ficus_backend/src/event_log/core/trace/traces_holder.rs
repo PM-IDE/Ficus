@@ -4,7 +4,6 @@ use crate::event_log::core::event::{event::Event, event_hasher::EventHasher};
 
 use super::trace::Trace;
 
-
 #[derive(Debug)]
 pub struct TracesHolder<TTrace, TEvent>
 where

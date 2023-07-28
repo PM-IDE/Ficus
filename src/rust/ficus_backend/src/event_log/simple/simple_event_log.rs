@@ -4,9 +4,9 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use crate::event_log::core::{
     event::event::{Event, EventPayloadValue},
     event::event_hasher::EventHasher,
-    event_log::EventLog,
     event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
     event::lifecycle::Lifecycle,
+    event_log::EventLog,
     trace::trace::Trace,
     trace::traces_holder::TracesHolder,
 };

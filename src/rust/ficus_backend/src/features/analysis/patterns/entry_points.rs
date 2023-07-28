@@ -30,8 +30,6 @@ pub fn find_patterns(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<Ref
     }
 }
 
-
-
 pub fn find_repeats(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>> {
     let patterns = find_patterns(log, patterns_kind);
     build_repeat_sets(log, &patterns)

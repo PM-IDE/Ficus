@@ -1,4 +1,4 @@
-use crate::event_log::core::{event_log::EventLog, event::event::Event};
+use crate::event_log::core::{event::event::Event, event_log::EventLog};
 
 pub fn rename_events<TLog, TEvent, TFilter>(log: &mut TLog, new_name: &str, filter: TFilter)
 where

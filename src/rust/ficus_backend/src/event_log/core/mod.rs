@@ -1,3 +1,4 @@
 pub mod event;
-pub mod trace;
 pub mod event_log;
+pub mod log_iterator;
+pub mod trace;

@@ -1,6 +1,7 @@
 use ficus_backend::{
     event_log::{
-        simple::simple_event_log::SimpleEventLog, core::{event_log::EventLog, event::event_hasher::NameEventHasher},
+        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
+        simple::simple_event_log::SimpleEventLog,
     },
     features::analysis::patterns::{
         entry_points::{discover_activities_instances, PatternsKind},

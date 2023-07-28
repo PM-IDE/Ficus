@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::event_log::core::{event_log::EventLog, event::event::Event};
+use crate::event_log::core::{event::event::Event, event_log::EventLog};
 
 pub fn filter_log_by_name<TLog>(log: &mut TLog, name: &str)
 where
