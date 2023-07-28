@@ -102,7 +102,7 @@ impl ActivityNode {
     }
 }
 
-pub struct ActivitiesDiscoveryContext<TNameCreator>
+pub struct RepeatsSetsDiscoveryContext<TNameCreator>
 where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
@@ -110,7 +110,7 @@ where
     pub name_creator: TNameCreator,
 }
 
-impl<TNameCreator> ActivitiesDiscoveryContext<TNameCreator>
+impl<TNameCreator> RepeatsSetsDiscoveryContext<TNameCreator>
 where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
@@ -125,7 +125,7 @@ where
 pub fn build_repeat_set_tree_from_repeats<TNameCreator>(
     log: &Vec<Vec<u64>>,
     repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-    context: ActivitiesDiscoveryContext<TNameCreator>,
+    context: &RepeatsSetsDiscoveryContext<TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
@@ -458,7 +458,7 @@ pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 pub fn create_new_log_from_activities_instances<TLog>(
     log: &TLog,
     instances: &Vec<Vec<ActivityInTraceInfo>>,
-    strategy: UndefActivityHandlingStrategy,
+    strategy: &UndefActivityHandlingStrategy,
 ) -> Rc<RefCell<SimpleEventLog>>
 where
     TLog: EventLog,
