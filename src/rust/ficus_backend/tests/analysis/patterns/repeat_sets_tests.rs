@@ -4,11 +4,14 @@ use ficus_backend::{
     event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::{
         entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
-        repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
+        repeat_sets::{ActivitiesDiscoveryContext, ActivityNode, SubArrayWithTraceIndex},
     },
 };
 
-use crate::test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log};
+use crate::{
+    analysis::patterns::utils::create_activity_name,
+    test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log},
+};
 
 #[test]
 fn test_repeat_sets_primitive_tandem_arrays() {
@@ -71,7 +74,8 @@ fn test_repeat_sets_near_super_maximal_repeats() {
 fn test_repeat_set_tree() {
     let log = create_log_from_taxonomy_of_patterns();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20));
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20), context);
 
     assert_eq!(
         get_top_level_activities_event_classes(&repeats.borrow()),
@@ -94,7 +98,8 @@ fn get_top_level_activities_event_classes(activities: &Vec<Rc<RefCell<ActivityNo
 fn test_repeat_set_tree2() {
     let log = create_maximal_repeats_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20));
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::PrimitiveTandemArrays(20), context);
 
     assert_eq!(
         get_top_level_activities_event_classes(&repeats.borrow()),
@@ -111,7 +116,8 @@ fn test_repeat_set_tree2() {
 fn test_repeat_set_tree3() {
     let log = create_maximal_repeats_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let repeats = build_repeat_set_tree(&hashes, PatternsKind::SuperMaximalRepeats);
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::SuperMaximalRepeats, context);
 
     assert_eq!(
         get_top_level_activities_event_classes(&repeats.borrow()),
@@ -131,7 +137,8 @@ fn test_repeat_set_tree3() {
 fn test_repeat_set_tree4() {
     let log = create_maximal_repeats_log();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let repeats = build_repeat_set_tree(&hashes, PatternsKind::MaximalRepeats);
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let repeats = build_repeat_set_tree(&hashes, PatternsKind::MaximalRepeats, context);
 
     assert_eq!(
         get_top_level_activities_event_classes(&repeats.borrow()),

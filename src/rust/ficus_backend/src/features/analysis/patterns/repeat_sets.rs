@@ -82,6 +82,8 @@ pub struct ActivityNode {
     pub repeat_set: SubArrayWithTraceIndex,
     pub event_classes: HashSet<u64>,
     pub children: Vec<Rc<RefCell<ActivityNode>>>,
+    pub level: usize,
+    pub name: String,
 }
 
 impl ActivityNode {
@@ -94,10 +96,34 @@ impl ActivityNode {
     }
 }
 
-pub fn build_repeat_set_tree_from_repeats(
+pub struct ActivitiesDiscoveryContext<TNameCreator>
+where
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
+    pub activity_level: usize,
+    pub name_creator: TNameCreator,
+}
+
+impl<TNameCreator> ActivitiesDiscoveryContext<TNameCreator>
+where
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
+    pub fn new(activity_level: usize, name_creator: TNameCreator) -> Self {
+        Self {
+            activity_level,
+            name_creator,
+        }
+    }
+}
+
+pub fn build_repeat_set_tree_from_repeats<TNameCreator>(
     log: &Vec<Vec<u64>>,
     repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>> {
+    context: ActivitiesDiscoveryContext<TNameCreator>,
+) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
+where
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
     let repeats = repeats.borrow();
     if repeats.len() == 0 {
         return Rc::new(RefCell::new(vec![]));
@@ -120,6 +146,8 @@ pub fn build_repeat_set_tree_from_repeats(
             repeat_set: *repeat_set,
             event_classes: events_set,
             children: vec![],
+            level: context.activity_level,
+            name: (&context.name_creator)(repeat_set),
         }))
     };
 

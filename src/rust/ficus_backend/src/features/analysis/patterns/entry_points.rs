@@ -2,8 +2,8 @@ use std::{cell::RefCell, rc::Rc};
 
 use super::{
     repeat_sets::{
-        build_repeat_set_tree_from_repeats, build_repeat_sets, extract_activities_instances, ActivityInTraceInfo,
-        ActivityNode, SubArrayWithTraceIndex,
+        build_repeat_set_tree_from_repeats, build_repeat_sets, extract_activities_instances,
+        ActivitiesDiscoveryContext, ActivityInTraceInfo, ActivityNode, SubArrayWithTraceIndex,
     },
     repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
     tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
@@ -33,18 +33,26 @@ pub fn find_repeats(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<RefC
     build_repeat_sets(log, &patterns)
 }
 
-pub fn build_repeat_set_tree(
+pub fn build_repeat_set_tree<TNameCreator>(
     log: &Vec<Vec<u64>>,
     patterns_kind: PatternsKind,
-) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>> {
+    context: ActivitiesDiscoveryContext<TNameCreator>,
+) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
+where
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
     let repeats = find_repeats(log, patterns_kind);
-    build_repeat_set_tree_from_repeats(log, &repeats)
+    build_repeat_set_tree_from_repeats(log, &repeats, context)
 }
 
-pub fn discover_activities_instances(
+pub fn discover_activities_instances<TNameCreator>(
     log: &Vec<Vec<u64>>,
     patterns_kind: PatternsKind,
-) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>> {
-    let repeat_set_tree = build_repeat_set_tree(log, patterns_kind);
+    context: ActivitiesDiscoveryContext<TNameCreator>,
+) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
+where
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
+    let repeat_set_tree = build_repeat_set_tree(log, patterns_kind, context);
     extract_activities_instances(log, repeat_set_tree, true)
 }
