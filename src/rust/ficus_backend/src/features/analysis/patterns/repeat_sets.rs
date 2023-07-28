@@ -291,7 +291,7 @@ pub fn extract_activities_instances(
                 continue;
             }
 
-            if current_activity
+            if !current_activity
                 .as_ref()
                 .unwrap()
                 .borrow()
