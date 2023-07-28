@@ -70,6 +70,7 @@ pub fn create_log_from_taxonomy_of_patterns() -> SimpleEventLog {
     let raw_log = vec![vec![
         "g", "d", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "f", "i", "c", "a",
     ]];
+    
     SimpleEventLog::new(&raw_log)
 }
 

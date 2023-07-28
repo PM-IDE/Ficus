@@ -17,6 +17,12 @@ pub struct SimpleEventLog {
 }
 
 impl SimpleEventLog {
+    pub fn empty() -> Self {
+        Self {
+            traces_holder: TracesHolder::empty(),
+        }
+    }
+
     pub fn new(raw_event_log: &Vec<Vec<&str>>) -> SimpleEventLog {
         let mut traces = Vec::new();
         for raw_trace in raw_event_log {
@@ -40,6 +46,10 @@ impl SimpleEventLog {
         }
 
         raw_log
+    }
+
+    pub fn push(&mut self, trace: Rc<RefCell<<SimpleEventLog as EventLog>::TTrace>>) {
+        self.traces_holder.push(trace);
     }
 }
 
@@ -118,7 +128,13 @@ impl Trace for SimpleTrace {
 const TRACE_EVENT_START_DATE: DateTime<Utc> = DateTime::<Utc>::MIN_UTC;
 
 impl SimpleTrace {
-    pub fn new(raw_trace: &Vec<&str>) -> SimpleTrace {
+    pub fn empty() -> Self {
+        Self {
+            events_holder: EventsHolder::empty(),
+        }
+    }
+
+    pub fn new(raw_trace: &Vec<&str>) -> Self {
         let mut events = Vec::new();
         let mut current_date = TRACE_EVENT_START_DATE;
         for raw_event in raw_trace {
@@ -126,9 +142,13 @@ impl SimpleTrace {
             current_date = current_date + Duration::seconds(1);
         }
 
-        SimpleTrace {
+        Self {
             events_holder: EventsHolder::new(events),
         }
+    }
+
+    pub fn push(&mut self, event: Rc<RefCell<<SimpleTrace as Trace>::TEvent>>) {
+        self.events_holder.push(event);
     }
 }
 
@@ -139,10 +159,17 @@ pub struct SimpleEvent {
 }
 
 impl SimpleEvent {
-    pub fn new(name: &str, stamp: DateTime<Utc>) -> SimpleEvent {
-        SimpleEvent {
+    pub fn new(name: &str, stamp: DateTime<Utc>) -> Self {
+        Self {
             name: name.to_owned(),
             timestamp: stamp,
+        }
+    }
+
+    pub fn new_with_min_date(name: &str) -> Self {
+        Self {
+            name: name.to_owned(),
+            timestamp: DateTime::<Utc>::MIN_UTC,
         }
     }
 }

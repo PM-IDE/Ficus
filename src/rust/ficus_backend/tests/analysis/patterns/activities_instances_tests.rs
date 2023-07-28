@@ -4,8 +4,8 @@ use ficus_backend::{
         simple::simple_event_log::SimpleEventLog,
     },
     features::analysis::patterns::{
-        entry_points::{discover_activities_instances, PatternsKind},
-        repeat_sets::{ActivitiesDiscoveryContext, ActivityInTraceInfo, SubArrayWithTraceIndex},
+        entry_points::{discover_activities_instances, PatternsKind, discover_activities_and_create_new_log},
+        repeat_sets::{ActivitiesDiscoveryContext, ActivityInTraceInfo, SubArrayWithTraceIndex, create_new_log_from_activities_instances},
     },
 };
 
@@ -50,4 +50,14 @@ fn test_activity_instances1() {
             vec![(0, 10), (10, 20), (20, 23)]
         ]
     );
+}
+
+#[test]
+fn test_creating_new_log_from_activity_instances() {
+    let log = create_log_from_taxonomy_of_patterns();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let new_log = discover_activities_and_create_new_log(&log, &hashes, PatternsKind::PrimitiveTandemArrays(20), context);
+
+    println!("{:?}", new_log.borrow().to_raw_vector());
 }

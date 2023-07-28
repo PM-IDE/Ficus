@@ -4,7 +4,13 @@ use std::{
     rc::Rc,
 };
 
-use crate::utils::hash_utils::calculate_poly_hash_for_collection;
+use crate::{
+    event_log::{
+        core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+        simple::simple_event_log::{SimpleEvent, SimpleEventLog, SimpleTrace},
+    },
+    utils::hash_utils::calculate_poly_hash_for_collection,
+};
 
 use super::tandem_arrays::SubArrayInTraceInfo;
 
@@ -415,4 +421,78 @@ fn narrow_activity(node_ptr: &Rc<RefCell<ActivityNode>>, activities_set: &HashSe
         .max_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
 
     Rc::clone(result.unwrap())
+}
+
+pub fn process_activities_in_trace<TUndefActivityHandleFunc, TActivityHandleFunc>(
+    trace_length: usize,
+    activities_instances: &Vec<ActivityInTraceInfo>,
+    mut undefined_activity_func: TUndefActivityHandleFunc,
+    mut activity_func: TActivityHandleFunc,
+) where
+    TUndefActivityHandleFunc: FnMut(usize, usize) -> (),
+    TActivityHandleFunc: FnMut(&ActivityInTraceInfo) -> (),
+{
+    let mut index = 0;
+    for instance in activities_instances {
+        if index < instance.start_pos {
+            undefined_activity_func(index, instance.start_pos);
+        }
+
+        activity_func(instance);
+        index = instance.start_pos + instance.length;
+    }
+
+    if index < trace_length {
+        undefined_activity_func(index, trace_length);
+    }
+}
+
+pub enum UndefActivityHandlingStrategy {
+    DontInsert,
+    InsertAsSingleEvent,
+    InsertAllEvents,
+}
+
+pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
+
+pub fn create_new_log_from_activities_instances<TLog>(
+    log: &TLog,
+    instances: &Vec<Vec<ActivityInTraceInfo>>,
+    strategy: UndefActivityHandlingStrategy,
+) -> Rc<RefCell<SimpleEventLog>>
+where
+    TLog: EventLog,
+{
+    let new_log_ptr = Rc::new(RefCell::new(SimpleEventLog::empty()));
+    let new_log = &mut new_log_ptr.borrow_mut();
+
+    for (instances, trace) in instances.iter().zip(log.get_traces()) {
+        let trace = trace.borrow();
+        let new_trace_ptr = Rc::new(RefCell::new(SimpleTrace::empty()));
+
+        let undef_activity_func = |start_index: usize, end_index: usize| match strategy {
+            UndefActivityHandlingStrategy::DontInsert => (),
+            UndefActivityHandlingStrategy::InsertAsSingleEvent => {
+                let event = SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME);
+                new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(event)));
+            }
+            UndefActivityHandlingStrategy::InsertAllEvents => {
+                for i in start_index..end_index {
+                    let event = SimpleEvent::new_with_min_date(&trace.get_events()[i].borrow().get_name());
+                    new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(event)));
+                }
+            }
+        };
+
+        let activity_func = |activity: &ActivityInTraceInfo| {
+            let high_level_event = SimpleEvent::new_with_min_date(&activity.node.borrow().name);
+            new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(high_level_event)));
+        };
+
+        process_activities_in_trace(trace.get_events().len(), &instances, undef_activity_func, activity_func);
+
+        new_log.push(new_trace_ptr)
+    }
+
+    Rc::clone(&new_log_ptr)
 }

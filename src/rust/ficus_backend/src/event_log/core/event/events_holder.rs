@@ -22,8 +22,16 @@ impl<TEvent> EventsHolder<TEvent>
 where
     TEvent: Event,
 {
-    pub fn new(events: Vec<Rc<RefCell<TEvent>>>) -> EventsHolder<TEvent> {
-        EventsHolder {
+    pub fn empty() -> Self {
+        Self {
+            events: vec![],
+            events_sequence_info: LazyCell::new(),
+            events_positions: LazyCell::new(),
+        }
+    }
+
+    pub fn new(events: Vec<Rc<RefCell<TEvent>>>) -> Self {
+        Self {
             events,
             events_sequence_info: LazyCell::new(),
             events_positions: LazyCell::new(),
@@ -32,6 +40,10 @@ where
 
     pub fn get_events(&self) -> &Vec<Rc<RefCell<TEvent>>> {
         &self.events
+    }
+
+    pub fn push(&mut self, event: Rc<RefCell<TEvent>>) {
+        self.events.push(event);
     }
 
     pub fn remove_events_by<TPred>(&mut self, predicate: TPred)

@@ -1,6 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::core::event::{event::Event, event_hasher::EventHasher};
+use crate::event_log::{
+    core::event::{event::Event, event_hasher::EventHasher},
+    simple::simple_event_log::SimpleEventLog,
+};
 
 use super::trace::Trace;
 
@@ -18,12 +21,20 @@ where
     TTrace: Trace<TEvent = TEvent>,
     TEvent: Event,
 {
-    pub fn new(traces: Vec<Rc<RefCell<TTrace>>>) -> TracesHolder<TTrace, TEvent> {
-        TracesHolder { traces }
+    pub fn empty() -> Self {
+        Self { traces: vec![] }
+    }
+
+    pub fn new(traces: Vec<Rc<RefCell<TTrace>>>) -> Self {
+        Self { traces }
     }
 
     pub fn get_traces(&self) -> &Vec<Rc<RefCell<TTrace>>> {
         &self.traces
+    }
+
+    pub fn push(&mut self, trace: Rc<RefCell<TTrace>>) {
+        self.traces.push(trace);
     }
 
     pub fn filter_events_by<TPred>(&mut self, predicate: TPred)
