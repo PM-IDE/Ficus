@@ -1,11 +1,8 @@
 use lazycell::LazyCell;
 
-use crate::utils::hash_map_utils::{add_to_list_in_map, increase_in_map};
+use crate::{utils::hash_map_utils::{add_to_list_in_map, increase_in_map}, event_log::core::trace::trace::{TraceInfo, TraceEventsPositions}};
 
-use super::{
-    event::Event,
-    trace::{TraceEventsPositions, TraceInfo},
-};
+use super::event::Event;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Debug)]

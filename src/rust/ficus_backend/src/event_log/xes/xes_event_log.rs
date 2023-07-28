@@ -5,12 +5,16 @@ use super::{
 };
 
 use crate::event_log::core::{
-    event::EventPayloadValue,
-    event_hasher::EventHasher,
+    event::{
+        event::EventPayloadValue,
+        event_hasher::EventHasher,
+        events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
+    },
+    trace::{
+        trace::Trace,
+        traces_holder::TracesHolder,
+    },
     event_log::EventLog,
-    events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
-    trace::Trace,
-    traces_holder::TracesHolder,
 };
 use crate::utils::vec_utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};

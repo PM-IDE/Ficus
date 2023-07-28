@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use ficus_backend::{
-    event_log::{core::trace::Trace, simple::simple_event_log::SimpleTrace},
+    event_log::{core::trace::trace::Trace, simple::simple_event_log::SimpleTrace},
     features::mutations::split::split_by_traces,
 };
 

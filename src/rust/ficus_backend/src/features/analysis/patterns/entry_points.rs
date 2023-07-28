@@ -1,5 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::event_log::core::event_log::EventLog;
+
 use super::{
     repeat_sets::{
         build_repeat_set_tree_from_repeats, build_repeat_sets, extract_activities_instances,
@@ -27,6 +29,8 @@ pub fn find_patterns(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<Ref
         PatternsKind::MaximalTandemArrays(length) => find_maximal_tandem_arrays(log, length),
     }
 }
+
+
 
 pub fn find_repeats(log: &Vec<Vec<u64>>, patterns_kind: PatternsKind) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>> {
     let patterns = find_patterns(log, patterns_kind);

@@ -1,7 +1,7 @@
 use chrono::Utc;
 use core::fmt::Debug;
 use ficus_backend::event_log::{
-    core::{event::Event, event_log::EventLog, trace::Trace},
+    core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     simple::simple_event_log::{SimpleEvent, SimpleEventLog},
 };
 

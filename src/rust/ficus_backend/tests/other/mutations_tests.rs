@@ -1,7 +1,7 @@
 use std::{collections::HashSet, vec};
 
 use ficus_backend::{
-    event_log::core::{event::Event, event_log::EventLog},
+    event_log::core::{event::event::Event, event_log::EventLog},
     features::mutations::{
         filtering::{filter_log_by_name, filter_log_by_names},
         mutations::rename_events,

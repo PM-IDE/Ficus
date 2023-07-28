@@ -1,5 +1,5 @@
 use crate::event_log::{
-    core::{
+    core::event::{
         event::EventPayloadValue,
         lifecycle::{Lifecycle, XesStandardLifecycle},
     },

@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use ficus_backend::{
-    event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
+    event_log::core::{event::event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::{
         entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
         repeat_sets::{ActivitiesDiscoveryContext, ActivityNode, SubArrayWithTraceIndex},

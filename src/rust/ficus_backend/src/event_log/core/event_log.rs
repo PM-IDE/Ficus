@@ -1,9 +1,8 @@
-use super::{
-    event::Event,
-    event_hasher::EventHasher,
-    trace::{Trace, TraceInfo},
-};
+
 use std::{cell::RefCell, rc::Rc};
+
+use crate::event_log::core::event::event::Event;
+use super::{trace::trace::{TraceInfo, Trace}, event::event_hasher::EventHasher};
 
 pub trait EventLog {
     type TEvent: Event;

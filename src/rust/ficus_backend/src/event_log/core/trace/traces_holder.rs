@@ -1,6 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use super::{event::Event, event_hasher::EventHasher, trace::Trace};
+use crate::event_log::core::event::{event::Event, event_hasher::EventHasher};
+
+use super::trace::Trace;
+
 
 #[derive(Debug)]
 pub struct TracesHolder<TTrace, TEvent>

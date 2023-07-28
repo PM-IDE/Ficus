@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use chrono::{DateTime, Utc};
 
 use crate::{
-    event_log::core::{
+    event_log::core::event::{
         event::{Event, EventPayloadValue},
         lifecycle::Lifecycle,
     },

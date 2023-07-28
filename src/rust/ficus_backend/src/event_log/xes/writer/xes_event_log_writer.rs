@@ -12,9 +12,9 @@ use quick_xml::{
 
 use crate::event_log::{
     core::{
-        event::{Event, EventPayloadValue},
+        event::event::{Event, EventPayloadValue},
         event_log::EventLog,
-        trace::Trace,
+        trace::trace::Trace,
     },
     xes::{constants::*, xes_event_log::XesEventLogImpl},
 };

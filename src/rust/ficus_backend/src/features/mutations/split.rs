@@ -5,7 +5,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::event_log::core::{event::Event, event_log::EventLog, trace::Trace};
+use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
 
 struct TracePointer<TTrace> {
     pub trace: Rc<RefCell<TTrace>>,

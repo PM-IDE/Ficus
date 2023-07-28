@@ -1,6 +1,6 @@
 use crate::event_log::core::event_log::EventLog;
-use crate::event_log::core::trace::Trace;
-use crate::{event_log::core::event::Event, utils::hash_map_utils::increase_in_map};
+use crate::event_log::core::trace::trace::Trace;
+use crate::{event_log::core::event::event::Event, utils::hash_map_utils::increase_in_map};
 use std::collections::{HashMap, HashSet};
 
 use super::constants::{FAKE_EVENT_END_NAME, FAKE_EVENT_START_NAME};

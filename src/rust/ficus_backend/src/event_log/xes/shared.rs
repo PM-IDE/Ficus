@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::event_log::core::event::EventPayloadValue;
+use crate::event_log::core::event::event::EventPayloadValue;
 
 #[derive(Debug, Clone)]
 pub struct XesEventLogExtension {

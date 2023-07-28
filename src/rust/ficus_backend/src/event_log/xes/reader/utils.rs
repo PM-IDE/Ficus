@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use crate::event_log::{core::event::EventPayloadValue, xes::constants::*};
+use crate::event_log::{core::event::event::EventPayloadValue, xes::constants::*};
 
 use quick_xml::events::{attributes::Attribute, BytesStart};
 

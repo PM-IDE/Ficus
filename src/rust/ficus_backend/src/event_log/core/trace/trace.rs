@@ -1,5 +1,6 @@
-use super::event::Event;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+use crate::event_log::core::event::event::Event;
 
 pub trait Trace {
     type TEvent: Event;

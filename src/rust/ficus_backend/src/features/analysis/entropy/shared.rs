@@ -1,10 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::{
-    event_log::core::{
-        event_log::EventLog,
-        trace::{Trace, TraceInfo},
-    },
+    event_log::core::{event_log::EventLog, trace::trace::{Trace, TraceInfo}},
     features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto},
 };
 

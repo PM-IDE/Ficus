@@ -2,13 +2,13 @@ use chrono::{DateTime, Duration, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::event_log::core::{
-    event::{Event, EventPayloadValue},
-    event_hasher::EventHasher,
+    event::event::{Event, EventPayloadValue},
+    event::event_hasher::EventHasher,
     event_log::EventLog,
-    events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
-    lifecycle::Lifecycle,
-    trace::Trace,
-    traces_holder::TracesHolder,
+    event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
+    event::lifecycle::Lifecycle,
+    trace::trace::Trace,
+    trace::traces_holder::TracesHolder,
 };
 
 #[derive(Debug)]

@@ -1,5 +1,5 @@
 use ficus_backend::{
-    event_log::core::{event_hasher::NameEventHasher, event_log::EventLog},
+    event_log::core::{event::event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::tandem_arrays::{
         find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, TandemArrayInfo,
     },
