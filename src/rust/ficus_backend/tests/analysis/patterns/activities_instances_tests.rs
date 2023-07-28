@@ -1,11 +1,10 @@
 use ficus_backend::{
-    event_log::{
-        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
-        simple::simple_event_log::SimpleEventLog,
-    },
+    event_log::core::{event::event_hasher::NameEventHasher, event_log::EventLog},
     features::analysis::patterns::{
-        entry_points::{discover_activities_instances, PatternsKind, discover_activities_and_create_new_log},
-        repeat_sets::{ActivitiesDiscoveryContext, ActivityInTraceInfo, SubArrayWithTraceIndex, create_new_log_from_activities_instances},
+        entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind},
+        repeat_sets::{
+            ActivitiesDiscoveryContext, ActivityInTraceInfo, UndefActivityHandlingStrategy,
+        },
     },
 };
 
@@ -22,7 +21,7 @@ fn test_activity_instances() {
 
     let activities = discover_activities_instances(&hashes, PatternsKind::PrimitiveTandemArrays(20), context);
     let activities = dump_activities(&activities.borrow());
-    assert_eq!(activities, [[(2, 17), (17, 19)]]);
+    assert_eq!(activities, [[(2, 15), (17, 19)]]);
 }
 
 fn dump_activities(instances: &Vec<Vec<ActivityInTraceInfo>>) -> Vec<Vec<(usize, usize)>> {
@@ -57,7 +56,13 @@ fn test_creating_new_log_from_activity_instances() {
     let log = create_log_from_taxonomy_of_patterns();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
-    let new_log = discover_activities_and_create_new_log(&log, &hashes, PatternsKind::PrimitiveTandemArrays(20), context);
+    let new_log = discover_activities_and_create_new_log(
+        &log,
+        &hashes,
+        PatternsKind::PrimitiveTandemArrays(20),
+        context,
+        UndefActivityHandlingStrategy::InsertAllEvents,
+    );
 
     println!("{:?}", new_log.borrow().to_raw_vector());
 }

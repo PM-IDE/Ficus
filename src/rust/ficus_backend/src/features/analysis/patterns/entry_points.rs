@@ -65,6 +65,7 @@ pub fn discover_activities_and_create_new_log<TLog, TNameCreator>(
     log: &Vec<Vec<u64>>,
     patterns_kind: PatternsKind,
     context: ActivitiesDiscoveryContext<TNameCreator>,
+    undef_events_handling_strategy: UndefActivityHandlingStrategy,
 ) -> Rc<RefCell<SimpleEventLog>>
 where
     TLog: EventLog,
@@ -72,10 +73,6 @@ where
 {
     let activity_instances = discover_activities_instances(log, patterns_kind, context);
     let activity_instances = activity_instances.borrow();
-    
-    create_new_log_from_activities_instances(
-        original_log,
-        &activity_instances,
-        UndefActivityHandlingStrategy::InsertAsSingleEvent,
-    )
+
+    create_new_log_from_activities_instances(original_log, &activity_instances, undef_events_handling_strategy)
 }
