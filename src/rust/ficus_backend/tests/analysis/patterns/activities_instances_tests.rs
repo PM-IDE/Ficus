@@ -3,7 +3,7 @@ use ficus_backend::{
     features::analysis::patterns::{
         entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind},
         repeat_sets::{
-            ActivitiesDiscoveryContext, ActivityInTraceInfo, UndefActivityHandlingStrategy,
+            ActivitiesDiscoveryContext, ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
         },
     },
 };
@@ -52,7 +52,7 @@ fn test_activity_instances1() {
 }
 
 #[test]
-fn test_creating_new_log_from_activity_instances() {
+fn test_creating_new_log_from_activity_instances_insert_all_events() {
     let log = create_log_from_taxonomy_of_patterns();
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
@@ -64,5 +64,37 @@ fn test_creating_new_log_from_activity_instances() {
         UndefActivityHandlingStrategy::InsertAllEvents,
     );
 
-    println!("{:?}", new_log.borrow().to_raw_vector());
+    assert_eq!(new_log.borrow().to_raw_vector(), [["g", "d", "abc", "f", "i", "abc"]]);
+}
+
+#[test]
+fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
+    let log = create_log_from_taxonomy_of_patterns();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let new_log = discover_activities_and_create_new_log(
+        &log,
+        &hashes,
+        PatternsKind::PrimitiveTandemArrays(20),
+        context,
+        UndefActivityHandlingStrategy::InsertAsSingleEvent,
+    );
+
+    assert_eq!(new_log.borrow().to_raw_vector(), [[UNDEF_ACTIVITY_NAME, "abc", UNDEF_ACTIVITY_NAME, "abc"]]);
+}
+
+#[test]
+fn test_creating_new_log_from_activity_instances_dont_insert() {
+    let log = create_log_from_taxonomy_of_patterns();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let new_log = discover_activities_and_create_new_log(
+        &log,
+        &hashes,
+        PatternsKind::PrimitiveTandemArrays(20),
+        context,
+        UndefActivityHandlingStrategy::DontInsert,
+    );
+
+    assert_eq!(new_log.borrow().to_raw_vector(), [["abc", "abc"]]);
 }
