@@ -93,7 +93,7 @@ pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TEvent, TNa
 ) -> Rc<RefCell<SimpleEventLog>>
 where
     TLog: EventLog<TEvent = TEvent> + EventLog,
-    TEvent: Event,
+    TEvent: Event + 'static,
     TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {

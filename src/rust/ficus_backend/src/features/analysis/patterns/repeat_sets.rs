@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{Ref, RefCell},
     collections::{HashMap, HashSet, VecDeque},
     rc::Rc,
 };
@@ -9,7 +9,7 @@ use crate::{
         core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
         simple::simple_event_log::{SimpleEvent, SimpleEventLog, SimpleTrace},
     },
-    utils::hash_utils::calculate_poly_hash_for_collection,
+    utils::{hash_utils::calculate_poly_hash_for_collection, user_data::Key},
 };
 
 use super::{contexts::ActivitiesDiscoveryContext, tandem_arrays::SubArrayInTraceInfo};
@@ -438,6 +438,13 @@ pub enum UndefActivityHandlingStrategy {
 
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 
+pub fn underlying_events_key<TEvent>() -> Key<Vec<Rc<RefCell<TEvent>>>>
+where
+    TEvent: Event + 'static,
+{
+    Key::new(&"UNDERLYING_EVENTS".to_string())
+}
+
 pub fn create_new_log_from_activities_instances<TLog>(
     log: &Rc<RefCell<TLog>>,
     instances: &Vec<Vec<ActivityInTraceInfo>>,
@@ -445,6 +452,7 @@ pub fn create_new_log_from_activities_instances<TLog>(
 ) -> Rc<RefCell<SimpleEventLog>>
 where
     TLog: EventLog,
+    TLog::TEvent: 'static,
 {
     let new_log_ptr = Rc::new(RefCell::new(SimpleEventLog::empty()));
     let new_log = &mut new_log_ptr.borrow_mut();
@@ -468,8 +476,19 @@ where
         };
 
         let activity_func = |activity: &ActivityInTraceInfo| {
-            let high_level_event = SimpleEvent::new_with_min_date(&activity.node.borrow().name);
-            new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(high_level_event)));
+            let ptr = Rc::new(RefCell::new(SimpleEvent::new_with_min_date(
+                &activity.node.borrow().name,
+            )));
+            new_trace_ptr.borrow_mut().push(Rc::clone(&ptr));
+
+            let mut underlying_events = vec![];
+            for i in activity.start_pos..(activity.start_pos + activity.length) {
+                underlying_events.push(Rc::clone(&trace.get_events()[i]));
+            }
+
+            let mut event = ptr.borrow_mut();
+            let user_data = event.get_user_data();
+            user_data.put(&underlying_events_key(), Box::new(underlying_events));
         };
 
         process_activities_in_trace(trace.get_events().len(), &instances, undef_activity_func, activity_func);
