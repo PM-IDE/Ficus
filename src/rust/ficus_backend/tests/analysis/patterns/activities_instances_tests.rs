@@ -1,21 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
 use ficus_backend::{
-    event_log::{
-        core::{
-            event::event_hasher::{default_class_extractor, NameEventHasher},
-            event_log::EventLog,
-        },
-        simple::simple_event_log::SimpleEventLog,
-    },
+    event_log::{core::event::event_hasher::default_class_extractor, simple::simple_event_log::SimpleEventLog},
     features::analysis::patterns::{
-        entry_points::{
-            discover_activities_and_create_new_log, discover_activities_instances, ActivitiesInstancesDiscovery,
-            ActivityDiscoveryContext, PatternsKind, RepeatsDiscoveryContext,
-        },
-        repeat_sets::{
-            ActivityInTraceInfo, RepeatsSetsDiscoveryContext, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
-        },
+        contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
+        entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind},
+        repeat_sets::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
     },
 };
 
@@ -28,13 +18,13 @@ use crate::{
 fn test_activity_instances() {
     let log = Rc::new(RefCell::new(create_log_from_taxonomy_of_patterns()));
 
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
+
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
 
     let activities = discover_activities_instances(&repeats_context, &context);
     let activities = dump_activities(&activities.borrow());
@@ -53,13 +43,13 @@ fn dump_activities(instances: &Vec<Vec<ActivityInTraceInfo>>) -> Vec<Vec<(usize,
 fn test_activity_instances1() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
 
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
+
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
 
     let activities = discover_activities_instances(&repeats_context, &context);
 
@@ -91,14 +81,15 @@ fn execute_activities_discovery_test(
     expected: &Vec<Vec<&str>>,
 ) {
     let log = Rc::new(RefCell::new(log));
-    let repeats_context = RepeatsDiscoveryContext::new(
+
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
-    let context = ActivitiesInstancesDiscovery::new(strategy, context);
+
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesInstancesDiscoveryContext::new(strategy, context);
 
     let new_log = discover_activities_and_create_new_log(&repeats_context, &context);
 

@@ -1,15 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
 use ficus_backend::{
-    event_log::core::{
-        event::event_hasher::{default_class_extractor, NameEventHasher},
-        event_log::EventLog,
-    },
+    event_log::core::event::event_hasher::default_class_extractor,
     features::analysis::patterns::{
-        entry_points::{
-            build_repeat_set_tree, find_repeats, ActivityDiscoveryContext, PatternsKind, RepeatsDiscoveryContext,
-        },
-        repeat_sets::{ActivityNode, RepeatsSetsDiscoveryContext, SubArrayWithTraceIndex},
+        contexts::{ActivitiesDiscoveryContext, PatternsDiscoveryContext},
+        entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
+        repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
     },
 };
 
@@ -21,7 +17,7 @@ use crate::{
 #[test]
 fn test_repeat_sets_primitive_tandem_arrays() {
     let log = create_maximal_repeats_log();
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
@@ -38,7 +34,7 @@ fn get_first_trace_repeat(repeats: &Vec<SubArrayWithTraceIndex>) -> Vec<(usize, 
 #[test]
 fn test_repeat_sets_super_maximal_repeats() {
     let log = create_maximal_repeats_log();
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::SuperMaximalRepeats,
         default_class_extractor,
@@ -65,8 +61,8 @@ fn test_repeat_sets_super_maximal_repeats() {
 #[test]
 fn test_repeat_sets_near_super_maximal_repeats() {
     let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let repeats_context = RepeatsDiscoveryContext::new(
+
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::NearSuperMaximalRepeats,
         default_class_extractor,
@@ -94,14 +90,13 @@ fn test_repeat_sets_near_super_maximal_repeats() {
 #[test]
 fn test_repeat_set_tree() {
     let log = Rc::new(RefCell::new(create_log_from_taxonomy_of_patterns()));
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
 
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
     let repeats = build_repeat_set_tree(&repeats_context, &context);
 
     assert_eq!(
@@ -124,14 +119,13 @@ fn get_top_level_activities_event_classes(activities: &Vec<Rc<RefCell<ActivityNo
 #[test]
 fn test_repeat_set_tree2() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
 
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
 
     let repeats = build_repeat_set_tree(&repeats_context, &context);
 
@@ -149,14 +143,13 @@ fn test_repeat_set_tree2() {
 #[test]
 fn test_repeat_set_tree3() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
-    let repeats_context = RepeatsDiscoveryContext::new(
+    let repeats_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::SuperMaximalRepeats,
         default_class_extractor,
     );
 
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::SuperMaximalRepeats);
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
     let repeats = build_repeat_set_tree(&repeats_context, &context);
 
     assert_eq!(
@@ -177,10 +170,10 @@ fn test_repeat_set_tree3() {
 fn test_repeat_set_tree4() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
     let repeats_context =
-        RepeatsDiscoveryContext::new(Rc::clone(&log), PatternsKind::MaximalRepeats, default_class_extractor);
+        PatternsDiscoveryContext::new(Rc::clone(&log), PatternsKind::MaximalRepeats, default_class_extractor);
 
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivityDiscoveryContext::new(context, PatternsKind::MaximalRepeats);
+    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+
     let repeats = build_repeat_set_tree(&repeats_context, &context);
 
     assert_eq!(

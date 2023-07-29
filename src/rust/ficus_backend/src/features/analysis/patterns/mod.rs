@@ -1,3 +1,4 @@
+pub mod contexts;
 pub mod entry_points;
 pub mod repeat_sets;
 pub mod repeats;

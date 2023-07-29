@@ -12,7 +12,7 @@ use crate::{
     utils::hash_utils::calculate_poly_hash_for_collection,
 };
 
-use super::tandem_arrays::SubArrayInTraceInfo;
+use super::{contexts::ActivitiesDiscoveryContext, tandem_arrays::SubArrayInTraceInfo};
 
 #[derive(Clone, Copy, Debug)]
 pub struct SubArrayWithTraceIndex {
@@ -102,30 +102,10 @@ impl ActivityNode {
     }
 }
 
-pub struct RepeatsSetsDiscoveryContext<TNameCreator>
-where
-    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
-{
-    pub activity_level: usize,
-    pub name_creator: TNameCreator,
-}
-
-impl<TNameCreator> RepeatsSetsDiscoveryContext<TNameCreator>
-where
-    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
-{
-    pub fn new(activity_level: usize, name_creator: TNameCreator) -> Self {
-        Self {
-            activity_level,
-            name_creator,
-        }
-    }
-}
-
 pub fn build_repeat_set_tree_from_repeats<TNameCreator>(
     log: &Vec<Vec<u64>>,
     repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-    context: &RepeatsSetsDiscoveryContext<TNameCreator>,
+    context: &ActivitiesDiscoveryContext<TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
