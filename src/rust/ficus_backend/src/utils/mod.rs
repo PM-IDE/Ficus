@@ -3,3 +3,4 @@ pub mod hash_utils;
 pub mod interval_tree;
 pub mod suffix_tree;
 pub mod vec_utils;
+pub mod user_data;
