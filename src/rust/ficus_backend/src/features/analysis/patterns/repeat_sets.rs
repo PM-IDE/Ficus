@@ -456,7 +456,7 @@ pub enum UndefActivityHandlingStrategy {
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 
 pub fn create_new_log_from_activities_instances<TLog>(
-    log: &TLog,
+    log: &Rc<RefCell<TLog>>,
     instances: &Vec<Vec<ActivityInTraceInfo>>,
     strategy: &UndefActivityHandlingStrategy,
 ) -> Rc<RefCell<SimpleEventLog>>
@@ -466,7 +466,7 @@ where
     let new_log_ptr = Rc::new(RefCell::new(SimpleEventLog::empty()));
     let new_log = &mut new_log_ptr.borrow_mut();
 
-    for (instances, trace) in instances.iter().zip(log.get_traces()) {
+    for (instances, trace) in instances.iter().zip(log.borrow().get_traces()) {
         let trace = trace.borrow();
         let new_trace_ptr = Rc::new(RefCell::new(SimpleTrace::empty()));
 

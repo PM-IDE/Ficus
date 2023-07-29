@@ -19,9 +19,16 @@ where
     TEvent: Event,
 {
     fn hash(event: &TEvent) -> u64 {
-        let mut hasher = DefaultHasher::new();
-        event.get_name().hash(&mut hasher);
-
-        hasher.finish()
+        default_class_extractor(event)
     }
+}
+
+pub fn default_class_extractor<TEvent>(event: &TEvent) -> u64
+where
+    TEvent: Event,
+{
+    let mut hasher = DefaultHasher::new();
+    event.get_name().hash(&mut hasher);
+
+    hasher.finish()
 }
