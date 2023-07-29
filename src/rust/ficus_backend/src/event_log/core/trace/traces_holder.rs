@@ -1,9 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::{
-    core::event::{event::Event, event_hasher::EventHasher},
-    simple::simple_event_log::SimpleEventLog,
-};
+use crate::event_log::core::event::{event::Event, event_hasher::EventHasher};
 
 use super::trace::Trace;
 

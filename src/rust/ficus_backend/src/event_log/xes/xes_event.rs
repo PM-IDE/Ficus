@@ -7,7 +7,7 @@ use crate::{
         event::{Event, EventPayloadValue},
         lifecycle::Lifecycle,
     },
-    utils::vec_utils,
+    utils::{user_data::UserData, vec_utils},
 };
 
 pub struct XesEventImpl {
@@ -16,6 +16,7 @@ pub struct XesEventImpl {
     lifecycle: Option<Lifecycle>,
 
     payload: HashMap<String, EventPayloadValue>,
+    user_data: UserData,
 }
 
 impl XesEventImpl {
@@ -30,6 +31,7 @@ impl XesEventImpl {
             timestamp,
             lifecycle,
             payload,
+            user_data: UserData::new(),
         }
     }
 }
@@ -79,5 +81,9 @@ impl Event for XesEventImpl {
 
     fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue) {
         *self.payload.get_mut(&key).unwrap() = value;
+    }
+
+    fn get_user_data(&self) -> &UserData {
+        &self.user_data
     }
 }
