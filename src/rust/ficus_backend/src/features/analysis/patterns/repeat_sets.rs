@@ -5,7 +5,7 @@ use std::{
 };
 
 use crate::{
-    event_log::core::{event::event::Event, event_log::EventLog},
+    event_log::core::event_log::EventLog,
     utils::hash_utils::calculate_poly_hash_for_collection,
 };
 
@@ -99,15 +99,14 @@ impl ActivityNode {
     }
 }
 
-pub fn build_repeat_set_tree_from_repeats<TClassExtractor, TLog, TEvent, TNameCreator>(
+pub fn build_repeat_set_tree_from_repeats<TClassExtractor, TLog, TNameCreator>(
     log: &Vec<Vec<u64>>,
     repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-    context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+    context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let repeats = repeats.borrow();

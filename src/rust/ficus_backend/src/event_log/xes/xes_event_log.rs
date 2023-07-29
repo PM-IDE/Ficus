@@ -17,7 +17,7 @@ use crate::utils::vec_utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
-    traces_holder: TracesHolder<XesTraceImpl, XesEventImpl>,
+    traces_holder: TracesHolder<XesTraceImpl>,
     globals: HashMap<String, HashMap<String, String>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,

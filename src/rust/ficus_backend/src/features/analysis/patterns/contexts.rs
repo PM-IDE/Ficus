@@ -1,17 +1,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
+use crate::event_log::core::{event_log::EventLog, trace::trace::Trace};
 
 use super::{
     activity_instances::UndefActivityHandlingStrategy, entry_points::PatternsKind, repeat_sets::SubArrayWithTraceIndex,
 };
 
-pub struct PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>
+pub struct PatternsDiscoveryContext<TClassExtractor, TLog>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
 {
     pub log: Rc<RefCell<TLog>>,
     pub pattern_kind: PatternsKind,
@@ -20,11 +19,10 @@ where
     processed_log: Vec<Vec<u64>>,
 }
 
-impl<TClassExtractor, TLog, TEvent> PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>
+impl<TClassExtractor, TLog> PatternsDiscoveryContext<TClassExtractor, TLog>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
 {
     pub fn get_processed_log(&self) -> &Vec<Vec<u64>> {
         &self.processed_log
@@ -50,28 +48,25 @@ where
     }
 }
 
-pub struct ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
+pub struct ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    pub patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
+    pub patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog>,
     pub activity_level: usize,
     pub name_creator: TNameCreator,
 }
 
-impl<TClassExtractor, TLog, TEvent, TNameCreator>
-    ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
+impl<TClassExtractor, TLog, TNameCreator> ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     pub fn new(
-        patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
+        patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog>,
         activity_level: usize,
         name_creator: TNameCreator,
     ) -> Self {
@@ -83,27 +78,24 @@ where
     }
 }
 
-pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
+pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    pub activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+    pub activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
     pub undef_events_handling_strategy: UndefActivityHandlingStrategy,
 }
 
-impl<TClassExtractor, TLog, TEvent, TNameCreator>
-    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
+impl<TClassExtractor, TLog, TNameCreator> ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     pub fn new(
-        activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+        activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
         strategy: UndefActivityHandlingStrategy,
     ) -> Self {
         Self {

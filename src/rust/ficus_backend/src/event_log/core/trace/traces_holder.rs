@@ -1,22 +1,20 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::core::event::{event::Event, event_hasher::EventHasher};
+use crate::event_log::core::event::event_hasher::EventHasher;
 
 use super::trace::Trace;
 
 #[derive(Debug)]
-pub struct TracesHolder<TTrace, TEvent>
+pub struct TracesHolder<TTrace>
 where
-    TTrace: Trace<TEvent = TEvent>,
-    TEvent: Event,
+    TTrace: Trace,
 {
     traces: Vec<Rc<RefCell<TTrace>>>,
 }
 
-impl<TTrace, TEvent> TracesHolder<TTrace, TEvent>
+impl<TTrace> TracesHolder<TTrace>
 where
-    TTrace: Trace<TEvent = TEvent>,
-    TEvent: Event,
+    TTrace: Trace,
 {
     pub fn empty() -> Self {
         Self { traces: vec![] }
@@ -36,7 +34,7 @@ where
 
     pub fn filter_events_by<TPred>(&mut self, predicate: TPred)
     where
-        TPred: Fn(&TEvent) -> bool,
+        TPred: Fn(&TTrace::TEvent) -> bool,
     {
         let traces = &mut self.traces;
         for index in (0..traces.len()).rev() {
@@ -49,7 +47,7 @@ where
 
     pub fn mutate_events<TMutator>(&mut self, mutator: TMutator)
     where
-        TMutator: Fn(&mut TEvent),
+        TMutator: Fn(&mut TTrace::TEvent),
     {
         for trace in &self.traces {
             trace.borrow_mut().mutate_events(&mutator);
@@ -58,7 +56,7 @@ where
 
     pub fn to_hashes_vectors<THasher>(&self) -> Vec<Vec<u64>>
     where
-        THasher: EventHasher<TEvent>,
+        THasher: EventHasher<TTrace::TEvent>,
     {
         let mut hashes = Vec::new();
         for trace in &self.traces {

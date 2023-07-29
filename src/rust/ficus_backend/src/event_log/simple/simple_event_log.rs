@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct SimpleEventLog {
-    traces_holder: TracesHolder<SimpleTrace, SimpleEvent>,
+    traces_holder: TracesHolder<SimpleTrace>,
 }
 
 impl SimpleEventLog {

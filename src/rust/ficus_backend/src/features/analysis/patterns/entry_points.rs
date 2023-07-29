@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::event_log::{
-    core::{event::event::Event, event_log::EventLog},
+    core::event_log::EventLog,
     simple::simple_event_log::SimpleEventLog,
 };
 
@@ -22,13 +22,12 @@ pub enum PatternsKind {
     NearSuperMaximalRepeats,
 }
 
-pub fn find_patterns<TClassExtractor, TLog, TEvent>(
-    context: &PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
+pub fn find_patterns<TClassExtractor, TLog>(
+    context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
 ) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
 {
     let log = context.get_processed_log();
     match &context.pattern_kind {
@@ -40,25 +39,23 @@ where
     }
 }
 
-pub fn find_repeats<TClassExtractor, TLog, TEvent>(
-    context: &PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
+pub fn find_repeats<TClassExtractor, TLog>(
+    context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
 ) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
 {
     let patterns = find_patterns(context);
     build_repeat_sets(context.get_processed_log(), &patterns)
 }
 
-pub fn build_repeat_set_tree<TClassExtractor, TLog, TEvent, TNameCreator>(
-    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+pub fn build_repeat_set_tree<TClassExtractor, TLog, TNameCreator>(
+    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let repeats = find_repeats(&activities_context.patterns_context);
@@ -69,13 +66,12 @@ where
     )
 }
 
-pub fn discover_activities_instances<TClassExtractor, TLog, TEvent, TNameCreator>(
-    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+pub fn discover_activities_instances<TClassExtractor, TLog, TNameCreator>(
+    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
 ) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
 where
-    TLog: EventLog<TEvent = TEvent>,
-    TEvent: Event,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let repeat_set_tree = build_repeat_set_tree(activities_context);
@@ -86,13 +82,13 @@ where
     )
 }
 
-pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TEvent, TNameCreator>(
-    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
+pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TNameCreator>(
+    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
 ) -> Rc<RefCell<SimpleEventLog>>
 where
-    TLog: EventLog<TEvent = TEvent> + EventLog,
-    TEvent: Event + 'static,
-    TClassExtractor: Fn(&TEvent) -> u64,
+    TLog: EventLog,
+    TLog::TEvent: 'static,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let activity_instances = discover_activities_instances(&context.activities_context);
