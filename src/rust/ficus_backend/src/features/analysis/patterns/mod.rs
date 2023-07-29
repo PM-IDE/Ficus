@@ -1,3 +1,4 @@
+pub mod activity_instances;
 pub mod contexts;
 pub mod entry_points;
 pub mod repeat_sets;

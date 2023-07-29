@@ -4,8 +4,7 @@ use std::rc::Rc;
 use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
 
 use super::{
-    entry_points::PatternsKind,
-    repeat_sets::{SubArrayWithTraceIndex, UndefActivityHandlingStrategy},
+    activity_instances::UndefActivityHandlingStrategy, entry_points::PatternsKind, repeat_sets::SubArrayWithTraceIndex,
 };
 
 pub struct PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>

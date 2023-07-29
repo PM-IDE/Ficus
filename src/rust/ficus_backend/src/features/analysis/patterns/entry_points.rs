@@ -6,11 +6,9 @@ use crate::event_log::{
 };
 
 use super::{
+    activity_instances::{create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo},
     contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
-    repeat_sets::{
-        build_repeat_set_tree_from_repeats, build_repeat_sets, create_new_log_from_activities_instances,
-        extract_activities_instances, ActivityInTraceInfo, ActivityNode, SubArrayWithTraceIndex,
-    },
+    repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets, ActivityNode, SubArrayWithTraceIndex},
     repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
     tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
 };
