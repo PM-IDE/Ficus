@@ -55,8 +55,7 @@ where
 }
 
 pub fn build_repeat_set_tree<TClassExtractor, TLog, TEvent, TNameCreator>(
-    patterns_context: &PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
-    repeats_sets_context: &ActivitiesDiscoveryContext<TNameCreator>,
+    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
     TLog: EventLog<TEvent = TEvent>,
@@ -64,13 +63,16 @@ where
     TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    let repeats = find_repeats(patterns_context);
-    build_repeat_set_tree_from_repeats(patterns_context.get_processed_log(), &repeats, &repeats_sets_context)
+    let repeats = find_repeats(&activities_context.patterns_context);
+    build_repeat_set_tree_from_repeats(
+        activities_context.patterns_context.get_processed_log(),
+        &repeats,
+        &activities_context,
+    )
 }
 
-pub fn discover_activities_instances<TNameCreator, TClassExtractor, TLog, TEvent>(
-    repeats_context: &PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
-    repeats_sets_context: &ActivitiesDiscoveryContext<TNameCreator>,
+pub fn discover_activities_instances<TClassExtractor, TLog, TEvent, TNameCreator>(
+    activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
 ) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
 where
     TLog: EventLog<TEvent = TEvent>,
@@ -78,13 +80,16 @@ where
     TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    let repeat_set_tree = build_repeat_set_tree(repeats_context, repeats_sets_context);
-    extract_activities_instances(repeats_context.get_processed_log(), repeat_set_tree, true)
+    let repeat_set_tree = build_repeat_set_tree(activities_context);
+    extract_activities_instances(
+        activities_context.patterns_context.get_processed_log(),
+        repeat_set_tree,
+        true,
+    )
 }
 
 pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TEvent, TNameCreator>(
-    repeats_context: &PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
-    context: &ActivitiesInstancesDiscoveryContext<TNameCreator>,
+    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
 ) -> Rc<RefCell<SimpleEventLog>>
 where
     TLog: EventLog<TEvent = TEvent> + EventLog,
@@ -92,11 +97,11 @@ where
     TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    let activity_instances = discover_activities_instances(repeats_context, &context.activities_context);
+    let activity_instances = discover_activities_instances(&context.activities_context);
     let activity_instances = activity_instances.borrow();
 
     create_new_log_from_activities_instances(
-        &repeats_context.log,
+        &context.activities_context.patterns_context.log,
         &activity_instances,
         &context.undef_events_handling_strategy,
     )

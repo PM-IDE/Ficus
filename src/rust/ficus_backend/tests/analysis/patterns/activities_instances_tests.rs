@@ -18,15 +18,17 @@ use crate::{
 fn test_activity_instances() {
     let log = Rc::new(RefCell::new(create_log_from_taxonomy_of_patterns()));
 
-    let repeats_context = PatternsDiscoveryContext::new(
+    let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+        create_activity_name(&log.borrow(), sub_array)
+    });
 
-    let activities = discover_activities_instances(&repeats_context, &context);
+    let activities = discover_activities_instances(&context);
     let activities = dump_activities(&activities.borrow());
 
     assert_eq!(activities, [[(2, 15), (17, 19)]]);
@@ -43,15 +45,17 @@ fn dump_activities(instances: &Vec<Vec<ActivityInTraceInfo>>) -> Vec<Vec<(usize,
 fn test_activity_instances1() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
 
-    let repeats_context = PatternsDiscoveryContext::new(
+    let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+        create_activity_name(&log.borrow(), sub_array)
+    });
 
-    let activities = discover_activities_instances(&repeats_context, &context);
+    let activities = discover_activities_instances(&context);
 
     let activities = dump_activities(&activities.borrow());
     assert_eq!(
@@ -82,16 +86,18 @@ fn execute_activities_discovery_test(
 ) {
     let log = Rc::new(RefCell::new(log));
 
-    let repeats_context = PatternsDiscoveryContext::new(
+    let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-    let context = ActivitiesInstancesDiscoveryContext::new(strategy, context);
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+        create_activity_name(&log.borrow(), sub_array)
+    });
+    let context = ActivitiesInstancesDiscoveryContext::new(context, strategy);
 
-    let new_log = discover_activities_and_create_new_log(&repeats_context, &context);
+    let new_log = discover_activities_and_create_new_log(&context);
 
     assert_eq!(new_log.borrow().to_raw_vector(), *expected);
 }

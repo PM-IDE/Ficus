@@ -51,41 +51,61 @@ where
     }
 }
 
-pub struct ActivitiesDiscoveryContext<TNameCreator>
+pub struct ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
 where
+    TLog: EventLog<TEvent = TEvent>,
+    TEvent: Event,
+    TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
+    pub patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
     pub activity_level: usize,
     pub name_creator: TNameCreator,
 }
 
-impl<TNameCreator> ActivitiesDiscoveryContext<TNameCreator>
+impl<TClassExtractor, TLog, TEvent, TNameCreator>
+    ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
 where
+    TLog: EventLog<TEvent = TEvent>,
+    TEvent: Event,
+    TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    pub fn new(activity_level: usize, name_creator: TNameCreator) -> Self {
+    pub fn new(
+        patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog, TEvent>,
+        activity_level: usize,
+        name_creator: TNameCreator,
+    ) -> Self {
         Self {
+            patterns_context,
             activity_level,
             name_creator,
         }
     }
 }
 
-pub struct ActivitiesInstancesDiscoveryContext<TNameCreator>
+pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
 where
+    TLog: EventLog<TEvent = TEvent>,
+    TEvent: Event,
+    TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    pub activities_context: ActivitiesDiscoveryContext<TNameCreator>,
+    pub activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
     pub undef_events_handling_strategy: UndefActivityHandlingStrategy,
 }
 
-impl<TNameCreator> ActivitiesInstancesDiscoveryContext<TNameCreator>
+impl<TClassExtractor, TLog, TEvent, TNameCreator>
+    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>
 where
+    TLog: EventLog<TEvent = TEvent>,
+    TEvent: Event,
+    TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     pub fn new(
+        activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
         strategy: UndefActivityHandlingStrategy,
-        activities_context: ActivitiesDiscoveryContext<TNameCreator>,
     ) -> Self {
         Self {
             activities_context,

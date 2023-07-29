@@ -102,12 +102,15 @@ impl ActivityNode {
     }
 }
 
-pub fn build_repeat_set_tree_from_repeats<TNameCreator>(
+pub fn build_repeat_set_tree_from_repeats<TClassExtractor, TLog, TEvent, TNameCreator>(
     log: &Vec<Vec<u64>>,
     repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-    context: &ActivitiesDiscoveryContext<TNameCreator>,
+    context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TEvent, TNameCreator>,
 ) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
 where
+    TLog: EventLog<TEvent = TEvent>,
+    TEvent: Event,
+    TClassExtractor: Fn(&TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let repeats = repeats.borrow();
