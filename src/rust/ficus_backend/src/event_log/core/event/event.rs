@@ -31,7 +31,7 @@ pub trait Event {
     fn get_lifecycle(&self) -> Option<Lifecycle>;
     fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue>;
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
-    fn get_user_data(&self) -> &UserData;
+    fn get_user_data(&mut self) -> &mut UserData;
 
     fn set_name(&mut self, new_name: &String);
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>);

@@ -11,7 +11,7 @@ use crate::{
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
     },
-    utils::user_data::UserData,
+    utils::user_data::{UserData, UserDataHolder},
 };
 
 #[derive(Debug)]
@@ -159,7 +159,7 @@ impl SimpleTrace {
 pub struct SimpleEvent {
     name: String,
     timestamp: DateTime<Utc>,
-    user_data: UserData,
+    user_data_holder: UserDataHolder,
 }
 
 impl SimpleEvent {
@@ -167,7 +167,7 @@ impl SimpleEvent {
         Self {
             name: name.to_owned(),
             timestamp: stamp,
-            user_data: UserData::new(),
+            user_data_holder: UserDataHolder::new(),
         }
     }
 
@@ -175,7 +175,7 @@ impl SimpleEvent {
         Self {
             name: name.to_owned(),
             timestamp: DateTime::<Utc>::MIN_UTC,
-            user_data: UserData::new(),
+            user_data_holder: UserDataHolder::new(),
         }
     }
 }
@@ -217,7 +217,7 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
-    fn get_user_data(&self) -> &UserData {
-        &self.user_data
+    fn get_user_data(&mut self) -> &mut UserData {
+        self.user_data_holder.get_mut()
     }
 }

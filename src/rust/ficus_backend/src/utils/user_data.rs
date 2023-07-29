@@ -115,3 +115,22 @@ impl UserData {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct UserDataHolder {
+    user_data: Option<UserData>,
+}
+
+impl UserDataHolder {
+    pub fn new() -> Self {
+        Self { user_data: None }
+    }
+
+    pub fn get_mut(&mut self) -> &mut UserData {
+        if self.user_data.is_none() {
+            self.user_data = Some(UserData::new());
+        }
+
+        self.user_data.as_mut().unwrap()
+    }
+}
