@@ -1,12 +1,17 @@
+use std::{cell::RefCell, rc::Rc};
+
 use ficus_backend::{
     event_log::{
-        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
+        core::{
+            event::event_hasher::{default_class_extractor, NameEventHasher},
+            event_log::EventLog,
+        },
         simple::simple_event_log::SimpleEventLog,
     },
     features::analysis::patterns::{
         entry_points::{
             discover_activities_and_create_new_log, discover_activities_instances, ActivitiesInstancesDiscovery,
-            ActivityDiscoveryContext, PatternsKind,
+            ActivityDiscoveryContext, PatternsKind, RepeatsDiscoveryContext,
         },
         repeat_sets::{
             ActivityInTraceInfo, RepeatsSetsDiscoveryContext, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
@@ -21,12 +26,17 @@ use crate::{
 
 #[test]
 fn test_activity_instances() {
-    let log = create_log_from_taxonomy_of_patterns();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let log = Rc::new(RefCell::new(create_log_from_taxonomy_of_patterns()));
+
+    let repeats_context = RepeatsDiscoveryContext::new(
+        Rc::clone(&log),
+        PatternsKind::PrimitiveTandemArrays(20),
+        default_class_extractor,
+    );
+    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
     let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
 
-    let activities = discover_activities_instances(&hashes, &context);
+    let activities = discover_activities_instances(&repeats_context, &context);
     let activities = dump_activities(&activities.borrow());
 
     assert_eq!(activities, [[(2, 15), (17, 19)]]);
@@ -41,11 +51,17 @@ fn dump_activities(instances: &Vec<Vec<ActivityInTraceInfo>>) -> Vec<Vec<(usize,
 
 #[test]
 fn test_activity_instances1() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
+
+    let repeats_context = RepeatsDiscoveryContext::new(
+        Rc::clone(&log),
+        PatternsKind::PrimitiveTandemArrays(20),
+        default_class_extractor,
+    );
+    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
     let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
-    let activities = discover_activities_instances(&hashes, &context);
+
+    let activities = discover_activities_instances(&repeats_context, &context);
 
     let activities = dump_activities(&activities.borrow());
     assert_eq!(
@@ -62,34 +78,37 @@ fn test_activity_instances1() {
 
 #[test]
 fn test_creating_new_log_from_activity_instances_insert_all_events() {
-    let log = create_log_from_taxonomy_of_patterns();
     execute_activities_discovery_test(
-        &log,
+        create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::InsertAllEvents,
         &vec![vec!["g", "d", "abc", "f", "i", "abc"]],
     );
 }
 
 fn execute_activities_discovery_test(
-    log: &SimpleEventLog,
+    log: SimpleEventLog,
     strategy: UndefActivityHandlingStrategy,
     expected: &Vec<Vec<&str>>,
 ) {
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log, sub_array));
+    let log = Rc::new(RefCell::new(log));
+    let repeats_context = RepeatsDiscoveryContext::new(
+        Rc::clone(&log),
+        PatternsKind::PrimitiveTandemArrays(20),
+        default_class_extractor,
+    );
+    let context = RepeatsSetsDiscoveryContext::new(0, |sub_array| create_activity_name(&log.borrow(), sub_array));
     let context = ActivityDiscoveryContext::new(context, PatternsKind::PrimitiveTandemArrays(20));
     let context = ActivitiesInstancesDiscovery::new(strategy, context);
 
-    let new_log = discover_activities_and_create_new_log(log, &hashes, &context);
+    let new_log = discover_activities_and_create_new_log(&repeats_context, &context);
 
     assert_eq!(new_log.borrow().to_raw_vector(), *expected);
 }
 
 #[test]
 fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
-    let log = create_log_from_taxonomy_of_patterns();
     execute_activities_discovery_test(
-        &log,
+        create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::InsertAsSingleEvent,
         &vec![vec![UNDEF_ACTIVITY_NAME, "abc", UNDEF_ACTIVITY_NAME, "abc"]],
     );
@@ -97,9 +116,8 @@ fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
 
 #[test]
 fn test_creating_new_log_from_activity_instances_dont_insert() {
-    let log = create_log_from_taxonomy_of_patterns();
     execute_activities_discovery_test(
-        &log,
+        create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::DontInsert,
         &vec![vec!["abc", "abc"]],
     );
