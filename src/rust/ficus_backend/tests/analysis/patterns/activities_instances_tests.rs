@@ -138,6 +138,7 @@ fn test_creating_new_log_from_activity_instances_dont_insert() {
 fn test_creating_log_for_activities() {
     execute_activities_logs_creation_test(
         create_log_from_taxonomy_of_patterns(),
+        PatternsKind::PrimitiveTandemArrays(20),
         vec![(
             "abc".to_owned(),
             vec![
@@ -148,24 +149,115 @@ fn test_creating_log_for_activities() {
     )
 }
 
-fn execute_activities_logs_creation_test(log: SimpleEventLog, expected: Vec<(String, Vec<Vec<String>>)>) {
+#[test]
+fn test_creating_log_for_activities1() {
+    execute_activities_logs_creation_test(
+        create_maximal_repeats_log(),
+        PatternsKind::MaximalRepeats,
+        vec![
+            ("bcd".to_owned(), vec![vecs!["b", "d", "c"]]),
+            (
+                "dabc".to_owned(),
+                vec![
+                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                ],
+            ),
+            ("e".to_owned(), vec![vecs!["e"], vecs!["e"]]),
+        ],
+    )
+}
+
+#[test]
+fn test_creating_log_for_activities2() {
+    execute_activities_logs_creation_test(
+        create_maximal_repeats_log(),
+        PatternsKind::NearSuperMaximalRepeats,
+        vec![
+            ("bcd".to_owned(), vec![vecs!["b", "d", "c"]]),
+            (
+                "dabc".to_owned(),
+                vec![
+                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                ],
+            ),
+            ("e".to_owned(), vec![vecs!["e"], vecs!["e"]]),
+        ],
+    )
+}
+
+#[test]
+fn test_creating_log_for_activities3() {
+    execute_activities_logs_creation_test(
+        create_maximal_repeats_log(),
+        PatternsKind::PrimitiveTandemArrays(20),
+        vec![
+            (
+                "dabc".to_owned(),
+                vec![
+                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                    vecs!["b", "d", "c"]
+                ],
+            )
+        ],
+    )
+}
+
+#[test]
+fn test_creating_log_for_activities4() {
+    execute_activities_logs_creation_test(
+        create_maximal_repeats_log(),
+        PatternsKind::MaximalTandemArrays(20),
+        vec![
+            (
+                "dabc".to_owned(),
+                vec![
+                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                    vecs!["b", "d", "c"]
+                ],
+            )
+        ],
+    )
+}
+
+fn execute_activities_logs_creation_test(
+    log: SimpleEventLog,
+    pattern_kind: PatternsKind,
+    expected: Vec<(String, Vec<Vec<String>>)>,
+) {
     let log = Rc::new(RefCell::new(log));
 
-    let patterns_context = PatternsDiscoveryContext::new(
-        Rc::clone(&log),
-        PatternsKind::PrimitiveTandemArrays(20),
-        default_class_extractor,
-    );
+    let patterns_context = PatternsDiscoveryContext::new(Rc::clone(&log), pattern_kind, default_class_extractor);
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
         create_activity_name(&log.borrow(), sub_array)
     });
 
     let activities_logs = create_logs_for_activities(&context, 0);
-    let activities_logs = activities_logs
+    let mut activities_logs = activities_logs
         .iter()
         .map(|pair| (pair.0.to_owned(), pair.1.borrow().to_raw_vector()))
         .collect::<Vec<(String, Vec<Vec<String>>)>>();
 
+    activities_logs.sort_by(|first, second| first.0.cmp(&second.0));
     assert_eq!(activities_logs, expected);
 }
