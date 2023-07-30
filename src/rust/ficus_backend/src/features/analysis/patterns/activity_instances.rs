@@ -29,10 +29,10 @@ impl ActivityInTraceInfo {
 
 pub fn extract_activities_instances(
     log: &Vec<Vec<u64>>,
-    activities: Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>,
+    activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     should_narrow: bool,
 ) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>> {
-    let activities_by_size = split_activities_nodes_by_size(&mut activities.borrow_mut());
+    let activities_by_size = split_activities_nodes_by_size(activities);
     let result_ptr = Rc::new(RefCell::new(vec![]));
     let result = &mut result_ptr.borrow_mut();
 
@@ -301,4 +301,57 @@ where
     }
 
     Rc::clone(&new_log_ptr)
+}
+
+pub fn add_unattached_activities<TLog, TClassExtractor>(
+    log: &TLog,
+    activities: Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>,
+    existing_instances: &Vec<Vec<ActivityInTraceInfo>>,
+    class_extractor: TClassExtractor,
+    min_numbers_of_events: usize,
+    should_narrow: bool,
+) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
+where
+    TLog: EventLog,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
+{
+    let new_activities_ptr = Rc::new(RefCell::new(vec![]));
+    let mut new_activities = new_activities_ptr.borrow_mut();
+
+    for (trace_activities, trace) in existing_instances.iter().zip(log.get_traces()) {
+        let mut new_trace_activities = vec![];
+
+        let handle_unattached_events = |start_index: usize, end_index: usize| {
+            let trace = trace.borrow();
+            let sub_trace = trace.get_events();
+            let mut hashes = vec![];
+            for i in start_index..end_index {
+                hashes.push(class_extractor(&sub_trace[i].borrow()))
+            }
+
+            let activities = extract_activities_instances(&vec![hashes], &mut activities.borrow_mut(), should_narrow);
+            new_trace_activities.extend(
+                activities.borrow()[0]
+                    .iter()
+                    .map(|instance| ActivityInTraceInfo {
+                        node: Rc::clone(&instance.node),
+                        start_pos: start_index + instance.start_pos,
+                        length: instance.length,
+                    })
+                    .collect::<Vec<ActivityInTraceInfo>>(),
+            );
+        };
+
+        let handle_activity = |_| {};
+
+        let length = trace.borrow().get_events().len();
+        process_activities_in_trace(length, trace_activities, handle_unattached_events, handle_activity);
+
+        new_trace_activities.extend(trace_activities.iter().map(|instance| *instance));
+        new_trace_activities.sort_by(|first, second| first.start_pos.cmp(&second.start_pos));
+
+        new_activities.push(new_trace_activities);
+    }
+
+    new_activities_ptr
 }

@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    collections::HashSet,
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 use crate::utils::hash_utils::calculate_poly_hash_for_collection;
 
