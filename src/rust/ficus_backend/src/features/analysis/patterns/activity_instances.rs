@@ -14,7 +14,7 @@ use crate::{
 
 use super::repeat_sets::ActivityNode;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ActivityInTraceInfo {
     pub node: Rc<RefCell<ActivityNode>>,
     pub start_pos: usize,
@@ -322,6 +322,10 @@ where
         let mut new_trace_activities = vec![];
 
         let handle_unattached_events = |start_index: usize, end_index: usize| {
+            if end_index - start_index < min_numbers_of_events {
+                return;
+            }
+
             let trace = trace.borrow();
             let sub_trace = trace.get_events();
             let mut hashes = vec![];
@@ -342,16 +346,14 @@ where
             );
         };
 
-        let handle_activity = |_| {};
-
         let length = trace.borrow().get_events().len();
-        process_activities_in_trace(length, trace_activities, handle_unattached_events, handle_activity);
+        process_activities_in_trace(length, trace_activities, handle_unattached_events, |_| { });
 
-        new_trace_activities.extend(trace_activities.iter().map(|instance| *instance));
+        new_trace_activities.extend(trace_activities.iter().map(|instance| instance.clone()));
         new_trace_activities.sort_by(|first, second| first.start_pos.cmp(&second.start_pos));
 
         new_activities.push(new_trace_activities);
     }
 
-    new_activities_ptr
+    Rc::clone(&new_activities_ptr)
 }

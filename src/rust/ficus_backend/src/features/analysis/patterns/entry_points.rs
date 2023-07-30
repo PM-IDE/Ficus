@@ -72,6 +72,8 @@ where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let repeat_set_tree = build_repeat_set_tree(activities_context);
+    let repeat_set_tree = &mut repeat_set_tree.borrow_mut();
+    
     extract_activities_instances(
         activities_context.patterns_context.get_processed_log(),
         repeat_set_tree,
