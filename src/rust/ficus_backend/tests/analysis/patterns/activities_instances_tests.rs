@@ -8,8 +8,12 @@ use ficus_backend::{
     features::analysis::patterns::{
         activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
         contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
-        entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind},
+        entry_points::{
+            create_logs_for_activities, discover_activities_and_create_new_log, discover_activities_instances,
+            PatternsKind,
+        },
     },
+    vecs,
 };
 
 use crate::{
@@ -128,4 +132,40 @@ fn test_creating_new_log_from_activity_instances_dont_insert() {
         UndefActivityHandlingStrategy::<SimpleEvent, &dyn Fn() -> Rc<RefCell<SimpleEvent>>>::DontInsert,
         &vec![vec!["abc", "abc"]],
     );
+}
+
+#[test]
+fn test_creating_log_for_activities() {
+    execute_activities_logs_creation_test(
+        create_log_from_taxonomy_of_patterns(),
+        vec![(
+            "abc".to_owned(),
+            vec![
+                vecs!["a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a"],
+                vecs!["c", "a"],
+            ],
+        )],
+    )
+}
+
+fn execute_activities_logs_creation_test(log: SimpleEventLog, expected: Vec<(String, Vec<Vec<String>>)>) {
+    let log = Rc::new(RefCell::new(log));
+
+    let patterns_context = PatternsDiscoveryContext::new(
+        Rc::clone(&log),
+        PatternsKind::PrimitiveTandemArrays(20),
+        default_class_extractor,
+    );
+
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+        create_activity_name(&log.borrow(), sub_array)
+    });
+
+    let activities_logs = create_logs_for_activities(&context, 0);
+    let activities_logs = activities_logs
+        .iter()
+        .map(|pair| (pair.0.to_owned(), pair.1.borrow().to_raw_vector()))
+        .collect::<Vec<(String, Vec<Vec<String>>)>>();
+
+    assert_eq!(activities_logs, expected);
 }
