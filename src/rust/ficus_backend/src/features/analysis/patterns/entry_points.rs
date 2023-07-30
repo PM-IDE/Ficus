@@ -1,9 +1,11 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::event_log::core::event_log::EventLog;
 
 use super::{
-    activity_instances::{create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo},
+    activity_instances::{
+        self, create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo,
+    },
     contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
     repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets, ActivityNode, SubArrayWithTraceIndex},
     repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
@@ -100,5 +102,25 @@ where
         &activity_instances,
         &context.undef_events_handling_strategy,
         &context.high_level_event_factory,
+    )
+}
+
+pub fn create_logs_for_activities<TClassExtractor, TLog, TNameCreator>(
+    context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
+    activity_level: usize,
+) -> HashMap<String, Rc<RefCell<TLog>>>
+where
+    TLog: EventLog,
+    TLog::TEvent: 'static,
+    TClassExtractor: Fn(&TLog::TEvent) -> u64,
+    TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+{
+    let activity_instances = discover_activities_instances(&context);
+    let activity_instances = activity_instances.borrow();
+
+    activity_instances::create_logs_for_activities(
+        &context.patterns_context.log.borrow(),
+        &activity_instances,
+        activity_level,
     )
 }

@@ -361,7 +361,7 @@ where
     Rc::clone(&new_activities_ptr)
 }
 
-pub fn create_log_for_activities<TLog>(
+pub fn create_logs_for_activities<TLog>(
     log: &TLog,
     activities: &Vec<Vec<ActivityInTraceInfo>>,
     activity_level: usize,
