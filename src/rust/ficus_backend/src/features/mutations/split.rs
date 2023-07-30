@@ -29,7 +29,7 @@ impl<TTrace> Clone for TracePointer<TTrace> {
 
 pub fn split_by_traces<TLog>(log: &TLog) -> Vec<Vec<Rc<RefCell<TLog::TTrace>>>>
 where
-    TLog: EventLog
+    TLog: EventLog,
 {
     let len_to_traces = create_len_to_traces_map(log);
 
@@ -43,7 +43,7 @@ where
 
 fn create_len_to_traces_map<TLog>(log: &TLog) -> HashMap<usize, Vec<TracePointer<TLog::TTrace>>>
 where
-    TLog: EventLog
+    TLog: EventLog,
 {
     let mut len_to_traces: HashMap<usize, Vec<TracePointer<TLog::TTrace>>> = HashMap::new();
     let traces = log.get_traces();

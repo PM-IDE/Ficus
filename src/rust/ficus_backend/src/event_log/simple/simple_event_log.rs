@@ -6,7 +6,7 @@ use crate::{
         event::event::{Event, EventPayloadValue},
         event::event_hasher::EventHasher,
         event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
-        event::lifecycle::Lifecycle,
+        event::{event_base::EventBase, lifecycle::Lifecycle},
         event_log::EventLog,
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
@@ -157,36 +157,30 @@ impl SimpleTrace {
 
 #[derive(Debug)]
 pub struct SimpleEvent {
-    name: String,
-    timestamp: DateTime<Utc>,
-    user_data_holder: UserDataHolder,
+    event_base: EventBase,
 }
 
 impl SimpleEvent {
-    pub fn new(name: &str, stamp: DateTime<Utc>) -> Self {
+    pub fn new(name: &str, timestamp: DateTime<Utc>) -> Self {
         Self {
-            name: name.to_owned(),
-            timestamp: stamp,
-            user_data_holder: UserDataHolder::new(),
+            event_base: EventBase::new(name.to_owned(), timestamp),
         }
     }
 
     pub fn new_with_min_date(name: &str) -> Self {
         Self {
-            name: name.to_owned(),
-            timestamp: DateTime::<Utc>::MIN_UTC,
-            user_data_holder: UserDataHolder::new(),
+            event_base: EventBase::new(name.to_owned(), DateTime::<Utc>::MIN_UTC),
         }
     }
 }
 
 impl Event for SimpleEvent {
     fn get_name(&self) -> &String {
-        &self.name
+        &self.event_base.name
     }
 
     fn get_timestamp(&self) -> &DateTime<Utc> {
-        &self.timestamp
+        &self.event_base.timestamp
     }
 
     fn get_lifecycle(&self) -> Option<Lifecycle> {
@@ -202,11 +196,11 @@ impl Event for SimpleEvent {
     }
 
     fn set_name(&mut self, new_name: &String) {
-        self.name = new_name.to_owned();
+        self.event_base.name = new_name.to_owned();
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
-        self.timestamp = new_timestamp;
+        self.event_base.timestamp = new_timestamp;
     }
 
     fn set_lifecycle(&mut self, _: Lifecycle) {
@@ -218,6 +212,6 @@ impl Event for SimpleEvent {
     }
 
     fn get_user_data(&mut self) -> &mut UserData {
-        self.user_data_holder.get_mut()
+        self.event_base.user_data_holder.get_mut()
     }
 }

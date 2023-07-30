@@ -5,21 +5,16 @@ use chrono::{DateTime, Utc};
 use crate::{
     event_log::core::event::{
         event::{Event, EventPayloadValue},
+        event_base::EventBase,
         lifecycle::Lifecycle,
     },
-    utils::{
-        user_data::{UserData, UserDataHolder},
-        vec_utils,
-    },
+    utils::{user_data::UserData, vec_utils},
 };
 
 pub struct XesEventImpl {
-    name: String,
-    timestamp: DateTime<Utc>,
+    event_base: EventBase,
     lifecycle: Option<Lifecycle>,
-
     payload: HashMap<String, EventPayloadValue>,
-    user_data_holder: UserDataHolder,
 }
 
 impl XesEventImpl {
@@ -30,22 +25,20 @@ impl XesEventImpl {
         payload: HashMap<String, EventPayloadValue>,
     ) -> XesEventImpl {
         XesEventImpl {
-            name: name.to_owned(),
-            timestamp,
+            event_base: EventBase::new(name, timestamp),
             lifecycle,
             payload,
-            user_data_holder: UserDataHolder::new(),
         }
     }
 }
 
 impl Event for XesEventImpl {
     fn get_name(&self) -> &String {
-        &self.name
+        &self.event_base.name
     }
 
     fn get_timestamp(&self) -> &DateTime<Utc> {
-        &self.timestamp
+        &self.event_base.timestamp
     }
 
     fn get_lifecycle(&self) -> Option<Lifecycle> {
@@ -71,11 +64,11 @@ impl Event for XesEventImpl {
     }
 
     fn set_name(&mut self, new_name: &String) {
-        self.name = new_name.to_owned();
+        self.event_base.name = new_name.to_owned();
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
-        self.timestamp = new_timestamp;
+        self.event_base.timestamp = new_timestamp;
     }
 
     fn set_lifecycle(&mut self, lifecycle: Lifecycle) {
@@ -87,6 +80,6 @@ impl Event for XesEventImpl {
     }
 
     fn get_user_data(&mut self) -> &mut UserData {
-        self.user_data_holder.get_mut()
+        self.event_base.user_data_holder.get_mut()
     }
 }

@@ -4,10 +4,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::{
-    event_log::core::event_log::EventLog,
-    utils::hash_utils::calculate_poly_hash_for_collection,
-};
+use crate::{event_log::core::event_log::EventLog, utils::hash_utils::calculate_poly_hash_for_collection};
 
 use super::{contexts::ActivitiesDiscoveryContext, tandem_arrays::SubArrayInTraceInfo};
 

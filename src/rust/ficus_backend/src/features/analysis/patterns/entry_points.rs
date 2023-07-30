@@ -1,9 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::{
-    core::event_log::EventLog,
-    simple::simple_event_log::SimpleEventLog,
-};
+use crate::event_log::{core::event_log::EventLog, simple::simple_event_log::SimpleEventLog};
 
 use super::{
     activity_instances::{create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo},

@@ -3,8 +3,9 @@ use std::{cell::RefCell, rc::Rc};
 use ficus_backend::{
     event_log::{core::event::event_hasher::default_class_extractor, simple::simple_event_log::SimpleEventLog},
     features::analysis::patterns::{
+        activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
         contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
-        entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind}, activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
+        entry_points::{discover_activities_and_create_new_log, discover_activities_instances, PatternsKind},
     },
 };
 
