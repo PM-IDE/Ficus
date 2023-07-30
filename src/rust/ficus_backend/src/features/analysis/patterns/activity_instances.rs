@@ -273,7 +273,6 @@ where
         let undef_activity_func = |start_index: usize, end_index: usize| match strategy {
             UndefActivityHandlingStrategy::DontInsert => (),
             UndefActivityHandlingStrategy::InsertAsSingleEvent(factory) => {
-                let event = SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME);
                 new_trace_ptr.borrow_mut().push(factory());
             }
             UndefActivityHandlingStrategy::InsertAllEvents => {
@@ -373,12 +372,16 @@ where
     let mut activities_to_logs: HashMap<String, Rc<RefCell<TLog>>> = HashMap::new();
     for (trace_activities, trace) in activities.iter().zip(log.get_traces()) {
         let activity_handler = |activity_info: &ActivityInTraceInfo| {
+            if activity_level != activity_info.node.borrow().level {
+                return;
+            }
+
             let new_trace_ptr = Rc::new(RefCell::new(TLog::TTrace::empty()));
             let mut new_trace = new_trace_ptr.borrow_mut();
 
             let start = activity_info.start_pos;
             let end = start + activity_info.length;
-            
+
             let trace = trace.borrow();
             let events = trace.get_events();
 

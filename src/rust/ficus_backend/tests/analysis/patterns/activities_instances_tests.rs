@@ -1,7 +1,10 @@
 use std::{cell::RefCell, rc::Rc};
 
 use ficus_backend::{
-    event_log::{core::event::event_hasher::default_class_extractor, simple::simple_event_log::{SimpleEventLog, SimpleEvent}},
+    event_log::{
+        core::event::event_hasher::default_class_extractor,
+        simple::simple_event_log::{SimpleEvent, SimpleEventLog},
+    },
     features::analysis::patterns::{
         activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
         contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
@@ -75,7 +78,7 @@ fn test_creating_new_log_from_activity_instances_insert_all_events() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::<SimpleEvent, &dyn Fn() -> Rc<RefCell<SimpleEvent>>>::InsertAllEvents,
-        &vec![vec!["g", "d", "abc", "f", "i", "abc"]]
+        &vec![vec!["g", "d", "abc", "f", "i", "abc"]],
     );
 }
 
@@ -83,8 +86,7 @@ fn execute_activities_discovery_test<TUndefEventFactory>(
     log: SimpleEventLog,
     strategy: UndefActivityHandlingStrategy<SimpleEvent, TUndefEventFactory>,
     expected: &Vec<Vec<&str>>,
-)
-where
+) where
     TUndefEventFactory: Fn() -> Rc<RefCell<SimpleEvent>>,
 {
     let log = Rc::new(RefCell::new(log));
@@ -112,7 +114,9 @@ where
 fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
-        UndefActivityHandlingStrategy::InsertAsSingleEvent(|| { Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))}),
+        UndefActivityHandlingStrategy::InsertAsSingleEvent(|| {
+            Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))
+        }),
         &vec![vec![UNDEF_ACTIVITY_NAME, "abc", UNDEF_ACTIVITY_NAME, "abc"]],
     );
 }
@@ -122,6 +126,6 @@ fn test_creating_new_log_from_activity_instances_dont_insert() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::<SimpleEvent, &dyn Fn() -> Rc<RefCell<SimpleEvent>>>::DontInsert,
-        &vec![vec!["abc", "abc"]]
+        &vec![vec!["abc", "abc"]],
     );
 }

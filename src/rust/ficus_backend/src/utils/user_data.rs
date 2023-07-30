@@ -1,7 +1,8 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    marker::PhantomData, rc::Rc,
+    marker::PhantomData,
+    rc::Rc,
 };
 
 pub struct Key<T> {
@@ -49,9 +50,14 @@ where
     }
 }
 
-impl<T> Clone for ValueHolderImpl<T> where T: Clone {
+impl<T> Clone for ValueHolderImpl<T>
+where
+    T: Clone,
+{
     fn clone(&self) -> Self {
-        Self { value: self.value.clone() }
+        Self {
+            value: self.value.clone(),
+        }
     }
 }
 
@@ -65,8 +71,7 @@ impl UserData {
         Self { values_map: None }
     }
 
-    pub fn put<T: Clone + 'static>(&mut self, key: &Key<T>, value: Box<T>)
-    {
+    pub fn put<T: Clone + 'static>(&mut self, key: &Key<T>, value: Box<T>) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
@@ -116,7 +121,9 @@ impl Clone for UserData {
                     new_map.insert(key.clone(), Rc::clone(value));
                 }
 
-                Self { values_map: Some(new_map) }
+                Self {
+                    values_map: Some(new_map),
+                }
             }
         }
     }
