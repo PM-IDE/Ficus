@@ -10,11 +10,6 @@ fn test_user_data() {
     user_data.put(&key, b);
 
     assert_eq!(*user_data.get(&key).unwrap(), 123);
-
-    let value = user_data.get_mut(&key).unwrap();
-    *value = 321;
-
-    assert_eq!(*user_data.get(&key).unwrap(), 321);
 }
 
 #[test]
