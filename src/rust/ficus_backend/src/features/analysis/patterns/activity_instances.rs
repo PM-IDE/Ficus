@@ -1,13 +1,13 @@
 use std::{
-    cell::RefCell,
-    collections::{HashSet, VecDeque},
+    cell::{Ref, RefCell},
+    collections::{HashMap, HashSet, VecDeque},
     rc::Rc,
 };
 
 use crate::{
     event_log::{
         core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-        simple::simple_event_log::{SimpleEvent, SimpleEventLog, SimpleTrace},
+        simple::simple_event_log::SimpleEvent,
     },
     utils::user_data::Key,
 };
@@ -233,9 +233,12 @@ pub fn process_activities_in_trace<TUndefActivityHandleFunc, TActivityHandleFunc
     }
 }
 
-pub enum UndefActivityHandlingStrategy {
+pub enum UndefActivityHandlingStrategy<TEvent, TUndefEventFactory>
+where
+    TUndefEventFactory: Fn() -> Rc<RefCell<TEvent>>,
+{
     DontInsert,
-    InsertAsSingleEvent,
+    InsertAsSingleEvent(TUndefEventFactory),
     InsertAllEvents,
 }
 
@@ -248,40 +251,41 @@ where
     Key::new(&"UNDERLYING_EVENTS".to_string())
 }
 
-pub fn create_new_log_from_activities_instances<TLog>(
+pub fn create_new_log_from_activities_instances<TLog, TEventFactory, TUndefActivityFactory>(
     log: &Rc<RefCell<TLog>>,
     instances: &Vec<Vec<ActivityInTraceInfo>>,
-    strategy: &UndefActivityHandlingStrategy,
-) -> Rc<RefCell<SimpleEventLog>>
+    strategy: &UndefActivityHandlingStrategy<TLog::TEvent, TUndefActivityFactory>,
+    event_from_activity_factory: &TEventFactory,
+) -> Rc<RefCell<TLog>>
 where
     TLog: EventLog,
     TLog::TEvent: 'static,
+    TEventFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
+    TUndefActivityFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
-    let new_log_ptr = Rc::new(RefCell::new(SimpleEventLog::empty()));
+    let new_log_ptr = Rc::new(RefCell::new(TLog::empty()));
     let new_log = &mut new_log_ptr.borrow_mut();
 
     for (instances, trace) in instances.iter().zip(log.borrow().get_traces()) {
         let trace = trace.borrow();
-        let new_trace_ptr = Rc::new(RefCell::new(SimpleTrace::empty()));
+        let new_trace_ptr = Rc::new(RefCell::new(TLog::TTrace::empty()));
 
         let undef_activity_func = |start_index: usize, end_index: usize| match strategy {
             UndefActivityHandlingStrategy::DontInsert => (),
-            UndefActivityHandlingStrategy::InsertAsSingleEvent => {
+            UndefActivityHandlingStrategy::InsertAsSingleEvent(factory) => {
                 let event = SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME);
-                new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(event)));
+                new_trace_ptr.borrow_mut().push(factory());
             }
             UndefActivityHandlingStrategy::InsertAllEvents => {
                 for i in start_index..end_index {
-                    let event = SimpleEvent::new_with_min_date(&trace.get_events()[i].borrow().get_name());
+                    let event = trace.get_events()[i].borrow().clone();
                     new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(event)));
                 }
             }
         };
 
         let activity_func = |activity: &ActivityInTraceInfo| {
-            let ptr = Rc::new(RefCell::new(SimpleEvent::new_with_min_date(
-                &activity.node.borrow().name,
-            )));
+            let ptr = event_from_activity_factory(activity);
 
             new_trace_ptr.borrow_mut().push(Rc::clone(&ptr));
 
@@ -347,7 +351,7 @@ where
         };
 
         let length = trace.borrow().get_events().len();
-        process_activities_in_trace(length, trace_activities, handle_unattached_events, |_| { });
+        process_activities_in_trace(length, trace_activities, handle_unattached_events, |_| {});
 
         new_trace_activities.extend(trace_activities.iter().map(|instance| instance.clone()));
         new_trace_activities.sort_by(|first, second| first.start_pos.cmp(&second.start_pos));
@@ -356,4 +360,46 @@ where
     }
 
     Rc::clone(&new_activities_ptr)
+}
+
+pub fn create_log_for_activities<TLog>(
+    log: &TLog,
+    activities: &Vec<Vec<ActivityInTraceInfo>>,
+    activity_level: usize,
+) -> HashMap<String, Rc<RefCell<TLog>>>
+where
+    TLog: EventLog,
+{
+    let mut activities_to_logs: HashMap<String, Rc<RefCell<TLog>>> = HashMap::new();
+    for (trace_activities, trace) in activities.iter().zip(log.get_traces()) {
+        let activity_handler = |activity_info: &ActivityInTraceInfo| {
+            let new_trace_ptr = Rc::new(RefCell::new(TLog::TTrace::empty()));
+            let mut new_trace = new_trace_ptr.borrow_mut();
+
+            let start = activity_info.start_pos;
+            let end = start + activity_info.length;
+            
+            let trace = trace.borrow();
+            let events = trace.get_events();
+
+            for i in start..end {
+                new_trace.push(Rc::new(RefCell::new(events[i].borrow().clone())));
+            }
+
+            let name = &activity_info.node.borrow().name;
+            if let Some(activity_log) = activities_to_logs.get_mut(name) {
+                activity_log.borrow_mut().push(Rc::clone(&new_trace_ptr));
+            } else {
+                let log = Rc::new(RefCell::new(TLog::empty()));
+                log.borrow_mut().push(Rc::clone(&new_trace_ptr));
+
+                activities_to_logs.insert(name.to_owned(), log);
+            }
+        };
+
+        let length = trace.borrow().get_events().len();
+        process_activities_in_trace(length, trace_activities, |_, _| {}, activity_handler);
+    }
+
+    activities_to_logs
 }

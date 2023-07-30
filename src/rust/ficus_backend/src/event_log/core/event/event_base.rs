@@ -18,3 +18,13 @@ impl EventBase {
         }
     }
 }
+
+impl Clone for EventBase {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name.clone(),
+            timestamp: self.timestamp.clone(),
+            user_data_holder: self.user_data_holder.clone(),
+        }
+    }
+}

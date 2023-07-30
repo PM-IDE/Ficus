@@ -25,7 +25,7 @@ impl ToString for EventPayloadValue {
     }
 }
 
-pub trait Event {
+pub trait Event: Clone {
     fn get_name(&self) -> &String;
     fn get_timestamp(&self) -> &DateTime<Utc>;
     fn get_lifecycle(&self) -> Option<Lifecycle>;

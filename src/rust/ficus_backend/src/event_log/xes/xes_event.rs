@@ -83,3 +83,13 @@ impl Event for XesEventImpl {
         self.event_base.user_data_holder.get_mut()
     }
 }
+
+impl Clone for XesEventImpl {
+    fn clone(&self) -> Self {
+        Self {
+            event_base: self.event_base.clone(),
+            lifecycle: self.lifecycle.clone(),
+            payload: self.payload.clone(),
+        }
+    }
+}

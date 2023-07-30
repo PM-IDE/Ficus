@@ -7,7 +7,11 @@ pub trait Trace {
     type TTraceInfo: TraceInfo;
     type TTracePositions: TraceEventsPositions;
 
+    fn empty() -> Self;
+
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>>;
+    fn push(&mut self, event: Rc<RefCell<Self::TEvent>>);
+
     fn to_names_vec(&self) -> Vec<String>;
     fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo;
     fn get_or_create_events_positions(&mut self) -> &Self::TTracePositions;

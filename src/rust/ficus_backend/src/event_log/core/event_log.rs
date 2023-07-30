@@ -11,7 +11,10 @@ pub trait EventLog {
     type TTraceInfo: TraceInfo;
     type TTrace: Trace<TEvent = Self::TEvent, TTraceInfo = Self::TTraceInfo>;
 
+    fn empty() -> Self;
+
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
+    fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>);
 
     fn to_hashes_event_log<THasher>(&self) -> Vec<Vec<u64>>
     where

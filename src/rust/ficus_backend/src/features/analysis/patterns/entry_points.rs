@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::{core::event_log::EventLog, simple::simple_event_log::SimpleEventLog};
+use crate::event_log::core::event_log::EventLog;
 
 use super::{
     activity_instances::{create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo},
@@ -73,7 +73,7 @@ where
 {
     let repeat_set_tree = build_repeat_set_tree(activities_context);
     let repeat_set_tree = &mut repeat_set_tree.borrow_mut();
-    
+
     extract_activities_instances(
         activities_context.patterns_context.get_processed_log(),
         repeat_set_tree,
@@ -81,14 +81,16 @@ where
     )
 }
 
-pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TNameCreator>(
-    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-) -> Rc<RefCell<SimpleEventLog>>
+pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>(
+    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>,
+) -> Rc<RefCell<TLog>>
 where
     TLog: EventLog,
     TLog::TEvent: 'static,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+    TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
+    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     let activity_instances = discover_activities_instances(&context.activities_context);
     let activity_instances = activity_instances.borrow();
@@ -97,5 +99,6 @@ where
         &context.activities_context.patterns_context.log,
         &activity_instances,
         &context.undef_events_handling_strategy,
+        &context.high_level_event_factory,
     )
 }

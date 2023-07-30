@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::core::{
@@ -8,10 +8,11 @@ use crate::{
         event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
         event::{event_base::EventBase, lifecycle::Lifecycle},
         event_log::EventLog,
+        log_iterator::TraceIterator,
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
     },
-    utils::user_data::{UserData, UserDataHolder},
+    utils::user_data::UserData,
 };
 
 #[derive(Debug)]
@@ -20,12 +21,6 @@ pub struct SimpleEventLog {
 }
 
 impl SimpleEventLog {
-    pub fn empty() -> Self {
-        Self {
-            traces_holder: TracesHolder::empty(),
-        }
-    }
-
     pub fn new(raw_event_log: &Vec<Vec<&str>>) -> SimpleEventLog {
         let mut traces = Vec::new();
         for raw_trace in raw_event_log {
@@ -61,8 +56,18 @@ impl EventLog for SimpleEventLog {
     type TTrace = SimpleTrace;
     type TTraceInfo = EventSequenceInfo;
 
+    fn empty() -> Self {
+        Self {
+            traces_holder: TracesHolder::empty(),
+        }
+    }
+
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces_holder.get_traces()
+    }
+
+    fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>) {
+        self.traces_holder.push(trace);
     }
 
     fn filter_events_by<TPred>(&mut self, predicate: TPred)
@@ -97,8 +102,18 @@ impl Trace for SimpleTrace {
     type TTraceInfo = EventSequenceInfo;
     type TTracePositions = EventsPositions;
 
+    fn empty() -> Self {
+        Self {
+            events_holder: EventsHolder::empty(),
+        }
+    }
+
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
+    }
+
+    fn push(&mut self, event: Rc<RefCell<Self::TEvent>>) {
+        self.events_holder.push(event);
     }
 
     fn remove_events_by<TPred>(&mut self, predicate: TPred)
@@ -213,5 +228,13 @@ impl Event for SimpleEvent {
 
     fn get_user_data(&mut self) -> &mut UserData {
         self.event_base.user_data_holder.get_mut()
+    }
+}
+
+impl Clone for SimpleEvent {
+    fn clone(&self) -> Self {
+        Self {
+            event_base: self.event_base.clone(),
+        }
     }
 }

@@ -109,8 +109,22 @@ impl EventLog for XesEventLogImpl {
     type TTrace = XesTraceImpl;
     type TTraceInfo = EventSequenceInfo;
 
+    fn empty() -> Self {
+        Self {
+            traces_holder: TracesHolder::empty(),
+            globals: HashMap::new(),
+            extensions: Vec::new(),
+            classifiers: Vec::new(),
+            properties: HashMap::new(),
+        }
+    }
+
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces_holder.get_traces()
+    }
+
+    fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>) {
+        self.traces_holder.push(trace);
     }
 
     fn filter_events_by<TPred>(&mut self, predicate: TPred)
@@ -160,8 +174,18 @@ impl Trace for XesTraceImpl {
     type TTraceInfo = EventSequenceInfo;
     type TTracePositions = EventsPositions;
 
+    fn empty() -> Self {
+        Self {
+            events_holder: EventsHolder::empty(),
+        }
+    }
+
     fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
+    }
+
+    fn push(&mut self, event: Rc<RefCell<Self::TEvent>>) {
+        self.events_holder.push(event);
     }
 
     fn remove_events_by<TPred>(&mut self, predicate: TPred)

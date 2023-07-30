@@ -4,7 +4,9 @@ use std::rc::Rc;
 use crate::event_log::core::{event_log::EventLog, trace::trace::Trace};
 
 use super::{
-    activity_instances::UndefActivityHandlingStrategy, entry_points::PatternsKind, repeat_sets::SubArrayWithTraceIndex,
+    activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy},
+    entry_points::PatternsKind,
+    repeat_sets::SubArrayWithTraceIndex,
 };
 
 pub struct PatternsDiscoveryContext<TClassExtractor, TLog>
@@ -78,29 +80,37 @@ where
     }
 }
 
-pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
+pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+    TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
+    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     pub activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-    pub undef_events_handling_strategy: UndefActivityHandlingStrategy,
+    pub undef_events_handling_strategy: UndefActivityHandlingStrategy<TLog::TEvent, TUndefEvtFactory>,
+    pub high_level_event_factory: TEvtFactory,
 }
 
-impl<TClassExtractor, TLog, TNameCreator> ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
+impl<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
+    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
+    TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
+    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     pub fn new(
         activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-        strategy: UndefActivityHandlingStrategy,
+        strategy: UndefActivityHandlingStrategy<TLog::TEvent, TUndefEvtFactory>,
+        high_level_event_factory: TEvtFactory,
     ) -> Self {
         Self {
             activities_context,
             undef_events_handling_strategy: strategy,
+            high_level_event_factory,
         }
     }
 }
