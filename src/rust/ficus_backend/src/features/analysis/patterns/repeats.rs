@@ -36,65 +36,84 @@ where
 
     match strategy {
         PatternsDiscoveryStrategy::FromAllTraces => {
-            for trace in log {
-                let slice = SingleWordSuffixTreeSlice::new(trace.as_slice());
-                let mut tree = SuffixTree::new(&slice);
-                tree.build_tree();
-                push_repeats(finder(&tree).as_slice());
-            }
+            find_from_all_traces(log, &finder, &mut push_repeats);
         }
         PatternsDiscoveryStrategy::FromSingleMergedTrace => {
-            let mut single_trace = vec![];
-            for trace in log {
-                single_trace.push(trace.as_slice());
-            }
-
-            let slice = MultipleWordsSuffixTreeSlice::new(single_trace.clone());
-            let mut tree = SuffixTree::new(&slice);
-
-            tree.build_tree();
-
-            let mut patterns = finder(&tree);
-            adjust_patterns_from_single_merged_trace(&mut patterns, &slice);
-
-            let mut upper_bound = single_trace[0].len() + 1;
-            let mut trace_index = 1;
-            let mut pattern_index = 0;
-            let mut prev_pattern_index = 0;
-
-            while pattern_index <= patterns.len() {
-                if pattern_index >= patterns.len() {
-                    push_repeats(&patterns[prev_pattern_index..pattern_index]);
-                    break;
-                }
-
-                if pattern_index < patterns.len() {
-                    let pattern = &patterns[pattern_index];
-                    if pattern.1 < upper_bound {
-                        pattern_index += 1;
-                        continue;
-                    }
-                }
-
-                push_repeats(&patterns[prev_pattern_index..pattern_index]);
-
-                if trace_index >= single_trace.len() {
-                    break;
-                }
-
-                upper_bound += single_trace[trace_index].len() + 1;
-                trace_index += 1;
-                prev_pattern_index = pattern_index;
-            }
+            find_from_single_merged_trace(log, &finder, &mut push_repeats);
         }
     }
 
     Rc::clone(&repeats_ptr)
 }
 
+fn find_from_all_traces<TFinder, TRepeatsPusher>(log: &Vec<Vec<u64>>, finder: &TFinder, pusher: &mut TRepeatsPusher)
+where
+    TFinder: Fn(&SuffixTree<u64>) -> Vec<(usize, usize)>,
+    TRepeatsPusher: FnMut(&[(usize, usize)]) -> (),
+{
+    for trace in log {
+        let slice = SingleWordSuffixTreeSlice::new(trace.as_slice());
+        let mut tree = SuffixTree::new(&slice);
+        tree.build_tree();
+        pusher(finder(&tree).as_slice());
+    }
+}
+
+fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(
+    log: &Vec<Vec<u64>>,
+    finder: &TFinder,
+    pusher: &mut TRepeatsPusher,
+) where
+    TFinder: Fn(&SuffixTree<u64>) -> Vec<(usize, usize)>,
+    TRepeatsPusher: FnMut(&[(usize, usize)]) -> (),
+{
+    let mut single_trace = vec![];
+    for trace in log {
+        single_trace.push(trace.as_slice());
+    }
+
+    let slice = MultipleWordsSuffixTreeSlice::new(single_trace.clone());
+    let mut tree = SuffixTree::new(&slice);
+
+    tree.build_tree();
+
+    let mut patterns = finder(&tree);
+    adjust_patterns_from_single_merged_trace(&mut patterns, &slice);
+
+    let mut upper_bound = single_trace[0].len() + 1;
+    let mut trace_index = 1;
+    let mut pattern_index = 0;
+    let mut prev_pattern_index = 0;
+
+    while pattern_index <= patterns.len() {
+        if pattern_index >= patterns.len() {
+            pusher(&patterns[prev_pattern_index..pattern_index]);
+            break;
+        }
+
+        if pattern_index < patterns.len() {
+            let pattern = &patterns[pattern_index];
+            if pattern.1 < upper_bound {
+                pattern_index += 1;
+                continue;
+            }
+        }
+
+        pusher(&patterns[prev_pattern_index..pattern_index]);
+
+        if trace_index >= single_trace.len() {
+            break;
+        }
+
+        upper_bound += single_trace[trace_index].len() + 1;
+        trace_index += 1;
+        prev_pattern_index = pattern_index;
+    }
+}
+
 fn adjust_patterns_from_single_merged_trace(
-    patterns: &mut Vec<(usize, usize)>, 
-    slice: &MultipleWordsSuffixTreeSlice<u64>
+    patterns: &mut Vec<(usize, usize)>,
+    slice: &MultipleWordsSuffixTreeSlice<u64>,
 ) {
     for pattern in patterns {
         let first_index_info = slice.get_slice_info_for(pattern.0).unwrap();
