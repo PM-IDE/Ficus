@@ -34,13 +34,14 @@ where
         let mut seen = HashSet::new();
         let mut filtered_repeats = Vec::new();
         for repeat in &maximal_repeats {
-            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-            if seen.contains(sub_slice) {
-                continue;
-            }
+            if let Some(sub_slice) = self.slice.sub_slice(repeat.0, repeat.1) {
+                if seen.contains(sub_slice) {
+                    continue;
+                }
 
-            seen.insert(sub_slice);
-            filtered_repeats.push(*repeat);
+                seen.insert(sub_slice);
+                filtered_repeats.push(*repeat);
+            }
         }
 
         filtered_repeats
@@ -51,12 +52,13 @@ where
 
         self.find_maximal_repeats_and_build_suffix_tree(|maximal_repeats, maximal_repeats_tree| {
             for repeat in maximal_repeats {
-                let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-                let patterns = maximal_repeats_tree.find_patterns(sub_slice);
+                if let Some(sub_slice) = self.slice.sub_slice(repeat.0, repeat.1) {
+                    let patterns = maximal_repeats_tree.find_patterns(sub_slice);
 
-                if let Some(patterns) = patterns {
-                    if patterns.len() == 1 {
-                        super_maximal_repeats.push((repeat.0, repeat.1));
+                    if let Some(patterns) = patterns {
+                        if patterns.len() == 1 {
+                            super_maximal_repeats.push((repeat.0, repeat.1));
+                        }
                     }
                 }
             }
@@ -72,8 +74,9 @@ where
         let found_maximal_repeats = self.find_maximal_repeats();
         let mut slices = Vec::new();
         for repeat in &found_maximal_repeats {
-            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-            slices.push(sub_slice);
+            if let Some(sub_slice) = self.slice.sub_slice(repeat.0, repeat.1) {
+                slices.push(sub_slice);
+            }
         }
 
         let slice = MultipleWordsSuffixTreeSlice::new(slices);
@@ -90,11 +93,14 @@ where
             let mut intervals = vec![];
             for index in 0..maximal_repeats.len() {
                 let repeat = maximal_repeats[index];
-                let repeat_positions = maximal_repeats_tree.find_patterns(self.slice.sub_slice(repeat.0, repeat.1));
 
-                if let Some(repeat_positions) = repeat_positions {
-                    for repeat_pos in repeat_positions {
-                        intervals.push(Interval::new_with_data(repeat_pos.0, repeat_pos.1, Some(index)));
+                if let Some(sub_slice) = self.slice.sub_slice(repeat.0, repeat.1) {
+                    let repeat_positions = maximal_repeats_tree.find_patterns(sub_slice);
+
+                    if let Some(repeat_positions) = repeat_positions {
+                        for repeat_pos in repeat_positions {
+                            intervals.push(Interval::new_with_data(repeat_pos.0, repeat_pos.1, Some(index)));
+                        }
                     }
                 }
             }

@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc, vec};
 
 use crate::utils::suffix_tree::{
     suffix_tree::SuffixTree,
-    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice, SuffixTreeSlice},
+    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
 };
 
 use super::{contexts::PatternsDiscoveryStrategy, tandem_arrays::SubArrayInTraceInfo};
@@ -55,12 +55,17 @@ where
             tree.build_tree();
 
             let patterns = finder(&tree);
-            let mut upper_bound = single_trace[0].len();
+            let mut upper_bound = single_trace[0].len() + 1;
             let mut trace_index = 1;
             let mut pattern_index = 0;
             let mut prev_pattern_index = 0;
 
-            while pattern_index < patterns.len() {
+            while pattern_index <= patterns.len() {
+                if pattern_index >= patterns.len() {
+                    push_repeats(&patterns[prev_pattern_index..pattern_index]);
+                    break;
+                }
+
                 if pattern_index < patterns.len() {
                     let pattern = &patterns[pattern_index];
                     if pattern.1 < upper_bound {
@@ -75,7 +80,7 @@ where
                     break;
                 }
 
-                upper_bound += single_trace[trace_index].len();
+                upper_bound += single_trace[trace_index].len() + 1;
                 trace_index += 1;
                 prev_pattern_index = pattern_index;
             }

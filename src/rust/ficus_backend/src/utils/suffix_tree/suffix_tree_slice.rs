@@ -5,7 +5,7 @@ where
     fn equals(&self, first: usize, second: usize) -> bool;
     fn len(&self) -> usize;
     fn get(&self, index: usize) -> Option<TElement>;
-    fn sub_slice(&self, start: usize, end: usize) -> &[TElement];
+    fn sub_slice(&self, start: usize, end: usize) -> Option<&[TElement]>;
 }
 
 pub struct SingleWordSuffixTreeSlice<'a, TElement>
@@ -48,8 +48,8 @@ where
         }
     }
 
-    fn sub_slice(&self, start: usize, end: usize) -> &[TElement] {
-        &self.slice[start..end]
+    fn sub_slice(&self, start: usize, end: usize) -> Option<&[TElement]> {
+        Some(&self.slice[start..end])
     }
 }
 
@@ -78,21 +78,11 @@ where
     }
 
     fn get(&self, index: usize) -> Option<TElement> {
-        let mut next_word_border = 0;
-        for slice in &self.words {
-            next_word_border += slice.len();
-            if index < next_word_border {
-                return Some(slice[index - (next_word_border - slice.len())]);
-            }
-
-            if index == next_word_border {
-                return None;
-            }
-
-            next_word_border += 1;
+        if let Some((slice_index, Some(index_in_slice))) = self.get_slice_for(index) {
+            Some(self.words[slice_index][index_in_slice])
+        } else {
+            None
         }
-
-        return None;
     }
 
     fn len(&self) -> usize {
@@ -105,7 +95,49 @@ where
         len
     }
 
-    fn sub_slice(&self, start: usize, end: usize) -> &[TElement] {
-        panic!();
+    fn sub_slice(&self, start: usize, end: usize) -> Option<&[TElement]> {
+        if let Some((start_slice_index, Some(start_index_in_slice))) = self.get_slice_for(start) {
+            if let Some((end_slice_index, end_index_in_slice)) = self.get_slice_for(end) {
+                if start_slice_index != end_slice_index {
+                    return None;
+                } else {
+                    let patched_end_index = if let Some(end_index_in_slice) = end_index_in_slice {
+                        end_index_in_slice
+                    } else {
+                        self.words[start_slice_index].len()
+                    };
+
+                    return Some(&self.words[start_slice_index][start_index_in_slice..patched_end_index]);
+                }
+            }
+        }
+
+        None
+    }
+}
+
+impl<'a, TElement> MultipleWordsSuffixTreeSlice<'a, TElement>
+where
+    TElement: PartialEq + Copy,
+{
+    fn get_slice_for(&self, index: usize) -> Option<(usize, Option<usize>)> {
+        let mut next_word_border = 0;
+        let mut slice_index = 0;
+        for slice in &self.words {
+            next_word_border += slice.len();
+            if index < next_word_border {
+                let index_in_slice = index - (next_word_border - slice.len());
+                return Some((slice_index, Some(index_in_slice)));
+            }
+
+            if index == next_word_border {
+                return Some((slice_index, None));
+            }
+
+            next_word_border += 1;
+            slice_index += 1;
+        }
+
+        return None;
     }
 }
