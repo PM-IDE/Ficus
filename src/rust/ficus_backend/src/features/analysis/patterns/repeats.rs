@@ -54,7 +54,9 @@ where
 
             tree.build_tree();
 
-            let patterns = finder(&tree);
+            let mut patterns = finder(&tree);
+            adjust_patterns_from_single_merged_trace(&mut patterns, &slice);
+
             let mut upper_bound = single_trace[0].len() + 1;
             let mut trace_index = 1;
             let mut pattern_index = 0;
@@ -88,6 +90,25 @@ where
     }
 
     Rc::clone(&repeats_ptr)
+}
+
+fn adjust_patterns_from_single_merged_trace(
+    patterns: &mut Vec<(usize, usize)>, 
+    slice: &MultipleWordsSuffixTreeSlice<u64>
+) {
+    for pattern in patterns {
+        let first_index_info = slice.get_slice_info_for(pattern.0).unwrap();
+        let trace_index = first_index_info.0;
+
+        let first_index = first_index_info.1.unwrap();
+        let second_index = match slice.get_slice_info_for(pattern.1).unwrap().1 {
+            Some(index) => index,
+            None => slice.get_slice_part_len(trace_index),
+        };
+
+        pattern.0 = first_index;
+        pattern.1 = second_index;
+    }
 }
 
 pub fn find_super_maximal_repeats(

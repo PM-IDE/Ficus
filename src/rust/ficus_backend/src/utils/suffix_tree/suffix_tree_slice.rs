@@ -78,7 +78,7 @@ where
     }
 
     fn get(&self, index: usize) -> Option<TElement> {
-        if let Some((slice_index, Some(index_in_slice))) = self.get_slice_for(index) {
+        if let Some((slice_index, Some(index_in_slice))) = self.get_slice_info_for(index) {
             Some(self.words[slice_index][index_in_slice])
         } else {
             None
@@ -96,8 +96,8 @@ where
     }
 
     fn sub_slice(&self, start: usize, end: usize) -> Option<&[TElement]> {
-        if let Some((start_slice_index, Some(start_index_in_slice))) = self.get_slice_for(start) {
-            if let Some((end_slice_index, end_index_in_slice)) = self.get_slice_for(end) {
+        if let Some((start_slice_index, Some(start_index_in_slice))) = self.get_slice_info_for(start) {
+            if let Some((end_slice_index, end_index_in_slice)) = self.get_slice_info_for(end) {
                 if start_slice_index != end_slice_index {
                     return None;
                 } else {
@@ -120,7 +120,7 @@ impl<'a, TElement> MultipleWordsSuffixTreeSlice<'a, TElement>
 where
     TElement: PartialEq + Copy,
 {
-    fn get_slice_for(&self, index: usize) -> Option<(usize, Option<usize>)> {
+    pub fn get_slice_info_for(&self, index: usize) -> Option<(usize, Option<usize>)> {
         let mut next_word_border = 0;
         let mut slice_index = 0;
         for slice in &self.words {
@@ -139,5 +139,9 @@ where
         }
 
         return None;
+    }
+
+    pub fn get_slice_part_len(&self, slice_part_index: usize) -> usize {
+        self.words[slice_part_index].len()
     }
 }
