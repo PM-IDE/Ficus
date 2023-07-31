@@ -7,7 +7,10 @@ use ficus_backend::{
     },
     features::analysis::patterns::{
         activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
-        contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
+        contexts::{
+            ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext,
+            PatternsDiscoveryStrategy,
+        },
         entry_points::{
             create_logs_for_activities, discover_activities_and_create_new_log, discover_activities_instances,
             PatternsKind,
@@ -28,6 +31,7 @@ fn test_activity_instances() {
     let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -55,6 +59,7 @@ fn test_activity_instances1() {
     let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -98,6 +103,7 @@ fn execute_activities_discovery_test<TUndefEventFactory>(
     let patterns_context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -200,20 +206,18 @@ fn test_creating_log_for_activities3() {
     execute_activities_logs_creation_test(
         create_maximal_repeats_log(),
         PatternsKind::PrimitiveTandemArrays(20),
-        vec![
-            (
-                "dabc".to_owned(),
-                vec![
-                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
-                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
-                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
-                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
-                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
-                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
-                    vecs!["b", "d", "c"]
-                ],
-            )
-        ],
+        vec![(
+            "dabc".to_owned(),
+            vec![
+                vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                vecs!["b", "d", "c"],
+            ],
+        )],
     )
 }
 
@@ -222,20 +226,18 @@ fn test_creating_log_for_activities4() {
     execute_activities_logs_creation_test(
         create_maximal_repeats_log(),
         PatternsKind::MaximalTandemArrays(20),
-        vec![
-            (
-                "dabc".to_owned(),
-                vec![
-                    vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
-                    vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
-                    vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
-                    vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
-                    vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
-                    vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
-                    vecs!["b", "d", "c"]
-                ],
-            )
-        ],
+        vec![(
+            "dabc".to_owned(),
+            vec![
+                vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
+                vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
+                vecs!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
+                vecs!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
+                vecs!["a", "a", "a", "c", "d", "c", "d", "c", "b"],
+                vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
+                vecs!["b", "d", "c"],
+            ],
+        )],
     )
 }
 
@@ -246,7 +248,12 @@ fn execute_activities_logs_creation_test(
 ) {
     let log = Rc::new(RefCell::new(log));
 
-    let patterns_context = PatternsDiscoveryContext::new(Rc::clone(&log), pattern_kind, default_class_extractor);
+    let patterns_context = PatternsDiscoveryContext::new(
+        Rc::clone(&log),
+        pattern_kind,
+        PatternsDiscoveryStrategy::FromAllTraces,
+        default_class_extractor,
+    );
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
         create_activity_name(&log.borrow(), sub_array)

@@ -1,14 +1,11 @@
 use std::{
-    cell::{Ref, RefCell},
+    cell::RefCell,
     collections::{HashMap, HashSet, VecDeque},
     rc::Rc,
 };
 
 use crate::{
-    event_log::{
-        core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-        simple::simple_event_log::SimpleEvent,
-    },
+    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     utils::user_data::Key,
 };
 

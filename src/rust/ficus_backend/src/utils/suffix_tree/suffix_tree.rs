@@ -9,19 +9,17 @@ use crate::utils::interval_tree::interval_tree::IntervalTree;
 use super::node::Node;
 use super::suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SuffixTreeSlice};
 
-pub struct SuffixTree<TElement, TSlice>
+pub struct SuffixTree<'a, TElement>
 where
     TElement: Eq + Hash + Copy,
-    TSlice: SuffixTreeSlice<TElement>,
 {
-    pub(super) slice: Rc<Box<TSlice>>,
+    pub(super) slice: &'a dyn SuffixTreeSlice<TElement>,
     pub(super) nodes: Rc<RefCell<Vec<Node<TElement>>>>,
 }
 
-impl<TElement, TSlice> SuffixTree<TElement, TSlice>
+impl<'a, TElement> SuffixTree<'a, TElement>
 where
     TElement: Eq + Hash + Copy,
-    TSlice: SuffixTreeSlice<TElement>,
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
     pub fn find_maximal_repeats(&self) -> Vec<(usize, usize)> {
@@ -49,29 +47,28 @@ where
     }
 
     pub fn find_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
-        let (maximal_repeats, maximal_repeats_tree) = self.find_maximal_repeats_and_build_suffix_tree();
+        let mut super_maximal_repeats = vec![];
 
-        let mut super_maximal_repeats = Vec::new();
-        for repeat in maximal_repeats {
-            let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
-            let patterns = maximal_repeats_tree.find_patterns(sub_slice);
+        self.find_maximal_repeats_and_build_suffix_tree(|maximal_repeats, maximal_repeats_tree| {
+            for repeat in maximal_repeats {
+                let sub_slice = self.slice.sub_slice(repeat.0, repeat.1);
+                let patterns = maximal_repeats_tree.find_patterns(sub_slice);
 
-            if let Some(patterns) = patterns {
-                if patterns.len() == 1 {
-                    super_maximal_repeats.push((repeat.0, repeat.1));
+                if let Some(patterns) = patterns {
+                    if patterns.len() == 1 {
+                        super_maximal_repeats.push((repeat.0, repeat.1));
+                    }
                 }
             }
-        }
+        });
 
         super_maximal_repeats
     }
 
-    fn find_maximal_repeats_and_build_suffix_tree(
-        &self,
-    ) -> (
-        Vec<(usize, usize)>,
-        SuffixTree<TElement, MultipleWordsSuffixTreeSlice<TElement>>,
-    ) {
+    fn find_maximal_repeats_and_build_suffix_tree<TContinuation>(&self, mut continuation: TContinuation)
+    where
+        TContinuation: FnMut(&Vec<(usize, usize)>, &SuffixTree<TElement>) -> (),
+    {
         let found_maximal_repeats = self.find_maximal_repeats();
         let mut slices = Vec::new();
         for repeat in &found_maximal_repeats {
@@ -80,48 +77,49 @@ where
         }
 
         let slice = MultipleWordsSuffixTreeSlice::new(slices);
-        let mut suffix_tree = SuffixTree::new(Rc::new(Box::new(slice)));
+        let mut suffix_tree = SuffixTree::new(&slice);
         suffix_tree.build_tree();
 
-        (found_maximal_repeats, suffix_tree)
+        continuation(&found_maximal_repeats, &suffix_tree);
     }
 
     pub fn find_near_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
-        let (maximal_repeats, maximal_repeats_tree) = self.find_maximal_repeats_and_build_suffix_tree();
+        let mut near_super_maximal_repeats = vec![];
 
-        let mut intervals = vec![];
-        for index in 0..maximal_repeats.len() {
-            let repeat = maximal_repeats[index];
-            let repeat_positions = maximal_repeats_tree.find_patterns(self.slice.sub_slice(repeat.0, repeat.1));
+        self.find_maximal_repeats_and_build_suffix_tree(|maximal_repeats, maximal_repeats_tree| {
+            let mut intervals = vec![];
+            for index in 0..maximal_repeats.len() {
+                let repeat = maximal_repeats[index];
+                let repeat_positions = maximal_repeats_tree.find_patterns(self.slice.sub_slice(repeat.0, repeat.1));
 
-            if let Some(repeat_positions) = repeat_positions {
-                for repeat_pos in repeat_positions {
-                    intervals.push(Interval::new_with_data(repeat_pos.0, repeat_pos.1, Some(index)));
+                if let Some(repeat_positions) = repeat_positions {
+                    for repeat_pos in repeat_positions {
+                        intervals.push(Interval::new_with_data(repeat_pos.0, repeat_pos.1, Some(index)));
+                    }
                 }
             }
-        }
 
-        let mut visited = HashSet::new();
-        let mut near_super_maximal_repeats = vec![];
-        let mut interval_tree = IntervalTree::new(&intervals, |left, right| *left..*right);
+            let mut visited = HashSet::new();
+            let mut interval_tree = IntervalTree::new(&intervals, |left, right| *left..*right);
 
-        intervals.sort_by(|first, second| (second.right - second.left).cmp(&(first.right - first.left)));
-        for interval in intervals {
-            if visited.contains(&interval) {
-                continue;
+            intervals.sort_by(|first, second| (second.right - second.left).cmp(&(first.right - first.left)));
+            for interval in intervals {
+                if visited.contains(&interval) {
+                    continue;
+                }
+
+                visited.insert(interval);
+
+                let associated_repeat = maximal_repeats.get(interval.data.unwrap()).unwrap();
+                near_super_maximal_repeats.push((associated_repeat.0, associated_repeat.1));
+
+                for envelope in interval_tree.search_envelopes(interval.left, interval.right) {
+                    visited.insert(envelope);
+                }
             }
 
-            visited.insert(interval);
-
-            let associated_repeat = maximal_repeats.get(interval.data.unwrap()).unwrap();
-            near_super_maximal_repeats.push((associated_repeat.0, associated_repeat.1));
-
-            for envelope in interval_tree.search_envelopes(interval.left, interval.right) {
-                visited.insert(envelope);
-            }
-        }
-
-        near_super_maximal_repeats.sort();
+            near_super_maximal_repeats.sort();
+        });
 
         near_super_maximal_repeats
     }

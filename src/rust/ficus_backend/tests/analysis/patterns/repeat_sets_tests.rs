@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use ficus_backend::{
     event_log::core::event::event_hasher::default_class_extractor,
     features::analysis::patterns::{
-        contexts::{ActivitiesDiscoveryContext, PatternsDiscoveryContext},
+        contexts::{ActivitiesDiscoveryContext, PatternsDiscoveryContext, PatternsDiscoveryStrategy},
         entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
         repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
     },
@@ -20,6 +20,7 @@ fn test_repeat_sets_primitive_tandem_arrays() {
     let context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -37,6 +38,7 @@ fn test_repeat_sets_super_maximal_repeats() {
     let context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::SuperMaximalRepeats,
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -65,6 +67,7 @@ fn test_repeat_sets_near_super_maximal_repeats() {
     let repeats_context = PatternsDiscoveryContext::new(
         Rc::new(RefCell::new(log)),
         PatternsKind::NearSuperMaximalRepeats,
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -93,6 +96,7 @@ fn test_repeat_set_tree() {
     let context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -123,6 +127,7 @@ fn test_repeat_set_tree2() {
     let context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::PrimitiveTandemArrays(20),
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -148,6 +153,7 @@ fn test_repeat_set_tree3() {
     let context = PatternsDiscoveryContext::new(
         Rc::clone(&log),
         PatternsKind::SuperMaximalRepeats,
+        PatternsDiscoveryStrategy::FromAllTraces,
         default_class_extractor,
     );
 
@@ -172,7 +178,13 @@ fn test_repeat_set_tree3() {
 #[test]
 fn test_repeat_set_tree4() {
     let log = Rc::new(RefCell::new(create_maximal_repeats_log()));
-    let context = PatternsDiscoveryContext::new(Rc::clone(&log), PatternsKind::MaximalRepeats, default_class_extractor);
+    let context = PatternsDiscoveryContext::new(
+        Rc::clone(&log),
+        PatternsKind::MaximalRepeats,
+        PatternsDiscoveryStrategy::FromAllTraces,
+        default_class_extractor,
+    );
+
     let context =
         ActivitiesDiscoveryContext::new(context, 0, |sub_array| create_activity_name(&log.borrow(), sub_array));
 

@@ -1,4 +1,4 @@
-use std::{fs, rc::Rc};
+use std::fs;
 
 use ficus_backend::utils::suffix_tree::{
     suffix_tree::SuffixTree,
@@ -26,7 +26,7 @@ fn test_suffix_tree_against_ref_impl() {
             //adds at implicitly
             file_string.remove(file_string.len() - 1);
             let slice = SingleWordSuffixTreeSlice::new(file_string.as_bytes());
-            let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+            let mut tree = SuffixTree::new(&slice);
             tree.build_tree();
 
             let mut test_value = String::new();
@@ -53,7 +53,7 @@ fn test_suffix_tree_against_ref_impl() {
 #[test]
 fn test_maximal_repeats() {
     let slice = SingleWordSuffixTreeSlice::new("djksadlasdjaslkdj".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -65,7 +65,7 @@ fn test_maximal_repeats() {
 #[test]
 fn test_maximal_repeats2() {
     let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_maximal_repeats(), [(0, 3)])
@@ -74,7 +74,7 @@ fn test_maximal_repeats2() {
 #[test]
 fn test_maximal_repeats3() {
     let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -98,7 +98,7 @@ fn test_maximal_repeats3() {
 #[test]
 fn test_maximal_repeats4() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
@@ -107,7 +107,7 @@ fn test_maximal_repeats4() {
 #[test]
 fn test_maximal_repeats5() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_maximal_repeats(), [(0, 4), (2, 3)])
@@ -116,7 +116,7 @@ fn test_maximal_repeats5() {
 #[test]
 fn test_super_maximal_repeats() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_super_maximal_repeats(), [(0, 1), (2, 5)])
@@ -125,7 +125,7 @@ fn test_super_maximal_repeats() {
 #[test]
 fn test_super_maximal_repeats3() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_super_maximal_repeats(), [(0, 4), (10, 11)])
@@ -134,7 +134,7 @@ fn test_super_maximal_repeats3() {
 #[test]
 fn test_near_super_maximal_repeats() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
@@ -143,7 +143,7 @@ fn test_near_super_maximal_repeats() {
 #[test]
 fn test_near_super_maximal_repeats2() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (2, 3)])
@@ -152,7 +152,7 @@ fn test_near_super_maximal_repeats2() {
 #[test]
 fn test_near_super_maximal_repeats3() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     println!("{:?}", create_max_repeats_trace_3());
@@ -165,7 +165,7 @@ fn test_near_super_maximal_repeats3() {
 #[test]
 fn test_near_super_maximal_repeats4() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_4());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -177,7 +177,7 @@ fn test_near_super_maximal_repeats4() {
 #[test]
 fn test_near_super_maximal_repeats6() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -202,7 +202,7 @@ fn test_near_super_maximal_repeats6() {
 fn test_multiple_words_suffix_tree_slice() {
     let slices = vec!["abc".as_bytes(), "fsd".as_bytes()];
     let slice = MultipleWordsSuffixTreeSlice::new(slices);
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("abc".as_bytes()).unwrap(), [(0, 3)]);
@@ -213,7 +213,7 @@ fn test_multiple_words_suffix_tree_slice() {
 #[test]
 fn test_patterns_search() {
     let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("abc".as_bytes()).unwrap(), [(0, 3), (5, 8), (9, 12)]);
@@ -222,7 +222,7 @@ fn test_patterns_search() {
 #[test]
 fn test_patterns_search2() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("badb".as_bytes()).unwrap(), [(14, 18)]);
@@ -231,7 +231,7 @@ fn test_patterns_search2() {
 #[test]
 fn test_patterns_search3() {
     let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("a".as_bytes()).unwrap(), [(0, 1), (5, 6), (9, 10)]);
@@ -240,7 +240,7 @@ fn test_patterns_search3() {
 #[test]
 fn test_patterns_search4() {
     let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(tree.find_patterns("xa".as_bytes()).unwrap(), [(0, 2), (3, 5)]);
@@ -249,7 +249,7 @@ fn test_patterns_search4() {
 #[test]
 fn test_patterns_search5() {
     let slice = SingleWordSuffixTreeSlice::new("bbbcdbbbccaa".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -261,7 +261,7 @@ fn test_patterns_search5() {
 #[test]
 pub fn test_suffix_tree_nodes() {
     let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -284,7 +284,7 @@ pub fn test_suffix_tree_nodes() {
 #[test]
 pub fn test_suffix_tree_nodes2() {
     let slice = SingleWordSuffixTreeSlice::new("dasdasdasasasdasdasasd".as_bytes());
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(
@@ -341,7 +341,7 @@ pub fn test_suffix_tree_nodes2() {
 pub fn test_suffix_tree_nodes3() {
     let string = "asjkldhoiufjaksdjkasfgahabvasdrfaoasdfuabjikdu".as_bytes();
     let slice = SingleWordSuffixTreeSlice::new(string);
-    let mut tree = SuffixTree::new(Rc::new(Box::new(slice)));
+    let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
     assert_eq!(

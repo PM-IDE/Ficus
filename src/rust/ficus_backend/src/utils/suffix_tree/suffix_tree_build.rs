@@ -7,12 +7,11 @@ struct BuildState {
     pub(self) node_index: Option<usize>,
 }
 
-impl<TElement, TSlice> SuffixTree<TElement, TSlice>
+impl<'a, TElement> SuffixTree<'a, TElement>
 where
     TElement: Eq + PartialEq + Hash + Copy,
-    TSlice: SuffixTreeSlice<TElement>,
 {
-    pub fn new(slice: Rc<Box<TSlice>>) -> Self {
+    pub fn new(slice: &'a dyn SuffixTreeSlice<TElement>) -> Self {
         Self {
             slice,
             nodes: Rc::new(RefCell::new(vec![Node::create_default()])),

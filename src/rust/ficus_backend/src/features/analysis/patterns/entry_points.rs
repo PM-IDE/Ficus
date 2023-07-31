@@ -30,9 +30,9 @@ where
 {
     let log = context.get_processed_log();
     match &context.pattern_kind {
-        PatternsKind::MaximalRepeats => find_maximal_repeats(log),
-        PatternsKind::SuperMaximalRepeats => find_super_maximal_repeats(log),
-        PatternsKind::NearSuperMaximalRepeats => find_near_super_maximal_repeats(log),
+        PatternsKind::MaximalRepeats => find_maximal_repeats(log, &context.strategy),
+        PatternsKind::SuperMaximalRepeats => find_super_maximal_repeats(log, &context.strategy),
+        PatternsKind::NearSuperMaximalRepeats => find_near_super_maximal_repeats(log, &context.strategy),
         PatternsKind::PrimitiveTandemArrays(length) => find_primitive_tandem_arrays(log, *length),
         PatternsKind::MaximalTandemArrays(length) => find_maximal_tandem_arrays(log, *length),
     }

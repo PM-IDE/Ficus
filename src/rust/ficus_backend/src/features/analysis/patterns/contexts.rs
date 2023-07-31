@@ -9,6 +9,11 @@ use super::{
     repeat_sets::SubArrayWithTraceIndex,
 };
 
+pub enum PatternsDiscoveryStrategy {
+    FromAllTraces,
+    FromSingleMergedTrace,
+}
+
 pub struct PatternsDiscoveryContext<TClassExtractor, TLog>
 where
     TLog: EventLog,
@@ -17,6 +22,7 @@ where
     pub log: Rc<RefCell<TLog>>,
     pub pattern_kind: PatternsKind,
     pub class_extractor: TClassExtractor,
+    pub strategy: PatternsDiscoveryStrategy,
 
     processed_log: Vec<Vec<u64>>,
 }
@@ -30,7 +36,12 @@ where
         &self.processed_log
     }
 
-    pub fn new(log: Rc<RefCell<TLog>>, pattern_kind: PatternsKind, class_extractor: TClassExtractor) -> Self {
+    pub fn new(
+        log: Rc<RefCell<TLog>>,
+        pattern_kind: PatternsKind,
+        strategy: PatternsDiscoveryStrategy,
+        class_extractor: TClassExtractor,
+    ) -> Self {
         let mut processed_log = vec![];
         for trace in log.borrow().get_traces() {
             let mut processed_trace = vec![];
@@ -45,6 +56,7 @@ where
             log,
             pattern_kind,
             class_extractor,
+            strategy,
             processed_log,
         }
     }
