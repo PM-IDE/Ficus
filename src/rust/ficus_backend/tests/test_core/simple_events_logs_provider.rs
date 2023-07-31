@@ -146,3 +146,10 @@ pub fn create_single_trace_test_log1() -> SimpleEventLog {
         vec!["r", "t", "u", "a", "b", "c"],
     ])
 }
+
+pub fn create_single_trace_test_log2() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["x", "y", "z", "a", "b", "c"],
+        vec!["a", "b", "c", "r", "t", "u"],
+    ])
+}
