@@ -139,3 +139,10 @@ pub fn create_maximal_repeats_log() -> SimpleEventLog {
         ],
     ])
 }
+
+pub fn create_single_trace_test_log1() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["a", "b", "c", "x", "y", "z"],
+        vec!["r", "t", "u", "a", "b", "c"],
+    ])
+}

@@ -1,13 +1,18 @@
 use ficus_backend::{
     event_log::core::{event::event_hasher::NameEventHasher, event_log::EventLog},
-    features::analysis::patterns::tandem_arrays::{
-        find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, TandemArrayInfo,
+    features::analysis::patterns::{
+        contexts::PatternsDiscoveryStrategy,
+        repeats::find_maximal_repeats,
+        tandem_arrays::{
+            find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, SubArrayInTraceInfo,
+            TandemArrayInfo,
+        },
     },
 };
 
 use crate::test_core::simple_events_logs_provider::{
     create_log_for_max_repeats2, create_log_from_taxonomy_of_patterns, create_no_tandem_array_log,
-    create_one_tandem_array_log,
+    create_one_tandem_array_log, create_single_trace_test_log1,
 };
 
 #[test]
@@ -52,4 +57,29 @@ fn test_tandem_arrays2() {
     let tandem_arrays = find_primitive_tandem_arrays_with_length(&hashes, 10);
 
     assert_eq!(get_first_trace_tuples(&tandem_arrays.borrow()), [(0, 4, 2)]);
+}
+
+#[test]
+fn test_maximal_repeats_single_merged_trace1() {
+    let log = create_single_trace_test_log1();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+
+    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
+
+    assert_eq!(dump_repeats(&repeats.borrow()), [(0, 0, 3)]);
+}
+
+fn dump_repeats(repeats: &Vec<Vec<SubArrayInTraceInfo>>) -> Vec<(usize, usize, usize)> {
+    let mut result = vec![];
+    let mut index = 0;
+
+    for trace_repeats in repeats {
+        for repeat in trace_repeats {
+            result.push((index, repeat.start_index, repeat.start_index + repeat.length));
+        }
+
+        index += 1;
+    }
+
+    result
 }
