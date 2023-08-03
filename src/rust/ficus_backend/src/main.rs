@@ -1,52 +1,14 @@
 use crate::event_log::{
-    core::{event::Event, event_log::EventLog, trace::Trace},
-    xes::{
-        reader::file_xes_log_reader::FromFileXesEventLogReader, writer::xes_event_log_writer,
-        xes_event_log::XesEventLogImpl,
-    },
+    core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    xes::{reader::file_xes_log_reader::FromFileXesEventLogReader, xes_event_log::XesEventLogImpl},
 };
 
 mod event_log;
 mod utils;
 
 fn main() {
-    let path = r"/Users/aero/Programming/pmide/Ficus/test_data/source/example_logs/exercise1.xes";
+    let path = r"/Users/aero/Programming/pmide/PhdDocsAndExperiments/Experiments/exp5/fixed_data/data/inline_merge/SystemArrayPooling/SystemArrayPooling.Program.Main[void...xes";
     let reader = FromFileXesEventLogReader::new(path).unwrap();
 
     let log = XesEventLogImpl::new(reader).unwrap();
-
-    println!("GLobals: ");
-    for global in log.get_ordered_globals() {
-        println!("{:?}", global)
-    }
-
-    println!("Classifiers: ");
-    for classifier in log.get_classifiers() {
-        println!("{:?}", classifier);
-    }
-
-    println!("Extensions: ");
-    for extension in log.get_extensions() {
-        println!("{:?}", extension);
-    }
-
-    println!("Properties: ");
-    for property in log.get_ordered_properties() {
-        println!("{:?}", property);
-    }
-
-    println!("Traces: ");
-    for trace in log.get_traces() {
-        println!("New trace");
-        for event in trace.borrow().get_events() {
-            println!("{}", event.borrow().get_name());
-        }
-    }
-
-    xes_event_log_writer::write_log(
-        &log,
-        r"/Users/aero/Programming/pmide/Ficus/src/rust/ficus_backend/target/debug/log.xes",
-    );
-
-    println!("Hello, world!");
 }
