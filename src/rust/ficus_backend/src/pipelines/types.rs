@@ -1,4 +1,7 @@
-use std::hash::{Hash, Hasher};
+use std::{
+    hash::{Hash, Hasher},
+    rc::Rc,
+};
 
 pub struct PipelineType {
     name: String,
@@ -22,6 +25,8 @@ impl PartialEq for PipelineType {
     }
 }
 
+impl Eq for PipelineType {}
+
 impl Hash for PipelineType {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name.hash(state);
@@ -29,65 +34,75 @@ impl Hash for PipelineType {
 }
 
 pub struct Types {
-    event_log: PipelineType,
-    activities: PipelineType,
-    repeat_sets: PipelineType,
-    trace_activities: PipelineType,
-    patterns: PipelineType,
-    petri_net: PipelineType,
-    event_class_tree: PipelineType,
-    activities_to_logs: PipelineType,
-    activity_name: PipelineType,
+    path: Rc<Box<PipelineType>>,
+    event_log: Rc<Box<PipelineType>>,
+    activities: Rc<Box<PipelineType>>,
+    repeat_sets: Rc<Box<PipelineType>>,
+    trace_activities: Rc<Box<PipelineType>>,
+    patterns: Rc<Box<PipelineType>>,
+    petri_net: Rc<Box<PipelineType>>,
+    event_class_tree: Rc<Box<PipelineType>>,
+    activities_to_logs: Rc<Box<PipelineType>>,
+    activity_name: Rc<Box<PipelineType>>,
 }
 
 impl Types {
     pub fn new() -> Self {
         Self {
-            event_log: PipelineType::new("event_log"),
-            activities: PipelineType::new("activities"),
-            repeat_sets: PipelineType::new("repeat_sets"),
-            trace_activities: PipelineType::new("trace_activities"),
-            patterns: PipelineType::new("patterns"),
-            petri_net: PipelineType::new("petri_net"),
-            event_class_tree: PipelineType::new("event_class_tree"),
-            activities_to_logs: PipelineType::new("activities_to_logs"),
-            activity_name: PipelineType::new("activity_name"),
+            path: Self::allocate_type(PipelineType::new("path")),
+            event_log: Self::allocate_type(PipelineType::new("event_log")),
+            activities: Self::allocate_type(PipelineType::new("activities")),
+            repeat_sets: Self::allocate_type(PipelineType::new("repeat_sets")),
+            trace_activities: Self::allocate_type(PipelineType::new("trace_activities")),
+            patterns: Self::allocate_type(PipelineType::new("patterns")),
+            petri_net: Self::allocate_type(PipelineType::new("petri_net")),
+            event_class_tree: Self::allocate_type(PipelineType::new("event_class_tree")),
+            activities_to_logs: Self::allocate_type(PipelineType::new("activities_to_logs")),
+            activity_name: Self::allocate_type(PipelineType::new("activity_name")),
         }
     }
 
-    pub fn event_log(&self) -> &PipelineType {
-        &self.event_log
+    fn allocate_type(pipeline_type: PipelineType) -> Rc<Box<PipelineType>> {
+        Rc::new(Box::new(pipeline_type))
     }
 
-    pub fn activities(&self) -> &PipelineType {
-        &self.activities
+    pub fn path(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.path)
     }
 
-    pub fn repeat_sets(&self) -> &PipelineType {
-        &self.repeat_sets
+    pub fn event_log(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.event_log)
     }
 
-    pub fn trace_activities(&self) -> &PipelineType {
-        &self.trace_activities
+    pub fn activities(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.activities)
     }
 
-    pub fn patterns(&self) -> &PipelineType {
-        &self.patterns
+    pub fn repeat_sets(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.repeat_sets)
     }
 
-    pub fn petri_net(&self) -> &PipelineType {
-        &self.petri_net
+    pub fn trace_activities(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.trace_activities)
     }
 
-    pub fn event_class_tree(&self) -> &PipelineType {
-        &self.event_class_tree
+    pub fn patterns(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.patterns)
     }
 
-    pub fn activities_to_logs(&self) -> &PipelineType {
-        &self.activities_to_logs
+    pub fn petri_net(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.petri_net)
     }
 
-    pub fn activity_name(&self) -> &PipelineType {
-        &self.activity_name
+    pub fn event_class_tree(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.event_class_tree)
+    }
+
+    pub fn activities_to_logs(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.activities_to_logs)
+    }
+
+    pub fn activity_name(&self) -> Rc<Box<PipelineType>> {
+        Rc::clone(&self.activity_name)
     }
 }

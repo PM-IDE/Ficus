@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use std::{borrow::BorrowMut, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::core::{
@@ -8,7 +8,6 @@ use crate::{
         event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
         event::{event_base::EventBase, lifecycle::Lifecycle},
         event_log::EventLog,
-        log_iterator::TraceIterator,
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
     },
