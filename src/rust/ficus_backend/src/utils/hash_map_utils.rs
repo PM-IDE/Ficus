@@ -12,6 +12,17 @@ where
     }
 }
 
+pub fn increase_in_map_by<TKey>(map: &mut HashMap<TKey, usize>, key: &TKey, increase_value: usize)
+where
+    TKey: Hash + Eq + PartialEq + Clone,
+{
+    if let Some(value) = map.get_mut(key) {
+        *value += increase_value;
+    } else {
+        map.insert(key.clone(), increase_value);
+    }
+}
+
 pub fn add_to_list_in_map<TKey, TValue>(map: &mut HashMap<TKey, Vec<TValue>>, key: &TKey, value: TValue)
 where
     TKey: Hash + Eq + PartialEq + Clone,
@@ -21,4 +32,23 @@ where
     } else {
         map.insert(key.clone(), vec![value]);
     }
+}
+
+pub fn compare_maps_by_keys<TKey, TValue>(first_map: &HashMap<TKey, TValue>, second_map: &HashMap<TKey, TValue>) -> bool
+where
+    TKey: Hash + Eq + PartialEq + Clone,
+{
+    for key in first_map.keys() {
+        if !second_map.contains_key(key) {
+            return false;
+        }
+    }
+
+    for key in second_map.keys() {
+        if !first_map.contains_key(key) {
+            return false;
+        }
+    }
+
+    true
 }

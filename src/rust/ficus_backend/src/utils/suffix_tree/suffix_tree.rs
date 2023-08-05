@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::rc::Rc;
 
+use crate::utils::hash_map_utils::{compare_maps_by_keys, increase_in_map_by};
 use crate::utils::interval_tree::interval::Interval;
 use crate::utils::interval_tree::interval_tree::IntervalTree;
 
@@ -204,7 +205,7 @@ where
         &self,
         index: usize,
         mut suffix_length: usize,
-        nodes_to_awc: &mut HashMap<usize, HashSet<Option<TElement>>>,
+        nodes_to_awc: &mut HashMap<usize, HashMap<Option<TElement>, usize>>,
         nodes_to_any_suffix_len: &mut HashMap<usize, usize>,
         maximal_repeats: &mut HashSet<(usize, usize)>,
     ) {
@@ -220,11 +221,11 @@ where
             };
 
             nodes_to_any_suffix_len.insert(index, suffix_length);
-            nodes_to_awc.insert(index, HashSet::from_iter(vec![(element)]));
+            nodes_to_awc.insert(index, HashMap::from_iter(vec![(element, 1)]));
             return;
         }
 
-        let mut child_set = HashSet::new();
+        let mut child_set = HashMap::new();
         for (_, child_index) in &node.children {
             self.dfs_maximal_repeats(
                 *child_index,
@@ -234,15 +235,16 @@ where
                 maximal_repeats,
             );
 
-            child_set.extend(nodes_to_awc.get(child_index).unwrap());
+            for (element, count) in nodes_to_awc.get(child_index).unwrap() {
+                increase_in_map_by(&mut child_set, element, *count);
+            }
         }
 
         nodes_to_awc.insert(index, child_set);
 
-        let mut children: Vec<&usize> = node.children.values().into_iter().collect();
-        children.sort();
+        let children: Vec<&usize> = node.children.values().into_iter().collect();
 
-        let child_suffix_len = nodes_to_any_suffix_len[children[0]];
+        let child_suffix_len = nodes_to_any_suffix_len[children.iter().min().unwrap()];
         nodes_to_any_suffix_len.insert(index, child_suffix_len);
 
         if suffix_length != 0 {
@@ -252,9 +254,10 @@ where
                         continue;
                     }
 
-                    let first_set = nodes_to_awc.get(first_child).unwrap();
-                    let second_set = nodes_to_awc.get(second_child).unwrap();
-                    if first_set != second_set {
+                    let first_map = nodes_to_awc.get(first_child).unwrap();
+                    let second_map = nodes_to_awc.get(second_child).unwrap();
+
+                    if !compare_maps_by_keys(first_map, second_map) {
                         let first_child_suffix_len = nodes_to_any_suffix_len[first_child];
                         let start = self.slice.len() - first_child_suffix_len;
 
