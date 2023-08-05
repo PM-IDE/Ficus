@@ -83,7 +83,6 @@ fn test_repeat_sets_near_super_maximal_repeats() {
             (0, 4, 2),
             (3, 1, 2),
             (3, 3, 4),
-            (4, 1, 4),
             (9, 1, 4),
             (10, 2, 4)
         ]

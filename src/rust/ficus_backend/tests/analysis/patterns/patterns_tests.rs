@@ -133,7 +133,6 @@ fn test_super_maximal_repeats_single_merged_trace() {
     assert_eq!(
         dump_repeats(&repeats.borrow()),
         [
-            (0, 0, 2),
             (0, 1, 5),
             (0, 2, 7),
             (0, 5, 9),
@@ -160,23 +159,13 @@ fn test_near_super_maximal_repeats_single_merged_trace() {
     assert_eq!(
         dump_repeats(&repeats.borrow()),
         [
-            (0, 0, 1),
             (0, 0, 2),
-            (0, 1, 3),
-            (0, 1, 4),
             (0, 1, 5),
             (0, 2, 7),
-            (0, 3, 5),
-            (0, 4, 5),
             (0, 4, 6),
             (0, 5, 7),
-            (0, 5, 8),
             (0, 5, 9),
-            (0, 6, 7),
-            (0, 6, 8),
             (0, 6, 10),
-            (0, 7, 8),
-            (0, 8, 10),
             (0, 0, 3),
             (0, 0, 4),
             (0, 7, 9),

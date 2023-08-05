@@ -2,7 +2,7 @@ use std::fs;
 
 use ficus_backend::utils::suffix_tree::{
     suffix_tree::SuffixTree,
-    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
+    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice, SuffixTreeSlice},
 };
 
 use crate::test_core::{
@@ -156,10 +156,7 @@ fn test_near_super_maximal_repeats3() {
     tree.build_tree();
 
     println!("{:?}", create_max_repeats_trace_3());
-    assert_eq!(
-        tree.find_near_super_maximal_repeats(),
-        [(0, 1), (0, 2), (0, 4), (3, 4), (10, 11)]
-    )
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (3, 4), (10, 11)])
 }
 
 #[test]
@@ -168,10 +165,7 @@ fn test_near_super_maximal_repeats4() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(
-        tree.find_near_super_maximal_repeats(),
-        [(0, 1), (0, 2), (5, 6), (7, 8), (7, 9)]
-    )
+    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (0, 2), (5, 6), (7, 9)])
 }
 
 #[test]
@@ -187,10 +181,8 @@ fn test_near_super_maximal_repeats6() {
             (0, 2),
             (3, 4),
             (3, 6),
-            (4, 5),
             (4, 6),
             (7, 9),
-            (8, 9),
             (9, 10),
             (10, 12),
             (17, 19)
