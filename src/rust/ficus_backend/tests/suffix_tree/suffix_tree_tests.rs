@@ -50,11 +50,18 @@ fn test_suffix_tree_against_ref_impl() {
     }
 }
 
-fn dump_repeats_to_string<TSlice>(slice: &TSlice, repeats: &Vec<(usize, usize)>) -> Vec<String> where TSlice: SuffixTreeSlice<u8> {
+fn dump_repeats_to_string<TSlice>(slice: &TSlice, repeats: &Vec<(usize, usize)>) -> Vec<String>
+where
+    TSlice: SuffixTreeSlice<u8>,
+{
     let mut dump = vec![];
 
     for (left, right) in repeats {
-        dump.push(String::from_utf8(slice.sub_slice(*left, *right).unwrap().iter().map(|e| *e).collect()).ok().unwrap())
+        dump.push(
+            String::from_utf8(slice.sub_slice(*left, *right).unwrap().iter().map(|e| *e).collect())
+                .ok()
+                .unwrap(),
+        )
     }
 
     dump.sort();
@@ -72,7 +79,6 @@ fn test_maximal_repeats() {
         [(0, 1), (0, 2), (2, 3), (3, 4), (4, 5), (6, 7), (7, 9)],
     )
 }
-
 
 #[test]
 fn test_maximal_repeats_string() {
@@ -155,7 +161,10 @@ fn test_maximal_repeats4_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_maximal_repeats()), ["a", "b", "bcd"])
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
+        ["a", "b", "bcd"]
+    )
 }
 
 #[test]
@@ -173,7 +182,10 @@ fn test_maximal_repeats5_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_maximal_repeats()), ["b", "dabc"])
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
+        ["b", "dabc"]
+    )
 }
 
 #[test]
@@ -191,7 +203,10 @@ fn test_super_maximal_repeats_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()), ["a", "bcd"])
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()),
+        ["a", "bcd"]
+    )
 }
 
 #[test]
@@ -209,7 +224,10 @@ fn test_super_maximal_repeats3_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()), ["a", "bbbc"])
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()),
+        ["a", "bbbc"]
+    )
 }
 
 #[test]
@@ -227,7 +245,10 @@ fn test_near_super_maximal_repeats_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()), ["a", "b", "bcd"])
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
+        ["a", "b", "bcd"]
+    )
 }
 
 #[test]
@@ -245,7 +266,10 @@ fn test_near_super_maximal_repeats2_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()), ["b", "dabc"]);
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
+        ["b", "dabc"]
+    );
 }
 
 #[test]
@@ -263,7 +287,10 @@ fn test_near_super_maximal_repeats3_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()), ["a", "bbbc", "c"]);
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
+        ["a", "bbbc", "c"]
+    );
 }
 
 #[test]
@@ -281,7 +308,10 @@ fn test_near_super_maximal_repeats4_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()), ["a", "aa", "b", "cc"]);
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
+        ["a", "aa", "b", "cc"]
+    );
 }
 
 #[test]
@@ -312,7 +342,10 @@ fn test_near_super_maximal_repeats6_string() {
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()), ["a", "aa", "bd", "c", "cb", "cdc", "db", "dc", "e"]);
+    assert_eq!(
+        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
+        ["a", "aa", "bd", "c", "cb", "cdc", "db", "dc", "e"]
+    );
 }
 
 #[test]
