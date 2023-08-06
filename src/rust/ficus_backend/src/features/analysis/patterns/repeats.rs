@@ -78,44 +78,9 @@ fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(
     tree.build_tree();
 
     let mut patterns = finder(&tree);
-    adjust_patterns_from_single_merged_trace(&mut patterns, &slice);
+    let mut traces_patterns = vec![vec![]; log.len()];
 
-    let mut upper_bound = single_trace[0].len() + 1;
-    let mut trace_index = 1;
-    let mut pattern_index = 0;
-    let mut prev_pattern_index = 0;
-
-    while pattern_index <= patterns.len() {
-        if pattern_index >= patterns.len() {
-            pusher(&patterns[prev_pattern_index..pattern_index]);
-            break;
-        }
-
-        if pattern_index < patterns.len() {
-            let pattern = &patterns[pattern_index];
-            if pattern.1 < upper_bound {
-                pattern_index += 1;
-                continue;
-            }
-        }
-
-        pusher(&patterns[prev_pattern_index..pattern_index]);
-
-        if trace_index >= single_trace.len() {
-            break;
-        }
-
-        upper_bound += single_trace[trace_index].len() + 1;
-        trace_index += 1;
-        prev_pattern_index = pattern_index;
-    }
-}
-
-fn adjust_patterns_from_single_merged_trace(
-    patterns: &mut Vec<(usize, usize)>,
-    slice: &MultipleWordsSuffixTreeSlice<u64>,
-) {
-    for pattern in patterns {
+    for pattern in &mut patterns {
         let first_index_info = slice.get_slice_info_for(pattern.0).unwrap();
         let trace_index = first_index_info.0;
 
@@ -127,6 +92,11 @@ fn adjust_patterns_from_single_merged_trace(
 
         pattern.0 = first_index;
         pattern.1 = second_index;
+        traces_patterns[trace_index].push((pattern.0, pattern.1));
+    }
+
+    for trace_patterns in traces_patterns {
+        pusher(&trace_patterns);
     }
 }
 
