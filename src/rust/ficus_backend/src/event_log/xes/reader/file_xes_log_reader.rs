@@ -9,7 +9,7 @@ use crate::event_log::xes::constants::*;
 use quick_xml::{events::BytesStart, Reader};
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
 
-pub(crate) struct FromFileXesEventLogReader {
+pub struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
     seen_globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,

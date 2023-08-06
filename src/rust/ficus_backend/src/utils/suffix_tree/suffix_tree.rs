@@ -4,8 +4,6 @@ use std::hash::Hash;
 use std::rc::Rc;
 
 use crate::utils::hash_map_utils::{compare_maps_by_keys, increase_in_map_by};
-use crate::utils::interval_tree::interval::Interval;
-use crate::utils::interval_tree::interval_tree::IntervalTree;
 
 use super::node::Node;
 use super::suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SuffixTreeSlice};

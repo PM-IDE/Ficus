@@ -41,13 +41,17 @@ fn test_tandem_arrays_from_paper_string() {
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
-    assert_eq!(dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log), ["abc", "bca", "cab", "abcabc", "bcabca"]);
+    assert_eq!(
+        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
+        ["abc", "bca", "cab", "abcabc", "bcabca"]
+    );
 }
 
 fn to_sub_arrays(arrays: &Vec<Vec<TandemArrayInfo>>) -> Vec<Vec<SubArrayInTraceInfo>> {
-    arrays.iter().map(|trace_arrays| {
-        trace_arrays.iter().map(|arr| *arr.get_sub_array_info()).collect()
-    }).collect()
+    arrays
+        .iter()
+        .map(|trace_arrays| trace_arrays.iter().map(|arr| *arr.get_sub_array_info()).collect())
+        .collect()
 }
 
 fn get_first_trace_tuples(tandem_arrays: &Vec<Vec<TandemArrayInfo>>) -> Vec<(usize, usize, usize)> {
@@ -69,7 +73,10 @@ fn test_no_tandem_arrays_string() {
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
-    assert_eq!(dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log), Vec::<String>::new());
+    assert_eq!(
+        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
+        Vec::<String>::new()
+    );
 }
 
 #[test]
@@ -87,7 +94,10 @@ fn test_one_tandem_array_string() {
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
 
-    assert_eq!(dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log), ["ab"]);
+    assert_eq!(
+        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
+        ["ab"]
+    );
 }
 
 #[test]
@@ -107,7 +117,10 @@ fn test_tandem_arrays2_string() {
 
     let tandem_arrays = find_primitive_tandem_arrays_with_length(&hashes, 10);
 
-    assert_eq!(dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log), ["dabc"]);
+    assert_eq!(
+        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
+        ["dabc"]
+    );
 }
 
 #[test]

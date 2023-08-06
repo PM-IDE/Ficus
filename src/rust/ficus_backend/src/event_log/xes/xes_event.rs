@@ -18,7 +18,7 @@ pub struct XesEventImpl {
 }
 
 impl XesEventImpl {
-    pub(crate) fn new(
+    pub fn new(
         name: String,
         timestamp: chrono::DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
@@ -28,6 +28,14 @@ impl XesEventImpl {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
             payload,
+        }
+    }
+
+    pub fn new_min_date(name: String) -> XesEventImpl {
+        XesEventImpl {
+            event_base: EventBase::new(name, DateTime::<Utc>::MIN_UTC),
+            lifecycle: None,
+            payload: HashMap::new(),
         }
     }
 }
