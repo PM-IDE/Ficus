@@ -1,18 +1,16 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use ficus_backend::{
     event_log::core::event::event_hasher::default_class_extractor,
     features::analysis::patterns::{
+        activity_instances::create_activity_name,
         contexts::{ActivitiesDiscoveryContext, PatternsDiscoveryContext, PatternsDiscoveryStrategy},
         entry_points::{build_repeat_set_tree, find_repeats, PatternsKind},
         repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
     },
 };
 
-use crate::{
-    analysis::patterns::utils::create_activity_name,
-    test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log},
-};
+use crate::test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log};
 
 #[test]
 fn test_repeat_sets_primitive_tandem_arrays() {
@@ -99,8 +97,9 @@ fn test_repeat_set_tree() {
         default_class_extractor,
     );
 
-    let context =
-        ActivitiesDiscoveryContext::new(context, 0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+        create_activity_name(log.borrow().deref(), sub_array)
+    });
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
@@ -130,8 +129,9 @@ fn test_repeat_set_tree2() {
         default_class_extractor,
     );
 
-    let context =
-        ActivitiesDiscoveryContext::new(context, 0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+        create_activity_name(log.borrow().deref(), sub_array)
+    });
 
     let repeats = build_repeat_set_tree(&context);
 
@@ -156,8 +156,9 @@ fn test_repeat_set_tree3() {
         default_class_extractor,
     );
 
-    let context =
-        ActivitiesDiscoveryContext::new(context, 0, |sub_array| create_activity_name(&log.borrow(), sub_array));
+    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+        create_activity_name(log.borrow().deref(), sub_array)
+    });
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
@@ -184,9 +185,9 @@ fn test_repeat_set_tree4() {
         default_class_extractor,
     );
 
-    let context =
-        ActivitiesDiscoveryContext::new(context, 0, |sub_array| create_activity_name(&log.borrow(), sub_array));
-
+    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+        create_activity_name(log.borrow().deref(), sub_array)
+    });
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(

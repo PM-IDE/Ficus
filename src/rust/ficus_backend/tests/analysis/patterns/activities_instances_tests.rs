@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use ficus_backend::{
     event_log::{
@@ -6,7 +6,9 @@ use ficus_backend::{
         simple::simple_event_log::{SimpleEvent, SimpleEventLog},
     },
     features::analysis::patterns::{
-        activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME},
+        activity_instances::{
+            create_activity_name, ActivityInTraceInfo, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
+        },
         contexts::{
             ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext,
             PatternsDiscoveryStrategy,
@@ -19,10 +21,7 @@ use ficus_backend::{
     vecs,
 };
 
-use crate::{
-    analysis::patterns::utils::create_activity_name,
-    test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log},
-};
+use crate::test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log};
 
 #[test]
 fn test_activity_instances() {
@@ -36,7 +35,7 @@ fn test_activity_instances() {
     );
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
-        create_activity_name(&log.borrow(), sub_array)
+        create_activity_name(log.borrow().deref(), sub_array)
     });
 
     let activities = discover_activities_instances(&context);
@@ -64,7 +63,7 @@ fn test_activity_instances1() {
     );
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
-        create_activity_name(&log.borrow(), sub_array)
+        create_activity_name(log.borrow().deref(), sub_array)
     });
 
     let activities = discover_activities_instances(&context);
@@ -108,7 +107,7 @@ fn execute_activities_discovery_test<TUndefEventFactory>(
     );
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
-        create_activity_name(&log.borrow(), sub_array)
+        create_activity_name(log.borrow().deref(), sub_array)
     });
 
     let context = ActivitiesInstancesDiscoveryContext::new(context, strategy, |info| {
@@ -256,7 +255,7 @@ fn execute_activities_logs_creation_test(
     );
 
     let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
-        create_activity_name(&log.borrow(), sub_array)
+        create_activity_name(log.borrow().deref(), sub_array)
     });
 
     let activities_logs = create_logs_for_activities(&context, 0);
