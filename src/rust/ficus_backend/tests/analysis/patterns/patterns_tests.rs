@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use ficus_backend::{
     event_log::{
         core::{
@@ -25,26 +27,51 @@ use crate::test_core::simple_events_logs_provider::{
 
 #[test]
 fn test_tandem_arrays_from_paper() {
-    let log = create_log_from_taxonomy_of_patterns();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(
-        get_first_trace_tuples(&tandem_arrays.borrow()),
-        [(2, 3, 4), (3, 3, 4), (4, 3, 3), (2, 6, 2), (3, 6, 2)]
+    execute_test_with_positions(
+        create_log_from_taxonomy_of_patterns,
+        |log| get_first_trace_tuples(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
+        &[(2, 3, 4), (3, 3, 4), (4, 3, 3), (2, 6, 2), (3, 6, 2)],
     );
+}
+
+fn execute_test_with_positions<TLogCreator, TPatternsFinder, TValue>(
+    log_creator: TLogCreator,
+    patterns_finder: TPatternsFinder,
+    expected: &[TValue],
+) where
+    TLogCreator: Fn() -> SimpleEventLog,
+    TPatternsFinder: Fn(&Vec<Vec<u64>>) -> Vec<TValue>,
+    TValue: PartialEq + Debug,
+{
+    let log = log_creator();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let patterns = patterns_finder(&hashes);
+
+    assert_eq!(patterns.as_slice(), expected);
 }
 
 #[test]
 fn test_tandem_arrays_from_paper_string() {
-    let log = create_log_from_taxonomy_of_patterns();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(
-        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
-        ["abc", "bca", "cab", "abcabc", "bcabca"]
+    execute_test_with_string_dump(
+        create_log_from_taxonomy_of_patterns,
+        |log| to_sub_arrays(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
+        &["abc", "bca", "cab", "abcabc", "bcabca"],
     );
+}
+
+fn execute_test_with_string_dump<TLogCreator, TPatternsFinder>(
+    log_creator: TLogCreator,
+    patterns_finder: TPatternsFinder,
+    expected: &[&str],
+) where
+    TLogCreator: Fn() -> SimpleEventLog,
+    TPatternsFinder: Fn(&Vec<Vec<u64>>) -> Vec<Vec<SubArrayInTraceInfo>>,
+{
+    let log = log_creator();
+    let hashes = log.to_hashes_event_log::<NameEventHasher>();
+    let patterns = patterns_finder(&hashes);
+
+    assert_eq!(dump_repeats_to_string(&patterns, &log), expected);
 }
 
 fn to_sub_arrays(arrays: &Vec<Vec<TandemArrayInfo>>) -> Vec<Vec<SubArrayInTraceInfo>> {
@@ -69,45 +96,38 @@ fn test_no_tandem_arrays() {
 
 #[test]
 fn test_no_tandem_arrays_string() {
-    let log = create_no_tandem_array_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(
-        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
-        Vec::<String>::new()
+    execute_test_with_string_dump(
+        create_no_tandem_array_log,
+        |log| to_sub_arrays(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
+        Vec::<&str>::new().as_slice(),
     );
 }
 
 #[test]
 fn test_one_tandem_array() {
-    let log = create_one_tandem_array_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(get_first_trace_tuples(&tandem_arrays.borrow()), [(0, 2, 2)]);
+    execute_test_with_positions(
+        create_one_tandem_array_log,
+        |log| get_first_trace_tuples(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
+        &[(0, 2, 2)],
+    );
 }
 
 #[test]
 fn test_one_tandem_array_string() {
-    let log = create_one_tandem_array_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-    let tandem_arrays = find_maximal_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(
-        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
-        ["ab"]
+    execute_test_with_string_dump(
+        create_one_tandem_array_log,
+        |log| to_sub_arrays(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
+        &["ab"],
     );
 }
 
 #[test]
 fn test_tandem_arrays2() {
-    let log = create_log_for_max_repeats2();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let tandem_arrays = find_primitive_tandem_arrays_with_length(&hashes, 10);
-
-    assert_eq!(get_first_trace_tuples(&tandem_arrays.borrow()), [(0, 4, 2)]);
+    execute_test_with_positions(
+        create_log_for_max_repeats2,
+        |log| get_first_trace_tuples(&find_primitive_tandem_arrays_with_length(log, 10).borrow()),
+        &[(0, 4, 2)],
+    );
 }
 
 #[test]
@@ -125,54 +145,54 @@ fn test_tandem_arrays2_string() {
 
 #[test]
 fn test_maximal_repeats_single_merged_trace1() {
-    let log = create_single_trace_test_log1();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(dump_repeats(&repeats.borrow()), [(0, 0, 3)]);
+    execute_test_with_positions(
+        create_single_trace_test_log1,
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).borrow()),
+        &[(0, 0, 3)],
+    );
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace1_string() {
-    let log = create_single_trace_test_log1();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(dump_repeats_to_string(&repeats.borrow(), &log), ["abc"]);
+    execute_test_with_string_dump(
+        create_single_trace_test_log1,
+        |log| {
+            find_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)
+                .borrow()
+                .clone()
+        },
+        &["abc"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace2() {
-    let log = create_single_trace_test_log2();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(dump_repeats(&repeats.borrow()), [(0, 3, 6)]);
+    execute_test_with_positions(
+        create_single_trace_test_log2,
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).borrow()),
+        &[(0, 3, 6)],
+    );
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace2_string() {
-    let log = create_single_trace_test_log2();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(dump_repeats_to_string(&repeats.borrow(), &log), ["abc"]);
+    execute_test_with_string_dump(
+        create_single_trace_test_log2,
+        |log| {
+            find_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)
+                .borrow()
+                .clone()
+        },
+        &["abc"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace3() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats(&repeats.borrow()),
-        [
+    execute_test_with_positions(
+        create_maximal_repeats_log,
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).borrow()),
+        &[
             (0, 0, 1),
             (0, 0, 2),
             (0, 1, 3),
@@ -201,37 +221,35 @@ fn test_maximal_repeats_single_merged_trace3() {
             (4, 3, 6),
             (4, 4, 6),
             (4, 9, 10),
-            (4, 17, 19)
-        ]
+            (4, 17, 19),
+        ],
     );
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace3_string() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats_to_string(&repeats.borrow(), &log),
-        [
+    execute_test_with_string_dump(
+        create_maximal_repeats_log,
+        |log| {
+            find_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)
+                .borrow()
+                .clone()
+        },
+        &[
             "a", "aa", "ab", "abc", "abcd", "bcdbb", "cd", "d", "db", "bb", "bbc", "bbcd", "b", "bc", "bcda", "c",
-            "da", "dab", "dabc", "cb", "bbbc", "bbcc", "bcc", "cc", "ad", "cdc", "dc", "e", "bd"
-        ]
+            "da", "dab", "dabc", "cb", "bbbc", "bbcc", "bcc", "cc", "ad", "cdc", "dc", "e", "bd",
+        ],
     );
 }
 
 #[test]
 fn test_super_maximal_repeats_single_merged_trace() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_super_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats(&repeats.borrow()),
-        [
+    execute_test_with_positions(
+        create_maximal_repeats_log,
+        |log| {
+            dump_repeats(&find_super_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).borrow())
+        },
+        &[
             (0, 1, 5),
             (0, 2, 7),
             (0, 5, 9),
@@ -243,34 +261,36 @@ fn test_super_maximal_repeats_single_merged_trace() {
             (3, 2, 4),
             (4, 3, 6),
             (4, 9, 10),
-            (4, 17, 19)
-        ]
+            (4, 17, 19),
+        ],
     );
 }
 
 #[test]
 fn test_super_maximal_repeats_single_merged_trace_string() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_super_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats_to_string(&repeats.borrow(), &log),
-        ["abcd", "bcdbb", "bbcd", "bcda", "dabc", "cb", "bbbc", "bbcc", "ad", "cdc", "e", "bd"]
+    execute_test_with_string_dump(
+        create_maximal_repeats_log,
+        |log| {
+            find_super_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)
+                .borrow()
+                .clone()
+        },
+        &[
+            "abcd", "bcdbb", "bbcd", "bcda", "dabc", "cb", "bbbc", "bbcc", "ad", "cdc", "e", "bd",
+        ],
     );
 }
 
 #[test]
 fn test_near_super_maximal_repeats_single_merged_trace() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_near_super_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats(&repeats.borrow()),
-        [
+    execute_test_with_positions(
+        create_maximal_repeats_log,
+        |log| {
+            dump_repeats(
+                &find_near_super_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).borrow(),
+            )
+        },
+        &[
             (0, 0, 2),
             (0, 1, 5),
             (0, 2, 7),
@@ -289,24 +309,24 @@ fn test_near_super_maximal_repeats_single_merged_trace() {
             (4, 3, 6),
             (4, 4, 6),
             (4, 9, 10),
-            (4, 17, 19)
-        ]
+            (4, 17, 19),
+        ],
     );
 }
 
 #[test]
 fn test_near_super_maximal_repeats_single_merged_trace_string() {
-    let log = create_maximal_repeats_log();
-    let hashes = log.to_hashes_event_log::<NameEventHasher>();
-
-    let repeats = find_near_super_maximal_repeats(&hashes, &PatternsDiscoveryStrategy::FromSingleMergedTrace);
-
-    assert_eq!(
-        dump_repeats_to_string(&repeats.borrow(), &log),
-        [
+    execute_test_with_string_dump(
+        create_maximal_repeats_log,
+        |log| {
+            find_near_super_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)
+                .borrow()
+                .clone()
+        },
+        &[
             "aa", "abcd", "bcdbb", "db", "bb", "bbcd", "bcda", "dab", "dabc", "cb", "bbbc", "bbcc", "bcc", "cc", "ad",
-            "cdc", "dc", "e", "bd"
-        ]
+            "cdc", "dc", "e", "bd",
+        ],
     );
 }
 
