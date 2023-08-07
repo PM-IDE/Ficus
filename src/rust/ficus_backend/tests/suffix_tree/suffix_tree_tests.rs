@@ -231,6 +231,15 @@ fn test_super_maximal_repeats3_string() {
 }
 
 #[test]
+fn test_super_maximal_repeats4() {
+    let slice = MultipleWordsSuffixTreeSlice::new(vec!["aaax".as_bytes(), "aaay".as_bytes()]);
+    let mut tree = SuffixTree::new(&slice);
+    tree.build_tree();
+
+    assert_eq!(tree.find_maximal_repeats(), [(0, 2), (0, 3), (1, 2)])
+}
+
+#[test]
 fn test_near_super_maximal_repeats() {
     let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
     let mut tree = SuffixTree::new(&slice);

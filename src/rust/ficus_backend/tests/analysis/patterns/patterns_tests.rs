@@ -55,7 +55,7 @@ fn test_tandem_arrays_from_paper_string() {
     execute_test_with_string_dump(
         create_log_from_taxonomy_of_patterns,
         |log| to_sub_arrays(&find_maximal_tandem_arrays_with_length(log, 10).borrow()),
-        &["abc", "bca", "cab", "abcabc", "bcabca"],
+        &["abc", "abcabc", "bca", "bcabca", "cab"],
     );
 }
 
@@ -71,7 +71,10 @@ fn execute_test_with_string_dump<TLogCreator, TPatternsFinder>(
     let hashes = log.to_hashes_event_log::<NameEventHasher>();
     let patterns = patterns_finder(&hashes);
 
-    assert_eq!(dump_repeats_to_string(&patterns, &log), expected);
+    let mut dump = dump_repeats_to_string(&patterns, &log);
+    dump.sort();
+
+    assert_eq!(dump, expected);
 }
 
 fn to_sub_arrays(arrays: &Vec<Vec<TandemArrayInfo>>) -> Vec<Vec<SubArrayInTraceInfo>> {
@@ -217,6 +220,7 @@ fn test_maximal_repeats_single_merged_trace3() {
             (2, 6, 10),
             (2, 7, 10),
             (2, 8, 10),
+            (3, 0, 3),
             (3, 2, 4),
             (4, 3, 6),
             (4, 4, 6),
@@ -236,8 +240,8 @@ fn test_maximal_repeats_single_merged_trace3_string() {
                 .clone()
         },
         &[
-            "a", "aa", "ab", "abc", "abcd", "bcdbb", "cd", "d", "db", "bb", "bbc", "bbcd", "b", "bc", "bcda", "c",
-            "da", "dab", "dabc", "cb", "bbbc", "bbcc", "bcc", "cc", "ad", "cdc", "dc", "e", "bd",
+            "a", "aa", "aaa", "ab", "abc", "abcd", "ad", "b", "bb", "bbbc", "bbc", "bbcc", "bbcd", "bc", "bcc", "bcda",
+            "bcdbb", "bd", "c", "cb", "cc", "cd", "cdc", "d", "da", "dab", "dabc", "db", "dc", "e",
         ],
     );
 }
@@ -258,6 +262,7 @@ fn test_super_maximal_repeats_single_merged_trace() {
             (1, 7, 9),
             (2, 0, 4),
             (2, 6, 10),
+            (3, 0, 3),
             (3, 2, 4),
             (4, 3, 6),
             (4, 9, 10),
@@ -276,7 +281,7 @@ fn test_super_maximal_repeats_single_merged_trace_string() {
                 .clone()
         },
         &[
-            "abcd", "bcdbb", "bbcd", "bcda", "dabc", "cb", "bbbc", "bbcc", "ad", "cdc", "e", "bd",
+            "aaa", "abcd", "ad", "bbbc", "bbcc", "bbcd", "bcda", "bcdbb", "bd", "cb", "cdc", "dabc", "e",
         ],
     );
 }
@@ -324,8 +329,8 @@ fn test_near_super_maximal_repeats_single_merged_trace_string() {
                 .clone()
         },
         &[
-            "aa", "abcd", "bcdbb", "db", "bb", "bbcd", "bcda", "dab", "dabc", "cb", "bbbc", "bbcc", "bcc", "cc", "ad",
-            "cdc", "dc", "e", "bd",
+            "aa", "abcd", "ad", "bb", "bbbc", "bbcc", "bbcd", "bcc", "bcda", "bcdbb", "bd", "cb", "cc", "cdc", "dab",
+            "dabc", "db", "dc", "e",
         ],
     );
 }
