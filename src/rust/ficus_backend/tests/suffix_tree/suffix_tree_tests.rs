@@ -1,8 +1,11 @@
-use std::fs;
+use std::{fmt::Debug, fs};
 
-use ficus_backend::utils::suffix_tree::{
-    suffix_tree_patterns::SuffixTree,
-    suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice, SuffixTreeSlice},
+use ficus_backend::{
+    utils::suffix_tree::{
+        suffix_tree_patterns::SuffixTree,
+        suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice, SuffixTreeSlice},
+    },
+    vecs,
 };
 
 use crate::test_core::{
@@ -50,10 +53,7 @@ fn test_suffix_tree_against_ref_impl() {
     }
 }
 
-fn dump_repeats_to_string<TSlice>(slice: &TSlice, repeats: &Vec<(usize, usize)>) -> Vec<String>
-where
-    TSlice: SuffixTreeSlice<u8>,
-{
+fn dump_repeats_to_string(slice: &dyn SuffixTreeSlice<u8>, repeats: &Vec<(usize, usize)>) -> Vec<String> {
     let mut dump = vec![];
 
     for (left, right) in repeats {
@@ -70,55 +70,58 @@ where
 
 #[test]
 fn test_maximal_repeats() {
-    let slice = SingleWordSuffixTreeSlice::new("djksadlasdjaslkdj".as_bytes());
+    execute_test_with_tuple_dump(
+        "djksadlasdjaslkdj".as_bytes(),
+        |_, tree| tree.find_maximal_repeats(),
+        vec![(0, 1), (0, 2), (2, 3), (3, 4), (4, 5), (6, 7), (7, 9)],
+    );
+}
+
+fn execute_test_with_tuple_dump<TFinder, TValue>(text: &[u8], finder: TFinder, expected: Vec<TValue>)
+where
+    TFinder: Fn(&dyn SuffixTreeSlice<u8>, &SuffixTree<u8>) -> Vec<TValue>,
+    TValue: PartialEq + Debug,
+{
+    let slice = SingleWordSuffixTreeSlice::new(text);
     let mut tree = SuffixTree::new(&slice);
     tree.build_tree();
 
-    assert_eq!(
-        tree.find_maximal_repeats(),
-        [(0, 1), (0, 2), (2, 3), (3, 4), (4, 5), (6, 7), (7, 9)],
-    )
+    assert_eq!(finder(&slice, &tree), expected)
 }
 
 #[test]
 fn test_maximal_repeats_string() {
-    let slice = SingleWordSuffixTreeSlice::new("djksadlasdjaslkdj".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
-        ["a", "as", "d", "dj", "k", "l", "s"],
-    )
+    execute_test_with_tuple_dump(
+        "djksadlasdjaslkdj".as_bytes(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_maximal_repeats()),
+        vecs!["a", "as", "d", "dj", "k", "l", "s"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats2() {
-    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_maximal_repeats(), [(0, 3)])
+    execute_test_with_tuple_dump(
+        "abcdxabcyabcz".as_bytes(),
+        |_, tree| tree.find_maximal_repeats(),
+        vec![(0, 3)],
+    );
 }
 
 #[test]
 fn test_maximal_repeats2_string() {
-    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(dump_repeats_to_string(&slice, &tree.find_maximal_repeats()), ["abc"])
+    execute_test_with_tuple_dump(
+        "abcdxabcyabcz".as_bytes(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_maximal_repeats()),
+        vecs!["abc"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats3() {
-    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.find_maximal_repeats(),
-        [
+    execute_test_with_tuple_dump(
+        "aaacdcdcbedbccbadbdebdc".as_bytes(),
+        |_, tree| tree.find_maximal_repeats(),
+        vec![
             (0, 1),
             (0, 2),
             (3, 4),
@@ -129,105 +132,90 @@ fn test_maximal_repeats3() {
             (8, 9),
             (9, 10),
             (10, 12),
-            (17, 19)
-        ]
-    )
+            (17, 19),
+        ],
+    );
 }
 
 #[test]
 fn test_maximal_repeats3_string() {
-    let slice = SingleWordSuffixTreeSlice::new("aaacdcdcbedbccbadbdebdc".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
-        ["a", "aa", "b", "bd", "c", "cb", "cdc", "d", "db", "dc", "e"]
-    )
+    execute_test_with_tuple_dump(
+        "aaacdcdcbedbccbadbdebdc".as_bytes(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_maximal_repeats()),
+        vecs!["a", "aa", "b", "bd", "c", "cb", "cdc", "d", "db", "dc", "e"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats4() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |_, tree| tree.find_maximal_repeats(),
+        vec![(0, 1), (2, 3), (2, 5)],
+    );
 }
 
 #[test]
 fn test_maximal_repeats4_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
-        ["a", "b", "bcd"]
-    )
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_maximal_repeats()),
+        vecs!["a", "b", "bcd"],
+    );
 }
 
 #[test]
 fn test_maximal_repeats5() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_maximal_repeats(), [(0, 4), (2, 3)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_2(),
+        |_, tree| tree.find_maximal_repeats(),
+        vec![(0, 4), (2, 3)],
+    );
 }
 
 #[test]
 fn test_maximal_repeats5_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_maximal_repeats()),
-        ["b", "dabc"]
-    )
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_2(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_maximal_repeats()),
+        vecs!["b", "dabc"],
+    );
 }
 
 #[test]
 fn test_super_maximal_repeats() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_super_maximal_repeats(), [(0, 1), (2, 5)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |_, tree| tree.find_super_maximal_repeats(),
+        vec![(0, 1), (2, 5)],
+    );
 }
 
 #[test]
 fn test_super_maximal_repeats_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()),
-        ["a", "bcd"]
-    )
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_super_maximal_repeats()),
+        vecs!["a", "bcd"],
+    );
 }
 
 #[test]
 fn test_super_maximal_repeats3() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_super_maximal_repeats(), [(0, 4), (10, 11)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_3(),
+        |_, tree| tree.find_super_maximal_repeats(),
+        vec![(0, 4), (10, 11)],
+    );
 }
 
 #[test]
 fn test_super_maximal_repeats3_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_super_maximal_repeats()),
-        ["a", "bbbc"]
-    )
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_3(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_super_maximal_repeats()),
+        vecs!["a", "bbbc"],
+    );
 }
 
 #[test]
@@ -241,97 +229,82 @@ fn test_super_maximal_repeats4() {
 
 #[test]
 fn test_near_super_maximal_repeats() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (2, 3), (2, 5)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |_, tree| tree.find_near_super_maximal_repeats(),
+        vec![(0, 1), (2, 3), (2, 5)],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_1());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
-        ["a", "b", "bcd"]
-    )
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_1(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_near_super_maximal_repeats()),
+        vecs!["a", "b", "bcd"],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats2() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (2, 3)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_2(),
+        |_, tree| tree.find_near_super_maximal_repeats(),
+        vec![(0, 4), (2, 3)],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats2_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_2());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
-        ["b", "dabc"]
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_2(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_near_super_maximal_repeats()),
+        vecs!["b", "dabc"],
     );
 }
 
 #[test]
 fn test_near_super_maximal_repeats3() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 4), (3, 4), (10, 11)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_3(),
+        |_, tree| tree.find_near_super_maximal_repeats(),
+        vec![(0, 4), (3, 4), (10, 11)],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats3_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_3());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
-        ["a", "bbbc", "c"]
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_3(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_near_super_maximal_repeats()),
+        vecs!["a", "bbbc", "c"],
     );
 }
 
 #[test]
 fn test_near_super_maximal_repeats4() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_4());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_near_super_maximal_repeats(), [(0, 1), (0, 2), (5, 6), (7, 9)])
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_4(),
+        |_, tree| tree.find_near_super_maximal_repeats(),
+        vec![(0, 1), (0, 2), (5, 6), (7, 9)],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats4_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_4());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
-        ["a", "aa", "b", "cc"]
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_4(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_near_super_maximal_repeats()),
+        vecs!["a", "aa", "b", "cc"],
     );
 }
 
 #[test]
 fn test_near_super_maximal_repeats6() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.find_near_super_maximal_repeats(),
-        [
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_5(),
+        |_, tree| tree.find_near_super_maximal_repeats(),
+        vec![
             (0, 1),
             (0, 2),
             (3, 4),
@@ -340,20 +313,17 @@ fn test_near_super_maximal_repeats6() {
             (7, 9),
             (9, 10),
             (10, 12),
-            (17, 19)
-        ]
-    )
+            (17, 19),
+        ],
+    );
 }
 
 #[test]
 fn test_near_super_maximal_repeats6_string() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        dump_repeats_to_string(&slice, &tree.find_near_super_maximal_repeats()),
-        ["a", "aa", "bd", "c", "cb", "cdc", "db", "dc", "e"]
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_5(),
+        |slice, tree| dump_repeats_to_string(slice, &tree.find_near_super_maximal_repeats()),
+        vecs!["a", "aa", "bd", "c", "cb", "cdc", "db", "dc", "e"],
     );
 }
 
@@ -371,61 +341,55 @@ fn test_multiple_words_suffix_tree_slice() {
 
 #[test]
 fn test_patterns_search() {
-    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_patterns("abc".as_bytes()).unwrap(), [(0, 3), (5, 8), (9, 12)]);
+    execute_test_with_tuple_dump(
+        "abcdxabcyabcz".as_bytes(),
+        |_, tree| tree.find_patterns("abc".as_bytes()).unwrap(),
+        vec![(0, 3), (5, 8), (9, 12)],
+    );
 }
 
 #[test]
 fn test_patterns_search2() {
-    let slice = SingleWordSuffixTreeSlice::new(create_max_repeats_trace_5());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_patterns("badb".as_bytes()).unwrap(), [(14, 18)]);
+    execute_test_with_tuple_dump(
+        create_max_repeats_trace_5(),
+        |_, tree| tree.find_patterns("badb".as_bytes()).unwrap(),
+        vec![(14, 18)],
+    );
 }
 
 #[test]
 fn test_patterns_search3() {
-    let slice = SingleWordSuffixTreeSlice::new("abcdxabcyabcz".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_patterns("a".as_bytes()).unwrap(), [(0, 1), (5, 6), (9, 10)]);
+    execute_test_with_tuple_dump(
+        "abcdxabcyabcz".as_bytes(),
+        |_, tree| tree.find_patterns("a".as_bytes()).unwrap(),
+        vec![(0, 1), (5, 6), (9, 10)],
+    );
 }
 
 #[test]
 fn test_patterns_search4() {
-    let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(tree.find_patterns("xa".as_bytes()).unwrap(), [(0, 2), (3, 5)]);
+    execute_test_with_tuple_dump(
+        "xabxac".as_bytes(),
+        |_, tree| tree.find_patterns("xa".as_bytes()).unwrap(),
+        vec![(0, 2), (3, 5)],
+    );
 }
 
 #[test]
 fn test_patterns_search5() {
-    let slice = SingleWordSuffixTreeSlice::new("bbbcdbbbccaa".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.find_patterns("bb".as_bytes()).unwrap(),
-        [(0, 2), (1, 3), (5, 7), (6, 8)]
+    execute_test_with_tuple_dump(
+        "bbbcdbbbccaa".as_bytes(),
+        |_, tree| tree.find_patterns("bb".as_bytes()).unwrap(),
+        vec![(0, 2), (1, 3), (5, 7), (6, 8)],
     );
 }
 
 #[test]
 pub fn test_suffix_tree_nodes() {
-    let slice = SingleWordSuffixTreeSlice::new("xabxac".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.dump_nodes(),
-        [
+    execute_test_with_tuple_dump(
+        "xabxac".as_bytes(),
+        |_, tree| tree.dump_nodes(),
+        vec![
             (0, 0, None, None),
             (2, 7, Some(4), None),
             (2, 7, Some(6), None),
@@ -435,20 +399,17 @@ pub fn test_suffix_tree_nodes() {
             (1, 2, Some(0), Some(0)),
             (5, 7, Some(6), None),
             (5, 7, Some(0), None),
-            (6, 7, Some(0), None)
-        ]
+            (6, 7, Some(0), None),
+        ],
     );
 }
 
 #[test]
 pub fn test_suffix_tree_nodes2() {
-    let slice = SingleWordSuffixTreeSlice::new("dasdasdasasasdasdasasd".as_bytes());
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.dump_nodes(),
-        [
+    execute_test_with_tuple_dump(
+        "dasdasdasasasdasdasasd".as_bytes(),
+        |_, tree| tree.dump_nodes(),
+        vec![
             (0, 0, None, None),
             (6, 23, Some(4), None),
             (11, 23, Some(20), None),
@@ -491,21 +452,17 @@ pub fn test_suffix_tree_nodes2() {
             (22, 23, Some(38), None),
             (0, 1, Some(0), Some(0)),
             (22, 23, Some(40), None),
-            (22, 23, Some(0), None)
-        ]
+            (22, 23, Some(0), None),
+        ],
     );
 }
 
 #[test]
 pub fn test_suffix_tree_nodes3() {
-    let string = "asjkldhoiufjaksdjkasfgahabvasdrfaoasdfuabjikdu".as_bytes();
-    let slice = SingleWordSuffixTreeSlice::new(string);
-    let mut tree = SuffixTree::new(&slice);
-    tree.build_tree();
-
-    assert_eq!(
-        tree.dump_nodes(),
-        [
+    execute_test_with_tuple_dump(
+        "asjkldhoiufjaksdjkasfgahabvasdrfaoasdfuabjikdu".as_bytes(),
+        |_, tree| tree.dump_nodes(),
+        vec![
             (0, 0, None, None),
             (2, 47, Some(25), None),
             (2, 47, Some(18), None),
@@ -569,7 +526,7 @@ pub fn test_suffix_tree_nodes3() {
             (44, 47, Some(16), None),
             (45, 47, Some(20), None),
             (46, 47, Some(51), None),
-            (46, 47, Some(0), None)
-        ]
+            (46, 47, Some(0), None),
+        ],
     );
 }
