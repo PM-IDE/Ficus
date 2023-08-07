@@ -1,9 +1,7 @@
-import pm4py
-
-from ...ficus.log.functions import parse_log_from_strings
-from ...ficus.log.pm4py_converters import from_pm4py_log
+from ..core.utils import maximal_repeats_to_substrings
 from ...ficus.analysis.patterns.event_log_patterns import *
 from ...ficus.analysis.patterns.util import create_activity_name_from_log
+from ...ficus.log.functions import parse_log_from_strings
 from ...tests import log_creators
 
 
@@ -90,7 +88,7 @@ def test_maximal_repeat_from_taxonomy_of_patterns():
     raw_logs = list(map(log_creators.insert_separator, raw_events))
     event_log = parse_log_from_strings(raw_logs)
     maximal_repeat_set_by_traces = find_maximal_repeats(event_log)
-    substrings = _maximal_repeats_to_substrings(raw_events, maximal_repeat_set_by_traces)
+    substrings = maximal_repeats_to_substrings(raw_events, maximal_repeat_set_by_traces)
 
     assert substrings == [['a', 'b', 'bcd'],
                           ['dabc', 'b'],
@@ -99,25 +97,12 @@ def test_maximal_repeat_from_taxonomy_of_patterns():
                           ['a', 'aa', 'c', 'cdc', 'cb', 'd', 'dc', 'db', 'b', 'bd', 'e']]
 
 
-def _maximal_repeats_to_substrings(raw_events: list[str],
-                                   repeat_set_by_traces: list[list[MaximalRepeatInfo]]) -> list[list[str]]:
-    substrings = []
-    for raw_event_string, trace_repeats in zip(raw_events, repeat_set_by_traces):
-        trace_substrings = []
-        for repeat in trace_repeats:
-            trace_substrings.append(raw_event_string[repeat.first_pos:(repeat.first_pos + repeat.length)])
-
-        substrings.append(trace_substrings)
-
-    return substrings
-
-
 def test_super_maximal_repeat_from_taxonomy_of_patterns():
     raw_events = log_creators.create_list_of_raw_events_for_maximal_repeat()
     raw_logs = list(map(log_creators.insert_separator, raw_events))
     event_log = parse_log_from_strings(raw_logs)
     super_maximal_repeats = find_super_maximal_repeats(event_log)
-    substrings = _maximal_repeats_to_substrings(raw_events, super_maximal_repeats)
+    substrings = maximal_repeats_to_substrings(raw_events, super_maximal_repeats)
 
     assert substrings == [['a', 'bcd'],
                           ['dabc'],
@@ -131,7 +116,7 @@ def test_near_super_maximal_repeat_from_taxonomy_of_patterns():
     raw_logs = list(map(log_creators.insert_separator, raw_events))
     event_log = parse_log_from_strings(raw_logs)
     near_super_maximal_repeats = find_near_super_maximal_repeats(event_log)
-    substrings = _maximal_repeats_to_substrings(raw_events, near_super_maximal_repeats)
+    substrings = maximal_repeats_to_substrings(raw_events, near_super_maximal_repeats)
 
     assert substrings == [['a', 'b', 'bcd'],
                           ['dabc', 'b'],
@@ -234,3 +219,36 @@ def test_creating_abstractions_from_maximal_repeats():
     raw_events = list(map(log_creators.insert_separator, raw_logs))
     expected = ['a::b::c::d', 'e']
     _do_test_with_abstractions(raw_events, expected, find_maximal_repeats)
+
+
+def test_maximal_repeats_from_single_merged_trace():
+    current_log = log_creators.create_single_merged_trace_maximal_repeats_log()
+    raw_events = log_creators.create_single_merged_trace_maximal_repeat_traces()
+
+    near_super_maximal_repeats = find_maximal_repeats(current_log)
+    substrings = maximal_repeats_to_substrings(raw_events, near_super_maximal_repeats)
+    assert substrings == [['a', 'aa', 'aaa', 'ab', 'abc', 'abcd', 'ad', 'b', 'bc',
+                           'bcd', 'bcdbb', 'bcda', 'bcc', 'bb', 'bbc', 'bbcd', 'bbcc',
+                           'bbbc', 'bd', 'c', 'cd', 'cdc', 'cb', 'cc', 'd', 'db', 'da',
+                           'dab', 'dabc', 'dc', 'e']]
+
+
+def test_super_maximal_repeats_from_single_merged_trace():
+    current_log = log_creators.create_single_merged_trace_maximal_repeats_log()
+    raw_events = log_creators.create_single_merged_trace_maximal_repeat_traces()
+
+    near_super_maximal_repeats = find_super_maximal_repeats(current_log)
+    substrings = maximal_repeats_to_substrings(raw_events, near_super_maximal_repeats)
+    assert substrings == [['aaa', 'abcd', 'ad', 'bcdbb', 'bcda', 'bbcd',
+                           'bbcc', 'bbbc', 'bd', 'cdc', 'cb', 'dabc', 'e']]
+
+
+def test_near_super_maximal_repeats_from_single_merged_trace():
+    current_log = log_creators.create_single_merged_trace_maximal_repeats_log()
+    raw_events = log_creators.create_single_merged_trace_maximal_repeat_traces()
+
+    near_super_maximal_repeats = find_near_super_maximal_repeats(current_log)
+    substrings = maximal_repeats_to_substrings(raw_events, near_super_maximal_repeats)
+    assert substrings == [['aa', 'aaa', 'abcd', 'ad', 'bcdbb', 'bcda', 'bcc', 'bb',
+                           'bbcd', 'bbcc', 'bbbc', 'bd', 'cdc', 'cb', 'cc', 'db', 'dab',
+                           'dabc', 'dc', 'e']]

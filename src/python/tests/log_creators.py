@@ -48,3 +48,24 @@ def insert_separator(single_chars_events: str, sep: str = default_separator) -> 
 def create_list_of_raw_events_for_maximal_repeat() -> list[str]:
     raw_log_strings = ['aabcdbbcda', 'dabcdabcbb', 'bbbcdbbbccaa', 'aaadabbccc', 'aaacdcdcbedbccbadbdebdc']
     return raw_log_strings
+
+
+def create_taxonomy_of_patterns_repeats_log() -> MyEventLog:
+    raw_traces = list(map(insert_separator, create_list_of_raw_events_for_maximal_repeat()))
+    return parse_log_from_strings(raw_traces)
+
+
+def create_single_merged_trace_maximal_repeat_traces() -> list[str]:
+    return ["X".join(create_list_of_raw_events_for_maximal_repeat())]
+
+
+def create_single_merged_trace_maximal_repeats_log() -> MyEventLog:
+    log = ['aabcdbbcda', 'dabcdabcbb', 'bbbcdbbbccaa', 'aaadabbccc', 'aaacdcdcbedbccbadbdebdc']
+    unique = ['X', 'Y', 'Z', 'W']
+    result = ''
+    for i in range(len(log) - 1):
+        result += log[i] + unique[i]
+
+    result += log[-1]
+
+    return parse_log_from_strings([insert_separator(result)])

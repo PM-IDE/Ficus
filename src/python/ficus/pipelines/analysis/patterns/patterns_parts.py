@@ -397,7 +397,9 @@ class DiscoverActivitiesFromPatterns(InternalPipelinePart):
             return copy.copy(initial_input)
 
         def output_merger(initial_input: PipelinePartResult, temp_result: PipelinePartResult):
-            return copy.copy(initial_input).with_activities(activities(temp_result))
+            return (copy.copy(initial_input)
+                    .with_activities(activities(temp_result))
+                    .with_patterns(patterns(temp_result)))
 
         return WithTempInput(input_transformer, output_merger, Pipeline(
             self.patterns_source,
