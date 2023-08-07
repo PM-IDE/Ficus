@@ -1,4 +1,4 @@
-use super::{node::Node, suffix_tree::SuffixTree, suffix_tree_slice::SuffixTreeSlice};
+use super::{node::Node, suffix_tree_patterns::SuffixTree, suffix_tree_slice::SuffixTreeSlice};
 use std::{cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
 
 #[derive(Copy, Clone)]

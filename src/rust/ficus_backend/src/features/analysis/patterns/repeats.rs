@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc, vec};
 
 use crate::utils::suffix_tree::{
-    suffix_tree::SuffixTree,
+    suffix_tree_patterns::SuffixTree,
     suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice},
 };
 

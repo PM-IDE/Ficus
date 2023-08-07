@@ -1,7 +1,7 @@
 use std::fs;
 
 use ficus_backend::utils::suffix_tree::{
-    suffix_tree::SuffixTree,
+    suffix_tree_patterns::SuffixTree,
     suffix_tree_slice::{MultipleWordsSuffixTreeSlice, SingleWordSuffixTreeSlice, SuffixTreeSlice},
 };
 
