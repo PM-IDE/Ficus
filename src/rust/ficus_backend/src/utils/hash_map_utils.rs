@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 pub fn increase_in_map<TKey>(map: &mut HashMap<TKey, usize>, key: &TKey)
@@ -34,18 +34,22 @@ where
     }
 }
 
-pub fn compare_maps_by_keys<TKey, TValue>(first_map: &HashMap<TKey, TValue>, second_map: &HashMap<TKey, TValue>) -> bool
+pub fn compare_maps_by_keys<TKey, TValue>(
+    first_map: &HashMap<TKey, TValue>,
+    second_map: &HashMap<TKey, TValue>,
+    unique_keys: HashSet<TKey>,
+) -> bool
 where
     TKey: Hash + Eq + PartialEq + Clone,
 {
     for key in first_map.keys() {
-        if !second_map.contains_key(key) {
+        if unique_keys.contains(key) || !second_map.contains_key(key) {
             return false;
         }
     }
 
     for key in second_map.keys() {
-        if !first_map.contains_key(key) {
+        if unique_keys.contains(key) || !first_map.contains_key(key) {
             return false;
         }
     }

@@ -24,7 +24,7 @@ enum RepeatType {
 
 impl<'a, TElement> SuffixTree<'a, TElement>
 where
-    TElement: Eq + Hash + Copy,
+    TElement: Eq + Hash + Copy
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
     pub fn find_maximal_repeats(&self) -> Vec<(usize, usize)> {
@@ -65,25 +65,6 @@ where
 
     pub fn find_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
         self.find_repeats(RepeatType::SuperMaximalRepeat)
-    }
-
-    fn find_maximal_repeats_and_build_suffix_tree<TContinuation>(&self, mut continuation: TContinuation)
-    where
-        TContinuation: FnMut(&Vec<(usize, usize)>, &SuffixTree<TElement>) -> (),
-    {
-        let found_maximal_repeats = self.find_maximal_repeats();
-        let mut slices = Vec::new();
-        for repeat in &found_maximal_repeats {
-            if let Some(sub_slice) = self.slice.sub_slice(repeat.0, repeat.1) {
-                slices.push(sub_slice);
-            }
-        }
-
-        let slice = MultipleWordsSuffixTreeSlice::new(slices);
-        let mut suffix_tree = SuffixTree::new(&slice);
-        suffix_tree.build_tree();
-
-        continuation(&found_maximal_repeats, &suffix_tree);
     }
 
     pub fn find_near_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
@@ -167,13 +148,14 @@ where
         children: &Vec<&usize>,
         suffix_length: usize,
         nodes_to_awc: &HashMap<usize, HashMap<Option<TElement>, usize>>,
-        nodes_to_any_suffix_len: &mut HashMap<usize, usize>,
+        nodes_to_any_suffix_len: &HashMap<usize, usize>,
         repeats: &mut HashSet<(usize, usize)>,
     ) {
         match repeat_type {
             RepeatType::MaximalRepeat => {}
             RepeatType::SuperMaximalRepeat => {
                 let nodes = &self.nodes.borrow();
+
                 for (_, child_index) in &nodes.get(*node_index).unwrap().children {
                     let child_node = nodes.get(*child_index).unwrap();
                     if !child_node.is_leaf() {
@@ -182,7 +164,7 @@ where
 
                     if child_node.is_leaf() {
                         let element = self.get_element_for_suffix(nodes_to_any_suffix_len[child_index]);
-                        if nodes_to_awc[node_index][&element] != 1 {
+                        if element != None && nodes_to_awc[node_index][&element] != 1 {
                             return;
                         }
                     }
@@ -196,7 +178,7 @@ where
                     if child_node.is_leaf() {
                         let element = self.get_element_for_suffix(nodes_to_any_suffix_len[child_index]);
 
-                        if nodes_to_awc[node_index][&element] == 1 {
+                        if element != None && nodes_to_awc[node_index][&element] == 1 {
                             witnesses_near_supermaximality = true;
                         }
                     }
@@ -217,7 +199,7 @@ where
                 let first_map = nodes_to_awc.get(first_child).unwrap();
                 let second_map = nodes_to_awc.get(second_child).unwrap();
 
-                if !compare_maps_by_keys(first_map, second_map) {
+                if !compare_maps_by_keys(first_map, second_map, HashSet::from_iter([None])) {
                     let first_child_suffix_len = nodes_to_any_suffix_len[first_child];
                     let start = self.slice.len() - first_child_suffix_len;
 
