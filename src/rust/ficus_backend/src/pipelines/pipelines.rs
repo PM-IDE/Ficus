@@ -1,16 +1,49 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    error::Error,
+    fmt::{Debug, Display},
+};
 
 use crate::event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log};
 
 use super::context::PipelineContext;
 
+pub struct PipelinePartExecutionError {
+    message: String,
+}
+
+impl Display for PipelinePartExecutionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl Debug for PipelinePartExecutionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PipelinePartExecutionError")
+            .field("message", &self.message)
+            .finish()
+    }
+}
+
+impl Error for PipelinePartExecutionError {}
+
+impl PipelinePartExecutionError {
+    pub fn new(message: String) -> Self {
+        Self { message }
+    }
+}
+
 pub struct PipelinePart {
     name: String,
-    executor: Box<dyn Fn(&mut PipelineContext) -> ()>,
+    executor: Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>,
 }
 
 impl PipelinePart {
-    pub fn new(name: String, executor: Box<dyn Fn(&mut PipelineContext) -> ()>) -> Self {
+    pub fn new(
+        name: String,
+        executor: Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>,
+    ) -> Self {
         Self { name, executor }
     }
 
@@ -40,7 +73,13 @@ impl PipelineParts {
             "ReadLogFromXes".to_string(),
             Box::new(|context| {
                 let path = context.get(&context.types().path()).unwrap();
-                context.put(&context.types().event_log(), Box::new(read_event_log(path).unwrap()))
+                let log = read_event_log(path);
+                if log.is_none() {
+                    return Err(PipelinePartExecutionError::new("Failed to read event log".to_string()));
+                }
+
+                context.put(&context.types().event_log(), Box::new(log.unwrap()));
+                Ok(())
             }),
         )
     }
@@ -50,7 +89,10 @@ impl PipelineParts {
             "WriteLogToXes".to_string(),
             Box::new(|context| {
                 let path = context.get(&context.types().path()).unwrap();
-                write_log(&context.get(&context.types().event_log()).unwrap(), path).ok();
+                match write_log(&context.get(&context.types().event_log()).unwrap(), path) {
+                    Ok(()) => Ok(()),
+                    Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
+                }
             }),
         )
     }

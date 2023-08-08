@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    fmt::{Debug, Display},
     fs,
     io::{self, Cursor},
     string::FromUtf8Error,
@@ -7,7 +8,7 @@ use std::{
 
 use quick_xml::{
     events::{BytesEnd, BytesStart},
-    Writer,
+    Error, Writer,
 };
 
 use crate::event_log::{
@@ -24,6 +25,28 @@ pub enum WriteLogError {
     IOError(io::Error),
     WriterError(quick_xml::Error),
 }
+
+impl Display for WriteLogError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FromUt8Error(err) => Display::fmt(&err, f),
+            Self::IOError(err) => Display::fmt(&err, f),
+            Self::WriterError(err) => Display::fmt(&err, f),
+        }
+    }
+}
+
+impl Debug for WriteLogError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::FromUt8Error(arg0) => f.debug_tuple("FromUt8Error").field(arg0).finish(),
+            Self::IOError(arg0) => f.debug_tuple("IOError").field(arg0).finish(),
+            Self::WriterError(arg0) => f.debug_tuple("WriterError").field(arg0).finish(),
+        }
+    }
+}
+
+impl std::error::Error for WriteLogError {}
 
 pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogError> {
     match serialize_event_log(log) {

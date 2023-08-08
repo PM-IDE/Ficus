@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    event_log::xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl},
+    event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
         analysis::patterns::{
             activity_instances::ActivityInTraceInfo,
