@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package ficus;
+
+message SimpleEventLog {
+    repeated SimpleTrace traces = 1;
+}
+
+message SimpleTrace {
+    repeated Event events = 1;
+}
+
+message Event {
+    string name = 1;
+    EventStamp stamp = 2;
+}
+
+message EventStamp {
+    oneof stamp {
+        google.protobuf.Timestamp date = 1;
+        uint64 order = 2;
+    }
+}
