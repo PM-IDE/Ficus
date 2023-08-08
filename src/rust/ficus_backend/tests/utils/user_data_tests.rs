@@ -4,7 +4,7 @@ use ficus_backend::utils::user_data::{Key, UserData};
 
 #[test]
 fn test_user_data() {
-    let key = Key::<usize>::new(&"asdasdasda".to_string());
+    let key = Key::<usize>::new("asdasdasda".to_string());
     let mut user_data = UserData::new();
     let b = Box::new(123);
     user_data.put(&key, b);
@@ -14,8 +14,8 @@ fn test_user_data() {
 
 #[test]
 fn test_user_data_two_keys() {
-    let first_key = Key::<Rc<Box<usize>>>::new(&"1".to_string());
-    let second_key = Key::<Rc<Box<usize>>>::new(&"2".to_string());
+    let first_key = Key::<Rc<Box<usize>>>::new("1".to_string());
+    let second_key = Key::<Rc<Box<usize>>>::new("2".to_string());
 
     let first_value = Rc::new(Box::new(123));
     let second_value = Rc::new(Box::new(321));
@@ -36,7 +36,7 @@ fn test_user_data_two_keys() {
 
 #[test]
 fn test_remove_from_user_data() {
-    let key = Key::<usize>::new(&"1".to_string());
+    let key = Key::<usize>::new("1".to_string());
 
     let value = 123;
     let mut user_data = UserData::new();
