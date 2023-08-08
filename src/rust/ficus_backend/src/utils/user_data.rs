@@ -44,17 +44,11 @@ impl<T> Hash for Key<T> {
     }
 }
 
-pub struct ValueHolderImpl<T>
-where
-    T: Clone,
-{
+pub struct ValueHolderImpl<T> {
     value: Box<T>,
 }
 
-impl<T> ValueHolderImpl<T>
-where
-    T: Clone,
-{
+impl<T> ValueHolderImpl<T> {
     pub fn new(value: Box<T>) -> Self {
         Self { value }
     }
@@ -89,7 +83,7 @@ impl UserData {
         Self { values_map: None }
     }
 
-    pub fn put<T: Clone + 'static>(&mut self, key: &Key<T>, value: Box<T>) {
+    pub fn put<T: 'static>(&mut self, key: &Key<T>, value: Box<T>) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
@@ -115,7 +109,7 @@ impl UserData {
         self.values_map.as_mut().unwrap().remove(&key.to_tuple());
     }
 
-    pub fn get<T: Clone + 'static>(&self, key: &Key<T>) -> Option<&T> {
+    pub fn get<T: 'static>(&self, key: &Key<T>) -> Option<&T> {
         if self.values_map.is_none() {
             return None;
         }

@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    event_log::xes::xes_event::XesEventImpl,
+    event_log::xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl},
     features::{
         analysis::patterns::{
             activity_instances::ActivityInTraceInfo,
@@ -53,13 +53,13 @@ impl<T> Hash for PipelineType<T> {
 
 pub struct Types {
     path: Rc<Box<PipelineType<String>>>,
-    event_log: Rc<Box<PipelineType<XesEventImpl>>>,
+    event_log: Rc<Box<PipelineType<XesEventLogImpl>>>,
     activities: Rc<Box<PipelineType<Vec<Rc<RefCell<ActivityNode>>>>>>,
     repeat_sets: Rc<Box<PipelineType<Vec<SubArrayWithTraceIndex>>>>,
     trace_activities: Rc<Box<PipelineType<Vec<Vec<ActivityInTraceInfo>>>>>,
     patterns: Rc<Box<PipelineType<Vec<Vec<SubArrayInTraceInfo>>>>>,
     petri_net: Rc<Box<PipelineType<PetriNet>>>,
-    activities_to_logs: Rc<Box<PipelineType<HashMap<String, XesEventImpl>>>>,
+    activities_to_logs: Rc<Box<PipelineType<HashMap<String, XesEventLogImpl>>>>,
     activity_name: Rc<Box<PipelineType<String>>>,
 }
 
@@ -86,7 +86,7 @@ impl Types {
         Rc::clone(&self.path)
     }
 
-    pub fn event_log(&self) -> Rc<Box<PipelineType<XesEventImpl>>> {
+    pub fn event_log(&self) -> Rc<Box<PipelineType<XesEventLogImpl>>> {
         Rc::clone(&self.event_log)
     }
 
@@ -110,7 +110,7 @@ impl Types {
         Rc::clone(&self.petri_net)
     }
 
-    pub fn activities_to_logs(&self) -> Rc<Box<PipelineType<HashMap<String, XesEventImpl>>>> {
+    pub fn activities_to_logs(&self) -> Rc<Box<PipelineType<HashMap<String, XesEventLogImpl>>>> {
         Rc::clone(&self.activities_to_logs)
     }
 

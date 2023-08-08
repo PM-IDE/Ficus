@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 
-use super::types::Types;
+use crate::event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log};
+
+use super::context::PipelineContext;
 
 pub struct PipelinePart {
     name: String,
-    executor: Box<dyn Fn() -> ()>,
+    executor: Box<dyn Fn(&mut PipelineContext) -> ()>,
 }
 
 impl PipelinePart {
-    pub fn new(name: String, executor: Box<dyn Fn() -> ()>) -> Self {
+    pub fn new(name: String, executor: Box<dyn Fn(&mut PipelineContext) -> ()>) -> Self {
         Self { name, executor }
     }
 
@@ -22,8 +24,8 @@ pub struct PipelineParts {
 }
 
 impl PipelineParts {
-    pub fn new(types: &Types) -> Self {
-        let parts = vec![Self::read_log_from_xes(types), Self::write_log_to_xes(types)];
+    pub fn new() -> Self {
+        let parts = vec![Self::read_log_from_xes(), Self::write_log_to_xes()];
 
         let mut names_to_parts = HashMap::new();
         for part in parts {
@@ -33,11 +35,23 @@ impl PipelineParts {
         Self { names_to_parts }
     }
 
-    fn read_log_from_xes(types: &Types) -> PipelinePart {
-        PipelinePart::new("ReadLogFromXes".to_string(), Box::new(|| {}))
+    fn read_log_from_xes() -> PipelinePart {
+        PipelinePart::new(
+            "ReadLogFromXes".to_string(),
+            Box::new(|context| {
+                let path = context.get(&context.types().path()).unwrap();
+                context.put(&context.types().event_log(), Box::new(read_event_log(path).unwrap()))
+            }),
+        )
     }
 
-    fn write_log_to_xes(types: &Types) -> PipelinePart {
-        PipelinePart::new("WriteLogToXes".to_string(), Box::new(|| {}))
+    fn write_log_to_xes() -> PipelinePart {
+        PipelinePart::new(
+            "WriteLogToXes".to_string(),
+            Box::new(|context| {
+                let path = context.get(&context.types().path()).unwrap();
+                write_log(&context.get(&context.types().event_log()).unwrap(), path).ok();
+            }),
+        )
     }
 }
