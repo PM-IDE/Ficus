@@ -15,7 +15,7 @@ where
 
 impl<'a, TElement> SuffixTree<'a, TElement>
 where
-    TElement: Eq + Hash + Copy
+    TElement: Eq + Hash + Copy,
 {
     pub fn find_patterns(&self, pattern: &[TElement]) -> Option<Vec<(usize, usize)>> {
         let mut current_node_index = 0;

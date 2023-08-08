@@ -1,28 +1,46 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
+    hash::{Hash, Hasher},
     marker::PhantomData,
     rc::Rc,
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 pub struct Key<T> {
     name: String,
     _phantom_data: PhantomData<T>,
+    _hash: u64,
 }
 
 impl<T> Key<T>
 where
     T: 'static,
 {
-    pub fn new(name: &String) -> Self {
+    pub fn new(name: String) -> Self {
+        static CURRENT_HASH: AtomicU64 = AtomicU64::new(0);
+
         Self {
             name: name.to_owned(),
             _phantom_data: PhantomData,
+            _hash: CURRENT_HASH.fetch_add(1, Ordering::SeqCst),
         }
     }
 
     fn to_tuple(&self) -> (String, TypeId) {
         (self.name.to_owned(), self._phantom_data.type_id())
+    }
+}
+
+impl<T> PartialEq for Key<T> {
+    fn eq(&self, other: &Self) -> bool {
+        false
+    }
+}
+
+impl<T> Hash for Key<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write_u64(self._hash)
     }
 }
 

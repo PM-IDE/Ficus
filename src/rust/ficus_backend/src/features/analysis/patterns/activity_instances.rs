@@ -245,7 +245,7 @@ pub fn underlying_events_key<TEvent>() -> Key<Vec<Rc<RefCell<TEvent>>>>
 where
     TEvent: Event + 'static,
 {
-    Key::new(&"UNDERLYING_EVENTS".to_string())
+    Key::new("UNDERLYING_EVENTS".to_string())
 }
 
 pub fn create_new_log_from_activities_instances<TLog, TEventFactory, TUndefActivityFactory>(

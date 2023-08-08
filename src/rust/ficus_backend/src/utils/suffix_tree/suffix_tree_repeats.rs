@@ -1,8 +1,10 @@
-use crate::utils::hash_map_utils::{increase_in_map_by, compare_maps_by_keys};
+use crate::utils::hash_map_utils::{compare_maps_by_keys, increase_in_map_by};
 
 use super::suffix_tree_patterns::SuffixTree;
-use std::{hash::Hash, collections::{HashMap, HashSet}};
-
+use std::{
+    collections::{HashMap, HashSet},
+    hash::Hash,
+};
 
 enum RepeatType {
     MaximalRepeat,
@@ -12,7 +14,7 @@ enum RepeatType {
 
 impl<'a, TElement> SuffixTree<'a, TElement>
 where
-    TElement: Eq + PartialEq + Hash + Copy 
+    TElement: Eq + PartialEq + Hash + Copy,
 {
     //docs: http://vis.usal.es/rodrigo/documentos/bioinfo/avanzada/soluciones/12-suffixtrees2.pdf
     pub fn find_maximal_repeats(&self) -> Vec<(usize, usize)> {
@@ -26,7 +28,7 @@ where
     pub fn find_near_super_maximal_repeats(&self) -> Vec<(usize, usize)> {
         self.find_repeats(RepeatType::NearSuperMaximalRepeat)
     }
-    
+
     fn find_repeats(&self, repeat_type: RepeatType) -> Vec<(usize, usize)> {
         let mut maximal_repeats = HashSet::new();
         let mut nodes_to_awc = HashMap::new();
@@ -58,7 +60,7 @@ where
 
         filtered_repeats
     }
-    
+
     fn dfs_repeats(
         &self,
         repeat_type: &RepeatType,
@@ -182,5 +184,4 @@ where
             }
         }
     }
-
 }

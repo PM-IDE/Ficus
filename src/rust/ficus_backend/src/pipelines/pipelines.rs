@@ -1,39 +1,19 @@
-use std::{
-    collections::HashMap,
-    rc::Rc,
-};
+use std::collections::HashMap;
 
-use super::types::{PipelineType, Types};
+use super::types::Types;
 
 pub struct PipelinePart {
     name: String,
-    required_types: Vec<Rc<Box<PipelineType>>>,
-    modified_types: Option<Vec<Rc<Box<PipelineType>>>>,
+    executor: Box<dyn Fn() -> ()>,
 }
 
 impl PipelinePart {
-    pub fn new(
-        name: String,
-        required_types: Vec<Rc<Box<PipelineType>>>,
-        modified_types: Option<Vec<Rc<Box<PipelineType>>>>,
-    ) -> Self {
-        Self {
-            name,
-            required_types,
-            modified_types,
-        }
+    pub fn new(name: String, executor: Box<dyn Fn() -> ()>) -> Self {
+        Self { name, executor }
     }
 
     pub fn name(&self) -> &String {
         &self.name
-    }
-
-    pub fn required_types(&self) -> &Vec<Rc<Box<PipelineType>>> {
-        &self.required_types
-    }
-
-    pub fn modified_types(&self) -> Option<&Vec<Rc<Box<PipelineType>>>> {
-        self.modified_types.as_ref()
     }
 }
 
@@ -43,10 +23,7 @@ pub struct PipelineParts {
 
 impl PipelineParts {
     pub fn new(types: &Types) -> Self {
-        let parts = vec![
-            PipelinePart::new("ReadLogFromXes".to_string(), vec![types.path()], Some(vec![types.event_log()])),
-            PipelinePart::new("WriteLogToXes".to_string(), vec![types.event_log()], None),
-        ];
+        let parts = vec![Self::read_log_from_xes(types), Self::write_log_to_xes(types)];
 
         let mut names_to_parts = HashMap::new();
         for part in parts {
@@ -54,5 +31,13 @@ impl PipelineParts {
         }
 
         Self { names_to_parts }
+    }
+
+    fn read_log_from_xes(types: &Types) -> PipelinePart {
+        PipelinePart::new("ReadLogFromXes".to_string(), Box::new(|| {}))
+    }
+
+    fn write_log_to_xes(types: &Types) -> PipelinePart {
+        PipelinePart::new("WriteLogToXes".to_string(), Box::new(|| {}))
     }
 }

@@ -1,49 +1,66 @@
 use std::{
+    cell::RefCell,
+    collections::HashMap,
     hash::{Hash, Hasher},
     rc::Rc,
 };
 
-pub struct PipelineType {
-    name: String,
+use crate::{
+    event_log::xes::xes_event::XesEventImpl,
+    features::{
+        analysis::patterns::{
+            activity_instances::ActivityInTraceInfo,
+            repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
+            tandem_arrays::SubArrayInTraceInfo,
+        },
+        discovery::petri_net::PetriNet,
+    },
+    utils::user_data::Key,
+};
+
+pub struct PipelineType<T> {
+    key: Key<T>,
 }
 
-impl PipelineType {
+impl<T> PipelineType<T>
+where
+    T: 'static,
+{
     pub fn new(type_name: &str) -> Self {
         Self {
-            name: type_name.to_owned(),
+            key: Key::new(type_name.to_owned()),
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn key(&self) -> &Key<T> {
+        &self.key
     }
 }
 
-impl PartialEq for PipelineType {
+impl<T> PartialEq for PipelineType<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
+        self.key == other.key
     }
 }
 
-impl Eq for PipelineType {}
+impl<T> Eq for PipelineType<T> {}
 
-impl Hash for PipelineType {
+impl<T> Hash for PipelineType<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.name.hash(state);
+        self.key.hash(state);
     }
 }
 
 pub struct Types {
-    path: Rc<Box<PipelineType>>,
-    event_log: Rc<Box<PipelineType>>,
-    activities: Rc<Box<PipelineType>>,
-    repeat_sets: Rc<Box<PipelineType>>,
-    trace_activities: Rc<Box<PipelineType>>,
-    patterns: Rc<Box<PipelineType>>,
-    petri_net: Rc<Box<PipelineType>>,
-    event_class_tree: Rc<Box<PipelineType>>,
-    activities_to_logs: Rc<Box<PipelineType>>,
-    activity_name: Rc<Box<PipelineType>>,
+    path: Rc<Box<PipelineType<String>>>,
+    event_log: Rc<Box<PipelineType<XesEventImpl>>>,
+    activities: Rc<Box<PipelineType<Vec<Rc<RefCell<ActivityNode>>>>>>,
+    repeat_sets: Rc<Box<PipelineType<Vec<SubArrayWithTraceIndex>>>>,
+    trace_activities: Rc<Box<PipelineType<Vec<Vec<ActivityInTraceInfo>>>>>,
+    patterns: Rc<Box<PipelineType<Vec<Vec<SubArrayInTraceInfo>>>>>,
+    petri_net: Rc<Box<PipelineType<PetriNet>>>,
+    activities_to_logs: Rc<Box<PipelineType<HashMap<String, XesEventImpl>>>>,
+    activity_name: Rc<Box<PipelineType<String>>>,
 }
 
 impl Types {
@@ -56,53 +73,48 @@ impl Types {
             trace_activities: Self::allocate_type(PipelineType::new("trace_activities")),
             patterns: Self::allocate_type(PipelineType::new("patterns")),
             petri_net: Self::allocate_type(PipelineType::new("petri_net")),
-            event_class_tree: Self::allocate_type(PipelineType::new("event_class_tree")),
             activities_to_logs: Self::allocate_type(PipelineType::new("activities_to_logs")),
             activity_name: Self::allocate_type(PipelineType::new("activity_name")),
         }
     }
 
-    fn allocate_type(pipeline_type: PipelineType) -> Rc<Box<PipelineType>> {
+    fn allocate_type<T>(pipeline_type: PipelineType<T>) -> Rc<Box<PipelineType<T>>> {
         Rc::new(Box::new(pipeline_type))
     }
 
-    pub fn path(&self) -> Rc<Box<PipelineType>> {
+    pub fn path(&self) -> Rc<Box<PipelineType<String>>> {
         Rc::clone(&self.path)
     }
 
-    pub fn event_log(&self) -> Rc<Box<PipelineType>> {
+    pub fn event_log(&self) -> Rc<Box<PipelineType<XesEventImpl>>> {
         Rc::clone(&self.event_log)
     }
 
-    pub fn activities(&self) -> Rc<Box<PipelineType>> {
+    pub fn activities(&self) -> Rc<Box<PipelineType<Vec<Rc<RefCell<ActivityNode>>>>>> {
         Rc::clone(&self.activities)
     }
 
-    pub fn repeat_sets(&self) -> Rc<Box<PipelineType>> {
+    pub fn repeat_sets(&self) -> Rc<Box<PipelineType<Vec<SubArrayWithTraceIndex>>>> {
         Rc::clone(&self.repeat_sets)
     }
 
-    pub fn trace_activities(&self) -> Rc<Box<PipelineType>> {
+    pub fn trace_activities(&self) -> Rc<Box<PipelineType<Vec<Vec<ActivityInTraceInfo>>>>> {
         Rc::clone(&self.trace_activities)
     }
 
-    pub fn patterns(&self) -> Rc<Box<PipelineType>> {
+    pub fn patterns(&self) -> Rc<Box<PipelineType<Vec<Vec<SubArrayInTraceInfo>>>>> {
         Rc::clone(&self.patterns)
     }
 
-    pub fn petri_net(&self) -> Rc<Box<PipelineType>> {
+    pub fn petri_net(&self) -> Rc<Box<PipelineType<PetriNet>>> {
         Rc::clone(&self.petri_net)
     }
 
-    pub fn event_class_tree(&self) -> Rc<Box<PipelineType>> {
-        Rc::clone(&self.event_class_tree)
-    }
-
-    pub fn activities_to_logs(&self) -> Rc<Box<PipelineType>> {
+    pub fn activities_to_logs(&self) -> Rc<Box<PipelineType<HashMap<String, XesEventImpl>>>> {
         Rc::clone(&self.activities_to_logs)
     }
 
-    pub fn activity_name(&self) -> Rc<Box<PipelineType>> {
+    pub fn activity_name(&self) -> Rc<Box<PipelineType<String>>> {
         Rc::clone(&self.activity_name)
     }
 }
