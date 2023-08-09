@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package ficus;
+
+message GrpcGuid {
+    string guid = 1;
+}

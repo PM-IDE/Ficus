@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "pipelines.proto";
+import "util.proto";
+import "pm_models.proto";
+
+package ficus;
+
+service BackendService {
+    rpc ExecutePipeline(PipelineExecutionRequest) returns (GrpcGuid);
+
+    rpc GetContextValue(ContextKey) returns (ContextValue);
+}
+
+message PipelineExecutionRequest {
+    Pipeline pipeline = 1;
+}
+

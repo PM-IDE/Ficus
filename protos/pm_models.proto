@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
 
 package ficus;
 
@@ -22,4 +23,22 @@ message EventStamp {
         google.protobuf.Timestamp date = 1;
         uint64 order = 2;
     }
+}
+
+
+message HashesEventLog {
+    repeated HashesLogTrace traces = 2;
+}
+
+message HashesLogTrace {
+    repeated uint64 events = 1;
+}
+
+
+message ContextKey {
+    string name = 1;
+}
+
+message ContextValue {
+    google.protobuf.Any value = 1;
 }
