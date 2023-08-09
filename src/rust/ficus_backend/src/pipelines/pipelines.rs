@@ -75,7 +75,8 @@ impl PipelineParts {
                 let path = context.get(&context.types().path()).unwrap();
                 let log = read_event_log(path);
                 if log.is_none() {
-                    return Err(PipelinePartExecutionError::new("Failed to read event log".to_string()));
+                    let message = format!("Failed to read event log from {}", path.as_str());
+                    return Err(PipelinePartExecutionError::new(message));
                 }
 
                 context.put(&context.types().event_log(), Box::new(log.unwrap()));

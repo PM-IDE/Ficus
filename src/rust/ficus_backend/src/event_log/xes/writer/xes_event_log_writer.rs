@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    error::Error,
     fmt::{Debug, Display},
     fs,
     io::{self, Cursor},
@@ -8,7 +9,7 @@ use std::{
 
 use quick_xml::{
     events::{BytesEnd, BytesStart},
-    Error, Writer,
+    Writer,
 };
 
 use crate::event_log::{
@@ -46,7 +47,7 @@ impl Debug for WriteLogError {
     }
 }
 
-impl std::error::Error for WriteLogError {}
+impl Error for WriteLogError {}
 
 pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogError> {
     match serialize_event_log(log) {

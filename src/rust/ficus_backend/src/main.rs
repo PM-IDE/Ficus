@@ -1,14 +1,17 @@
-use crate::event_log::{
-    core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    xes::{reader::file_xes_log_reader::FromFileXesEventLogReader, xes_event_log::XesEventLogImpl},
-};
+use ficus_backend::{ficus_proto::backend_service_server::BackendServiceServer, grpc::backend_service::FicusService};
+use tonic::transport::Server;
 
 mod event_log;
 mod utils;
 
-fn main() {
-    let path = r"/Users/aero/Programming/pmide/PhdDocsAndExperiments/Experiments/exp5/fixed_data/data/inline_merge/SystemArrayPooling/SystemArrayPooling.Program.Main[void...xes";
-    let reader = FromFileXesEventLogReader::new(path).unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let ficus_service = FicusService {};
+    let service = BackendServiceServer::new(ficus_service);
+    Server::builder()
+        .add_service(service)
+        .serve("[::1]:8080".parse()?)
+        .await?;
 
-    let log = XesEventLogImpl::new(reader).unwrap();
+    Ok(())
 }
