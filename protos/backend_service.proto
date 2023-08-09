@@ -9,7 +9,12 @@ package ficus;
 service BackendService {
     rpc ExecutePipeline(PipelineExecutionRequest) returns (GrpcGuid);
 
-    rpc GetContextValue(ContextKey) returns (ContextValue);
+    rpc GetContextValue(GetContextValueRequest) returns (ContextValue);
+}
+
+message GetContextValueRequest {
+    GrpcGuid executionId = 2;
+    ContextKey key = 1;
 }
 
 message PipelineExecutionRequest {
