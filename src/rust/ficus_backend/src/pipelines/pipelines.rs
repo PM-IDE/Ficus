@@ -98,3 +98,7 @@ impl PipelineParts {
         )
     }
 }
+
+unsafe impl Sync for PipelineParts {}
+
+unsafe impl Send for PipelineParts {}

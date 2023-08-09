@@ -4,35 +4,35 @@ import "google/protobuf/any.proto";
 
 package ficus;
 
-message Pipeline {
-    repeated PipelinePartBase parts = 1;
+message GrpcPipeline {
+    repeated GrpcPipelinePartBase parts = 1;
 }
 
-message PipelinePartBase {
+message GrpcPipelinePartBase {
     oneof part {
-        PipelinePart defaultPart = 1;
-        ParallelPipelinePart parallelPart = 2;
+        GrpcPipelinePart defaultPart = 1;
+        GrpcParallelPipelinePart parallelPart = 2;
     }
 }
 
-message PipelinePart {
+message GrpcPipelinePart {
     string name = 1;
-    PipelinePartConfiguration configuration = 2;
+    GrpcPipelinePartConfiguration configuration = 2;
 }
 
-message PipelinePartConfiguration {
-    repeated ConfigurationValue configurationParameters = 1;
+message GrpcPipelinePartConfiguration {
+    repeated GrpcConfigurationValue configurationParameters = 1;
 }
 
-message ConfigurationValue {
+message GrpcConfigurationValue {
     string name = 1;
     google.protobuf.Any value = 2;
 }
 
-message ParallelPipelinePart {
-    repeated PipelinePartBase pipelineParts = 1;
+message GrpcParallelPipelinePart {
+    repeated GrpcPipelinePartBase pipelineParts = 1;
 }
 
-message ParallelPipelineParts {
-    repeated ParallelPipelinePart pipeline = 1;
+message GrpcParallelPipelineParts {
+    repeated GrpcParallelPipelinePart pipeline = 1;
 }

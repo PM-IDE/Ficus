@@ -5,20 +5,20 @@ import "google/protobuf/any.proto";
 
 package ficus;
 
-message SimpleEventLog {
-    repeated SimpleTrace traces = 1;
+message GrpcSimpleEventLog {
+    repeated GrpcSimpleTrace traces = 1;
 }
 
-message SimpleTrace {
-    repeated Event events = 1;
+message GrpcSimpleTrace {
+    repeated GrpcEvent events = 1;
 }
 
-message Event {
+message GrpcEvent {
     string name = 1;
-    EventStamp stamp = 2;
+    GrpcEventStamp stamp = 2;
 }
 
-message EventStamp {
+message GrpcEventStamp {
     oneof stamp {
         google.protobuf.Timestamp date = 1;
         uint64 order = 2;
@@ -26,19 +26,19 @@ message EventStamp {
 }
 
 
-message HashesEventLog {
-    repeated HashesLogTrace traces = 2;
+message GrpcHashesEventLog {
+    repeated GrpcHashesLogTrace traces = 2;
 }
 
-message HashesLogTrace {
+message GrpcHashesLogTrace {
     repeated uint64 events = 1;
 }
 
 
-message ContextKey {
+message GrpcContextKey {
     string name = 1;
 }
 
-message ContextValue {
+message GrpcContextValue {
     google.protobuf.Any value = 1;
 }
