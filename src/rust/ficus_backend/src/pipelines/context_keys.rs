@@ -67,55 +67,51 @@ unsafe impl Sync for ContextKeys {}
 unsafe impl Send for ContextKeys {}
 
 impl ContextKeys {
-    pub fn find_key<T: 'static>(&self, name: &String) -> Option<&Box<T>> {
+    pub fn find_key<T: 'static>(&self, name: &String) -> Option<&Box<DefaultContextKey<T>>> {
         match self.keys.get(name) {
-            Some(key) => Some(key.downcast_ref::<Box<T>>().unwrap()),
+            Some(key) => Some(key.downcast_ref::<Box<DefaultContextKey<T>>>().unwrap()),
             None => None,
         }
     }
 
     pub fn path(&self) -> &Box<DefaultContextKey<String>> {
-        self.find_key::<DefaultContextKey<String>>(&Self::PATH.to_string())
-            .unwrap()
+        self.find_key::<String>(&Self::PATH.to_string()).unwrap()
     }
 
     pub fn event_log(&self) -> &Box<DefaultContextKey<XesEventLogImpl>> {
-        self.find_key::<DefaultContextKey<XesEventLogImpl>>(&Self::EVENT_LOG.to_string())
-            .unwrap()
+        self.find_key::<XesEventLogImpl>(&Self::EVENT_LOG.to_string()).unwrap()
     }
 
     pub fn activities(&self) -> &Box<DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>>> {
-        self.find_key::<DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>>>(&Self::ACTIVITIES.to_string())
+        self.find_key::<Vec<Rc<RefCell<ActivityNode>>>>(&Self::ACTIVITIES.to_string())
             .unwrap()
     }
 
     pub fn repeat_sets(&self) -> &Box<DefaultContextKey<Vec<SubArrayWithTraceIndex>>> {
-        self.find_key::<DefaultContextKey<Vec<SubArrayWithTraceIndex>>>(&Self::REPEAT_SETS.to_string())
+        self.find_key::<Vec<SubArrayWithTraceIndex>>(&Self::REPEAT_SETS.to_string())
             .unwrap()
     }
 
     pub fn trace_activities(&self) -> &Box<DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>>> {
-        self.find_key::<DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>>>(&Self::TRACE_ACTIVITIES.to_string())
+        self.find_key::<Vec<Vec<ActivityInTraceInfo>>>(&Self::TRACE_ACTIVITIES.to_string())
             .unwrap()
     }
 
     pub fn patterns(&self) -> &Box<DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>>> {
-        self.find_key::<DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>>>(&Self::PATTERNS.to_string())
+        self.find_key::<Vec<Vec<SubArrayInTraceInfo>>>(&Self::PATTERNS.to_string())
             .unwrap()
     }
 
     pub fn petri_net(&self) -> &Box<DefaultContextKey<PetriNet>> {
-        self.find_key::<DefaultContextKey<PetriNet>>(&Self::PETRI_NET.to_string())
-            .unwrap()
+        self.find_key::<PetriNet>(&Self::PETRI_NET.to_string()).unwrap()
     }
 
     pub fn activities_to_logs(&self) -> &Box<DefaultContextKey<HashMap<String, XesEventLogImpl>>> {
-        self.find_key::<DefaultContextKey<HashMap<String, XesEventLogImpl>>>(&Self::ACTIVITIES_TO_LOGS.to_string())
+        self.find_key::<HashMap<String, XesEventLogImpl>>(&Self::ACTIVITIES_TO_LOGS.to_string())
             .unwrap()
     }
 
     pub fn activity_name(&self) -> &Box<DefaultContextKey<String>> {
-        self.find_key::<DefaultContextKey<String>>(&Self::ACTIVITY_NAME.to_string())
-            .unwrap()
+        self.find_key::<String>(&Self::ACTIVITY_NAME.to_string()).unwrap()
     }
 }
