@@ -63,6 +63,9 @@ pub struct Types {
     activity_name: Rc<Box<PipelineType<String>>>,
 }
 
+unsafe impl Sync for Types {}
+unsafe impl Send for Types {}
+
 impl Types {
     pub fn new() -> Self {
         Self {

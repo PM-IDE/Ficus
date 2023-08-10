@@ -1,24 +1,25 @@
-use std::rc::Rc;
+use std::{rc::Rc, sync::Arc};
 
 use crate::utils::user_data::UserData;
 
 use super::types::{PipelineType, Types};
 
+#[derive(Clone)]
 pub struct PipelineContext {
     user_data: UserData,
-    types: Rc<Box<Types>>,
+    types: Arc<Box<Types>>,
 }
 
 impl PipelineContext {
-    pub fn new(types: Rc<Box<Types>>) -> Self {
+    pub fn new(types: &Arc<Box<Types>>) -> Self {
         Self {
             user_data: UserData::new(),
-            types: Rc::clone(&types),
+            types: Arc::clone(types),
         }
     }
 
-    pub fn types(&self) -> Rc<Box<Types>> {
-        Rc::clone(&self.types)
+    pub fn types(&self) -> Arc<Box<Types>> {
+        Arc::clone(&self.types)
     }
 
     pub fn get<T: 'static>(&self, pipeline_type: &PipelineType<T>) -> Option<&T> {
