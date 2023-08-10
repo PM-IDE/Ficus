@@ -7,13 +7,23 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 
-pub struct Key<T> {
+pub trait Key: Hash + PartialEq {
+    fn to_tuple(&self) -> (String, TypeId);
+}
+
+pub struct DefaultKey<T> {
     name: String,
     _phantom_data: PhantomData<T>,
     _hash: u64,
 }
 
-impl<T> Key<T>
+impl<T> Key for DefaultKey<T> where T: 'static {
+    fn to_tuple(&self) -> (String, TypeId) {
+        (self.name.to_owned(), self._phantom_data.type_id())
+    }
+}
+
+impl<T> DefaultKey<T>
 where
     T: 'static,
 {
@@ -26,19 +36,15 @@ where
             _hash: CURRENT_HASH.fetch_add(1, Ordering::SeqCst),
         }
     }
-
-    fn to_tuple(&self) -> (String, TypeId) {
-        (self.name.to_owned(), self._phantom_data.type_id())
-    }
 }
 
-impl<T> PartialEq for Key<T> {
+impl<T> PartialEq for DefaultKey<T> {
     fn eq(&self, other: &Self) -> bool {
         false
     }
 }
 
-impl<T> Hash for Key<T> {
+impl<T> Hash for DefaultKey<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write_u64(self._hash)
     }
@@ -85,7 +91,7 @@ impl UserData {
         Self { values_map: None }
     }
 
-    pub fn put<T: 'static>(&mut self, key: &Key<T>, value: Box<T>) {
+    pub fn put<T: 'static>(&mut self, key: &impl Key, value: Box<T>) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
@@ -100,7 +106,7 @@ impl UserData {
         self.values_map = Some(HashMap::new());
     }
 
-    pub fn remove<T>(&mut self, key: &Key<T>)
+    pub fn remove<T>(&mut self, key: &impl Key)
     where
         T: Clone + 'static,
     {
@@ -111,7 +117,7 @@ impl UserData {
         self.values_map.as_mut().unwrap().remove(&key.to_tuple());
     }
 
-    pub fn get<T: 'static>(&self, key: &Key<T>) -> Option<&T> {
+    pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
         if self.values_map.is_none() {
             return None;
         }

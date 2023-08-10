@@ -21,7 +21,7 @@ use crate::{
 
 pub struct FicusService {
     pipeline_parts: PipelineParts,
-    types: Arc<Box<ContextKeys>>,
+    context_keys: Arc<Box<ContextKeys>>,
     contexts: Mutex<HashMap<String, PipelineContext>>,
 }
 
@@ -29,7 +29,7 @@ impl FicusService {
     pub fn new(types: Arc<Box<ContextKeys>>) -> Self {
         Self {
             pipeline_parts: PipelineParts::new(),
-            types,
+            context_keys: types,
             contexts: Mutex::new(HashMap::new()),
         }
     }
@@ -65,7 +65,8 @@ impl GrpcBackendService for FicusService {
         &self,
         request: Request<GrpcGetContextValueRequest>,
     ) -> Result<Response<GrpcContextValue>, Status> {
-        todo!();
+        let key_name = &request.get_ref().key.as_ref().unwrap().name;
+        todo!()
     }
 }
 
@@ -76,7 +77,7 @@ impl FicusService {
     ) -> Result<(GrpcGuid, PipelineContext), PipelinePartExecutionError> {
         let id = Uuid::new_v4();
         let pipeline = self.to_pipeline(grpc_pipeline);
-        let mut context = PipelineContext::new(&self.types);
+        let mut context = PipelineContext::new(&self.context_keys);
         match pipeline.execute(&mut context) {
             Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context)),
             Err(err) => Err(err),

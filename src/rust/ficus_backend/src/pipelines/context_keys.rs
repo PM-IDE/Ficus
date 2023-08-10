@@ -16,7 +16,7 @@ use crate::{
         },
         discovery::petri_net::PetriNet,
     },
-    utils::user_data::Key,
+    utils::user_data::{DefaultKey, Key},
 };
 
 pub trait ContextKey: Any {}
@@ -25,7 +25,7 @@ pub struct DefaultContextKey<T>
 where
     T: 'static,
 {
-    key: Key<T>,
+    key: DefaultKey<T>,
 }
 
 impl<T> ContextKey for DefaultContextKey<T> {}
@@ -36,11 +36,11 @@ where
 {
     pub fn new(type_name: &str) -> Self {
         Self {
-            key: Key::new(type_name.to_owned()),
+            key: DefaultKey::new(type_name.to_owned()),
         }
     }
 
-    pub fn key(&self) -> &Key<T> {
+    pub fn key(&self) -> &DefaultKey<T> {
         &self.key
     }
 }

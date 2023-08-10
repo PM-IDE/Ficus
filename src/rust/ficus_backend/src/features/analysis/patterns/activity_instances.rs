@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    utils::user_data::Key,
+    utils::user_data::{DefaultKey, Key},
 };
 
 use super::repeat_sets::{ActivityNode, SubArrayWithTraceIndex};
@@ -241,11 +241,11 @@ where
 
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 
-pub fn underlying_events_key<TEvent>() -> Key<Vec<Rc<RefCell<TEvent>>>>
+pub fn underlying_events_key<TEvent>() -> DefaultKey<Vec<Rc<RefCell<TEvent>>>>
 where
     TEvent: Event + 'static,
 {
-    Key::new("UNDERLYING_EVENTS".to_string())
+    DefaultKey::new("UNDERLYING_EVENTS".to_string())
 }
 
 pub fn create_new_log_from_activities_instances<TLog, TEventFactory, TUndefActivityFactory>(
@@ -292,7 +292,7 @@ where
 
             let mut event = ptr.borrow_mut();
             let user_data = event.get_user_data();
-            user_data.put(&underlying_events_key(), Box::new(underlying_events));
+            user_data.put(&underlying_events_key::<TLog::TEvent>(), Box::new(underlying_events));
         };
 
         process_activities_in_trace(trace.get_events().len(), &instances, undef_activity_func, activity_func);
