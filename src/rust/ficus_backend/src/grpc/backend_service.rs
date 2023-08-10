@@ -15,18 +15,18 @@ use crate::{
     pipelines::{
         context::PipelineContext,
         pipelines::{Pipeline, PipelinePart, PipelinePartExecutionError, PipelineParts},
-        types::Types,
+        types::ContextKeys,
     },
 };
 
 pub struct FicusService {
     pipeline_parts: PipelineParts,
-    types: Arc<Box<Types>>,
+    types: Arc<Box<ContextKeys>>,
     contexts: Mutex<HashMap<String, PipelineContext>>,
 }
 
 impl FicusService {
-    pub fn new(types: Arc<Box<Types>>) -> Self {
+    pub fn new(types: Arc<Box<ContextKeys>>) -> Self {
         Self {
             pipeline_parts: PipelineParts::new(),
             types,
