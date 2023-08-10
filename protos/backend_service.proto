@@ -7,7 +7,7 @@ import "pm_models.proto";
 package ficus;
 
 service GrpcBackendService {
-    rpc ExecutePipeline(GrpcPipelineExecutionRequest) returns (GrpcGuid);
+    rpc ExecutePipeline(GrpcPipelineExecutionRequest) returns (GrpcPipelineExecutionResult);
     rpc GetContextValue(GrpcGetContextValueRequest) returns (GrpcContextValue);
 }
 
@@ -18,4 +18,11 @@ message GrpcGetContextValueRequest {
 
 message GrpcPipelineExecutionRequest {
     GrpcPipeline pipeline = 1;
+}
+
+message GrpcPipelineExecutionResult {
+    oneof executionResult {
+        GrpcGuid success = 1;
+        string error = 2;
+    }
 }

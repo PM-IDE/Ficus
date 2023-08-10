@@ -78,6 +78,8 @@ pub struct UserData {
     values_map: Option<HashMap<(String, TypeId), Rc<Box<dyn Any>>>>,
 }
 
+unsafe impl Send for UserData {}
+
 impl UserData {
     pub fn new() -> Self {
         Self { values_map: None }
