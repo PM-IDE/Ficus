@@ -60,82 +60,13 @@ impl<T> Hash for DefaultContextKey<T> {
 }
 
 pub struct ContextKeys {
-    keys: HashMap<String, Box<dyn Any>>,
+    pub(super) keys: HashMap<String, Box<dyn Any>>,
 }
 
 unsafe impl Sync for ContextKeys {}
 unsafe impl Send for ContextKeys {}
 
 impl ContextKeys {
-    pub const PATH: &str = "path";
-    pub const EVENT_LOG: &str = "event_log";
-    pub const ACTIVITIES: &str = "activities";
-    pub const REPEAT_SETS: &str = "repeat_sets";
-    pub const TRACE_ACTIVITIES: &str = "trace_activities";
-    pub const PATTERNS: &str = "patterns";
-    pub const PETRI_NET: &str = "petri_net";
-    pub const ACTIVITIES_TO_LOGS: &str = "activities_to_logs";
-    pub const ACTIVITY_NAME: &str = "activity_name";
-
-
-    pub fn new() -> Self {
-        let mut keys: HashMap<String, Box<dyn Any>> = HashMap::new();
-        keys.insert(
-            Self::PATH.to_string(),
-            Box::new(DefaultContextKey::<String>::new(Self::PATH)),
-        );
-
-        keys.insert(
-            Self::EVENT_LOG.to_string(),
-            Box::new(DefaultContextKey::<XesEventLogImpl>::new(Self::EVENT_LOG)),
-        );
-
-        keys.insert(
-            Self::ACTIVITIES.to_string(),
-            Box::new(DefaultContextKey::<Vec<Rc<RefCell<ActivityNode>>>>::new(
-                Self::ACTIVITIES,
-            )),
-        );
-
-        keys.insert(
-            Self::REPEAT_SETS.to_string(),
-            Box::new(DefaultContextKey::<Vec<SubArrayWithTraceIndex>>::new(Self::REPEAT_SETS)),
-        );
-
-        keys.insert(
-            Self::TRACE_ACTIVITIES.to_string(),
-            Box::new(DefaultContextKey::<Vec<Vec<ActivityInTraceInfo>>>::new(
-                Self::TRACE_ACTIVITIES,
-            )),
-        );
-
-        keys.insert(
-            Self::PATTERNS.to_string(),
-            Box::new(DefaultContextKey::<Vec<Vec<SubArrayInTraceInfo>>>::new(Self::PATTERNS)),
-        );
-
-        keys.insert(
-            Self::PETRI_NET.to_string(),
-            Box::new(DefaultContextKey::<PetriNet>::new(Self::PETRI_NET)),
-        );
-
-        keys.insert(
-            Self::ACTIVITIES_TO_LOGS.to_string(),
-            Box::new(DefaultContextKey::<HashMap<String, XesEventLogImpl>>::new(
-                Self::ACTIVITIES_TO_LOGS,
-            )),
-        );
-
-        keys.insert(
-            Self::ACTIVITY_NAME.to_string(),
-            Box::new(DefaultContextKey::<String>::new(Self::ACTIVITY_NAME)),
-        );
-
-        Self {
-            keys: HashMap::from_iter(keys),
-        }
-    }
-
     pub fn find_key<T: 'static>(&self, name: &String) -> Option<&Box<T>> {
         match self.keys.get(name) {
             Some(key) => Some(key.downcast_ref::<Box<T>>().unwrap()),

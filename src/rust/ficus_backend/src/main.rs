@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ficus_backend::{
     ficus_proto::grpc_backend_service_server::GrpcBackendServiceServer, grpc::backend_service::FicusService,
-    pipelines::types::ContextKeys,
+    pipelines::context_keys::ContextKeys,
 };
 use tonic::transport::Server;
 

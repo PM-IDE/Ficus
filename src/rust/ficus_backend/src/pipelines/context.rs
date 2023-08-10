@@ -1,8 +1,8 @@
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use crate::utils::user_data::UserData;
 
-use super::types::{ContextKeys, DefaultContextKey};
+use super::context_keys::{ContextKeys, DefaultContextKey};
 
 #[derive(Clone)]
 pub struct PipelineContext {
