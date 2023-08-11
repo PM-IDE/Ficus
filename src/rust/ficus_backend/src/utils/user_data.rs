@@ -1,8 +1,10 @@
 use std::{
     any::{Any, TypeId},
+    cell::RefCell,
     collections::HashMap,
     hash::{Hash, Hasher},
     marker::PhantomData,
+    ops::Deref,
     rc::Rc,
     sync::atomic::{AtomicU64, Ordering},
 };
@@ -84,7 +86,7 @@ where
 
 #[derive(Debug)]
 pub struct UserData {
-    values_map: Option<HashMap<(String, TypeId), Rc<Box<dyn Any>>>>,
+    values_map: Option<HashMap<(String, TypeId), Rc<RefCell<dyn Any>>>>,
 }
 
 unsafe impl Send for UserData {}
@@ -94,11 +96,15 @@ impl UserData {
         Self { values_map: None }
     }
 
+    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: Box<T>) {
+        self.put(key, value)
+    }
+
     pub fn put<T: 'static>(&mut self, key: &impl Key, value: Box<T>) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
-        values_map.insert(key.to_tuple(), Rc::new(Box::new(ValueHolderImpl::new(value))));
+        values_map.insert(key.to_tuple(), Rc::new(RefCell::new(ValueHolderImpl::new(value))));
     }
 
     fn initialize_values_map(&mut self) {
@@ -118,21 +124,40 @@ impl UserData {
     }
 
     pub fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
-        self.get_internal(&key.to_tuple())
+        self.get(key)
     }
 
     pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
-        self.get_internal(&key.to_tuple())
-    }
-
-    fn get_internal<T: 'static>(&self, tuple: &(String, TypeId)) -> Option<&T> {
         if self.values_map.is_none() {
             return None;
         }
 
         let values_map = self.values_map.as_ref().unwrap();
-        if let Some(value) = values_map.get(tuple) {
-            Some(value.as_ref().downcast_ref::<ValueHolderImpl<T>>().unwrap().get())
+        if let Some(value) = values_map.get(&key.to_tuple()) {
+            unsafe {
+                let r = value.as_ref().try_borrow_unguarded().ok().unwrap();
+                Some(r.downcast_ref::<ValueHolderImpl<T>>().unwrap().get())
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
+        self.get_mut(key)
+    }
+
+    pub fn get_mut<T: 'static>(&self, key: &impl Key) -> Option<&mut T> {
+        if self.values_map.is_none() {
+            return None;
+        }
+
+        let values_map = self.values_map.as_ref().unwrap();
+        if let Some(value) = values_map.get(&key.to_tuple()) {
+            unsafe {
+                let r = value.as_ptr().as_mut().unwrap();
+                Some(r.downcast_mut::<ValueHolderImpl<T>>().unwrap().get_mut())
+            }
         } else {
             None
         }

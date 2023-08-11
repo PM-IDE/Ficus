@@ -6,10 +6,13 @@ use ficus_backend::utils::user_data::{DefaultKey, UserData};
 fn test_user_data() {
     let key = DefaultKey::<usize>::new("asdasdasda".to_string());
     let mut user_data = UserData::new();
-    let b = Box::new(123usize);
-    user_data.put(&key, b);
+    let b = Box::new(123);
+    user_data.put_concrete(&key, b);
 
     assert_eq!(*user_data.get_concrete(&key).unwrap(), 123);
+
+    *user_data.get_concrete_mut(&key).unwrap() = 321;
+    assert_eq!(*user_data.get_concrete(&key).unwrap(), 321);
 }
 
 #[test]
