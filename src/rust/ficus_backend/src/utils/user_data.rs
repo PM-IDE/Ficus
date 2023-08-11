@@ -109,10 +109,7 @@ impl UserData {
         self.values_map = Some(HashMap::new());
     }
 
-    pub fn remove<T>(&mut self, key: &impl Key)
-    where
-        T: Clone + 'static,
-    {
+    pub fn remove(&mut self, key: &impl Key) {
         if self.values_map.is_none() {
             return;
         }
@@ -120,13 +117,21 @@ impl UserData {
         self.values_map.as_mut().unwrap().remove(&key.to_tuple());
     }
 
+    pub fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
+        self.get_internal(&key.to_tuple())
+    }
+
     pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
+        self.get_internal(&key.to_tuple())
+    }
+
+    fn get_internal<T: 'static>(&self, tuple: &(String, TypeId)) -> Option<&T> {
         if self.values_map.is_none() {
             return None;
         }
 
         let values_map = self.values_map.as_ref().unwrap();
-        if let Some(value) = values_map.get(&key.to_tuple()) {
+        if let Some(value) = values_map.get(tuple) {
             Some(value.as_ref().downcast_ref::<ValueHolderImpl<T>>().unwrap().get())
         } else {
             None

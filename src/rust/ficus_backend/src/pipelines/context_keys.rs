@@ -16,7 +16,7 @@ use crate::{
         },
         discovery::petri_net::PetriNet,
     },
-    utils::user_data::DefaultKey,
+    utils::user_data::{DefaultKey, Key},
 };
 
 pub trait ContextKey: Any {}
