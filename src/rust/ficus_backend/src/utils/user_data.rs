@@ -17,7 +17,10 @@ pub struct DefaultKey<T> {
     _hash: u64,
 }
 
-impl<T> Key for DefaultKey<T> where T: 'static {
+impl<T> Key for DefaultKey<T>
+where
+    T: 'static,
+{
     fn to_tuple(&self) -> (String, TypeId) {
         (self.name.to_owned(), self._phantom_data.type_id())
     }

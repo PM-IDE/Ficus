@@ -1,18 +1,11 @@
-use std::{any::Any, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{any::Any, collections::HashMap};
 
-use crate::{
-    event_log::xes::xes_event_log::XesEventLogImpl,
-    features::{
-        analysis::patterns::{
-            activity_instances::ActivityInTraceInfo,
-            repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
-            tandem_arrays::SubArrayInTraceInfo,
-        },
-        discovery::petri_net::PetriNet,
-    },
+use crate::{event_log::xes::xes_event_log::XesEventLogImpl, features::discovery::petri_net::PetriNet};
+
+use super::{
+    aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities},
+    context_keys::{ContextKeys, DefaultContextKey},
 };
-
-use super::context_keys::{ContextKeys, DefaultContextKey};
 
 impl ContextKeys {
     pub const PATH: &str = "path";
@@ -56,27 +49,22 @@ impl ContextKeys {
     }
 
     fn insert_activities(map: &mut HashMap<String, Box<dyn Any>>) {
-        let key = Box::new(DefaultContextKey::<Vec<Rc<RefCell<ActivityNode>>>>::new(
-            Self::ACTIVITIES,
-        ));
+        let key = Box::new(DefaultContextKey::<Activities>::new(Self::ACTIVITIES));
         map.insert(Self::ACTIVITIES.to_string(), key);
     }
 
     fn insert_repeat_sets(map: &mut HashMap<String, Box<dyn Any>>) {
-        let key = Box::new(DefaultContextKey::<Vec<SubArrayWithTraceIndex>>::new(Self::REPEAT_SETS));
+        let key = Box::new(DefaultContextKey::<RepeatSets>::new(Self::REPEAT_SETS));
         map.insert(Self::REPEAT_SETS.to_string(), key);
     }
 
     fn insert_trace_activities(map: &mut HashMap<String, Box<dyn Any>>) {
-        let key = Box::new(DefaultContextKey::<Vec<Vec<ActivityInTraceInfo>>>::new(
-            Self::TRACE_ACTIVITIES,
-        ));
-
+        let key = Box::new(DefaultContextKey::<TracesActivities>::new(Self::TRACE_ACTIVITIES));
         map.insert(Self::TRACE_ACTIVITIES.to_string(), key);
     }
 
     fn insert_patterns(map: &mut HashMap<String, Box<dyn Any>>) {
-        let key = Box::new(DefaultContextKey::<Vec<Vec<SubArrayInTraceInfo>>>::new(Self::PATTERNS));
+        let key = Box::new(DefaultContextKey::<Patterns>::new(Self::PATTERNS));
         map.insert(Self::PATTERNS.to_string(), key);
     }
 
@@ -86,10 +74,7 @@ impl ContextKeys {
     }
 
     fn insert_activities_to_logs(map: &mut HashMap<String, Box<dyn Any>>) {
-        let key = Box::new(DefaultContextKey::<HashMap<String, XesEventLogImpl>>::new(
-            Self::ACTIVITIES_TO_LOGS,
-        ));
-
+        let key = Box::new(DefaultContextKey::<ActivitiesToLogs>::new(Self::ACTIVITIES_TO_LOGS));
         map.insert(Self::ACTIVITIES_TO_LOGS.to_string(), key);
     }
 
