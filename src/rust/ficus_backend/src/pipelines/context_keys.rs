@@ -21,7 +21,7 @@ use crate::{
 
 use super::aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities};
 
-pub trait ContextKey: Any {}
+pub trait ContextKey {}
 
 pub struct DefaultContextKey<T>
 where
@@ -30,7 +30,8 @@ where
     key: DefaultKey<T>,
 }
 
-impl<T> ContextKey for DefaultContextKey<T> {}
+impl<T> ContextKey for DefaultContextKey<T> {
+}
 
 impl<T> DefaultContextKey<T>
 where

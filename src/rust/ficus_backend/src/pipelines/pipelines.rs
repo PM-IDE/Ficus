@@ -137,14 +137,14 @@ impl PipelineParts {
         DefaultPipelinePart::new(
             "ReadLogFromXes".to_string(),
             Box::new(|context| {
-                let path = context.get(&context.types().path()).unwrap();
+                let path = context.get_concrete(&context.types().path()).unwrap();
                 let log = read_event_log(path);
                 if log.is_none() {
                     let message = format!("Failed to read event log from {}", path.as_str());
                     return Err(PipelinePartExecutionError::new(message));
                 }
 
-                context.put(&context.types().event_log(), Box::new(log.unwrap()));
+                context.put_concrete(&context.types().event_log(), Box::new(log.unwrap()));
                 Ok(())
             }),
         )
@@ -154,8 +154,8 @@ impl PipelineParts {
         DefaultPipelinePart::new(
             "WriteLogToXes".to_string(),
             Box::new(|context| {
-                let path = context.get(&context.types().path()).unwrap();
-                match write_log(&context.get(&context.types().event_log()).unwrap(), path) {
+                let path = context.get_concrete(&context.types().path()).unwrap();
+                match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
                     Ok(()) => Ok(()),
                     Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
                 }

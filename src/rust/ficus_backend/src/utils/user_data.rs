@@ -4,7 +4,6 @@ use std::{
     collections::HashMap,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    ops::Deref,
     rc::Rc,
     sync::atomic::{AtomicU64, Ordering},
 };
@@ -45,7 +44,7 @@ where
 
 impl<T> PartialEq for DefaultKey<T> {
     fn eq(&self, other: &Self) -> bool {
-        false
+        self._hash == other._hash
     }
 }
 

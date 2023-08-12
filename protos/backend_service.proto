@@ -8,7 +8,7 @@ package ficus;
 
 service GrpcBackendService {
     rpc ExecutePipeline(GrpcPipelineExecutionRequest) returns (GrpcPipelineExecutionResult);
-    rpc GetContextValue(GrpcGetContextValueRequest) returns (GrpcContextValue);
+    rpc GetContextValue(GrpcGetContextValueRequest) returns (GrpcGetContextValueResult);
 }
 
 message GrpcGetContextValueRequest {
@@ -23,6 +23,13 @@ message GrpcPipelineExecutionRequest {
 message GrpcPipelineExecutionResult {
     oneof executionResult {
         GrpcGuid success = 1;
+        string error = 2;
+    }
+}
+
+message GrpcGetContextValueResult {
+    oneof contextValueResult {
+        GrpcContextValue value = 1;
         string error = 2;
     }
 }

@@ -10,7 +10,7 @@ use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_pipeline_execution_result::ExecutionResult,
         grpc_pipeline_part_base::Part, GrpcContextValue, GrpcGetContextValueRequest, GrpcGuid, GrpcPipeline,
-        GrpcPipelineExecutionRequest, GrpcPipelineExecutionResult,
+        GrpcPipelineExecutionRequest, GrpcPipelineExecutionResult, GrpcGetContextValueResult, grpc_get_context_value_result::ContextValueResult,
     },
     pipelines::{
         context::PipelineContext,
@@ -43,7 +43,7 @@ impl GrpcBackendService for FicusService {
     ) -> Result<Response<GrpcPipelineExecutionResult>, Status> {
         let grpc_pipeline = request.get_ref().pipeline.as_ref().unwrap();
 
-        match self.execute_grpc_pipeline(grpc_pipeline) {
+        let result = match self.execute_grpc_pipeline(grpc_pipeline) {
             Ok((guid, context)) => {
                 self.contexts
                     .lock()
@@ -51,22 +51,43 @@ impl GrpcBackendService for FicusService {
                     .unwrap()
                     .insert(guid.guid.to_owned(), context);
 
-                Ok(Response::new(GrpcPipelineExecutionResult {
+                GrpcPipelineExecutionResult {
                     execution_result: Some(ExecutionResult::Success(guid)),
-                }))
+                }
             }
-            Err(error) => Ok(Response::new(GrpcPipelineExecutionResult {
+            Err(error) => GrpcPipelineExecutionResult {
                 execution_result: Some(ExecutionResult::Error(error.to_string())),
-            })),
-        }
+            },
+        };
+
+        Ok(Response::new(result))
     }
 
     async fn get_context_value(
         &self,
         request: Request<GrpcGetContextValueRequest>,
-    ) -> Result<Response<GrpcContextValue>, Status> {
+    ) -> Result<Response<GrpcGetContextValueResult>, Status> {
         let key_name = &request.get_ref().key.as_ref().unwrap().name;
-        todo!()
+        let result = match self.context_keys.find_key(key_name) {
+            None => {
+                let error = ContextValueResult::Error("Failed to find key for key name".to_string());
+                GrpcGetContextValueResult { context_value_result: Some(error) }
+            }
+            Some(key) => {
+                let id = request.get_ref().execution_id.as_ref().unwrap();
+                match self.contexts.lock().as_ref().unwrap().get(&id.guid) {
+                    None => {
+                        let error = ContextValueResult::Error("Failed to find context value for key".to_string());
+                        GrpcGetContextValueResult { context_value_result: Some(error) }
+                    }
+                    Some(value) => {
+                        todo!()
+                    }
+                }
+            }
+        };
+
+        Ok(Response::new(result))
     }
 }
 

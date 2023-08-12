@@ -22,11 +22,11 @@ impl PipelineContext {
         Arc::clone(&self.types)
     }
 
-    pub fn get<T: 'static>(&self, pipeline_type: &DefaultContextKey<T>) -> Option<&T> {
-        self.user_data.get(pipeline_type.key())
+    pub fn get_concrete<T: 'static>(&self, key: &DefaultContextKey<T>) -> Option<&T> {
+        self.user_data.get(key.key())
     }
 
-    pub fn put<T: 'static>(&mut self, pipeline_type: &DefaultContextKey<T>, value: Box<T>) {
-        self.user_data.put(pipeline_type.key(), value)
+    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultContextKey<T>, value: Box<T>) {
+        self.user_data.put(key.key(), value)
     }
 }
