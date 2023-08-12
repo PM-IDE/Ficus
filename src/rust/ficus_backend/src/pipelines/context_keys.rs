@@ -21,7 +21,9 @@ use crate::{
 
 use super::aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities};
 
-pub trait ContextKey {}
+pub trait ContextKey {
+    fn key(&self) -> &dyn Key;
+}
 
 pub struct DefaultContextKey<T>
 where
@@ -31,6 +33,9 @@ where
 }
 
 impl<T> ContextKey for DefaultContextKey<T> {
+    fn key(&self) -> &dyn Key {
+        &self.key
+    }
 }
 
 impl<T> DefaultContextKey<T>

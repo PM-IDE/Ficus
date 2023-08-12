@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::{any::Any, sync::Arc};
 
 use crate::utils::user_data::UserData;
 
-use super::context_keys::{ContextKeys, DefaultContextKey};
+use super::context_keys::{ContextKey, ContextKeys, DefaultContextKey};
 
 #[derive(Clone)]
 pub struct PipelineContext {
@@ -20,6 +20,10 @@ impl PipelineContext {
 
     pub fn types(&self) -> Arc<Box<ContextKeys>> {
         Arc::clone(&self.types)
+    }
+
+    pub fn get_any(&self, key: &dyn ContextKey) -> Option<&dyn Any> {
+        self.user_data.get_any(key.key())
     }
 
     pub fn get_concrete<T: 'static>(&self, key: &DefaultContextKey<T>) -> Option<&T> {
