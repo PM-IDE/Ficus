@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use ficus_backend::{
     ficus_proto::grpc_backend_service_server::GrpcBackendServiceServer, grpc::backend_service::FicusService,
-    pipelines::context_keys::ContextKeys,
+    pipelines::keys::context_keys::ContextKeys,
 };
+
 use tonic::transport::Server;
 
 mod event_log;

@@ -9,13 +9,12 @@ use uuid::Uuid;
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
-        grpc_pipeline_execution_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextValue,
-        GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
-        GrpcPipelineExecutionResult,
+        grpc_pipeline_execution_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcGetContextValueRequest,
+        GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest, GrpcPipelineExecutionResult,
     },
     pipelines::{
         context::PipelineContext,
-        context_keys::ContextKeys,
+        keys::context_keys::ContextKeys,
         pipelines::{Pipeline, PipelinePart, PipelinePartExecutionError, PipelineParts},
     },
 };

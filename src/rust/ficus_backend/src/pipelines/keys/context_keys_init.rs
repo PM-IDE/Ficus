@@ -1,11 +1,10 @@
 use std::{any::Any, collections::HashMap};
 
-use crate::{event_log::xes::xes_event_log::XesEventLogImpl, features::discovery::petri_net::PetriNet};
-
-use super::{
-    aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities},
-    context_keys::{ContextKeys, DefaultContextKey},
+use crate::{
+    event_log::xes::xes_event_log::XesEventLogImpl, features::discovery::petri_net::PetriNet, pipelines::aliases::*,
 };
+
+use super::context_keys::{ContextKeys, DefaultContextKey};
 
 impl ContextKeys {
     pub const PATH: &str = "path";

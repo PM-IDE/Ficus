@@ -16,10 +16,9 @@ use crate::{
         },
         discovery::petri_net::PetriNet,
     },
+    pipelines::aliases::*,
     utils::user_data::{DefaultKey, Key},
 };
-
-use super::aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities};
 
 pub trait ContextKey {
     fn key(&self) -> &dyn Key;
