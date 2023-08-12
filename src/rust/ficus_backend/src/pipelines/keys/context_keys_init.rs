@@ -4,7 +4,7 @@ use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl, features::discovery::petri_net::PetriNet, pipelines::aliases::*,
 };
 
-use super::context_keys::{ContextKeys, DefaultContextKey};
+use super::{context_key::DefaultContextKey, context_keys::ContextKeys};
 
 impl ContextKeys {
     pub const PATH: &str = "path";
