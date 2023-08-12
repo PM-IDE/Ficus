@@ -79,4 +79,14 @@ impl ContextKeys {
         self.find_concrete_key::<String>(&Self::ACTIVITY_NAME.to_string())
             .unwrap()
     }
+
+    pub fn hashes_event_log(&self) -> &Box<DefaultContextKey<Vec<Vec<u64>>>> {
+        self.find_concrete_key::<Vec<Vec<u64>>>(&Self::HASHES_EVENT_LOG.to_string())
+            .unwrap()
+    }
+
+    pub fn names_event_log(&self) -> &Box<DefaultContextKey<Vec<Vec<String>>>> {
+        self.find_concrete_key::<Vec<Vec<String>>>(&Self::NAMES_EVENT_LOG.to_string())
+            .unwrap()
+    }
 }

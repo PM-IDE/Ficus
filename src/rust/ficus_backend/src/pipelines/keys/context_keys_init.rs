@@ -1,7 +1,16 @@
 use std::{any::Any, collections::HashMap};
 
 use crate::{
-    event_log::xes::xes_event_log::XesEventLogImpl, features::discovery::petri_net::PetriNet, pipelines::aliases::*,
+    event_log::{
+        core::{
+            event::{event::Event, event_hasher::NameEventHasher},
+            event_log::EventLog,
+            trace::trace::Trace,
+        },
+        xes::xes_event_log::XesEventLogImpl,
+    },
+    features::discovery::petri_net::PetriNet,
+    pipelines::aliases::*,
 };
 
 use super::{context_key::DefaultContextKey, context_keys::ContextKeys};
@@ -16,6 +25,8 @@ impl ContextKeys {
     pub const PETRI_NET: &str = "petri_net";
     pub const ACTIVITIES_TO_LOGS: &str = "activities_to_logs";
     pub const ACTIVITY_NAME: &str = "activity_name";
+    pub const HASHES_EVENT_LOG: &str = "hashes_event_log";
+    pub const NAMES_EVENT_LOG: &str = "names_event_log";
 
     pub fn new() -> Self {
         let mut keys: HashMap<String, Box<dyn Any>> = HashMap::new();
@@ -29,6 +40,9 @@ impl ContextKeys {
         Self::insert_petri_net(&mut keys);
         Self::insert_activities_to_logs(&mut keys);
         Self::insert_activity_name(&mut keys);
+
+        Self::insert_hashes_event_log(&mut keys);
+        Self::insert_names_event_log(&mut keys);
 
         Self {
             keys: HashMap::from_iter(keys),
@@ -80,5 +94,45 @@ impl ContextKeys {
     fn insert_activity_name(map: &mut HashMap<String, Box<dyn Any>>) {
         let key = Box::new(DefaultContextKey::<String>::new(Self::ACTIVITY_NAME));
         map.insert(Self::ACTIVITY_NAME.to_string(), key);
+    }
+
+    fn insert_hashes_event_log(map: &mut HashMap<String, Box<dyn Any>>) {
+        let key = DefaultContextKey::<Vec<Vec<u64>>>::new_with_factory(
+            Self::HASHES_EVENT_LOG.to_string(),
+            Box::new(
+                |pipeline_context, keys| match pipeline_context.get_concrete(keys.event_log()) {
+                    None => None,
+                    Some(log) => Some(log.to_hashes_event_log::<NameEventHasher>()),
+                },
+            ),
+        );
+
+        map.insert(Self::HASHES_EVENT_LOG.to_string(), Box::new(key));
+    }
+
+    fn insert_names_event_log(map: &mut HashMap<String, Box<dyn Any>>) {
+        let key = DefaultContextKey::<Vec<Vec<String>>>::new_with_factory(
+            Self::NAMES_EVENT_LOG.to_string(),
+            Box::new(
+                |pipeline_context, keys| match pipeline_context.get_concrete(keys.event_log()) {
+                    None => None,
+                    Some(log) => {
+                        let mut result = vec![];
+                        for trace in log.get_traces() {
+                            let mut vec = vec![];
+                            for event in trace.borrow().get_events() {
+                                vec.push(event.borrow().get_name().to_string());
+                            }
+
+                            result.push(vec);
+                        }
+
+                        Some(result)
+                    }
+                },
+            ),
+        );
+
+        map.insert(Self::NAMES_EVENT_LOG.to_string(), Box::new(key));
     }
 }
