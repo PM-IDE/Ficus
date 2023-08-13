@@ -1,13 +1,14 @@
-use prost::Message;
 use std::{any::Any, sync::Arc};
 
 use crate::{
-    event_log::{simple::simple_event_log::SimpleEventLog, xes::xes_event_log::XesEventLogImpl},
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue, GrpcHashesEventLog,
         GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcStringContextValue,
     },
-    pipelines::{context::PipelineContext, keys::context_keys::ContextKeys},
+    pipelines::{
+        context::PipelineContext,
+        keys::{context_key::ContextKey, context_keys::ContextKeys},
+    },
 };
 
 pub(super) fn create_initial_context(
@@ -29,7 +30,23 @@ pub(super) fn create_initial_context(
     context
 }
 
-pub(super) fn convert_to_grpc_context_value(value: &dyn Any) -> Option<GrpcContextValue> {
+pub(super) fn convert_to_grpc_context_value(
+    key: &dyn ContextKey,
+    value: &dyn Any,
+    keys: &ContextKeys,
+) -> Option<GrpcContextValue> {
+    if keys.is_path(key) {
+        return try_convert_to_string_context_value(value);
+    }
+
+    if keys.is_hashes_event_log(key) {
+        return try_convert_to_hashes_event_log(value);
+    }
+
+    None
+}
+
+fn try_convert_to_string_context_value(value: &dyn Any) -> Option<GrpcContextValue> {
     if value.is::<String>() {
         let value = GrpcStringContextValue {
             value: value.downcast_ref::<String>().unwrap().clone(),
@@ -40,6 +57,10 @@ pub(super) fn convert_to_grpc_context_value(value: &dyn Any) -> Option<GrpcConte
         });
     }
 
+    None
+}
+
+fn try_convert_to_hashes_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
     if value.is::<Vec<Vec<u64>>>() {
         let vec = value.downcast_ref::<Vec<Vec<u64>>>().unwrap();
         let mut traces = vec![];
@@ -55,7 +76,7 @@ pub(super) fn convert_to_grpc_context_value(value: &dyn Any) -> Option<GrpcConte
         let value = GrpcHashesEventLogContextValue {
             log: Some(GrpcHashesEventLog { traces }),
         };
-        
+
         return Some(GrpcContextValue {
             context_value: Some(ContextValue::HashesLog(value)),
         });

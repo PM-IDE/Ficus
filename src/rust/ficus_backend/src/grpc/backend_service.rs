@@ -1,4 +1,5 @@
 use std::{
+    any::Any,
     collections::HashMap,
     sync::{Arc, Mutex},
 };
@@ -15,7 +16,7 @@ use crate::{
     },
     pipelines::{
         context::PipelineContext,
-        keys::context_keys::ContextKeys,
+        keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{Pipeline, PipelinePart, PipelinePartExecutionError, PipelineParts},
     },
 };
@@ -76,22 +77,19 @@ impl GrpcBackendService for FicusService {
             None => Self::create_get_context_value_error("Failed to find key for key name".to_string()),
             Some(key) => {
                 let id = request.get_ref().execution_id.as_ref().unwrap();
-                match self.contexts.lock().as_ref().unwrap().get(&id.guid) {
+                match self.contexts.lock().as_mut().unwrap().get_mut(&id.guid) {
                     None => Self::create_get_context_value_error("Failed to get context for guid".to_string()),
                     Some(value) => match value.get_any(key.as_ref()) {
                         None => {
-                            Self::create_get_context_value_error("Failed to find context value for key".to_string())
-                        }
-                        Some(context_value) => {
-                            if let Some(grpc_context_value) = convert_to_grpc_context_value(context_value) {
-                                GrpcGetContextValueResult {
-                                    context_value_result: Some(ContextValueResult::Value(grpc_context_value)),
-                                }
+                            key.try_create_value_into_context(value, &self.context_keys);
+
+                            if let Some(created_value) = value.get_any(key.as_ref()) {
+                                self.try_convert_context_value(key, created_value)
                             } else {
-                                let msg = "Can not convert context value to grpc model".to_string();
-                                Self::create_get_context_value_error(msg)
+                                Self::create_get_context_value_error("Failed to find context value for key".to_string())
                             }
                         }
+                        Some(context_value) => self.try_convert_context_value(key, context_value),
                     },
                 }
             }
@@ -135,6 +133,22 @@ impl FicusService {
     fn create_get_context_value_error(message: String) -> GrpcGetContextValueResult {
         GrpcGetContextValueResult {
             context_value_result: Some(ContextValueResult::Error(message)),
+        }
+    }
+
+    fn try_convert_context_value(
+        &self,
+        key: &Box<dyn ContextKey>,
+        context_value: &dyn Any,
+    ) -> GrpcGetContextValueResult {
+        let value = convert_to_grpc_context_value(key.as_ref(), context_value, &self.context_keys);
+        if let Some(grpc_context_value) = value {
+            GrpcGetContextValueResult {
+                context_value_result: Some(ContextValueResult::Value(grpc_context_value)),
+            }
+        } else {
+            let msg = "Can not convert context value to grpc model".to_string();
+            Self::create_get_context_value_error(msg)
         }
     }
 }

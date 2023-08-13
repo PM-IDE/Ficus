@@ -138,10 +138,7 @@ impl UserData {
 
         let values_map = self.values_map.as_ref().unwrap();
         if let Some(value) = values_map.get(&key.id()) {
-            unsafe {
-                let r = value.as_ptr().as_mut().unwrap();
-                Some(r.downcast_mut::<T>().unwrap())
-            }
+            unsafe { Some(value.as_ptr().as_mut().unwrap().downcast_mut::<T>().unwrap()) }
         } else {
             None
         }

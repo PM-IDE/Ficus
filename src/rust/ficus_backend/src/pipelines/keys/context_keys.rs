@@ -11,6 +11,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
+    utils::user_data::Key,
 };
 
 use super::context_key::{ContextKey, DefaultContextKey};
@@ -39,16 +40,32 @@ impl ContextKeys {
         self.find_concrete_key::<String>(Self::PATH).unwrap()
     }
 
+    pub fn is_path(&self, key: &dyn ContextKey) -> bool {
+        return self.path().key().id() == key.key().id();
+    }
+
     pub fn event_log(&self) -> &DefaultContextKey<XesEventLogImpl> {
         self.find_concrete_key::<XesEventLogImpl>(Self::EVENT_LOG).unwrap()
+    }
+
+    pub fn is_event_log(&self, key: &dyn ContextKey) -> bool {
+        return self.event_log().key().id() == key.key().id();
     }
 
     pub fn activities(&self) -> &DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>> {
         self.find_concrete_key::<Activities>(Self::ACTIVITIES).unwrap()
     }
 
+    pub fn is_activities(&self, key: &dyn ContextKey) -> bool {
+        return self.activities().key().id() == key.key().id();
+    }
+
     pub fn repeat_sets(&self) -> &DefaultContextKey<Vec<SubArrayWithTraceIndex>> {
         self.find_concrete_key::<RepeatSets>(Self::REPEAT_SETS).unwrap()
+    }
+
+    pub fn is_repeat_sets(&self, key: &dyn ContextKey) -> bool {
+        return self.repeat_sets().key().id() == key.key().id();
     }
 
     pub fn trace_activities(&self) -> &DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>> {
@@ -56,12 +73,24 @@ impl ContextKeys {
             .unwrap()
     }
 
+    pub fn is_trace_activities(&self, key: &dyn ContextKey) -> bool {
+        return self.trace_activities().key().id() == key.key().id();
+    }
+
     pub fn patterns(&self) -> &DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>> {
         self.find_concrete_key::<Patterns>(Self::PATTERNS).unwrap()
     }
 
+    pub fn is_patterns(&self, key: &dyn ContextKey) -> bool {
+        return self.patterns().key().id() == key.key().id();
+    }
+
     pub fn petri_net(&self) -> &DefaultContextKey<PetriNet> {
         self.find_concrete_key::<PetriNet>(Self::PETRI_NET).unwrap()
+    }
+
+    pub fn is_petri_net(&self, key: &dyn ContextKey) -> bool {
+        return self.petri_net().key().id() == key.key().id();
     }
 
     pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
@@ -69,16 +98,32 @@ impl ContextKeys {
             .unwrap()
     }
 
+    pub fn is_activities_to_logs(&self, key: &dyn ContextKey) -> bool {
+        return self.activities_to_logs().key().id() == key.key().id();
+    }
+
     pub fn activity_name(&self) -> &DefaultContextKey<String> {
         self.find_concrete_key::<String>(Self::ACTIVITY_NAME).unwrap()
+    }
+
+    pub fn is_activity_name(&self, key: &dyn ContextKey) -> bool {
+        return self.activity_name().key().id() == key.key().id();
     }
 
     pub fn hashes_event_log(&self) -> &DefaultContextKey<Vec<Vec<u64>>> {
         self.find_concrete_key::<Vec<Vec<u64>>>(Self::HASHES_EVENT_LOG).unwrap()
     }
 
+    pub fn is_hashes_event_log(&self, key: &dyn ContextKey) -> bool {
+        return self.hashes_event_log().key().id() == key.key().id();
+    }
+
     pub fn names_event_log(&self) -> &DefaultContextKey<Vec<Vec<String>>> {
         self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG)
             .unwrap()
+    }
+
+    pub fn is_names_event_log(&self, key: &dyn ContextKey) -> bool {
+        return self.names_event_log().key().id() == key.key().id();
     }
 }

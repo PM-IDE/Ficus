@@ -3,6 +3,7 @@ use crate::{
     utils::user_data::{DefaultKey, Key},
 };
 use std::{
+    any::Any,
     hash::{Hash, Hasher},
     rc::Rc,
 };
@@ -13,6 +14,7 @@ type ContextKeyValueFactory<T> = Rc<Box<dyn Fn(&PipelineContext, &ContextKeys) -
 
 pub trait ContextKey {
     fn key(&self) -> &dyn Key;
+    fn try_create_value_into_context(&self, context: &mut PipelineContext, keys: &ContextKeys);
 }
 
 pub struct DefaultContextKey<T>
@@ -26,6 +28,16 @@ where
 impl<T> ContextKey for DefaultContextKey<T> {
     fn key(&self) -> &dyn Key {
         &self.key
+    }
+
+    fn try_create_value_into_context(&self, context: &mut PipelineContext, keys: &ContextKeys) {
+        if context.get_concrete(&self).is_some() {
+            return;
+        }
+
+        if let Some(factory) = self.factory.as_ref() {
+            context.put_concrete(self, factory(context, keys).unwrap())
+        }
     }
 }
 
