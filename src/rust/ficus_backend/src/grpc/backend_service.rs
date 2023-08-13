@@ -20,7 +20,7 @@ use crate::{
     },
 };
 
-use super::converters::{create_initial_context, IntoGrpcContextValue};
+use super::converters::{convert_to_grpc_context_value, create_initial_context};
 
 pub struct FicusService {
     pipeline_parts: PipelineParts,
@@ -83,16 +83,13 @@ impl GrpcBackendService for FicusService {
                             Self::create_get_context_value_error("Failed to find context value for key".to_string())
                         }
                         Some(context_value) => {
-                            if !context_value.is::<&dyn IntoGrpcContextValue>() {
+                            if let Some(grpc_context_value) = convert_to_grpc_context_value(context_value) {
+                                GrpcGetContextValueResult {
+                                    context_value_result: Some(ContextValueResult::Value(grpc_context_value)),
+                                }
+                            } else {
                                 let msg = "Can not convert context value to grpc model".to_string();
                                 Self::create_get_context_value_error(msg)
-                            } else {
-                                let context_value = context_value.downcast_ref::<&dyn IntoGrpcContextValue>().unwrap();
-                                let model = context_value.to_grpc_context_value();
-
-                                GrpcGetContextValueResult {
-                                    context_value_result: Some(ContextValueResult::Value(model)),
-                                }
                             }
                         }
                     },

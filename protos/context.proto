@@ -11,6 +11,8 @@ message GrpcContextKey {
 message GrpcContextValue {
     oneof contextValue {
         GrpcStringContextValue string = 1;
+        GrpcHashesEventLogContextValue hashes_log = 2;
+        GrpcNamesEventLogContextValue names_log = 3;
     }
 }
 
@@ -25,4 +27,8 @@ message GrpcStringContextValue {
 
 message GrpcHashesEventLogContextValue {
     GrpcHashesEventLog log = 1;
+}
+
+message GrpcNamesEventLogContextValue {
+    GrpcNamesEventLog log = 1;
 }
