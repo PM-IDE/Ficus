@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
 
 package ficus;
 
@@ -35,10 +34,10 @@ message GrpcHashesLogTrace {
 }
 
 
-message GrpcContextKey {
-    string name = 1;
+message GrpcNamesEventLog {
+    repeated GrpcNamesTrace traces = 1;
 }
 
-message GrpcContextValue {
-    google.protobuf.Any value = 1;
+message GrpcNamesTrace {
+    repeated string events = 1;
 }

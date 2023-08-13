@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package ficus;
+
+import "pm_models.proto";
+
+message GrpcContextKey {
+    string name = 1;
+}
+
+message GrpcContextValue {
+    oneof contextValue {
+        GrpcStringContextValue string = 1;
+    }
+}
+
+message GrpcContextKeyValue {
+    GrpcContextKey key = 1;
+    GrpcContextValue value = 2;
+}
+
+message GrpcStringContextValue {
+    string value = 1;
+}
+
+message GrpcHashesEventLogContextValue {
+    GrpcHashesEventLog log = 1;
+}
