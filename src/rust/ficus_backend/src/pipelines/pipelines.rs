@@ -144,7 +144,7 @@ impl PipelineParts {
                     return Err(PipelinePartExecutionError::new(message));
                 }
 
-                context.put_concrete(&context.types().event_log(), Box::new(log.unwrap()));
+                context.put_concrete(&context.types().event_log(), log.unwrap());
                 Ok(())
             }),
         )

@@ -19,7 +19,7 @@ fn test_event_log_key() {
 
         assert!(context.get_concrete(log_key).is_none());
 
-        context.put_concrete(log_key, Box::new(log));
+        context.put_concrete(log_key, log);
 
         assert!(context.get_concrete(log_key).is_some())
     })

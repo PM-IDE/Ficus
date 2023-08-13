@@ -6,7 +6,7 @@ use ficus_backend::utils::user_data::{DefaultKey, UserData};
 fn test_user_data() {
     let key = DefaultKey::<usize>::new("asdasdasda".to_string());
     let mut user_data = UserData::new();
-    let b = Box::new(123);
+    let b = 123;
     user_data.put_concrete(&key, b);
 
     assert_eq!(*user_data.get_concrete(&key).unwrap(), 123);
@@ -22,8 +22,8 @@ fn test_user_data_two_keys() {
 
     let first_value = Rc::new(Box::new(123));
     let second_value = Rc::new(Box::new(321));
-    let box1 = Box::new(Rc::clone(&first_value));
-    let box2 = Box::new(Rc::clone(&second_value));
+    let box1 = Rc::clone(&first_value);
+    let box2 = Rc::clone(&second_value);
 
     let mut user_data = UserData::new();
 
@@ -44,7 +44,7 @@ fn test_remove_from_user_data() {
     let value = 123usize;
     let mut user_data = UserData::new();
 
-    user_data.put(&key, Box::new(value));
+    user_data.put(&key, value);
 
     assert_eq!(*user_data.get_concrete(&key).unwrap(), 123);
 

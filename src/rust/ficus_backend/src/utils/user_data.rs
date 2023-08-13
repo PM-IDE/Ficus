@@ -64,35 +64,6 @@ impl<T> Hash for DefaultKey<T> {
     }
 }
 
-pub struct ValueHolderImpl<T> {
-    value: Box<T>,
-}
-
-impl<T> ValueHolderImpl<T> {
-    pub fn new(value: Box<T>) -> Self {
-        Self { value }
-    }
-
-    fn get(&self) -> &T {
-        &self.value
-    }
-
-    fn get_mut(&mut self) -> &mut T {
-        &mut self.value
-    }
-}
-
-impl<T> Clone for ValueHolderImpl<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        Self {
-            value: self.value.clone(),
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct UserData {
     values_map: Option<HashMap<u64, Rc<RefCell<dyn Any>>>>,
@@ -105,15 +76,15 @@ impl UserData {
         Self { values_map: None }
     }
 
-    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: Box<T>) {
+    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
         self.put(key, value)
     }
 
-    pub fn put<T: 'static>(&mut self, key: &dyn Key, value: Box<T>) {
+    pub fn put<T: 'static>(&mut self, key: &dyn Key, value: T) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
-        values_map.insert(key.id(), Rc::new(RefCell::new(ValueHolderImpl::new(value))));
+        values_map.insert(key.id(), Rc::new(RefCell::new(value)));
     }
 
     fn initialize_values_map(&mut self) {
@@ -139,7 +110,7 @@ impl UserData {
     pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
         match self.get_any(key) {
             None => None,
-            Some(any) => Some(any.downcast_ref::<ValueHolderImpl<T>>().unwrap().get()),
+            Some(any) => Some(any.downcast_ref::<T>().unwrap()),
         }
     }
 
@@ -169,7 +140,7 @@ impl UserData {
         if let Some(value) = values_map.get(&key.id()) {
             unsafe {
                 let r = value.as_ptr().as_mut().unwrap();
-                Some(r.downcast_mut::<ValueHolderImpl<T>>().unwrap().get_mut())
+                Some(r.downcast_mut::<T>().unwrap())
             }
         } else {
             None

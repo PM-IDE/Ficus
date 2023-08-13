@@ -20,7 +20,7 @@ pub(super) fn create_initial_context(
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();
         let value = value.value.as_ref().unwrap().context_value.as_ref().unwrap();
         match value {
-            ContextValue::String(ctx_value) => context.put_any(key.as_ref(), Box::new(ctx_value.value.clone())),
+            ContextValue::String(ctx_value) => context.put_any::<String>(key.as_ref(), ctx_value.value.clone()),
             ContextValue::HashesLog(_) => todo!(),
             ContextValue::NamesLog(_) => todo!(),
         }

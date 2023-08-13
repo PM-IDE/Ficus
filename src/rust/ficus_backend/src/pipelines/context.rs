@@ -33,11 +33,11 @@ impl PipelineContext {
         self.user_data.get(key.key())
     }
 
-    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultContextKey<T>, value: Box<T>) {
+    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultContextKey<T>, value: T) {
         self.user_data.put(key.key(), value)
     }
 
-    pub fn put_any<T: 'static>(&mut self, key: &dyn ContextKey, value: Box<T>) {
+    pub fn put_any<T: 'static>(&mut self, key: &dyn ContextKey, value: T) {
         self.user_data.put(key.key(), value)
     }
 }
