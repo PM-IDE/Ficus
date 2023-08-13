@@ -30,56 +30,56 @@ impl ContextKeys {
         }
     }
 
-    pub fn find_concrete_key<T: 'static>(&self, name: &str) -> Option<&Box<DefaultContextKey<T>>> {
+    pub fn find_concrete_key<T: 'static>(&self, name: &str) -> Option<&DefaultContextKey<T>> {
         match self.keys.get(name) {
-            Some(key) => Some(key.downcast_ref::<Box<DefaultContextKey<T>>>().unwrap()),
+            Some(key) => Some(key.downcast_ref::<DefaultContextKey<T>>().unwrap()),
             None => None,
         }
     }
 
-    pub fn path(&self) -> &Box<DefaultContextKey<String>> {
+    pub fn path(&self) -> &DefaultContextKey<String> {
         self.find_concrete_key::<String>(Self::PATH).unwrap()
     }
 
-    pub fn event_log(&self) -> &Box<DefaultContextKey<XesEventLogImpl>> {
+    pub fn event_log(&self) -> &DefaultContextKey<XesEventLogImpl> {
         self.find_concrete_key::<XesEventLogImpl>(Self::EVENT_LOG).unwrap()
     }
 
-    pub fn activities(&self) -> &Box<DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>>> {
+    pub fn activities(&self) -> &DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>> {
         self.find_concrete_key::<Activities>(Self::ACTIVITIES).unwrap()
     }
 
-    pub fn repeat_sets(&self) -> &Box<DefaultContextKey<Vec<SubArrayWithTraceIndex>>> {
+    pub fn repeat_sets(&self) -> &DefaultContextKey<Vec<SubArrayWithTraceIndex>> {
         self.find_concrete_key::<RepeatSets>(Self::REPEAT_SETS).unwrap()
     }
 
-    pub fn trace_activities(&self) -> &Box<DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>>> {
+    pub fn trace_activities(&self) -> &DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>> {
         self.find_concrete_key::<TracesActivities>(Self::TRACE_ACTIVITIES)
             .unwrap()
     }
 
-    pub fn patterns(&self) -> &Box<DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>>> {
+    pub fn patterns(&self) -> &DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>> {
         self.find_concrete_key::<Patterns>(Self::PATTERNS).unwrap()
     }
 
-    pub fn petri_net(&self) -> &Box<DefaultContextKey<PetriNet>> {
+    pub fn petri_net(&self) -> &DefaultContextKey<PetriNet> {
         self.find_concrete_key::<PetriNet>(Self::PETRI_NET).unwrap()
     }
 
-    pub fn activities_to_logs(&self) -> &Box<DefaultContextKey<HashMap<String, XesEventLogImpl>>> {
+    pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
         self.find_concrete_key::<ActivitiesToLogs>(Self::ACTIVITIES_TO_LOGS)
             .unwrap()
     }
 
-    pub fn activity_name(&self) -> &Box<DefaultContextKey<String>> {
+    pub fn activity_name(&self) -> &DefaultContextKey<String> {
         self.find_concrete_key::<String>(Self::ACTIVITY_NAME).unwrap()
     }
 
-    pub fn hashes_event_log(&self) -> &Box<DefaultContextKey<Vec<Vec<u64>>>> {
+    pub fn hashes_event_log(&self) -> &DefaultContextKey<Vec<Vec<u64>>> {
         self.find_concrete_key::<Vec<Vec<u64>>>(Self::HASHES_EVENT_LOG).unwrap()
     }
 
-    pub fn names_event_log(&self) -> &Box<DefaultContextKey<Vec<Vec<String>>>> {
+    pub fn names_event_log(&self) -> &DefaultContextKey<Vec<Vec<String>>> {
         self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG)
             .unwrap()
     }
