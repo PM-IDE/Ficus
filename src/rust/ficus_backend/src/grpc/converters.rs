@@ -3,7 +3,8 @@ use std::{any::Any, sync::Arc};
 use crate::{
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue, GrpcHashesEventLog,
-        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcStringContextValue,
+        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
+        GrpcNamesTrace, GrpcStringContextValue,
     },
     pipelines::{
         context::PipelineContext,
@@ -36,32 +37,32 @@ pub(super) fn convert_to_grpc_context_value(
     keys: &ContextKeys,
 ) -> Option<GrpcContextValue> {
     if keys.is_path(key) {
-        return try_convert_to_string_context_value(value);
+        try_convert_to_string_context_value(value)
+    } else if keys.is_hashes_event_log(key) {
+        try_convert_to_hashes_event_log(value)
+    } else if keys.is_names_event_log(key) {
+        try_convert_to_names_event_log(value)
+    } else {
+        None
     }
-
-    if keys.is_hashes_event_log(key) {
-        return try_convert_to_hashes_event_log(value);
-    }
-
-    None
 }
 
 fn try_convert_to_string_context_value(value: &dyn Any) -> Option<GrpcContextValue> {
-    if value.is::<String>() {
-        let value = GrpcStringContextValue {
-            value: value.downcast_ref::<String>().unwrap().clone(),
-        };
-
-        return Some(GrpcContextValue {
-            context_value: Some(ContextValue::String(value)),
-        });
+    if !value.is::<String>() {
+        None
+    } else {
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::String(GrpcStringContextValue {
+                value: value.downcast_ref::<String>().unwrap().clone(),
+            })),
+        })
     }
-
-    None
 }
 
 fn try_convert_to_hashes_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
-    if value.is::<Vec<Vec<u64>>>() {
+    if !value.is::<Vec<Vec<u64>>>() {
+        None
+    } else {
         let vec = value.downcast_ref::<Vec<Vec<u64>>>().unwrap();
         let mut traces = vec![];
         for trace in vec {
@@ -73,14 +74,33 @@ fn try_convert_to_hashes_event_log(value: &dyn Any) -> Option<GrpcContextValue> 
             traces.push(GrpcHashesLogTrace { events });
         }
 
-        let value = GrpcHashesEventLogContextValue {
-            log: Some(GrpcHashesEventLog { traces }),
-        };
-
-        return Some(GrpcContextValue {
-            context_value: Some(ContextValue::HashesLog(value)),
-        });
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::HashesLog(GrpcHashesEventLogContextValue {
+                log: Some(GrpcHashesEventLog { traces }),
+            })),
+        })
     }
+}
 
-    None
+fn try_convert_to_names_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<Vec<Vec<String>>>() {
+        None
+    } else {
+        let vec = value.downcast_ref::<Vec<Vec<String>>>().unwrap();
+        let mut traces = vec![];
+        for trace in vec {
+            let mut events = vec![];
+            for event in trace {
+                events.push(event.clone());
+            }
+
+            traces.push(GrpcNamesTrace { events });
+        }
+
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::NamesLog(GrpcNamesEventLogContextValue {
+                log: Some(GrpcNamesEventLog { traces }),
+            })),
+        })
+    }
 }
