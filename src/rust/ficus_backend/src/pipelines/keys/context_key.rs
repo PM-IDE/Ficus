@@ -2,11 +2,14 @@ use crate::{
     pipelines::context::PipelineContext,
     utils::user_data::{DefaultKey, Key},
 };
-use std::hash::{Hash, Hasher};
+use std::{
+    hash::{Hash, Hasher},
+    rc::Rc,
+};
 
 use super::context_keys::ContextKeys;
 
-type ContextKeyValueFactory<T> = Box<dyn Fn(&PipelineContext, &ContextKeys) -> Option<T>>;
+type ContextKeyValueFactory<T> = Rc<Box<dyn Fn(&PipelineContext, &ContextKeys) -> Option<T>>>;
 
 pub trait ContextKey {
     fn key(&self) -> &dyn Key;
@@ -23,6 +26,15 @@ where
 impl<T> ContextKey for DefaultContextKey<T> {
     fn key(&self) -> &dyn Key {
         &self.key
+    }
+}
+
+impl<T> Clone for DefaultContextKey<T> {
+    fn clone(&self) -> Self {
+        Self {
+            key: self.key.clone(),
+            factory: self.factory.clone(),
+        }
     }
 }
 

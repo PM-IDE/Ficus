@@ -27,6 +27,16 @@ where
     }
 }
 
+impl<T> Clone for DefaultKey<T> {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name.clone(),
+            _phantom_data: self._phantom_data.clone(),
+            _hash: self._hash.clone(),
+        }
+    }
+}
+
 impl<T> DefaultKey<T>
 where
     T: 'static,

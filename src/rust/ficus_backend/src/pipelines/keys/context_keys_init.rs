@@ -1,4 +1,4 @@
-use std::{any::Any, borrow::Cow, collections::HashMap};
+use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::{
@@ -13,7 +13,10 @@ use crate::{
     pipelines::aliases::*,
 };
 
-use super::{context_key::DefaultContextKey, context_keys::ContextKeys};
+use super::{
+    context_key::{ContextKey, DefaultContextKey},
+    context_keys::ContextKeys,
+};
 
 impl ContextKeys {
     pub const PATH: &str = "path";
@@ -29,92 +32,144 @@ impl ContextKeys {
     pub const NAMES_EVENT_LOG: &str = "names_event_log";
 
     pub fn new() -> Self {
-        let mut keys: HashMap<Cow<'static, str>, Box<dyn Any>> = HashMap::new();
+        let mut concrete_keys: HashMap<Cow<'static, str>, Box<dyn Any>> = HashMap::new();
+        let mut context_keys: HashMap<Cow<'static, str>, Box<dyn ContextKey>> = HashMap::new();
 
-        Self::insert_path(&mut keys);
-        Self::insert_event_log(&mut keys);
-        Self::insert_activities(&mut keys);
-        Self::insert_repeat_sets(&mut keys);
-        Self::insert_trace_activities(&mut keys);
-        Self::insert_patterns(&mut keys);
-        Self::insert_petri_net(&mut keys);
-        Self::insert_activities_to_logs(&mut keys);
-        Self::insert_activity_name(&mut keys);
+        Self::insert_path(&mut concrete_keys, &mut context_keys);
+        Self::insert_event_log(&mut concrete_keys, &mut context_keys);
+        Self::insert_activities(&mut concrete_keys, &mut context_keys);
+        Self::insert_repeat_sets(&mut concrete_keys, &mut context_keys);
+        Self::insert_trace_activities(&mut concrete_keys, &mut context_keys);
+        Self::insert_patterns(&mut concrete_keys, &mut context_keys);
+        Self::insert_petri_net(&mut concrete_keys, &mut context_keys);
+        Self::insert_activities_to_logs(&mut concrete_keys, &mut context_keys);
+        Self::insert_activity_name(&mut concrete_keys, &mut context_keys);
 
-        Self::insert_hashes_event_log(&mut keys);
-        Self::insert_names_event_log(&mut keys);
+        Self::insert_hashes_event_log(&mut concrete_keys, &mut context_keys);
+        Self::insert_names_event_log(&mut concrete_keys, &mut context_keys);
 
         Self {
-            keys: HashMap::from_iter(keys),
+            concrete_keys,
+            context_keys,
         }
     }
 
-    fn insert_path(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
-        map.insert(
-            Cow::Borrowed(&Self::PATH),
-            Box::new(DefaultContextKey::<String>::new(Self::PATH)),
-        );
+    fn insert_path(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        let key = Box::new(DefaultContextKey::<String>::new(Self::PATH));
+
+        context_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
+        concrete_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
     }
 
-    fn insert_event_log(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_event_log(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<XesEventLogImpl>::new(Self::EVENT_LOG));
-        map.insert(Cow::Borrowed(Self::EVENT_LOG), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::EVENT_LOG), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::EVENT_LOG), key);
     }
 
-    fn insert_activities(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_activities(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<Activities>::new(Self::ACTIVITIES));
-        map.insert(Cow::Borrowed(Self::ACTIVITIES), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::ACTIVITIES), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITIES), key);
     }
 
-    fn insert_repeat_sets(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_repeat_sets(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<RepeatSets>::new(Self::REPEAT_SETS));
-        map.insert(Cow::Borrowed(Self::REPEAT_SETS), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::REPEAT_SETS), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::REPEAT_SETS), key);
     }
 
-    fn insert_trace_activities(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_trace_activities(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<TracesActivities>::new(Self::TRACE_ACTIVITIES));
-        map.insert(Cow::Borrowed(Self::TRACE_ACTIVITIES), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::TRACE_ACTIVITIES), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::TRACE_ACTIVITIES), key);
     }
 
-    fn insert_patterns(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_patterns(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<Patterns>::new(Self::PATTERNS));
-        map.insert(Cow::Borrowed(Self::PATTERNS), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::PATTERNS), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::PATTERNS), key);
     }
 
-    fn insert_petri_net(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_petri_net(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<PetriNet>::new(Self::PETRI_NET));
-        map.insert(Cow::Borrowed(Self::PETRI_NET), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::PETRI_NET), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::PETRI_NET), key);
     }
 
-    fn insert_activities_to_logs(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_activities_to_logs(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<ActivitiesToLogs>::new(Self::ACTIVITIES_TO_LOGS));
-        map.insert(Cow::Borrowed(Self::ACTIVITIES_TO_LOGS), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::ACTIVITIES_TO_LOGS), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITIES_TO_LOGS), key);
     }
 
-    fn insert_activity_name(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_activity_name(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = Box::new(DefaultContextKey::<String>::new(Self::ACTIVITY_NAME));
-        map.insert(Cow::Borrowed(Self::ACTIVITY_NAME), key);
+
+        context_keys.insert(Cow::Borrowed(&Self::ACTIVITY_NAME), key.clone());
+        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITY_NAME), key);
     }
 
-    fn insert_hashes_event_log(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_hashes_event_log(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = DefaultContextKey::<Vec<Vec<u64>>>::new_with_factory(
             Self::HASHES_EVENT_LOG.to_string(),
-            Box::new(
-                |pipeline_context, keys| match pipeline_context.get_concrete(keys.event_log()) {
+            Rc::new(Box::new(|pipeline_context, keys| {
+                match pipeline_context.get_concrete(keys.event_log()) {
                     None => None,
                     Some(log) => Some(log.to_hashes_event_log::<NameEventHasher>()),
-                },
-            ),
+                }
+            })),
         );
 
-        map.insert(Cow::Borrowed(Self::HASHES_EVENT_LOG), Box::new(key));
+        context_keys.insert(Cow::Borrowed(&Self::HASHES_EVENT_LOG), Box::new(key.clone()));
+        concrete_keys.insert(Cow::Borrowed(Self::HASHES_EVENT_LOG), Box::new(key.clone()));
     }
 
-    fn insert_names_event_log(map: &mut HashMap<Cow<'static, str>, Box<dyn Any>>) {
+    fn insert_names_event_log(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
         let key = DefaultContextKey::<Vec<Vec<String>>>::new_with_factory(
             Self::NAMES_EVENT_LOG.to_string(),
-            Box::new(
-                |pipeline_context, keys| match pipeline_context.get_concrete(keys.event_log()) {
+            Rc::new(Box::new(|pipeline_context, keys| {
+                match pipeline_context.get_concrete(keys.event_log()) {
                     None => None,
                     Some(log) => {
                         let mut result = vec![];
@@ -129,10 +184,11 @@ impl ContextKeys {
 
                         Some(result)
                     }
-                },
-            ),
+                }
+            })),
         );
 
-        map.insert(Cow::Borrowed(Self::NAMES_EVENT_LOG), Box::new(key));
+        context_keys.insert(Cow::Borrowed(&Self::NAMES_EVENT_LOG), Box::new(key.clone()));
+        concrete_keys.insert(Cow::Borrowed(Self::NAMES_EVENT_LOG), Box::new(key.clone()));
     }
 }

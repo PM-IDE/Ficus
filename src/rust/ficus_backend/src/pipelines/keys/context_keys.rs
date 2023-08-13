@@ -16,7 +16,8 @@ use crate::{
 use super::context_key::{ContextKey, DefaultContextKey};
 
 pub struct ContextKeys {
-    pub(super) keys: HashMap<Cow<'static, str>, Box<dyn Any>>,
+    pub(super) concrete_keys: HashMap<Cow<'static, str>, Box<dyn Any>>,
+    pub(super) context_keys: HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
 }
 
 unsafe impl Sync for ContextKeys {}
@@ -24,14 +25,11 @@ unsafe impl Send for ContextKeys {}
 
 impl ContextKeys {
     pub fn find_key(&self, name: &str) -> Option<&Box<dyn ContextKey>> {
-        match self.keys.get(name) {
-            Some(key) => Some(key.downcast_ref::<Box<dyn ContextKey>>().unwrap()),
-            None => None,
-        }
+        self.context_keys.get(name)
     }
 
     pub fn find_concrete_key<T: 'static>(&self, name: &str) -> Option<&DefaultContextKey<T>> {
-        match self.keys.get(name) {
+        match self.concrete_keys.get(name) {
             Some(key) => Some(key.downcast_ref::<DefaultContextKey<T>>().unwrap()),
             None => None,
         }
