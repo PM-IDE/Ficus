@@ -109,7 +109,7 @@ impl UserData {
         self.put(key, value)
     }
 
-    pub fn put<T: 'static>(&mut self, key: &impl Key, value: Box<T>) {
+    pub fn put<T: 'static>(&mut self, key: &dyn Key, value: Box<T>) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();

@@ -9,8 +9,9 @@ use uuid::Uuid;
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
-        grpc_pipeline_execution_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcGetContextValueRequest,
-        GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest, GrpcPipelineExecutionResult,
+        grpc_pipeline_execution_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue,
+        GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
+        GrpcPipelineExecutionResult,
     },
     pipelines::{
         context::PipelineContext,
@@ -19,7 +20,7 @@ use crate::{
     },
 };
 
-use super::converters::IntoGrpcContextValue;
+use super::converters::{create_initial_context, IntoGrpcContextValue};
 
 pub struct FicusService {
     pipeline_parts: PipelineParts,
@@ -44,8 +45,9 @@ impl GrpcBackendService for FicusService {
         request: Request<GrpcPipelineExecutionRequest>,
     ) -> Result<Response<GrpcPipelineExecutionResult>, Status> {
         let grpc_pipeline = request.get_ref().pipeline.as_ref().unwrap();
+        let initial_context_values = &request.get_ref().initial_context;
 
-        let result = match self.execute_grpc_pipeline(grpc_pipeline) {
+        let result = match self.execute_grpc_pipeline(grpc_pipeline, initial_context_values) {
             Ok((guid, context)) => {
                 self.contexts
                     .lock()
@@ -106,10 +108,12 @@ impl FicusService {
     fn execute_grpc_pipeline(
         &self,
         grpc_pipeline: &GrpcPipeline,
+        initial_context_value: &Vec<GrpcContextKeyValue>,
     ) -> Result<(GrpcGuid, PipelineContext), PipelinePartExecutionError> {
         let id = Uuid::new_v4();
         let pipeline = self.to_pipeline(grpc_pipeline);
-        let mut context = PipelineContext::new(&self.context_keys);
+        let mut context = create_initial_context(initial_context_value, &self.context_keys);
+
         match pipeline.execute(&mut context) {
             Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context)),
             Err(err) => Err(err),
