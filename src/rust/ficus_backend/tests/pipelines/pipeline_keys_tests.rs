@@ -1,0 +1,59 @@
+use std::sync::Arc;
+
+use ficus_backend::{pipelines::{keys::context_keys::ContextKeys, context::PipelineContext, aliases::{Activities, ActivitiesToLogs, Patterns, RepeatSets, TracesActivities}}, event_log::{xes::xes_event_log::XesEventLogImpl, core::event_log::EventLog}, features::discovery::petri_net::PetriNet};
+
+
+#[test]
+fn test_event_log_key() {
+    execute_test(|keys, context| {
+        let log_key = keys.event_log();
+        let log = XesEventLogImpl::empty();
+
+        assert!(context.get_concrete(log_key).is_none());
+
+        context.put_concrete(log_key, Box::new(log));
+
+        assert!(context.get_concrete(log_key).is_some())
+    })
+}
+
+fn execute_test(test: impl Fn(&ContextKeys, &mut PipelineContext) -> ()) {
+    let keys = Arc::new(Box::new(ContextKeys::new()));
+    let mut context = PipelineContext::new(&keys);
+
+    test(&keys, &mut context);
+}
+
+#[test]
+fn test_event_log_all_concrete_keys() {
+    execute_test(|keys, _| {
+        assert!(keys.find_concrete_key::<XesEventLogImpl>(ContextKeys::EVENT_LOG).is_some());
+        assert!(keys.find_concrete_key::<Activities>(ContextKeys::ACTIVITIES).is_some());
+        assert!(keys.find_concrete_key::<ActivitiesToLogs>(ContextKeys::ACTIVITIES_TO_LOGS).is_some());
+        assert!(keys.find_concrete_key::<String>(ContextKeys::ACTIVITY_NAME).is_some());
+        assert!(keys.find_concrete_key::<Patterns>(ContextKeys::PATTERNS).is_some());
+        assert!(keys.find_concrete_key::<Vec<Vec<u64>>>(ContextKeys::HASHES_EVENT_LOG).is_some());
+        assert!(keys.find_concrete_key::<Vec<Vec<String>>>(ContextKeys::NAMES_EVENT_LOG).is_some());
+        assert!(keys.find_concrete_key::<PetriNet>(ContextKeys::PETRI_NET).is_some());
+        assert!(keys.find_concrete_key::<RepeatSets>(ContextKeys::REPEAT_SETS).is_some());
+        assert!(keys.find_concrete_key::<TracesActivities>(ContextKeys::TRACE_ACTIVITIES).is_some());
+        assert!(keys.find_concrete_key::<String>(ContextKeys::PATH).is_some());
+    })
+}
+
+#[test]
+fn test_event_log_all_keys() {
+    execute_test(|keys, _| {
+        assert!(keys.find_key(ContextKeys::EVENT_LOG).is_some());
+        assert!(keys.find_key(ContextKeys::ACTIVITIES).is_some());
+        assert!(keys.find_key(ContextKeys::ACTIVITIES_TO_LOGS).is_some());
+        assert!(keys.find_key(ContextKeys::ACTIVITY_NAME).is_some());
+        assert!(keys.find_key(ContextKeys::PATTERNS).is_some());
+        assert!(keys.find_key(ContextKeys::HASHES_EVENT_LOG).is_some());
+        assert!(keys.find_key(ContextKeys::NAMES_EVENT_LOG).is_some());
+        assert!(keys.find_key(ContextKeys::PETRI_NET).is_some());
+        assert!(keys.find_key(ContextKeys::REPEAT_SETS).is_some());
+        assert!(keys.find_key(ContextKeys::TRACE_ACTIVITIES).is_some());
+        assert!(keys.find_key(ContextKeys::PATH).is_some());
+    })
+}
