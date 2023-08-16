@@ -5,7 +5,17 @@ use std::{
     rc::Rc,
 };
 
-use crate::event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log};
+use crate::{
+    event_log::{
+        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
+        xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
+    },
+    features::analysis::patterns::{
+        contexts::PatternsDiscoveryStrategy,
+        repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
+        tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
+    },
+};
 
 use super::context::PipelineContext;
 
@@ -120,7 +130,15 @@ impl PipelineParts {
 
 impl PipelineParts {
     pub fn new() -> Self {
-        let parts = vec![Self::read_log_from_xes(), Self::write_log_to_xes()];
+        let parts = vec![
+            Self::read_log_from_xes(),
+            Self::write_log_to_xes(),
+            Self::find_primitive_tandem_arrays(),
+            Self::find_maximal_tandem_arrays(),
+            Self::find_maximal_repeats(),
+            Self::find_super_maximal_repeats(),
+            Self::find_near_super_maximal_repeats(),
+        ];
 
         let mut names_to_parts = HashMap::new();
         for part in parts {
@@ -160,6 +178,64 @@ impl PipelineParts {
                     Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
                 }
             }),
+        )
+    }
+
+    fn find_primitive_tandem_arrays() -> DefaultPipelinePart {
+        DefaultPipelinePart::new(
+            "FindPrimitiveTandemArrays".to_string(),
+            Box::new(|context| Self::find_tandem_arrays_and_put_to_context(context, find_primitive_tandem_arrays)),
+        )
+    }
+
+    fn find_maximal_tandem_arrays() -> DefaultPipelinePart {
+        DefaultPipelinePart::new(
+            "FindMaximalTandemArrays".to_string(),
+            Box::new(|context| Self::find_tandem_arrays_and_put_to_context(context, find_maximal_tandem_arrays)),
+        )
+    }
+
+    fn find_tandem_arrays_and_put_to_context(
+        context: &mut PipelineContext,
+        patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let types = context.types();
+        let log = context.get_concrete(&types.event_log()).unwrap();
+        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), 20);
+        context.put_concrete(types.patterns(), arrays);
+        Ok(())
+    }
+
+    fn find_repeats_and_put_to_context(
+        context: &mut PipelineContext,
+        patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let types = context.types();
+        let log = context.get_concrete(&types.event_log()).unwrap();
+        let strategy = PatternsDiscoveryStrategy::FromAllTraces;
+        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
+        context.put_concrete(types.patterns(), arrays);
+        Ok(())
+    }
+
+    fn find_maximal_repeats() -> DefaultPipelinePart {
+        DefaultPipelinePart::new(
+            "FindMaximalRepeats".to_string(),
+            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
+        )
+    }
+
+    fn find_super_maximal_repeats() -> DefaultPipelinePart {
+        DefaultPipelinePart::new(
+            "FindSuperMaximalRepeats".to_string(),
+            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
+        )
+    }
+
+    fn find_near_super_maximal_repeats() -> DefaultPipelinePart {
+        DefaultPipelinePart::new(
+            "FindNearSuperMaximalRepeats".to_string(),
+            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)),
         )
     }
 }

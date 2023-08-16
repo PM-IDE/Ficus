@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, vec};
+use std::vec;
 
 use crate::utils::suffix_tree::{
     suffix_tree_patterns::SuffixTree,
@@ -10,7 +10,7 @@ use super::{contexts::PatternsDiscoveryStrategy, tandem_arrays::SubArrayInTraceI
 pub fn find_maximal_repeats(
     log: &Vec<Vec<u64>>,
     strategy: &PatternsDiscoveryStrategy,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
+) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_maximal_repeats())
 }
 
@@ -18,12 +18,11 @@ fn find_repeats<TRepeatsFinder>(
     log: &Vec<Vec<u64>>,
     strategy: &PatternsDiscoveryStrategy,
     finder: TRepeatsFinder,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>>
+) -> Vec<Vec<SubArrayInTraceInfo>>
 where
     TRepeatsFinder: Fn(&SuffixTree<u64>) -> Vec<(usize, usize)>,
 {
-    let repeats_ptr = Rc::new(RefCell::new(vec![]));
-    let repeats = &mut repeats_ptr.borrow_mut();
+    let mut repeats = vec![];
 
     let mut push_repeats = |patterns: &[(usize, usize)]| {
         repeats.push(
@@ -43,7 +42,7 @@ where
         }
     }
 
-    Rc::clone(&repeats_ptr)
+    repeats
 }
 
 fn find_from_all_traces<TFinder, TRepeatsPusher>(log: &Vec<Vec<u64>>, finder: &TFinder, pusher: &mut TRepeatsPusher)
@@ -103,13 +102,13 @@ fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(
 pub fn find_super_maximal_repeats(
     log: &Vec<Vec<u64>>,
     strategy: &PatternsDiscoveryStrategy,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
+) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_super_maximal_repeats())
 }
 
 pub fn find_near_super_maximal_repeats(
     log: &Vec<Vec<u64>>,
     strategy: &PatternsDiscoveryStrategy,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
+) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_near_super_maximal_repeats())
 }

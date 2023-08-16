@@ -23,7 +23,7 @@ pub enum PatternsKind {
 
 pub fn find_patterns<TClassExtractor, TLog>(
     context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>>
+) -> Vec<Vec<SubArrayInTraceInfo>>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,

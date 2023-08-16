@@ -49,14 +49,12 @@ impl TandemArrayInfo {
 pub fn find_primitive_tandem_arrays(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
-    Rc::new(RefCell::new(
-        find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
-            .borrow()
-            .iter()
-            .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
-            .collect(),
-    ))
+) -> Vec<Vec<SubArrayInTraceInfo>> {
+    find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
+        .borrow()
+        .iter()
+        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+        .collect()
 }
 
 pub fn find_primitive_tandem_arrays_with_length(
@@ -92,14 +90,12 @@ pub fn find_primitive_tandem_arrays_with_length(
 pub fn find_maximal_tandem_arrays(
     log: &Vec<Vec<u64>>,
     max_tandem_array_length: usize,
-) -> Rc<RefCell<Vec<Vec<SubArrayInTraceInfo>>>> {
-    Rc::new(RefCell::new(
-        find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
-            .borrow()
-            .iter()
-            .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
-            .collect(),
-    ))
+) -> Vec<Vec<SubArrayInTraceInfo>> {
+    find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
+        .borrow()
+        .iter()
+        .map(|trace_arrays| trace_arrays.into_iter().map(|array| array.sub_array).collect())
+        .collect()
 }
 
 pub fn find_maximal_tandem_arrays_with_length(
