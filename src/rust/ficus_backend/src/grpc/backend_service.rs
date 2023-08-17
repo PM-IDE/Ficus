@@ -19,6 +19,7 @@ use crate::{
         keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{Pipeline, PipelinePart, PipelinePartExecutionError, PipelineParts},
     },
+    utils::user_data::UserData,
 };
 
 use super::converters::{convert_to_grpc_context_value, create_initial_context};
@@ -120,7 +121,7 @@ impl FicusService {
         for grpc_part in &grpc_pipeline.parts {
             match grpc_part.part.as_ref().unwrap() {
                 Part::DefaultPart(grpc_default_part) => match self.pipeline_parts.find_part(&grpc_default_part.name) {
-                    Some(default_part) => pipeline.push(default_part),
+                    Some(default_part) => pipeline.push(Box::new(default_part(UserData::new()))),
                     None => todo!(),
                 },
                 Part::ParallelPart(_) => todo!(),

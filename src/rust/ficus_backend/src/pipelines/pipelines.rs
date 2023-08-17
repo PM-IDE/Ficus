@@ -15,6 +15,7 @@ use crate::{
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
+    utils::user_data::UserData,
 };
 
 use super::context::PipelineContext;
@@ -46,7 +47,7 @@ impl PipelinePartExecutionError {
 }
 
 pub struct Pipeline {
-    parts: Vec<Rc<Box<dyn PipelinePart>>>,
+    parts: Vec<Box<dyn PipelinePart>>,
 }
 
 impl Pipeline {
@@ -54,7 +55,7 @@ impl Pipeline {
         Self { parts: vec![] }
     }
 
-    pub fn push(&mut self, part: Rc<Box<dyn PipelinePart>>) {
+    pub fn push(&mut self, part: Box<dyn PipelinePart>) {
         self.parts.push(part);
     }
 }
@@ -91,16 +92,15 @@ impl PipelinePart for ParallelPipelinePart {
     }
 }
 
+type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>;
+
 pub struct DefaultPipelinePart {
     name: String,
-    executor: Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>,
+    executor: PipelinePartExecutor,
 }
 
 impl DefaultPipelinePart {
-    pub fn new(
-        name: String,
-        executor: Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>,
-    ) -> Self {
+    pub fn new(name: String, executor: PipelinePartExecutor) -> Self {
         Self { name, executor }
     }
 
@@ -115,16 +115,15 @@ impl PipelinePart for DefaultPipelinePart {
     }
 }
 
+type PipelinePartFactory = Box<dyn Fn(UserData) -> DefaultPipelinePart>;
+
 pub struct PipelineParts {
-    names_to_parts: HashMap<String, Rc<Box<dyn PipelinePart>>>,
+    names_to_parts: HashMap<String, PipelinePartFactory>,
 }
 
 impl PipelineParts {
-    pub fn find_part(&self, name: &String) -> Option<Rc<Box<dyn PipelinePart>>> {
-        match self.names_to_parts.get(name) {
-            Some(part) => Some(Rc::clone(part)),
-            None => None,
-        }
+    pub fn find_part(&self, name: &String) -> Option<&PipelinePartFactory> {
+        self.names_to_parts.get(name)
     }
 }
 
@@ -142,56 +141,85 @@ impl PipelineParts {
 
         let mut names_to_parts = HashMap::new();
         for part in parts {
-            names_to_parts.insert(
-                (&part.name).to_owned(),
-                Rc::new(Box::new(part) as Box<dyn PipelinePart>),
-            );
+            names_to_parts.insert((&part.0).to_owned(), part.1);
         }
 
         Self { names_to_parts }
     }
 
-    fn read_log_from_xes() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "ReadLogFromXes".to_string(),
-            Box::new(|context| {
-                let path = context.get_concrete(&context.types().path()).unwrap();
-                let log = read_event_log(path);
-                if log.is_none() {
-                    let message = format!("Failed to read event log from {}", path.as_str());
-                    return Err(PipelinePartExecutionError::new(message));
-                }
+    fn read_log_from_xes() -> (String, PipelinePartFactory) {
+        const NAME: &str = "ReadLogFromXes";
 
-                context.put_concrete(&context.types().event_log(), log.unwrap());
-                Ok(())
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| {
+                        let path = context.get_concrete(&context.types().path()).unwrap();
+                        let log = read_event_log(path);
+                        if log.is_none() {
+                            let message = format!("Failed to read event log from {}", path.as_str());
+                            return Err(PipelinePartExecutionError::new(message));
+                        }
+
+                        context.put_concrete(&context.types().event_log(), log.unwrap());
+                        Ok(())
+                    }),
+                )
             }),
         )
     }
 
-    fn write_log_to_xes() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "WriteLogToXes".to_string(),
-            Box::new(|context| {
-                let path = context.get_concrete(&context.types().path()).unwrap();
-                match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
-                    Ok(()) => Ok(()),
-                    Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
-                }
+    fn write_log_to_xes() -> (String, PipelinePartFactory) {
+        const NAME: &str = "WriteLogToXes";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| {
+                        let path = context.get_concrete(&context.types().path()).unwrap();
+                        match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
+                            Ok(()) => Ok(()),
+                            Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
+                        }
+                    }),
+                )
             }),
         )
     }
 
-    fn find_primitive_tandem_arrays() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "FindPrimitiveTandemArrays".to_string(),
-            Box::new(|context| Self::find_tandem_arrays_and_put_to_context(context, find_primitive_tandem_arrays)),
+    fn find_primitive_tandem_arrays() -> (String, PipelinePartFactory) {
+        const NAME: &str = "FindPrimitiveTandemArrays";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| {
+                        Self::find_tandem_arrays_and_put_to_context(context, find_primitive_tandem_arrays)
+                    }),
+                )
+            }),
         )
     }
 
-    fn find_maximal_tandem_arrays() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "FindMaximalTandemArrays".to_string(),
-            Box::new(|context| Self::find_tandem_arrays_and_put_to_context(context, find_maximal_tandem_arrays)),
+    fn find_maximal_tandem_arrays() -> (String, PipelinePartFactory) {
+        const NAME: &str = "FindMaximalTandemArrays";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| {
+                        Self::find_tandem_arrays_and_put_to_context(context, find_maximal_tandem_arrays)
+                    }),
+                )
+            }),
         )
     }
 
@@ -218,24 +246,45 @@ impl PipelineParts {
         Ok(())
     }
 
-    fn find_maximal_repeats() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "FindMaximalRepeats".to_string(),
-            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
+    fn find_maximal_repeats() -> (String, PipelinePartFactory) {
+        const NAME: &str = "FindMaximalRepeats";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
+                )
+            }),
         )
     }
 
-    fn find_super_maximal_repeats() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "FindSuperMaximalRepeats".to_string(),
-            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
+    fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
+        const NAME: &str = "FindSuperMaximalRepeats";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
+                )
+            }),
         )
     }
 
-    fn find_near_super_maximal_repeats() -> DefaultPipelinePart {
-        DefaultPipelinePart::new(
-            "FindNearSuperMaximalRepeats".to_string(),
-            Box::new(|context| Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)),
+    fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
+        const NAME: &str = "FindNearSuperMaximalRepeats";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    "FindNearSuperMaximalRepeats".to_string(),
+                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)),
+                )
+            }),
         )
     }
 }
