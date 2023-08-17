@@ -10,11 +10,13 @@ use crate::{
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
-    pipelines::errors::pipeline_errors::RawPartExecutionError,
-    utils::user_data::UserData,
+    pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
+    utils::user_data::{Key, UserData},
 };
 
-use super::{context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError};
+use super::{
+    context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_key::DefaultContextKey,
+};
 
 pub struct Pipeline {
     parts: Vec<Box<dyn PipelinePart>>,
@@ -132,7 +134,7 @@ impl PipelineParts {
                     NAME.to_string(),
                     config,
                     Box::new(|context, _| {
-                        let path = context.get_concrete(&context.types().path()).unwrap();
+                        let path = Self::get_context_value(context, &context.types().path())?;
                         let log = read_event_log(path);
                         if log.is_none() {
                             let message = format!("Failed to read event log from {}", path.as_str());
@@ -147,6 +149,18 @@ impl PipelineParts {
         )
     }
 
+    fn get_context_value<'a, T>(
+        context: &'a PipelineContext,
+        key: &DefaultContextKey<T>,
+    ) -> Result<&'a T, PipelinePartExecutionError> {
+        match context.get_concrete(key) {
+            Some(value) => Ok(value),
+            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                key.key().name().to_owned(),
+            ))),
+        }
+    }
+
     fn write_log_to_xes() -> (String, PipelinePartFactory) {
         const NAME: &str = "WriteLogToXes";
 
@@ -157,7 +171,7 @@ impl PipelineParts {
                     NAME.to_string(),
                     config,
                     Box::new(|context, _| {
-                        let path = context.get_concrete(&context.types().path()).unwrap();
+                        let path = Self::get_context_value(context, &context.types().path())?;
                         match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
                             Ok(()) => Ok(()),
                             Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
@@ -210,7 +224,7 @@ impl PipelineParts {
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let types = context.types();
-        let log = context.get_concrete(&types.event_log()).unwrap();
+        let log = Self::get_context_value(context, &types.event_log())?;
         let array_length = part_config
             .get_concrete(context.types().tandem_array_length().key())
             .unwrap();
@@ -225,10 +239,12 @@ impl PipelineParts {
         patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let types = context.types();
-        let log = context.get_concrete(&types.event_log()).unwrap();
+        let log = Self::get_context_value(context, &types.event_log())?;
         let strategy = PatternsDiscoveryStrategy::FromAllTraces;
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
+
         context.put_concrete(types.patterns(), arrays);
+
         Ok(())
     }
 

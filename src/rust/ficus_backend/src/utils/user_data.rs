@@ -10,6 +10,7 @@ use std::{
 
 pub trait Key {
     fn id(&self) -> u64;
+    fn name(&self) -> &String;
 }
 
 pub struct DefaultKey<T> {
@@ -24,6 +25,10 @@ where
 {
     fn id(&self) -> u64 {
         self._hash
+    }
+
+    fn name(&self) -> &String {
+        &self.name
     }
 }
 
