@@ -4,12 +4,13 @@ use crate::{
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue, GrpcHashesEventLog,
         GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
-        GrpcNamesTrace, GrpcStringContextValue,
+        GrpcNamesTrace,
     },
     pipelines::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
+    utils::user_data::{Key, UserData},
 };
 
 pub(super) fn create_initial_context(
@@ -22,13 +23,23 @@ pub(super) fn create_initial_context(
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();
         let value = value.value.as_ref().unwrap().context_value.as_ref().unwrap();
         match value {
-            ContextValue::String(ctx_value) => context.put_any::<String>(key.as_ref(), ctx_value.value.clone()),
+            ContextValue::String(string) => context.put_any::<String>(key.as_ref(), string.clone()),
             ContextValue::HashesLog(_) => todo!(),
             ContextValue::NamesLog(_) => todo!(),
+            ContextValue::Uint32(number) => context.put_any::<u32>(key.as_ref(), number.clone()),
         }
     }
 
     context
+}
+
+pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut UserData) {
+    match value {
+        ContextValue::String(string) => user_data.put::<String>(key, string.clone()),
+        ContextValue::HashesLog(_) => todo!(),
+        ContextValue::NamesLog(_) => todo!(),
+        ContextValue::Uint32(number) => user_data.put::<u32>(key, number.clone()),
+    }
 }
 
 pub(super) fn convert_to_grpc_context_value(
@@ -52,9 +63,7 @@ fn try_convert_to_string_context_value(value: &dyn Any) -> Option<GrpcContextVal
         None
     } else {
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::String(GrpcStringContextValue {
-                value: value.downcast_ref::<String>().unwrap().clone(),
-            })),
+            context_value: Some(ContextValue::String(value.downcast_ref::<String>().unwrap().clone())),
         })
     }
 }

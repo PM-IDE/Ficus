@@ -126,4 +126,12 @@ impl ContextKeys {
     pub fn is_names_event_log(&self, key: &dyn ContextKey) -> bool {
         return self.names_event_log().key().id() == key.key().id();
     }
+
+    pub fn tandem_array_length(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::TANDEM_ARRAY_LENGTH).unwrap()
+    }
+
+    pub fn is_tandem_array_length(&self, key: &dyn ContextKey) -> bool {
+        return self.tandem_array_length().key().id() == key.key().id();
+    }
 }

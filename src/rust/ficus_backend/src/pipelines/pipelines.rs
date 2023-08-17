@@ -2,7 +2,6 @@ use std::{
     collections::HashMap,
     error::Error,
     fmt::{Debug, Display},
-    rc::Rc,
 };
 
 use crate::{
@@ -92,30 +91,35 @@ impl PipelinePart for ParallelPipelinePart {
     }
 }
 
-type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext) -> Result<(), PipelinePartExecutionError>>;
+type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext, &UserData) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct DefaultPipelinePart {
     name: String,
+    config: Box<UserData>,
     executor: PipelinePartExecutor,
 }
 
 impl DefaultPipelinePart {
-    pub fn new(name: String, executor: PipelinePartExecutor) -> Self {
-        Self { name, executor }
+    pub fn new(name: String, config: Box<UserData>, executor: PipelinePartExecutor) -> Self {
+        Self { name, config, executor }
     }
 
     pub fn name(&self) -> &String {
         &self.name
     }
+
+    pub fn config(&self) -> &UserData {
+        &self.config
+    }
 }
 
 impl PipelinePart for DefaultPipelinePart {
     fn execute(&self, context: &mut PipelineContext) -> Result<(), PipelinePartExecutionError> {
-        (self.executor)(context)
+        (self.executor)(context, &self.config)
     }
 }
 
-type PipelinePartFactory = Box<dyn Fn(UserData) -> DefaultPipelinePart>;
+type PipelinePartFactory = Box<dyn Fn(Box<UserData>) -> DefaultPipelinePart>;
 
 pub struct PipelineParts {
     names_to_parts: HashMap<String, PipelinePartFactory>,
@@ -155,7 +159,8 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| {
+                    config,
+                    Box::new(|context, _| {
                         let path = context.get_concrete(&context.types().path()).unwrap();
                         let log = read_event_log(path);
                         if log.is_none() {
@@ -179,7 +184,8 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| {
+                    config,
+                    Box::new(|context, _| {
                         let path = context.get_concrete(&context.types().path()).unwrap();
                         match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
                             Ok(()) => Ok(()),
@@ -199,8 +205,9 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| {
-                        Self::find_tandem_arrays_and_put_to_context(context, find_primitive_tandem_arrays)
+                    config,
+                    Box::new(|context, config| {
+                        Self::find_tandem_arrays_and_put_to_context(context, &config, find_primitive_tandem_arrays)
                     }),
                 )
             }),
@@ -215,8 +222,9 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| {
-                        Self::find_tandem_arrays_and_put_to_context(context, find_maximal_tandem_arrays)
+                    config,
+                    Box::new(|context, config| {
+                        Self::find_tandem_arrays_and_put_to_context(context, &config, find_maximal_tandem_arrays)
                     }),
                 )
             }),
@@ -225,11 +233,16 @@ impl PipelineParts {
 
     fn find_tandem_arrays_and_put_to_context(
         context: &mut PipelineContext,
+        part_config: &UserData,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let types = context.types();
         let log = context.get_concrete(&types.event_log()).unwrap();
-        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), 20);
+        let array_length = part_config
+            .get_concrete(context.types().tandem_array_length().key())
+            .unwrap();
+
+        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), *array_length as usize);
         context.put_concrete(types.patterns(), arrays);
         Ok(())
     }
@@ -254,7 +267,8 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
+                    config,
+                    Box::new(|context, _| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
                 )
             }),
         )
@@ -268,7 +282,8 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     NAME.to_string(),
-                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
+                    config,
+                    Box::new(|context, _| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
                 )
             }),
         )
@@ -282,7 +297,10 @@ impl PipelineParts {
             Box::new(|config| {
                 DefaultPipelinePart::new(
                     "FindNearSuperMaximalRepeats".to_string(),
-                    Box::new(|context| Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)),
+                    config,
+                    Box::new(|context, _| {
+                        Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)
+                    }),
                 )
             }),
         )

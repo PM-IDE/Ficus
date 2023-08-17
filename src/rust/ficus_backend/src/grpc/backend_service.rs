@@ -22,7 +22,7 @@ use crate::{
     utils::user_data::UserData,
 };
 
-use super::converters::{convert_to_grpc_context_value, create_initial_context};
+use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};
 
 pub struct FicusService {
     pipeline_parts: PipelineParts,
@@ -120,10 +120,23 @@ impl FicusService {
         let mut pipeline = Pipeline::empty();
         for grpc_part in &grpc_pipeline.parts {
             match grpc_part.part.as_ref().unwrap() {
-                Part::DefaultPart(grpc_default_part) => match self.pipeline_parts.find_part(&grpc_default_part.name) {
-                    Some(default_part) => pipeline.push(Box::new(default_part(UserData::new()))),
-                    None => todo!(),
-                },
+                Part::DefaultPart(grpc_default_part) => {
+                    let mut part_config = UserData::new();
+                    let grpc_config = &grpc_default_part.configuration.as_ref().unwrap();
+
+                    for conf_value in &grpc_config.configuration_parameters {
+                        let key_name = conf_value.key.as_ref().unwrap().name.as_ref();
+                        if let Some(key) = self.context_keys.find_key(key_name) {
+                            let value = conf_value.value.as_ref().unwrap().context_value.as_ref().unwrap();
+                            put_into_user_data(key.key(), value, &mut part_config);
+                        }
+                    }
+
+                    match self.pipeline_parts.find_part(&grpc_default_part.name) {
+                        Some(default_part) => pipeline.push(Box::new(default_part(Box::new(part_config)))),
+                        None => todo!(),
+                    }
+                }
                 Part::ParallelPart(_) => todo!(),
             }
         }

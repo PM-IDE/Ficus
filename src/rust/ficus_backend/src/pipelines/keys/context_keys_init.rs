@@ -20,6 +20,8 @@ use super::{
 
 impl ContextKeys {
     pub const PATH: &str = "path";
+    pub const TANDEM_ARRAY_LENGTH: &str = "tandem_array_length";
+
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
     pub const REPEAT_SETS: &str = "repeat_sets";
@@ -36,6 +38,8 @@ impl ContextKeys {
         let mut context_keys: HashMap<Cow<'static, str>, Box<dyn ContextKey>> = HashMap::new();
 
         Self::insert_path(&mut concrete_keys, &mut context_keys);
+        Self::insert_tandem_arrays_length(&mut concrete_keys, &mut context_keys);
+
         Self::insert_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_activities(&mut concrete_keys, &mut context_keys);
         Self::insert_repeat_sets(&mut concrete_keys, &mut context_keys);
@@ -62,6 +66,16 @@ impl ContextKeys {
 
         context_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
         concrete_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
+    }
+
+    fn insert_tandem_arrays_length(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        let key = Box::new(DefaultContextKey::<u32>::new(Self::TANDEM_ARRAY_LENGTH));
+
+        context_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
+        concrete_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
     }
 
     fn insert_event_log(

@@ -10,19 +10,16 @@ message GrpcContextKey {
 
 message GrpcContextValue {
     oneof contextValue {
-        GrpcStringContextValue string = 1;
+        string string = 1;
         GrpcHashesEventLogContextValue hashes_log = 2;
         GrpcNamesEventLogContextValue names_log = 3;
+        uint32 uint32 = 4;
     }
 }
 
 message GrpcContextKeyValue {
     GrpcContextKey key = 1;
     GrpcContextValue value = 2;
-}
-
-message GrpcStringContextValue {
-    string value = 1;
 }
 
 message GrpcHashesEventLogContextValue {
