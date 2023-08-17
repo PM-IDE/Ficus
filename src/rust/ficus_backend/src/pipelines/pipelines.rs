@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    error::Error,
-    fmt::{Debug, Display},
-};
+use std::collections::HashMap;
 
 use crate::{
     event_log::{
@@ -14,36 +10,11 @@ use crate::{
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
+    pipelines::errors::pipeline_errors::RawPartExecutionError,
     utils::user_data::UserData,
 };
 
-use super::context::PipelineContext;
-
-pub struct PipelinePartExecutionError {
-    message: String,
-}
-
-impl Display for PipelinePartExecutionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.message)
-    }
-}
-
-impl Debug for PipelinePartExecutionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("PipelinePartExecutionError")
-            .field("message", &self.message)
-            .finish()
-    }
-}
-
-impl Error for PipelinePartExecutionError {}
-
-impl PipelinePartExecutionError {
-    pub fn new(message: String) -> Self {
-        Self { message }
-    }
-}
+use super::{context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError};
 
 pub struct Pipeline {
     parts: Vec<Box<dyn PipelinePart>>,
@@ -165,7 +136,7 @@ impl PipelineParts {
                         let log = read_event_log(path);
                         if log.is_none() {
                             let message = format!("Failed to read event log from {}", path.as_str());
-                            return Err(PipelinePartExecutionError::new(message));
+                            return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
                         }
 
                         context.put_concrete(&context.types().event_log(), log.unwrap());
@@ -189,7 +160,9 @@ impl PipelineParts {
                         let path = context.get_concrete(&context.types().path()).unwrap();
                         match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
                             Ok(()) => Ok(()),
-                            Err(err) => Err(PipelinePartExecutionError::new(err.to_string())),
+                            Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                                err.to_string(),
+                            ))),
                         }
                     }),
                 )

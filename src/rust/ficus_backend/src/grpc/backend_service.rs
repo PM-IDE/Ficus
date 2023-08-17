@@ -16,8 +16,9 @@ use crate::{
     },
     pipelines::{
         context::PipelineContext,
+        errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{Pipeline, PipelinePart, PipelinePartExecutionError, PipelineParts},
+        pipelines::{Pipeline, PipelinePart, PipelineParts},
     },
     utils::user_data::UserData,
 };

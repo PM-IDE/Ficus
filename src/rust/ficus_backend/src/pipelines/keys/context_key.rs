@@ -3,7 +3,6 @@ use crate::{
     utils::user_data::{DefaultKey, Key},
 };
 use std::{
-    any::Any,
     hash::{Hash, Hasher},
     rc::Rc,
 };
