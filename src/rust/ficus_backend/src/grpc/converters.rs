@@ -23,10 +23,10 @@ pub(super) fn create_initial_context(
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();
         let value = value.value.as_ref().unwrap().context_value.as_ref().unwrap();
         match value {
-            ContextValue::String(string) => context.put_any::<String>(key.as_ref(), string.clone()),
+            ContextValue::String(string) => context.put_any::<String>(key.key(), string.clone()),
             ContextValue::HashesLog(_) => todo!(),
             ContextValue::NamesLog(_) => todo!(),
-            ContextValue::Uint32(number) => context.put_any::<u32>(key.as_ref(), number.clone()),
+            ContextValue::Uint32(number) => context.put_any::<u32>(key.key(), number.clone()),
         }
     }
 

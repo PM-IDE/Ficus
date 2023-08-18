@@ -165,7 +165,7 @@ impl ContextKeys {
         let key = DefaultContextKey::<Vec<Vec<u64>>>::new_with_factory(
             Self::HASHES_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
-                match pipeline_context.get_concrete(keys.event_log()) {
+                match pipeline_context.get_concrete(keys.event_log().key()) {
                     None => None,
                     Some(log) => Some(log.to_hashes_event_log::<NameEventHasher>()),
                 }
@@ -183,7 +183,7 @@ impl ContextKeys {
         let key = DefaultContextKey::<Vec<Vec<String>>>::new_with_factory(
             Self::NAMES_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
-                match pipeline_context.get_concrete(keys.event_log()) {
+                match pipeline_context.get_concrete(keys.event_log().key()) {
                     None => None,
                     Some(log) => {
                         let mut result = vec![];

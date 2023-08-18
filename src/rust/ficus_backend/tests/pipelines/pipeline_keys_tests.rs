@@ -17,11 +17,11 @@ fn test_event_log_key() {
         let log_key = keys.event_log();
         let log = XesEventLogImpl::empty();
 
-        assert!(context.get_concrete(log_key).is_none());
+        assert!(context.get_concrete(log_key.key()).is_none());
 
-        context.put_concrete(log_key, log);
+        context.put_concrete(log_key.key(), log);
 
-        assert!(context.get_concrete(log_key).is_some())
+        assert!(context.get_concrete(log_key.key()).is_some())
     })
 }
 

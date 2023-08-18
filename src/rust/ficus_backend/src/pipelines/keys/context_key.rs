@@ -30,12 +30,12 @@ impl<T> ContextKey for DefaultContextKey<T> {
     }
 
     fn try_create_value_into_context(&self, context: &mut PipelineContext, keys: &ContextKeys) {
-        if context.get_concrete(&self).is_some() {
+        if context.get_concrete(&self.key).is_some() {
             return;
         }
 
         if let Some(factory) = self.factory.as_ref() {
-            context.put_concrete(self, factory(context, keys).unwrap())
+            context.put_concrete(&self.key, factory(context, keys).unwrap())
         }
     }
 }

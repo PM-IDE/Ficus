@@ -141,7 +141,7 @@ impl PipelineParts {
                             return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
                         }
 
-                        context.put_concrete(&context.types().event_log(), log.unwrap());
+                        context.put_concrete(&context.types().event_log().key().clone(), log.unwrap());
                         Ok(())
                     }),
                 )
@@ -153,7 +153,7 @@ impl PipelineParts {
         context: &'a PipelineContext,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a T, PipelinePartExecutionError> {
-        match context.get_concrete(key) {
+        match context.get_concrete(key.key()) {
             Some(value) => Ok(value),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 key.key().name().to_owned(),
@@ -172,7 +172,7 @@ impl PipelineParts {
                     config,
                     Box::new(|context, _| {
                         let path = Self::get_context_value(context, &context.types().path())?;
-                        match write_log(&context.get_concrete(&context.types().event_log()).unwrap(), path) {
+                        match write_log(&context.get_concrete(&context.types().event_log().key()).unwrap(), path) {
                             Ok(()) => Ok(()),
                             Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
                                 err.to_string(),
@@ -230,7 +230,7 @@ impl PipelineParts {
             .unwrap();
 
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), *array_length as usize);
-        context.put_concrete(types.patterns(), arrays);
+        context.put_concrete(&types.patterns().key().clone(), arrays);
         Ok(())
     }
 
@@ -243,7 +243,7 @@ impl PipelineParts {
         let strategy = PatternsDiscoveryStrategy::FromAllTraces;
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
 
-        context.put_concrete(types.patterns(), arrays);
+        context.put_concrete(&types.patterns().key().clone(), arrays);
 
         Ok(())
     }
