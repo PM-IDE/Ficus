@@ -142,4 +142,12 @@ impl ContextKeys {
     pub fn is_activity_level(&self, key: &dyn ContextKey) -> bool {
         return self.activity_level().key().id() == key.key().id();
     }
+
+    pub fn narrow_activities(&self) -> &DefaultContextKey<bool> {
+        self.find_concrete_key::<bool>(Self::NARROW_ACTIVITIES).unwrap()
+    }
+
+    pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {
+        return self.narrow_activities().key().id() == key.key().id();
+    }
 }

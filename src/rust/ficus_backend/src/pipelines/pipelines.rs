@@ -1,15 +1,15 @@
-use std::{collections::HashMap, hash};
+use std::collections::HashMap;
 
 use crate::{
     event_log::{
         core::{
-            event::event_hasher::{default_class_extractor, NameEventHasher},
+            event::event_hasher::NameEventHasher,
             event_log::EventLog,
         },
         xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
     },
     features::analysis::patterns::{
-        activity_instances::create_activity_name,
+        activity_instances::{create_activity_name, extract_activities_instances},
         contexts::PatternsDiscoveryStrategy,
         repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
@@ -122,6 +122,8 @@ impl PipelineParts {
             Self::find_maximal_repeats(),
             Self::find_super_maximal_repeats(),
             Self::find_near_super_maximal_repeats(),
+            Self::discover_activities(),
+            Self::discover_activities_instances(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -162,6 +164,18 @@ impl PipelineParts {
         key: &DefaultContextKey<T>,
     ) -> Result<&'a T, PipelinePartExecutionError> {
         match context.get_concrete(key.key()) {
+            Some(value) => Ok(value),
+            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                key.key().name().to_owned(),
+            ))),
+        }
+    }
+
+    fn get_context_value_mut<'a, T>(
+        context: &'a PipelineContext,
+        key: &DefaultContextKey<T>,
+    ) -> Result<&'a mut T, PipelinePartExecutionError> {
+        match context.get_concrete_mut(key.key()) {
             Some(value) => Ok(value),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 key.key().name().to_owned(),
@@ -332,7 +346,30 @@ impl PipelineParts {
         )
     }
 
-    fn discover_activities_instances() {}
+    fn discover_activities_instances() -> (String, PipelinePartFactory) {
+        const NAME: &str = "DiscoverActivitiesInstances";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    config,
+                    Box::new(|context, _| {
+                        let log = Self::get_context_value(context, &context.types().event_log())?;
+                        let mut tree = Self::get_context_value_mut(context, &context.types().activities())?;
+                        let narrow = Self::get_context_value(context, &context.types().narrow_activities())?;
+
+                        let hashes = log.to_hashes_event_log::<NameEventHasher>();
+                        let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
+
+                        context.put_concrete(&context.types().trace_activities().key().clone(), instances);
+                        Ok(())
+                    }),
+                )
+            }),
+        )
+    }
 }
 
 unsafe impl Sync for PipelineParts {}
