@@ -40,7 +40,7 @@ where
 
 pub fn find_repeats<TClassExtractor, TLog>(
     context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
-) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>>
+) -> Vec<SubArrayWithTraceIndex>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
@@ -51,7 +51,7 @@ where
 
 pub fn build_repeat_set_tree<TClassExtractor, TLog, TNameCreator>(
     activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
+) -> Vec<Rc<RefCell<ActivityNode>>>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
@@ -61,24 +61,24 @@ where
     build_repeat_set_tree_from_repeats(
         activities_context.patterns_context.get_processed_log(),
         &repeats,
-        &activities_context,
+        activities_context.activity_level,
+        &activities_context.name_creator,
     )
 }
 
 pub fn discover_activities_instances<TClassExtractor, TLog, TNameCreator>(
     activities_context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
+) -> Vec<Vec<ActivityInTraceInfo>>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    let repeat_set_tree = build_repeat_set_tree(activities_context);
-    let repeat_set_tree = &mut repeat_set_tree.borrow_mut();
+    let mut repeat_set_tree = build_repeat_set_tree(activities_context);
 
     extract_activities_instances(
         activities_context.patterns_context.get_processed_log(),
-        repeat_set_tree,
+        &mut repeat_set_tree,
         true,
     )
 }
@@ -95,7 +95,6 @@ where
     TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     let activity_instances = discover_activities_instances(&context.activities_context);
-    let activity_instances = activity_instances.borrow();
 
     create_new_log_from_activities_instances(
         &context.activities_context.patterns_context.log,
@@ -116,7 +115,6 @@ where
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
     let activity_instances = discover_activities_instances(&context);
-    let activity_instances = activity_instances.borrow();
 
     activity_instances::create_logs_for_activities(
         &context.patterns_context.log.borrow(),

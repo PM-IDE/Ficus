@@ -24,10 +24,7 @@ impl SubArrayWithTraceIndex {
     }
 }
 
-pub fn build_repeat_sets(
-    log: &Vec<Vec<u64>>,
-    patterns: &Vec<Vec<SubArrayInTraceInfo>>,
-) -> Rc<RefCell<Vec<SubArrayWithTraceIndex>>> {
+pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTraceInfo>>) -> Vec<SubArrayWithTraceIndex> {
     let mut repeat_sets = HashMap::new();
     let mut set = HashSet::new();
     let mut vec: Vec<u64> = vec![];
@@ -74,7 +71,7 @@ pub fn build_repeat_sets(
         }
     });
 
-    Rc::new(RefCell::new(result))
+    result
 }
 
 #[derive(Debug)]
@@ -96,19 +93,17 @@ impl ActivityNode {
     }
 }
 
-pub fn build_repeat_set_tree_from_repeats<TClassExtractor, TLog, TNameCreator>(
+pub fn build_repeat_set_tree_from_repeats<TNameCreator>(
     log: &Vec<Vec<u64>>,
-    repeats: &Rc<RefCell<Vec<SubArrayWithTraceIndex>>>,
-    context: &ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-) -> Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>
+    repeats: &Vec<SubArrayWithTraceIndex>,
+    activity_level: usize,
+    name_creator: TNameCreator,
+) -> Vec<Rc<RefCell<ActivityNode>>>
 where
-    TLog: EventLog,
-    TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
 {
-    let repeats = repeats.borrow();
     if repeats.len() == 0 {
-        return Rc::new(RefCell::new(vec![]));
+        return vec![];
     }
 
     let extract_events_set = |repeat_set: &SubArrayWithTraceIndex| -> HashSet<u64> {
@@ -128,8 +123,8 @@ where
             repeat_set: *repeat_set,
             event_classes: events_set,
             children: vec![],
-            level: context.activity_level,
-            name: (&context.name_creator)(repeat_set),
+            level: activity_level,
+            name: name_creator(repeat_set),
         }))
     };
 
@@ -140,8 +135,7 @@ where
 
     activity_nodes.sort_by(|first, second| second.borrow().len().cmp(&first.borrow().len()));
     let max_length = activity_nodes[0].borrow().len();
-    let top_level_nodes_ptr = Rc::new(RefCell::new(vec![Rc::clone(&activity_nodes[0])]));
-    let top_level_nodes = &mut top_level_nodes_ptr.borrow_mut();
+    let mut top_level_nodes = vec![Rc::clone(&activity_nodes[0])];
     let mut next_length_index = 1;
     let mut current_length = max_length;
 
@@ -157,7 +151,7 @@ where
     }
 
     if top_level_nodes.len() == activity_nodes.len() {
-        return Rc::clone(&top_level_nodes_ptr);
+        return top_level_nodes;
     }
 
     let mut nodes_by_level: Vec<Vec<Rc<RefCell<ActivityNode>>>> = vec![vec![]];
@@ -201,5 +195,5 @@ where
         }
     }
 
-    Rc::clone(&top_level_nodes_ptr)
+    top_level_nodes
 }

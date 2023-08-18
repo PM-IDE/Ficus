@@ -23,7 +23,7 @@ fn test_repeat_sets_primitive_tandem_arrays() {
     );
 
     let repeats = find_repeats(&context);
-    assert_eq!(get_first_trace_repeat(&repeats.borrow()), [(0, 4, 1), (3, 2, 4)]);
+    assert_eq!(get_first_trace_repeat(&repeats), [(0, 4, 1), (3, 2, 4)]);
 }
 
 fn get_first_trace_repeat(repeats: &Vec<SubArrayWithTraceIndex>) -> Vec<(usize, usize, usize)> {
@@ -43,7 +43,7 @@ fn test_repeat_sets_super_maximal_repeats() {
     let repeats = find_repeats(&context);
 
     assert_eq!(
-        get_first_trace_repeat(&repeats.borrow()),
+        get_first_trace_repeat(&repeats),
         [
             (0, 1, 0),
             (2, 3, 0),
@@ -72,7 +72,7 @@ fn test_repeat_sets_near_super_maximal_repeats() {
     let repeats = find_repeats(&repeats_context);
 
     assert_eq!(
-        get_first_trace_repeat(&repeats.borrow()),
+        get_first_trace_repeat(&repeats),
         [
             (0, 1, 0),
             (2, 1, 0),
@@ -103,7 +103,7 @@ fn test_repeat_set_tree() {
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
-        get_top_level_activities_event_classes(&repeats.borrow()),
+        get_top_level_activities_event_classes(&repeats),
         [[3102445089172487244, 8186225505942432243, 16993177596579750922]]
     );
 }
@@ -136,7 +136,7 @@ fn test_repeat_set_tree2() {
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
-        get_top_level_activities_event_classes(&repeats.borrow()),
+        get_top_level_activities_event_classes(&repeats),
         [[
             3102445089172487244,
             7393736521911212725,
@@ -162,7 +162,7 @@ fn test_repeat_set_tree3() {
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
-        get_top_level_activities_event_classes(&repeats.borrow()),
+        get_top_level_activities_event_classes(&repeats),
         [
             vec![
                 3102445089172487244,
@@ -191,7 +191,7 @@ fn test_repeat_set_tree4() {
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
-        get_top_level_activities_event_classes(&repeats.borrow()),
+        get_top_level_activities_event_classes(&repeats),
         [
             vec![
                 3102445089172487244,

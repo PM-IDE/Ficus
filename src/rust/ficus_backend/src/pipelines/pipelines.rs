@@ -1,12 +1,17 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash};
 
 use crate::{
     event_log::{
-        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
+        core::{
+            event::event_hasher::{default_class_extractor, NameEventHasher},
+            event_log::EventLog,
+        },
         xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
     },
     features::analysis::patterns::{
+        activity_instances::create_activity_name,
         contexts::PatternsDiscoveryStrategy,
+        repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
@@ -288,7 +293,7 @@ impl PipelineParts {
             NAME.to_string(),
             Box::new(|config| {
                 DefaultPipelinePart::new(
-                    "FindNearSuperMaximalRepeats".to_string(),
+                    NAME.to_string(),
                     config,
                     Box::new(|context, _| {
                         Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)
@@ -297,6 +302,37 @@ impl PipelineParts {
             }),
         )
     }
+
+    fn discover_activities() -> (String, PipelinePartFactory) {
+        const NAME: &str = "DiscoverActivities";
+
+        (
+            NAME.to_string(),
+            Box::new(|config| {
+                DefaultPipelinePart::new(
+                    NAME.to_string(),
+                    config,
+                    Box::new(|context, _| {
+                        let log = Self::get_context_value(context, &context.types().event_log())?;
+                        let patterns = Self::get_context_value(context, &context.types().patterns())?;
+                        let hashes = log.to_hashes_event_log::<NameEventHasher>();
+                        let repeat_sets = build_repeat_sets(&hashes, patterns);
+
+                        let activity_level = Self::get_context_value(context, &context.types().activity_level())?;
+                        let tree =
+                            build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level, |sub_array| {
+                                create_activity_name(log, sub_array)
+                            });
+
+                        context.put_concrete(&context.types().activities().key().clone(), tree);
+                        Ok(())
+                    }),
+                )
+            }),
+        )
+    }
+
+    fn discover_activities_instances() {}
 }
 
 unsafe impl Sync for PipelineParts {}

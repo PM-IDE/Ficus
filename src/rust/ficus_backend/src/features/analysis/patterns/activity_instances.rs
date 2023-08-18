@@ -28,10 +28,9 @@ pub fn extract_activities_instances(
     log: &Vec<Vec<u64>>,
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     should_narrow: bool,
-) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>> {
+) -> Vec<Vec<ActivityInTraceInfo>> {
     let activities_by_size = split_activities_nodes_by_size(activities);
-    let result_ptr = Rc::new(RefCell::new(vec![]));
-    let result = &mut result_ptr.borrow_mut();
+    let mut result = vec![];
 
     for trace in log {
         let mut trace_activities = vec![];
@@ -148,7 +147,7 @@ pub fn extract_activities_instances(
         result.push(trace_activities);
     }
 
-    Rc::clone(&result_ptr)
+    result
 }
 
 fn split_activities_nodes_by_size(
@@ -335,7 +334,7 @@ where
 
             let activities = extract_activities_instances(&vec![hashes], &mut activities.borrow_mut(), should_narrow);
             new_trace_activities.extend(
-                activities.borrow()[0]
+                activities[0]
                     .iter()
                     .map(|instance| ActivityInTraceInfo {
                         node: Rc::clone(&instance.node),

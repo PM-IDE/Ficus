@@ -22,6 +22,7 @@ use super::{
 impl ContextKeys {
     pub const PATH: &str = "path";
     pub const TANDEM_ARRAY_LENGTH: &str = "tandem_array_length";
+    pub const ACTIVITY_LEVEL: &str = "activity_level";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -40,6 +41,7 @@ impl ContextKeys {
 
         Self::insert_path(&mut concrete_keys, &mut context_keys);
         Self::insert_tandem_arrays_length(&mut concrete_keys, &mut context_keys);
+        Self::insert_activity_level(&mut concrete_keys, &mut context_keys);
 
         Self::insert_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_activities(&mut concrete_keys, &mut context_keys);
@@ -77,6 +79,16 @@ impl ContextKeys {
 
         context_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
         concrete_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
+    }
+
+    fn insert_activity_level(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        let key = Box::new(DefaultContextKey::<usize>::new(Self::ACTIVITY_LEVEL));
+
+        context_keys.insert(Cow::Borrowed(&Self::ACTIVITY_LEVEL), key.clone());
+        concrete_keys.insert(Cow::Borrowed(&Self::ACTIVITY_LEVEL), key.clone());
     }
 
     fn insert_event_log(

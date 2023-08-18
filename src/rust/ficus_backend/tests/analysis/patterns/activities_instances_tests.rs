@@ -39,7 +39,7 @@ fn test_activity_instances() {
     });
 
     let activities = discover_activities_instances(&context);
-    let activities = dump_activities(&activities.borrow());
+    let activities = dump_activities(&activities);
 
     assert_eq!(activities, [[(2, 15), (17, 19)]]);
 }
@@ -68,7 +68,7 @@ fn test_activity_instances1() {
 
     let activities = discover_activities_instances(&context);
 
-    let activities = dump_activities(&activities.borrow());
+    let activities = dump_activities(&activities);
     assert_eq!(
         activities,
         vec![

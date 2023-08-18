@@ -10,10 +10,7 @@ use crate::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
-    utils::user_data::{
-        keys::Key,
-        user_data::UserData,
-    },
+    utils::user_data::{keys::Key, user_data::UserData},
 };
 
 pub(super) fn create_initial_context(
