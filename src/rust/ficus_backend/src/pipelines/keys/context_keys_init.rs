@@ -11,6 +11,7 @@ use crate::{
     },
     features::discovery::petri_net::PetriNet,
     pipelines::aliases::*,
+    utils::user_data::user_data::UserData,
 };
 
 use super::{

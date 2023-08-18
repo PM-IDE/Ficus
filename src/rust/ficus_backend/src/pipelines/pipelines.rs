@@ -11,7 +11,10 @@ use crate::{
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
-    utils::user_data::{keys::Key, user_data::UserData},
+    utils::user_data::{
+        keys::Key,
+        user_data::{UserData, UserDataImpl},
+    },
 };
 
 use super::{
@@ -64,16 +67,16 @@ impl PipelinePart for ParallelPipelinePart {
     }
 }
 
-type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext, &UserData) -> Result<(), PipelinePartExecutionError>>;
+type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext, &UserDataImpl) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct DefaultPipelinePart {
     name: String,
-    config: Box<UserData>,
+    config: Box<UserDataImpl>,
     executor: PipelinePartExecutor,
 }
 
 impl DefaultPipelinePart {
-    pub fn new(name: String, config: Box<UserData>, executor: PipelinePartExecutor) -> Self {
+    pub fn new(name: String, config: Box<UserDataImpl>, executor: PipelinePartExecutor) -> Self {
         Self { name, config, executor }
     }
 
@@ -81,7 +84,7 @@ impl DefaultPipelinePart {
         &self.name
     }
 
-    pub fn config(&self) -> &UserData {
+    pub fn config(&self) -> &UserDataImpl {
         &self.config
     }
 }
@@ -92,7 +95,7 @@ impl PipelinePart for DefaultPipelinePart {
     }
 }
 
-type PipelinePartFactory = Box<dyn Fn(Box<UserData>) -> DefaultPipelinePart>;
+type PipelinePartFactory = Box<dyn Fn(Box<UserDataImpl>) -> DefaultPipelinePart>;
 
 pub struct PipelineParts {
     names_to_parts: HashMap<String, PipelinePartFactory>,
@@ -220,7 +223,7 @@ impl PipelineParts {
 
     fn find_tandem_arrays_and_put_to_context(
         context: &mut PipelineContext,
-        part_config: &UserData,
+        part_config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let types = context.types();

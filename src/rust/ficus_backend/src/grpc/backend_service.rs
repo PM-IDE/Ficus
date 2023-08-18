@@ -20,7 +20,7 @@ use crate::{
         keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{Pipeline, PipelinePart, PipelineParts},
     },
-    utils::user_data::user_data::UserData,
+    utils::user_data::user_data::{UserData, UserDataImpl},
 };
 
 use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};
@@ -122,7 +122,7 @@ impl FicusService {
         for grpc_part in &grpc_pipeline.parts {
             match grpc_part.part.as_ref().unwrap() {
                 Part::DefaultPart(grpc_default_part) => {
-                    let mut part_config = UserData::new();
+                    let mut part_config = UserDataImpl::new();
                     let grpc_config = &grpc_default_part.configuration.as_ref().unwrap();
 
                     for conf_value in &grpc_config.configuration_parameters {

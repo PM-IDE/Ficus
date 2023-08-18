@@ -10,7 +10,10 @@ use crate::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
-    utils::user_data::{keys::Key, user_data::UserData},
+    utils::user_data::{
+        keys::Key,
+        user_data::{UserData, UserDataImpl},
+    },
 };
 
 pub(super) fn create_initial_context(
@@ -33,12 +36,12 @@ pub(super) fn create_initial_context(
     context
 }
 
-pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut UserData) {
+pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut UserDataImpl) {
     match value {
-        ContextValue::String(string) => user_data.put::<String>(key, string.clone()),
+        ContextValue::String(string) => user_data.put_any::<String>(key, string.clone()),
         ContextValue::HashesLog(_) => todo!(),
         ContextValue::NamesLog(_) => todo!(),
-        ContextValue::Uint32(number) => user_data.put::<u32>(key, number.clone()),
+        ContextValue::Uint32(number) => user_data.put_any::<u32>(key, number.clone()),
     }
 }
 

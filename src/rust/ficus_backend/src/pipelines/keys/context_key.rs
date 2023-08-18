@@ -1,6 +1,9 @@
 use crate::{
     pipelines::context::PipelineContext,
-    utils::user_data::keys::{DefaultKey, Key},
+    utils::user_data::{
+        keys::{DefaultKey, Key},
+        user_data::UserData,
+    },
 };
 use std::{
     hash::{Hash, Hasher},

@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    utils::user_data::keys::{DefaultKey, Key},
+    utils::user_data::{keys::DefaultKey, user_data::UserData},
 };
 
 use super::repeat_sets::{ActivityNode, SubArrayWithTraceIndex};
@@ -292,7 +292,7 @@ where
 
             let mut event = ptr.borrow_mut();
             let user_data = event.get_user_data();
-            user_data.put(&underlying_events_key::<TLog::TEvent>(), Box::new(underlying_events));
+            user_data.put_any(&underlying_events_key::<TLog::TEvent>(), underlying_events);
         };
 
         process_activities_in_trace(trace.get_events().len(), &instances, undef_activity_func, activity_func);

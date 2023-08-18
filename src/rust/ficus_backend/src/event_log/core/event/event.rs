@@ -1,4 +1,4 @@
-use crate::utils::user_data::user_data::UserData;
+use crate::utils::user_data::user_data::UserDataImpl;
 
 use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};
@@ -31,7 +31,7 @@ pub trait Event: Clone {
     fn get_lifecycle(&self) -> Option<Lifecycle>;
     fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue>;
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
-    fn get_user_data(&mut self) -> &mut UserData;
+    fn get_user_data(&mut self) -> &mut UserDataImpl;
 
     fn set_name(&mut self, new_name: &String);
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>);

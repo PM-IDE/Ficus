@@ -8,7 +8,7 @@ use crate::{
         event_base::EventBase,
         lifecycle::Lifecycle,
     },
-    utils::{user_data::user_data::UserData, vec_utils},
+    utils::{user_data::user_data::UserDataImpl, vec_utils},
 };
 
 pub struct XesEventImpl {
@@ -87,7 +87,7 @@ impl Event for XesEventImpl {
         *self.payload.get_mut(&key).unwrap() = value;
     }
 
-    fn get_user_data(&mut self) -> &mut UserData {
+    fn get_user_data(&mut self) -> &mut UserDataImpl {
         self.event_base.user_data_holder.get_mut()
     }
 }

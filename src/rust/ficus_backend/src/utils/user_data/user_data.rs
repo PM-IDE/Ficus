@@ -3,26 +3,57 @@ use std::{any::Any, cell::RefCell, collections::HashMap, rc::Rc};
 use super::keys::{DefaultKey, Key};
 
 #[derive(Debug)]
-pub struct UserData {
+pub struct UserDataImpl {
     values_map: Option<HashMap<u64, Rc<RefCell<dyn Any>>>>,
 }
 
-unsafe impl Send for UserData {}
+unsafe impl Send for UserDataImpl {}
 
-impl UserData {
-    pub fn new() -> Self {
-        Self { values_map: None }
+pub trait UserData {
+    fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T);
+    fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T);
+    fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
+    fn get_any(&self, key: &dyn Key) -> Option<&dyn Any>;
+    fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T>;
+}
+
+impl UserData for UserDataImpl {
+    fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
+        self.put_any(key, value)
     }
 
-    pub fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
-        self.put(key, value)
-    }
-
-    pub fn put<T: 'static>(&mut self, key: &dyn Key, value: T) {
+    fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T) {
         self.initialize_values_map();
 
         let values_map = self.values_map.as_mut().unwrap();
         values_map.insert(key.id(), Rc::new(RefCell::new(value)));
+    }
+
+    fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
+        self.get(key)
+    }
+
+    fn get_any(&self, key: &dyn Key) -> Option<&dyn Any> {
+        if self.values_map.is_none() {
+            return None;
+        }
+
+        let values_map = self.values_map.as_ref().unwrap();
+        if let Some(value) = values_map.get(&key.id()) {
+            unsafe { Some(value.as_ref().try_borrow_unguarded().ok().unwrap()) }
+        } else {
+            None
+        }
+    }
+
+    fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
+        self.get_mut(key)
+    }
+}
+
+impl UserDataImpl {
+    pub fn new() -> Self {
+        Self { values_map: None }
     }
 
     fn initialize_values_map(&mut self) {
@@ -41,32 +72,11 @@ impl UserData {
         self.values_map.as_mut().unwrap().remove(&key.id());
     }
 
-    pub fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
-        self.get(key)
-    }
-
     pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
         match self.get_any(key) {
             None => None,
             Some(any) => Some(any.downcast_ref::<T>().unwrap()),
         }
-    }
-
-    pub fn get_any(&self, key: &dyn Key) -> Option<&dyn Any> {
-        if self.values_map.is_none() {
-            return None;
-        }
-
-        let values_map = self.values_map.as_ref().unwrap();
-        if let Some(value) = values_map.get(&key.id()) {
-            unsafe { Some(value.as_ref().try_borrow_unguarded().ok().unwrap()) }
-        } else {
-            None
-        }
-    }
-
-    pub fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
-        self.get_mut(key)
     }
 
     pub fn get_mut<T: 'static>(&self, key: &impl Key) -> Option<&mut T> {
@@ -83,7 +93,7 @@ impl UserData {
     }
 }
 
-impl Clone for UserData {
+impl Clone for UserDataImpl {
     fn clone(&self) -> Self {
         match self.values_map.as_ref() {
             None => Self { values_map: None },
@@ -103,7 +113,7 @@ impl Clone for UserData {
 
 #[derive(Debug)]
 pub struct UserDataHolder {
-    user_data: Option<UserData>,
+    user_data: Option<UserDataImpl>,
 }
 
 impl UserDataHolder {
@@ -111,9 +121,9 @@ impl UserDataHolder {
         Self { user_data: None }
     }
 
-    pub fn get_mut(&mut self) -> &mut UserData {
+    pub fn get_mut(&mut self) -> &mut UserDataImpl {
         if self.user_data.is_none() {
-            self.user_data = Some(UserData::new());
+            self.user_data = Some(UserDataImpl::new());
         }
 
         self.user_data.as_mut().unwrap()

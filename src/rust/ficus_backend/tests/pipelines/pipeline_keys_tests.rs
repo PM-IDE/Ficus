@@ -8,7 +8,7 @@ use ficus_backend::{
         context::PipelineContext,
         keys::context_keys::ContextKeys,
     },
-    utils::user_data::keys::Key,
+    utils::user_data::{keys::Key, user_data::UserData},
 };
 
 #[test]

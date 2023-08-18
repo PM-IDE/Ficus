@@ -11,7 +11,7 @@ use crate::{
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
     },
-    utils::user_data::user_data::UserData,
+    utils::user_data::user_data::UserDataImpl,
 };
 
 #[derive(Debug)]
@@ -225,7 +225,7 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
-    fn get_user_data(&mut self) -> &mut UserData {
+    fn get_user_data(&mut self) -> &mut UserDataImpl {
         self.event_base.user_data_holder.get_mut()
     }
 }
