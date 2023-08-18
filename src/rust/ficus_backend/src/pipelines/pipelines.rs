@@ -11,7 +11,7 @@ use crate::{
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
-    utils::user_data::{Key, UserData},
+    utils::user_data::{keys::Key, user_data::UserData},
 };
 
 use super::{

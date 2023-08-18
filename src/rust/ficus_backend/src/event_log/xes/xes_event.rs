@@ -8,7 +8,7 @@ use crate::{
         event_base::EventBase,
         lifecycle::Lifecycle,
     },
-    utils::{user_data::UserData, vec_utils},
+    utils::{user_data::user_data::UserData, vec_utils},
 };
 
 pub struct XesEventImpl {

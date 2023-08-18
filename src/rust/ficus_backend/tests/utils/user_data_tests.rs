@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use ficus_backend::utils::user_data::{DefaultKey, UserData};
+use ficus_backend::utils::user_data::{keys::DefaultKey, user_data::UserData};
 
 #[test]
 fn test_user_data() {

@@ -1,4 +1,4 @@
-use crate::utils::user_data::UserData;
+use crate::utils::user_data::user_data::UserData;
 
 use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};

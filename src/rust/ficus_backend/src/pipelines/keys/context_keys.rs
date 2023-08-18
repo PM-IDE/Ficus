@@ -11,7 +11,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
-    utils::user_data::Key,
+    utils::user_data::keys::Key,
 };
 
 use super::context_key::{ContextKey, DefaultContextKey};

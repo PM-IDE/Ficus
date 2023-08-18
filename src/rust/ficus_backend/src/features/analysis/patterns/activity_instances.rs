@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    utils::user_data::{DefaultKey, Key},
+    utils::user_data::keys::{DefaultKey, Key},
 };
 
 use super::repeat_sets::{ActivityNode, SubArrayWithTraceIndex};

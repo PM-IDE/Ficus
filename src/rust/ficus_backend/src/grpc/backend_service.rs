@@ -20,7 +20,7 @@ use crate::{
         keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{Pipeline, PipelinePart, PipelineParts},
     },
-    utils::user_data::UserData,
+    utils::user_data::user_data::UserData,
 };
 
 use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};

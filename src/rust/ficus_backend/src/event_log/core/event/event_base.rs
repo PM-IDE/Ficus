@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use crate::utils::user_data::UserDataHolder;
+use crate::utils::user_data::user_data::UserDataHolder;
 
 #[derive(Debug)]
 pub struct EventBase {

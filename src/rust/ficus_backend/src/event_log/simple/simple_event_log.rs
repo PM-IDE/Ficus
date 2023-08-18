@@ -11,7 +11,7 @@ use crate::{
         trace::trace::Trace,
         trace::traces_holder::TracesHolder,
     },
-    utils::user_data::UserData,
+    utils::user_data::user_data::UserData,
 };
 
 #[derive(Debug)]
