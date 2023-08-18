@@ -12,7 +12,7 @@ use crate::{
     },
     utils::user_data::{
         keys::Key,
-        user_data::{UserData, UserDataImpl},
+        user_data::UserData,
     },
 };
 
@@ -25,18 +25,13 @@ pub(super) fn create_initial_context(
     for value in values {
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();
         let value = value.value.as_ref().unwrap().context_value.as_ref().unwrap();
-        match value {
-            ContextValue::String(string) => context.put_any::<String>(key.key(), string.clone()),
-            ContextValue::HashesLog(_) => todo!(),
-            ContextValue::NamesLog(_) => todo!(),
-            ContextValue::Uint32(number) => context.put_any::<u32>(key.key(), number.clone()),
-        }
+        put_into_user_data(key.key(), value, &mut context);
     }
 
     context
 }
 
-pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut UserDataImpl) {
+pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut impl UserData) {
     match value {
         ContextValue::String(string) => user_data.put_any::<String>(key, string.clone()),
         ContextValue::HashesLog(_) => todo!(),
