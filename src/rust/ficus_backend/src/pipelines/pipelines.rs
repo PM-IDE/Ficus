@@ -104,7 +104,7 @@ pub struct PipelineParts {
 }
 
 impl PipelineParts {
-    pub fn find_part(&self, name: &String) -> Option<&PipelinePartFactory> {
+    pub fn find_part(&self, name: &str) -> Option<&PipelinePartFactory> {
         self.names_to_parts.get(name)
     }
 }
