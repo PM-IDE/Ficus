@@ -132,25 +132,30 @@ impl PipelineParts {
     }
 
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
-        const NAME: &str = "ReadLogFromXes";
+        Self::create_pipeline_part("ReadLogFromXes", &|context, _| {
+            let path = Self::get_context_value(context, &context.types().path())?;
+            let log = read_event_log(path);
+            if log.is_none() {
+                let message = format!("Failed to read event log from {}", path.as_str());
+                return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
+            }
 
+            context.put_concrete(&context.types().event_log().key().clone(), log.unwrap());
+            Ok(())
+        })
+    }
+
+    fn create_pipeline_part(
+        name: &'static str,
+        executor: &'static impl Fn(&mut PipelineContext, &UserDataImpl) -> Result<(), PipelinePartExecutionError>,
+    ) -> (String, PipelinePartFactory) {
         (
-            NAME.to_string(),
+            name.to_string(),
             Box::new(|config| {
                 DefaultPipelinePart::new(
-                    NAME.to_string(),
+                    name.to_string(),
                     config,
-                    Box::new(|context, _| {
-                        let path = Self::get_context_value(context, &context.types().path())?;
-                        let log = read_event_log(path);
-                        if log.is_none() {
-                            let message = format!("Failed to read event log from {}", path.as_str());
-                            return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
-                        }
-
-                        context.put_concrete(&context.types().event_log().key().clone(), log.unwrap());
-                        Ok(())
-                    }),
+                    Box::new(|context, config| executor(context, config)),
                 )
             }),
         )
@@ -181,60 +186,27 @@ impl PipelineParts {
     }
 
     fn write_log_to_xes() -> (String, PipelinePartFactory) {
-        const NAME: &str = "WriteLogToXes";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| {
-                        let path = Self::get_context_value(context, &context.types().path())?;
-                        match write_log(&context.get_concrete(&context.types().event_log().key()).unwrap(), path) {
-                            Ok(()) => Ok(()),
-                            Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                                err.to_string(),
-                            ))),
-                        }
-                    }),
-                )
-            }),
-        )
+        Self::create_pipeline_part("WriteLogToXes", &|context, _| {
+            let path = Self::get_context_value(context, &context.types().path())?;
+            match write_log(&context.get_concrete(&context.types().event_log().key()).unwrap(), path) {
+                Ok(()) => Ok(()),
+                Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                    err.to_string(),
+                ))),
+            }
+        })
     }
 
     fn find_primitive_tandem_arrays() -> (String, PipelinePartFactory) {
-        const NAME: &str = "FindPrimitiveTandemArrays";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, config| {
-                        Self::find_tandem_arrays_and_put_to_context(context, &config, find_primitive_tandem_arrays)
-                    }),
-                )
-            }),
-        )
+        Self::create_pipeline_part("FindPrimitiveTandemArrays", &|context, config| {
+            Self::find_tandem_arrays_and_put_to_context(context, &config, find_primitive_tandem_arrays)
+        })
     }
 
     fn find_maximal_tandem_arrays() -> (String, PipelinePartFactory) {
-        const NAME: &str = "FindMaximalTandemArrays";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, config| {
-                        Self::find_tandem_arrays_and_put_to_context(context, &config, find_maximal_tandem_arrays)
-                    }),
-                )
-            }),
-        )
+        Self::create_pipeline_part("FindMaximalTandemArrays", &|context, config| {
+            Self::find_tandem_arrays_and_put_to_context(context, &config, find_maximal_tandem_arrays)
+        })
     }
 
     fn find_tandem_arrays_and_put_to_context(
@@ -268,104 +240,52 @@ impl PipelineParts {
     }
 
     fn find_maximal_repeats() -> (String, PipelinePartFactory) {
-        const NAME: &str = "FindMaximalRepeats";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| Self::find_repeats_and_put_to_context(context, find_maximal_repeats)),
-                )
-            }),
-        )
+        Self::create_pipeline_part("FindMaximalRepeats", &|context, _| {
+            Self::find_repeats_and_put_to_context(context, find_maximal_repeats)
+        })
     }
 
     fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        const NAME: &str = "FindSuperMaximalRepeats";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)),
-                )
-            }),
-        )
+        Self::create_pipeline_part("FindSuperMaximalRepeats", &|context, _| {
+            Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)
+        })
     }
 
     fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        const NAME: &str = "FindNearSuperMaximalRepeats";
-
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| {
-                        Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)
-                    }),
-                )
-            }),
-        )
+        Self::create_pipeline_part("FindNearSuperMaximalRepeats", &|context, _| {
+            Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)
+        })
     }
 
     fn discover_activities() -> (String, PipelinePartFactory) {
-        const NAME: &str = "DiscoverActivities";
+        Self::create_pipeline_part("DiscoverActivities", &|context, _| {
+            let log = Self::get_context_value(context, &context.types().event_log())?;
+            let patterns = Self::get_context_value(context, &context.types().patterns())?;
+            let hashes = log.to_hashes_event_log::<NameEventHasher>();
+            let repeat_sets = build_repeat_sets(&hashes, patterns);
 
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| {
-                        let log = Self::get_context_value(context, &context.types().event_log())?;
-                        let patterns = Self::get_context_value(context, &context.types().patterns())?;
-                        let hashes = log.to_hashes_event_log::<NameEventHasher>();
-                        let repeat_sets = build_repeat_sets(&hashes, patterns);
+            let activity_level = Self::get_context_value(context, &context.types().activity_level())?;
+            let tree = build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level, |sub_array| {
+                create_activity_name(log, sub_array)
+            });
 
-                        let activity_level = Self::get_context_value(context, &context.types().activity_level())?;
-                        let tree =
-                            build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level, |sub_array| {
-                                create_activity_name(log, sub_array)
-                            });
-
-                        context.put_concrete(&context.types().activities().key().clone(), tree);
-                        Ok(())
-                    }),
-                )
-            }),
-        )
+            context.put_concrete(&context.types().activities().key().clone(), tree);
+            Ok(())
+        })
     }
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
-        const NAME: &str = "DiscoverActivitiesInstances";
+        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, _| {
+            let log = Self::get_context_value(context, &context.types().event_log())?;
+            let mut tree = Self::get_context_value_mut(context, &context.types().activities())?;
+            let narrow = Self::get_context_value(context, &context.types().narrow_activities())?;
 
-        (
-            NAME.to_string(),
-            Box::new(|config| {
-                DefaultPipelinePart::new(
-                    NAME.to_string(),
-                    config,
-                    Box::new(|context, _| {
-                        let log = Self::get_context_value(context, &context.types().event_log())?;
-                        let mut tree = Self::get_context_value_mut(context, &context.types().activities())?;
-                        let narrow = Self::get_context_value(context, &context.types().narrow_activities())?;
+            let hashes = log.to_hashes_event_log::<NameEventHasher>();
+            let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
 
-                        let hashes = log.to_hashes_event_log::<NameEventHasher>();
-                        let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
-
-                        context.put_concrete(&context.types().trace_activities().key().clone(), instances);
-                        Ok(())
-                    }),
-                )
-            }),
-        )
+            context.put_concrete(&context.types().trace_activities().key().clone(), instances);
+            Ok(())
+        })
     }
 }
 
