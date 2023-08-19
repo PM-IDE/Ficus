@@ -14,6 +14,8 @@ message GrpcContextValue {
         GrpcHashesEventLogContextValue hashes_log = 2;
         GrpcNamesEventLogContextValue names_log = 3;
         uint32 uint32 = 4;
+        GrpcEventLogTraceSubArraysContextValue traces_sub_arrays = 5;
+        GrpcSubArraysWithTraceIndexContextValue trace_index_sub_arrays = 6;
     }
 }
 
@@ -28,4 +30,26 @@ message GrpcHashesEventLogContextValue {
 
 message GrpcNamesEventLogContextValue {
     GrpcNamesEventLog log = 1;
+}
+
+message GrpcEventLogTraceSubArraysContextValue {
+    repeated GrpcTraceSubArrays traces_sub_arrays = 1;
+}
+
+message GrpcTraceSubArray {
+    uint32 start = 1;
+    uint32 end = 2;
+}
+
+message GrpcTraceSubArrays {
+    repeated GrpcTraceSubArray sub_arrays = 1;
+}
+
+message GrpcSubArrayWithTraceIndex {
+    GrpcTraceSubArray sub_array = 1;
+    uint32 trace_index = 2;
+}
+
+message GrpcSubArraysWithTraceIndexContextValue {
+    repeated GrpcSubArrayWithTraceIndex sub_arrays = 1;
 }

@@ -1,10 +1,12 @@
 use std::{any::Any, sync::Arc};
 
 use crate::{
+    features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue, GrpcHashesEventLog,
-        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
-        GrpcNamesTrace,
+        grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue,
+        GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace,
+        GrpcNamesEventLog, GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
+        GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
     },
     pipelines::{
         context::PipelineContext,
@@ -34,6 +36,8 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         ContextValue::HashesLog(_) => todo!(),
         ContextValue::NamesLog(_) => todo!(),
         ContextValue::Uint32(number) => user_data.put_any::<u32>(key, number.clone()),
+        ContextValue::TracesSubArrays(_) => todo!(),
+        ContextValue::TraceIndexSubArrays(_) => todo!(),
     }
 }
 
@@ -48,6 +52,10 @@ pub(super) fn convert_to_grpc_context_value(
         try_convert_to_hashes_event_log(value)
     } else if keys.is_names_event_log(key) {
         try_convert_to_names_event_log(value)
+    } else if keys.is_patterns(key) {
+        try_convert_to_grpc_traces_sub_arrays(value)
+    } else if keys.is_repeat_sets(key) {
+        try_convert_to_grpc_sub_arrays_with_index(value)
     } else {
         None
     }
@@ -105,6 +113,57 @@ fn try_convert_to_names_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
             context_value: Some(ContextValue::NamesLog(GrpcNamesEventLogContextValue {
                 log: Some(GrpcNamesEventLog { traces }),
             })),
+        })
+    }
+}
+
+fn try_convert_to_grpc_traces_sub_arrays(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<Vec<Vec<SubArrayInTraceInfo>>>() {
+        None
+    } else {
+        let vec = value.downcast_ref::<Vec<Vec<SubArrayInTraceInfo>>>().unwrap();
+        let mut traces = vec![];
+        for trace in vec {
+            let mut sub_arrays = vec![];
+            for array in trace {
+                sub_arrays.push(GrpcTraceSubArray {
+                    start: array.start_index as u32,
+                    end: (array.start_index + array.length) as u32,
+                })
+            }
+
+            traces.push(GrpcTraceSubArrays { sub_arrays })
+        }
+
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::TracesSubArrays(GrpcEventLogTraceSubArraysContextValue {
+                traces_sub_arrays: traces,
+            })),
+        })
+    }
+}
+
+fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<Vec<SubArrayWithTraceIndex>>() {
+        None
+    } else {
+        let vec = value.downcast_ref::<Vec<SubArrayWithTraceIndex>>().unwrap();
+        let mut sub_arrays = vec![];
+
+        for array in vec {
+            sub_arrays.push(GrpcSubArrayWithTraceIndex {
+                sub_array: Some(GrpcTraceSubArray {
+                    start: array.sub_array.start_index as u32,
+                    end: (array.sub_array.start_index + array.sub_array.length) as u32,
+                }),
+                trace_index: array.trace_index as u32,
+            })
+        }
+
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::TraceIndexSubArrays(
+                GrpcSubArraysWithTraceIndexContextValue { sub_arrays },
+            )),
         })
     }
 }
