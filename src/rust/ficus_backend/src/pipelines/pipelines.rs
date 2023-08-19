@@ -2,10 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     event_log::{
-        core::{
-            event::event_hasher::NameEventHasher,
-            event_log::EventLog,
-        },
+        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
         xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
     },
     features::analysis::patterns::{

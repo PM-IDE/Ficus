@@ -67,120 +67,103 @@ impl ContextKeys {
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<String>::new(Self::PATH));
+        Self::insert_key::<String>(concrete_keys, context_keys, Self::PATH);
+    }
 
-        context_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
-        concrete_keys.insert(Cow::Borrowed(&Self::PATH), key.clone());
+    fn insert_key<T: 'static>(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+        name: &'static str,
+    ) {
+        let key = Box::new(DefaultContextKey::<T>::new(name));
+        Self::insert_key_to_map(concrete_keys, context_keys, key, name);
+    }
+
+    fn insert_key_to_map<T: 'static>(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+        key: Box<DefaultContextKey<T>>,
+        name: &'static str,
+    ) {
+        context_keys.insert(Cow::Borrowed(name), key.clone());
+        concrete_keys.insert(Cow::Borrowed(name), key.clone());
     }
 
     fn insert_tandem_arrays_length(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<u32>::new(Self::TANDEM_ARRAY_LENGTH));
-
-        context_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
-        concrete_keys.insert(Cow::Borrowed(&Self::TANDEM_ARRAY_LENGTH), key.clone());
+        Self::insert_key::<u32>(concrete_keys, context_keys, Self::TANDEM_ARRAY_LENGTH);
     }
 
     fn insert_activity_level(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<usize>::new(Self::ACTIVITY_LEVEL));
-
-        context_keys.insert(Cow::Borrowed(&Self::ACTIVITY_LEVEL), key.clone());
-        concrete_keys.insert(Cow::Borrowed(&Self::ACTIVITY_LEVEL), key.clone());
+        Self::insert_key::<usize>(concrete_keys, context_keys, Self::ACTIVITY_LEVEL);
     }
 
     fn insert_narrow_activities(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<bool>::new(Self::NARROW_ACTIVITIES));
-
-        context_keys.insert(Cow::Borrowed(&Self::NARROW_ACTIVITIES), key.clone());
-        concrete_keys.insert(Cow::Borrowed(&Self::NARROW_ACTIVITIES), key.clone());
+        Self::insert_key::<bool>(concrete_keys, context_keys, Self::NARROW_ACTIVITIES);
     }
 
     fn insert_event_log(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<XesEventLogImpl>::new(Self::EVENT_LOG));
-
-        context_keys.insert(Cow::Borrowed(&Self::EVENT_LOG), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::EVENT_LOG), key);
+        Self::insert_key::<XesEventLogImpl>(concrete_keys, context_keys, Self::EVENT_LOG);
     }
 
     fn insert_activities(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<Activities>::new(Self::ACTIVITIES));
-
-        context_keys.insert(Cow::Borrowed(&Self::ACTIVITIES), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITIES), key);
+        Self::insert_key::<Activities>(concrete_keys, context_keys, Self::ACTIVITIES);
     }
 
     fn insert_repeat_sets(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<RepeatSets>::new(Self::REPEAT_SETS));
-
-        context_keys.insert(Cow::Borrowed(&Self::REPEAT_SETS), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::REPEAT_SETS), key);
+        Self::insert_key::<RepeatSets>(concrete_keys, context_keys, Self::REPEAT_SETS);
     }
 
     fn insert_trace_activities(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<TracesActivities>::new(Self::TRACE_ACTIVITIES));
-
-        context_keys.insert(Cow::Borrowed(&Self::TRACE_ACTIVITIES), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::TRACE_ACTIVITIES), key);
+        Self::insert_key::<TracesActivities>(concrete_keys, context_keys, Self::TRACE_ACTIVITIES);
     }
 
     fn insert_patterns(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<Patterns>::new(Self::PATTERNS));
-
-        context_keys.insert(Cow::Borrowed(&Self::PATTERNS), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::PATTERNS), key);
+        Self::insert_key::<Patterns>(concrete_keys, context_keys, Self::PATTERNS);
     }
 
     fn insert_petri_net(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<PetriNet>::new(Self::PETRI_NET));
-
-        context_keys.insert(Cow::Borrowed(&Self::PETRI_NET), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::PETRI_NET), key);
+        Self::insert_key::<PetriNet>(concrete_keys, context_keys, Self::PETRI_NET);
     }
 
     fn insert_activities_to_logs(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<ActivitiesToLogs>::new(Self::ACTIVITIES_TO_LOGS));
-
-        context_keys.insert(Cow::Borrowed(&Self::ACTIVITIES_TO_LOGS), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITIES_TO_LOGS), key);
+        Self::insert_key::<ActivitiesToLogs>(concrete_keys, context_keys, Self::ACTIVITIES_TO_LOGS);
     }
 
     fn insert_activity_name(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        let key = Box::new(DefaultContextKey::<String>::new(Self::ACTIVITY_NAME));
-
-        context_keys.insert(Cow::Borrowed(&Self::ACTIVITY_NAME), key.clone());
-        concrete_keys.insert(Cow::Borrowed(Self::ACTIVITY_NAME), key);
+        Self::insert_key::<String>(concrete_keys, context_keys, Self::ACTIVITY_NAME);
     }
 
     fn insert_hashes_event_log(
@@ -197,8 +180,7 @@ impl ContextKeys {
             })),
         );
 
-        context_keys.insert(Cow::Borrowed(&Self::HASHES_EVENT_LOG), Box::new(key.clone()));
-        concrete_keys.insert(Cow::Borrowed(Self::HASHES_EVENT_LOG), Box::new(key.clone()));
+        Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::HASHES_EVENT_LOG);
     }
 
     fn insert_names_event_log(
@@ -227,7 +209,6 @@ impl ContextKeys {
             })),
         );
 
-        context_keys.insert(Cow::Borrowed(&Self::NAMES_EVENT_LOG), Box::new(key.clone()));
-        concrete_keys.insert(Cow::Borrowed(Self::NAMES_EVENT_LOG), Box::new(key.clone()));
+        Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::NAMES_EVENT_LOG);
     }
 }
