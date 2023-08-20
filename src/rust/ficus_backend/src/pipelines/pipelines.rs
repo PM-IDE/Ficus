@@ -20,7 +20,9 @@ use crate::{
 };
 
 use super::{
-    context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_key::DefaultContextKey,
+    context::PipelineContext,
+    errors::pipeline_errors::PipelinePartExecutionError,
+    keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
 };
 
 pub struct Pipeline {
@@ -38,9 +40,9 @@ impl Pipeline {
 }
 
 impl PipelinePart for Pipeline {
-    fn execute(&self, context: &mut PipelineContext) -> Result<(), PipelinePartExecutionError> {
+    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
         for part in &self.parts {
-            part.execute(context)?;
+            part.execute(context, keys)?;
         }
 
         Ok(())
@@ -48,7 +50,7 @@ impl PipelinePart for Pipeline {
 }
 
 pub trait PipelinePart {
-    fn execute(&self, context: &mut PipelineContext) -> Result<(), PipelinePartExecutionError>;
+    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError>;
 }
 
 pub struct ParallelPipelinePart {
@@ -56,20 +58,21 @@ pub struct ParallelPipelinePart {
 }
 
 impl PipelinePart for ParallelPipelinePart {
-    fn execute(&self, context: &mut PipelineContext) -> Result<(), PipelinePartExecutionError> {
+    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
         for pipeline in &self.parallel_pipelines[0..(self.parallel_pipelines.len() - 1)] {
-            pipeline.execute(&mut context.clone())?;
+            pipeline.execute(&mut context.clone(), keys)?;
         }
 
         if let Some(last_pipeline) = self.parallel_pipelines.last() {
-            last_pipeline.execute(context)?;
+            last_pipeline.execute(context, keys)?;
         }
 
         Ok(())
     }
 }
 
-type PipelinePartExecutor = Box<dyn Fn(&mut PipelineContext, &UserDataImpl) -> Result<(), PipelinePartExecutionError>>;
+type PipelinePartExecutor =
+    Box<dyn Fn(&mut PipelineContext, &ContextKeys, &UserDataImpl) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct DefaultPipelinePart {
     name: String,
@@ -92,8 +95,8 @@ impl DefaultPipelinePart {
 }
 
 impl PipelinePart for DefaultPipelinePart {
-    fn execute(&self, context: &mut PipelineContext) -> Result<(), PipelinePartExecutionError> {
-        (self.executor)(context, &self.config)
+    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
+        (self.executor)(context, keys, &self.config)
     }
 }
 
@@ -132,22 +135,26 @@ impl PipelineParts {
     }
 
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("ReadLogFromXes", &|context, _| {
-            let path = Self::get_context_value(context, &context.types().path())?;
+        Self::create_pipeline_part("ReadLogFromXes", &|context, keys, _| {
+            let path = Self::get_context_value(context, &keys.path())?;
             let log = read_event_log(path);
             if log.is_none() {
                 let message = format!("Failed to read event log from {}", path.as_str());
                 return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
             }
 
-            context.put_concrete(&context.types().event_log().key().clone(), log.unwrap());
+            context.put_concrete(keys.event_log().key(), log.unwrap());
             Ok(())
         })
     }
 
     fn create_pipeline_part(
         name: &'static str,
-        executor: &'static impl Fn(&mut PipelineContext, &UserDataImpl) -> Result<(), PipelinePartExecutionError>,
+        executor: &'static impl Fn(
+            &mut PipelineContext,
+            &ContextKeys,
+            &UserDataImpl,
+        ) -> Result<(), PipelinePartExecutionError>,
     ) -> (String, PipelinePartFactory) {
         (
             name.to_string(),
@@ -155,7 +162,7 @@ impl PipelineParts {
                 DefaultPipelinePart::new(
                     name.to_string(),
                     config,
-                    Box::new(|context, config| executor(context, config)),
+                    Box::new(|context, keys, config| executor(context, keys, config)),
                 )
             }),
         )
@@ -186,9 +193,9 @@ impl PipelineParts {
     }
 
     fn write_log_to_xes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("WriteLogToXes", &|context, _| {
-            let path = Self::get_context_value(context, &context.types().path())?;
-            match write_log(&context.get_concrete(&context.types().event_log().key()).unwrap(), path) {
+        Self::create_pipeline_part("WriteLogToXes", &|context, keys, _| {
+            let path = Self::get_context_value(context, &keys.path())?;
+            match write_log(&context.get_concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
                 Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
                     err.to_string(),
@@ -198,92 +205,90 @@ impl PipelineParts {
     }
 
     fn find_primitive_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindPrimitiveTandemArrays", &|context, config| {
-            Self::find_tandem_arrays_and_put_to_context(context, &config, find_primitive_tandem_arrays)
+        Self::create_pipeline_part("FindPrimitiveTandemArrays", &|context, keys, config| {
+            Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_primitive_tandem_arrays)
         })
     }
 
     fn find_maximal_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindMaximalTandemArrays", &|context, config| {
-            Self::find_tandem_arrays_and_put_to_context(context, &config, find_maximal_tandem_arrays)
+        Self::create_pipeline_part("FindMaximalTandemArrays", &|context, keys, config| {
+            Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_maximal_tandem_arrays)
         })
     }
 
     fn find_tandem_arrays_and_put_to_context(
         context: &mut PipelineContext,
+        keys: &ContextKeys,
         part_config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let types = context.types();
-        let log = Self::get_context_value(context, &types.event_log())?;
-        let array_length = part_config
-            .get_concrete(context.types().tandem_array_length().key())
-            .unwrap();
+        let log = Self::get_context_value(context, &keys.event_log())?;
+        let array_length = part_config.get_concrete(keys.tandem_array_length().key()).unwrap();
 
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), *array_length as usize);
-        context.put_concrete(&types.patterns().key().clone(), arrays);
+        context.put_concrete(&keys.patterns().key(), arrays);
         Ok(())
     }
 
     fn find_repeats_and_put_to_context(
         context: &mut PipelineContext,
+        keys: &ContextKeys,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let types = context.types();
-        let log = Self::get_context_value(context, &types.event_log())?;
+        let log = Self::get_context_value(context, &keys.event_log())?;
         let strategy = PatternsDiscoveryStrategy::FromAllTraces;
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
 
-        context.put_concrete(&types.patterns().key().clone(), arrays);
+        context.put_concrete(&keys.patterns().key(), arrays);
 
         Ok(())
     }
 
     fn find_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindMaximalRepeats", &|context, _| {
-            Self::find_repeats_and_put_to_context(context, find_maximal_repeats)
+        Self::create_pipeline_part("FindMaximalRepeats", &|context, keys, _| {
+            Self::find_repeats_and_put_to_context(context, keys, find_maximal_repeats)
         })
     }
 
     fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindSuperMaximalRepeats", &|context, _| {
-            Self::find_repeats_and_put_to_context(context, find_super_maximal_repeats)
+        Self::create_pipeline_part("FindSuperMaximalRepeats", &|context, keys, _| {
+            Self::find_repeats_and_put_to_context(context, keys, find_super_maximal_repeats)
         })
     }
 
     fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindNearSuperMaximalRepeats", &|context, _| {
-            Self::find_repeats_and_put_to_context(context, find_near_super_maximal_repeats)
+        Self::create_pipeline_part("FindNearSuperMaximalRepeats", &|context, keys, _| {
+            Self::find_repeats_and_put_to_context(context, keys, find_near_super_maximal_repeats)
         })
     }
 
     fn discover_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivities", &|context, _| {
-            let log = Self::get_context_value(context, &context.types().event_log())?;
-            let patterns = Self::get_context_value(context, &context.types().patterns())?;
+        Self::create_pipeline_part("DiscoverActivities", &|context, keys, _| {
+            let log = Self::get_context_value(context, &keys.event_log())?;
+            let patterns = Self::get_context_value(context, &keys.patterns())?;
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let repeat_sets = build_repeat_sets(&hashes, patterns);
 
-            let activity_level = Self::get_context_value(context, &context.types().activity_level())?;
+            let activity_level = Self::get_context_value(context, &keys.activity_level())?;
             let tree = build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level, |sub_array| {
                 create_activity_name(log, sub_array)
             });
 
-            context.put_concrete(&context.types().activities().key().clone(), tree);
+            context.put_concrete(&keys.activities().key(), tree);
             Ok(())
         })
     }
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, _| {
-            let log = Self::get_context_value(context, &context.types().event_log())?;
-            let mut tree = Self::get_context_value_mut(context, &context.types().activities())?;
-            let narrow = Self::get_context_value(context, &context.types().narrow_activities())?;
+        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, keys, _| {
+            let log = Self::get_context_value(context, &keys.event_log())?;
+            let mut tree = Self::get_context_value_mut(context, &keys.activities())?;
+            let narrow = Self::get_context_value(context, &keys.narrow_activities())?;
 
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
 
-            context.put_concrete(&context.types().trace_activities().key().clone(), instances);
+            context.put_concrete(&keys.trace_activities().key(), instances);
             Ok(())
         })
     }

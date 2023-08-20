@@ -10,19 +10,13 @@ use super::keys::context_keys::ContextKeys;
 #[derive(Clone)]
 pub struct PipelineContext {
     user_data: UserDataImpl,
-    types: Arc<Box<ContextKeys>>,
 }
 
 impl PipelineContext {
     pub fn new(types: &Arc<Box<ContextKeys>>) -> Self {
         Self {
             user_data: UserDataImpl::new(),
-            types: Arc::clone(types),
         }
-    }
-
-    pub fn types(&self) -> &ContextKeys {
-        &self.types
     }
 }
 

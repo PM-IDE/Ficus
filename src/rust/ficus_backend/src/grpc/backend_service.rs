@@ -111,7 +111,7 @@ impl FicusService {
         let pipeline = self.to_pipeline(grpc_pipeline);
         let mut context = create_initial_context(initial_context_value, &self.context_keys);
 
-        match pipeline.execute(&mut context) {
+        match pipeline.execute(&mut context, &self.context_keys) {
             Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context)),
             Err(err) => Err(err),
         }
