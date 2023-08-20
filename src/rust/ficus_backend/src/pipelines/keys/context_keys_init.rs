@@ -100,7 +100,7 @@ impl ContextKeys {
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        Self::insert_key::<usize>(concrete_keys, context_keys, Self::ACTIVITY_LEVEL);
+        Self::insert_key::<u32>(concrete_keys, context_keys, Self::ACTIVITY_LEVEL);
     }
 
     fn insert_narrow_activities(

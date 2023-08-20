@@ -16,6 +16,7 @@ message GrpcContextValue {
         uint32 uint32 = 4;
         GrpcEventLogTraceSubArraysContextValue traces_sub_arrays = 5;
         GrpcSubArraysWithTraceIndexContextValue trace_index_sub_arrays = 6;
+        bool bool = 7;
     }
 }
 

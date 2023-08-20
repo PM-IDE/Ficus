@@ -135,8 +135,8 @@ impl ContextKeys {
         return self.tandem_array_length().key().id() == key.key().id();
     }
 
-    pub fn activity_level(&self) -> &DefaultContextKey<usize> {
-        self.find_concrete_key::<usize>(Self::ACTIVITY_LEVEL).unwrap()
+    pub fn activity_level(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::ACTIVITY_LEVEL).unwrap()
     }
 
     pub fn is_activity_level(&self, key: &dyn ContextKey) -> bool {

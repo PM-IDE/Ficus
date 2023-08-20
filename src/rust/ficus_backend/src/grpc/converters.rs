@@ -38,6 +38,7 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         ContextValue::Uint32(number) => user_data.put_any::<u32>(key, number.clone()),
         ContextValue::TracesSubArrays(_) => todo!(),
         ContextValue::TraceIndexSubArrays(_) => todo!(),
+        ContextValue::Bool(bool) => user_data.put_any::<bool>(key, bool.clone()),
     }
 }
 

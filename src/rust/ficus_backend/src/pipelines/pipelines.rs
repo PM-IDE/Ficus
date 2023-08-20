@@ -176,7 +176,7 @@ impl PipelineParts {
     }
 
     fn get_context_value<'a, T>(
-        context: &'a PipelineContext,
+        context: &'a impl UserData,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a T, PipelinePartExecutionError> {
         match context.get_concrete(key.key()) {
@@ -270,16 +270,17 @@ impl PipelineParts {
     }
 
     fn discover_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivities", &|context, keys, _| {
+        Self::create_pipeline_part("DiscoverActivities", &|context, keys, config| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let patterns = Self::get_context_value(context, &keys.patterns())?;
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let repeat_sets = build_repeat_sets(&hashes, patterns);
 
-            let activity_level = Self::get_context_value(context, &keys.activity_level())?;
-            let tree = build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level, |sub_array| {
-                create_activity_name(log, sub_array)
-            });
+            let activity_level = Self::get_context_value(config, &keys.activity_level())?;
+            let tree =
+                build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level as usize, |sub_array| {
+                    create_activity_name(log, sub_array)
+                });
 
             context.put_concrete(&keys.activities().key(), tree);
             Ok(())
@@ -287,10 +288,10 @@ impl PipelineParts {
     }
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, keys, _| {
+        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, keys, config| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let mut tree = Self::get_context_value_mut(context, &keys.activities())?;
-            let narrow = Self::get_context_value(context, &keys.narrow_activities())?;
+            let narrow = Self::get_context_value(config, &keys.narrow_activities())?;
 
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
