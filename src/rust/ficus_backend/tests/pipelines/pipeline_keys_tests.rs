@@ -47,9 +47,12 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<RepeatSets>(ContextKeys::REPEAT_SETS).is_some());
         assert!(keys.find_concrete_key::<TracesActivities>(ContextKeys::TRACE_ACTIVITIES).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::PATH).is_some());
+
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
         assert!(keys.find_concrete_key::<bool>(ContextKeys::NARROW_ACTIVITIES).is_some());
+        assert!(keys.find_concrete_key::<String>(ContextKeys::EVENT_NAME).is_some());
+        assert!(keys.find_concrete_key::<String>(ContextKeys::REGEX).is_some());
     })
 }
 
@@ -71,6 +74,8 @@ fn test_event_log_all_keys() {
         assert!(keys.find_key(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_key(ContextKeys::ACTIVITY_LEVEL).is_some());
         assert!(keys.find_key(ContextKeys::NARROW_ACTIVITIES).is_some());
+        assert!(keys.find_key(ContextKeys::EVENT_NAME).is_some());
+        assert!(keys.find_key(ContextKeys::REGEX).is_some());
     })
 }
 
@@ -92,5 +97,7 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::TANDEM_ARRAY_LENGTH).unwrap().key().id() == keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::ACTIVITY_LEVEL).unwrap().key().id() == keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::NARROW_ACTIVITIES).unwrap().key().id() == keys.find_concrete_key::<bool>(ContextKeys::NARROW_ACTIVITIES).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::EVENT_NAME).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::EVENT_NAME).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::REGEX).unwrap().key().id());
     })
 }

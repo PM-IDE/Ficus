@@ -229,6 +229,7 @@ dependencies = [
  "prost",
  "prost-types",
  "quick-xml",
+ "regex",
  "tokio",
  "tonic",
  "tonic-build",

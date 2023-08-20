@@ -1,5 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use regex::Regex;
+
 use crate::{
     event_log::{
         core::{event::event_hasher::NameEventHasher, event_log::EventLog},
@@ -8,7 +10,7 @@ use crate::{
             xes_event::XesEventImpl,
         },
     },
-    features::analysis::patterns::{
+    features::{analysis::patterns::{
         activity_instances::{
             create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
             UndefActivityHandlingStrategy,
@@ -17,7 +19,7 @@ use crate::{
         repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
-    },
+    }, mutations::filtering::{filter_log_by_name, filter_log_by_regex}},
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::user_data::{
         keys::Key,
@@ -131,6 +133,8 @@ impl PipelineParts {
             Self::discover_activities(),
             Self::discover_activities_instances(),
             Self::create_log_from_activities(),
+            Self::filter_log_by_event_name(),
+            Self::filter_log_by_regex()
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -319,6 +323,33 @@ impl PipelineParts {
             context.put_concrete(keys.event_log().key(), log);
 
             Ok(())
+        })
+    }
+
+    fn filter_log_by_event_name() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part("FilterEventsByName", &|context, keys, config| {
+            let log = Self::get_context_value_mut(context, &keys.event_log())?;
+            let event_name = Self::get_context_value(config, &keys.event_name())?;
+            filter_log_by_name(log, &event_name);
+
+            Ok(())
+        })
+    }
+
+    fn filter_log_by_regex() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part("FilterEventsByRegex", &|context, keys, config| {
+            let log = Self::get_context_value_mut(context, &keys.event_log())?;
+            let regex = Self::get_context_value(config, &keys.regex())?;
+            match Regex::new(&regex) {
+                Ok(regex) => {
+                    filter_log_by_regex(log, &regex);
+                    Ok(())
+                },
+                Err(_) => {
+                    let error = format!("Failed to parse regex {}", regex);
+                    Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(error)))
+                }
+            }
         })
     }
 }

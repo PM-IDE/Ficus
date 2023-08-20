@@ -24,6 +24,8 @@ impl ContextKeys {
     pub const TANDEM_ARRAY_LENGTH: &str = "tandem_array_length";
     pub const ACTIVITY_LEVEL: &str = "activity_level";
     pub const NARROW_ACTIVITIES: &str = "narrow_activities";
+    pub const EVENT_NAME: &str = "event_name";
+    pub const REGEX: &str = "regex";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -44,6 +46,8 @@ impl ContextKeys {
         Self::insert_tandem_arrays_length(&mut concrete_keys, &mut context_keys);
         Self::insert_activity_level(&mut concrete_keys, &mut context_keys);
         Self::insert_narrow_activities(&mut concrete_keys, &mut context_keys);
+        Self::insert_event_name(&mut concrete_keys, &mut context_keys);
+        Self::insert_regex(&mut concrete_keys, &mut context_keys);
 
         Self::insert_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_activities(&mut concrete_keys, &mut context_keys);
@@ -108,6 +112,20 @@ impl ContextKeys {
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
         Self::insert_key::<bool>(concrete_keys, context_keys, Self::NARROW_ACTIVITIES);
+    }
+
+    fn insert_event_name(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        Self::insert_key::<String>(concrete_keys, context_keys, Self::EVENT_NAME);
+    }
+
+    fn insert_regex(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        Self::insert_key::<String>(concrete_keys, context_keys, Self::REGEX);
     }
 
     fn insert_event_log(

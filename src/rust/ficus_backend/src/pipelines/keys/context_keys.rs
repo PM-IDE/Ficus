@@ -150,4 +150,20 @@ impl ContextKeys {
     pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {
         return self.narrow_activities().key().id() == key.key().id();
     }
+
+    pub fn event_name(&self) -> &DefaultContextKey<String> {
+        self.find_concrete_key::<String>(Self::EVENT_NAME).unwrap()
+    }
+
+    pub fn is_event_name(&self, key: &dyn ContextKey) -> bool {
+        return self.event_name().key().id() == key.key().id();
+    }
+
+    pub fn regex(&self) -> &DefaultContextKey<String> {
+        self.find_concrete_key::<String>(Self::REGEX).unwrap()
+    }
+
+    pub fn is_regex(&self, key: &dyn ContextKey) -> bool {
+        return self.regex().key().id() == key.key().id();
+    }
 }
