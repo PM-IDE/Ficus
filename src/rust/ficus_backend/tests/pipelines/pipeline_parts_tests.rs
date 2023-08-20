@@ -14,6 +14,7 @@ fn test_pipeline_parts() {
         "FindNearSuperMaximalRepeats",
         "DiscoverActivities",
         "DiscoverActivitiesInstances",
+        "CreateLogFromActivities"
     ];
 
     for name in names {

@@ -1,12 +1,18 @@
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::{
         core::{event::event_hasher::NameEventHasher, event_log::EventLog},
-        xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
+        xes::{
+            reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log,
+            xes_event::XesEventImpl,
+        },
     },
     features::analysis::patterns::{
-        activity_instances::{create_activity_name, extract_activities_instances},
+        activity_instances::{
+            create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
+            UndefActivityHandlingStrategy,
+        },
         contexts::PatternsDiscoveryStrategy,
         repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
@@ -124,6 +130,7 @@ impl PipelineParts {
             Self::find_near_super_maximal_repeats(),
             Self::discover_activities(),
             Self::discover_activities_instances(),
+            Self::create_log_from_activities(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -289,6 +296,27 @@ impl PipelineParts {
             let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
 
             context.put_concrete(&keys.trace_activities().key(), instances);
+            Ok(())
+        })
+    }
+
+    fn create_log_from_activities() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part("CreateLogFromActivities", &|context, keys, config| {
+            let log = Self::get_context_value(context, &keys.event_log())?;
+            let instances = Self::get_context_value(context, &keys.trace_activities())?;
+            let log = create_new_log_from_activities_instances(
+                log,
+                instances,
+                &UndefActivityHandlingStrategy::InsertAllEvents,
+                &|info| {
+                    Rc::new(RefCell::new(XesEventImpl::new_min_date(
+                        info.node.borrow().name.clone(),
+                    )))
+                },
+            );
+
+            context.put_concrete(keys.event_log().key(), log);
+
             Ok(())
         })
     }

@@ -85,18 +85,16 @@ fn test_activity_instances1() {
 fn test_creating_new_log_from_activity_instances_insert_all_events() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
-        UndefActivityHandlingStrategy::<SimpleEvent, &dyn Fn() -> Rc<RefCell<SimpleEvent>>>::InsertAllEvents,
+        UndefActivityHandlingStrategy::<SimpleEvent>::InsertAllEvents,
         &vec![vec!["g", "d", "abc", "f", "i", "abc"]],
     );
 }
 
-fn execute_activities_discovery_test<TUndefEventFactory>(
+fn execute_activities_discovery_test(
     log: SimpleEventLog,
-    strategy: UndefActivityHandlingStrategy<SimpleEvent, TUndefEventFactory>,
+    strategy: UndefActivityHandlingStrategy<SimpleEvent>,
     expected: &Vec<Vec<&str>>,
-) where
-    TUndefEventFactory: Fn() -> Rc<RefCell<SimpleEvent>>,
-{
+) {
     let log = Rc::new(RefCell::new(log));
 
     let patterns_context = PatternsDiscoveryContext::new(
@@ -116,16 +114,16 @@ fn execute_activities_discovery_test<TUndefEventFactory>(
 
     let new_log = discover_activities_and_create_new_log(&context);
 
-    assert_eq!(new_log.borrow().to_raw_vector(), *expected);
+    assert_eq!(new_log.to_raw_vector(), *expected);
 }
 
 #[test]
 fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
-        UndefActivityHandlingStrategy::InsertAsSingleEvent(|| {
+        UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
             Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))
-        }),
+        })),
         &vec![vec![UNDEF_ACTIVITY_NAME, "abc", UNDEF_ACTIVITY_NAME, "abc"]],
     );
 }
@@ -134,7 +132,7 @@ fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
 fn test_creating_new_log_from_activity_instances_dont_insert() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
-        UndefActivityHandlingStrategy::<SimpleEvent, &dyn Fn() -> Rc<RefCell<SimpleEvent>>>::DontInsert,
+        UndefActivityHandlingStrategy::<SimpleEvent>::DontInsert,
         &vec![vec!["abc", "abc"]],
     );
 }

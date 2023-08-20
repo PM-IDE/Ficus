@@ -92,31 +92,29 @@ where
     }
 }
 
-pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
+pub struct ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
     TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
-    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     pub activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-    pub undef_events_handling_strategy: UndefActivityHandlingStrategy<TLog::TEvent, TUndefEvtFactory>,
+    pub undef_events_handling_strategy: UndefActivityHandlingStrategy<TLog::TEvent>,
     pub high_level_event_factory: TEvtFactory,
 }
 
-impl<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
-    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>
+impl<TClassExtractor, TLog, TNameCreator, TEvtFactory>
+    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
     TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
-    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     pub fn new(
         activities_context: ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>,
-        strategy: UndefActivityHandlingStrategy<TLog::TEvent, TUndefEvtFactory>,
+        strategy: UndefActivityHandlingStrategy<TLog::TEvent>,
         high_level_event_factory: TEvtFactory,
     ) -> Self {
         Self {

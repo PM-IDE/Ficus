@@ -83,21 +83,20 @@ where
     )
 }
 
-pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>(
-    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory, TUndefEvtFactory>,
-) -> Rc<RefCell<TLog>>
+pub fn discover_activities_and_create_new_log<TClassExtractor, TLog, TNameCreator, TEvtFactory>(
+    context: &ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory>,
+) -> TLog
 where
     TLog: EventLog,
     TLog::TEvent: 'static,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
     TNameCreator: Fn(&SubArrayWithTraceIndex) -> String,
     TEvtFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
-    TUndefEvtFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
     let activity_instances = discover_activities_instances(&context.activities_context);
 
     create_new_log_from_activities_instances(
-        &context.activities_context.patterns_context.log,
+        &context.activities_context.patterns_context.log.borrow(),
         &activity_instances,
         &context.undef_events_handling_strategy,
         &context.high_level_event_factory,

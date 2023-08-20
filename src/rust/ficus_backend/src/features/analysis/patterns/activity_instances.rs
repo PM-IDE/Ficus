@@ -229,12 +229,9 @@ pub fn process_activities_in_trace<TUndefActivityHandleFunc, TActivityHandleFunc
     }
 }
 
-pub enum UndefActivityHandlingStrategy<TEvent, TUndefEventFactory>
-where
-    TUndefEventFactory: Fn() -> Rc<RefCell<TEvent>>,
-{
+pub enum UndefActivityHandlingStrategy<TEvent> {
     DontInsert,
-    InsertAsSingleEvent(TUndefEventFactory),
+    InsertAsSingleEvent(Box<dyn Fn() -> Rc<RefCell<TEvent>>>),
     InsertAllEvents,
 }
 
@@ -247,22 +244,20 @@ where
     DefaultKey::new("UNDERLYING_EVENTS".to_string())
 }
 
-pub fn create_new_log_from_activities_instances<TLog, TEventFactory, TUndefActivityFactory>(
-    log: &Rc<RefCell<TLog>>,
+pub fn create_new_log_from_activities_instances<TLog, TEventFactory>(
+    log: &TLog,
     instances: &Vec<Vec<ActivityInTraceInfo>>,
-    strategy: &UndefActivityHandlingStrategy<TLog::TEvent, TUndefActivityFactory>,
+    strategy: &UndefActivityHandlingStrategy<TLog::TEvent>,
     event_from_activity_factory: &TEventFactory,
-) -> Rc<RefCell<TLog>>
+) -> TLog
 where
     TLog: EventLog,
     TLog::TEvent: 'static,
     TEventFactory: Fn(&ActivityInTraceInfo) -> Rc<RefCell<TLog::TEvent>>,
-    TUndefActivityFactory: Fn() -> Rc<RefCell<TLog::TEvent>>,
 {
-    let new_log_ptr = Rc::new(RefCell::new(TLog::empty()));
-    let new_log = &mut new_log_ptr.borrow_mut();
+    let mut new_log = TLog::empty();
 
-    for (instances, trace) in instances.iter().zip(log.borrow().get_traces()) {
+    for (instances, trace) in instances.iter().zip(log.get_traces()) {
         let trace = trace.borrow();
         let new_trace_ptr = Rc::new(RefCell::new(TLog::TTrace::empty()));
 
@@ -299,7 +294,7 @@ where
         new_log.push(new_trace_ptr)
     }
 
-    Rc::clone(&new_log_ptr)
+    new_log
 }
 
 pub fn add_unattached_activities<TLog, TClassExtractor>(
