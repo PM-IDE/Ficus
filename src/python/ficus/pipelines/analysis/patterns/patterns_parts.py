@@ -438,7 +438,7 @@ class SaveAllActivitiesNames(InternalPipelinePart):
                         continue
 
                     visited.add(current_activity.name)
-                    fout.write(f'{current_activity.name}\n\n')
+                    fout.write(f'{current_activity.name}\n')
 
                     for child in current_activity.child_nodes:
                         q.append(child)
@@ -452,4 +452,23 @@ class SaveAllActivitiesNames(InternalPipelinePart):
 class PrintNumberOfUnderlyingEvents(InternalPipelinePart):
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
         print(f'Underlying events count: {calculate_underlying_events_count(log(current_input))}')
+        return current_input
+
+
+class SaveAllActivitiesInstancesNames(InternalPipelinePart):
+    def __init__(self, save_path: str):
+        self.save_path = save_path
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        with open(self.save_path, 'w') as fout:
+            visited = set()
+            for trace in traces_activities(current_input):
+                for activity in trace:
+                    node = activity.node
+                    if node in visited:
+                        continue
+
+                    fout.write(f'{node.name}\n')
+                    visited.add(node)
+
         return current_input
