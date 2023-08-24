@@ -456,11 +456,13 @@ class PrintNumberOfUnderlyingEvents(InternalPipelinePart):
 
 
 class SaveAllActivitiesInstancesNames(InternalPipelinePart):
-    def __init__(self, save_path: str):
+    def __init__(self, save_path: Union[str, Callable[[], str]]):
         self.save_path = save_path
 
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
-        with open(self.save_path, 'w') as fout:
+        path = self.save_path if type(self.save_path) == str else self.save_path()
+
+        with open(path, 'w') as fout:
             visited = set()
             for trace in traces_activities(current_input):
                 for activity in trace:
@@ -468,7 +470,7 @@ class SaveAllActivitiesInstancesNames(InternalPipelinePart):
                     if node in visited:
                         continue
 
-                    fout.write(f'{node.name}\n')
+                    fout.write(f'{hash(node)}={node.name}\n')
                     visited.add(node)
 
         return current_input

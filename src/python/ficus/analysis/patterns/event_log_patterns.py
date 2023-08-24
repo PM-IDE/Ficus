@@ -105,6 +105,7 @@ def _do_find_maximal_repeats(hash_traces: list[list[int]]) -> list[list[MaximalR
         tree = Tree({'Trace': trace})
         repeats = tree.maximal_repeats()
         infos = [MaximalRepeatInfo(first_pos=r[1].start, length=r[1].end - r[1].start) for r in repeats]
+        infos = list(filter(lambda info: info.length > 1, infos))
         repeats_by_traces.append(infos)
 
     return repeats_by_traces

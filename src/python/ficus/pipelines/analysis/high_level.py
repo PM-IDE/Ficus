@@ -201,7 +201,13 @@ class DiscoverActivitiesInstancesFromRepeatsUntilNoMore(InternalPipelinePart):
                  discovery_strategy=ActivitiesDiscoveryStrategy.DiscoverFromAllTraces,
                  min_events_in_trace: int = 1,
                  activity_in_trace_filter: ActivityInTraceFilter = default_activity_in_trace_filter,
-                 should_narrow_activity: bool = True):
+                 should_narrow_activity: bool = True,
+                 initial_activity_level: int = 0,
+                 increase_activity_level: bool = False,
+                 before_log_creation_pipeline: Pipeline = None):
+        self.before_log_creation_pipeline = before_log_creation_pipeline
+        self.initial_activity_level = initial_activity_level
+        self.increase_activity_level = increase_activity_level
         self.should_narrow_activity = should_narrow_activity
         self.activity_in_trace_filter = activity_in_trace_filter
         self.min_events_in_trace = min_events_in_trace
@@ -211,16 +217,27 @@ class DiscoverActivitiesInstancesFromRepeatsUntilNoMore(InternalPipelinePart):
 
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
         log_size = calculate_events_count(log(current_input))
+        activity_level = self.initial_activity_level
+
         while True:
-            current_input = Pipeline(
+            current_input =  Pipeline(
                 ClearActivities(),
                 DiscoverActivitiesInstancesFromRepeats(RepeatActivitiesSource.MaximalRepeats,
-                                                       activity_level=0,
+                                                       activity_level=activity_level,
                                                        class_extractor=self.class_extractor,
                                                        activities_discovery_strategy=self.discovery_strategy,
-                                                       should_narrow_activity=self.should_narrow_activity),
+                                                       should_narrow_activity=self.should_narrow_activity)
+            )(current_input)
+
+            if self.before_log_creation_pipeline is not None:
+                self.before_log_creation_pipeline(current_input)
+
+            current_input = Pipeline(
                 CreateLogFromActivities(use_hashes_as_names=self.use_hashes_as_event_names)
             )(current_input)
+
+            if self.increase_activity_level:
+                activity_level += 1
 
             new_log_size = calculate_events_count(log(current_input))
 
