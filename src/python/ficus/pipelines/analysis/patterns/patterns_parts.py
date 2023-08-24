@@ -470,7 +470,7 @@ class SaveAllActivitiesInstancesNames(InternalPipelinePart):
                     if node in visited:
                         continue
 
-                    fout.write(f'{hash(node)}={node.name}\n')
+                    fout.write(f'{node.unique_name()}={node.name}\n')
                     visited.add(node)
 
         return current_input

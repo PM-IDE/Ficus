@@ -220,14 +220,19 @@ class DiscoverActivitiesInstancesFromRepeatsUntilNoMore(InternalPipelinePart):
         activity_level = self.initial_activity_level
 
         while True:
+            prev_input = current_input
             current_input =  Pipeline(
                 ClearActivities(),
                 DiscoverActivitiesInstancesFromRepeats(RepeatActivitiesSource.MaximalRepeats,
                                                        activity_level=activity_level,
                                                        class_extractor=self.class_extractor,
+                                                       activity_in_trace_filter=self.activity_in_trace_filter,
                                                        activities_discovery_strategy=self.discovery_strategy,
                                                        should_narrow_activity=self.should_narrow_activity)
             )(current_input)
+
+            if sum(map(len, traces_activities(current_input))) == 0:
+                return prev_input
 
             if self.before_log_creation_pipeline is not None:
                 self.before_log_creation_pipeline(current_input)

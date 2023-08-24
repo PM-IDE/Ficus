@@ -21,6 +21,8 @@ class SubArrayWithTraceIndex(SubArrayInEventLog):
     trace_index: int
 
 
+unique_activity_node_index = 0
+
 class ActivityNode(GraphNode):
     def __init__(self,
                  name: str,
@@ -36,6 +38,10 @@ class ActivityNode(GraphNode):
         self.set_of_events: set[int] = set_of_events
         self.length = len(self.set_of_events)
 
+        global unique_activity_node_index
+        self._unique_index = unique_activity_node_index
+        unique_activity_node_index += 1
+
     def contains_other(self, other: 'ActivityNode') -> bool:
         return self.set_of_events.issuperset(other.set_of_events)
 
@@ -44,6 +50,9 @@ class ActivityNode(GraphNode):
 
     def _serialize(self):
         return str(sorted(list(self.set_of_events)))
+
+    def unique_name(self):
+        return f'Activity_{self._unique_index}'
 
 
 @dataclass
