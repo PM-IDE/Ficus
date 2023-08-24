@@ -1,3 +1,5 @@
+from ....pipelines.serialization.pipeline_parts import SavePathCreator
+
 from .type_aliases import GraphAttributesSetter
 from ...common import InternalDrawingPipelinePart
 from ....analysis.event_log_info import calculate_events_count
@@ -181,7 +183,7 @@ class DrawActivitiesDiagram(InternalDrawingPipelinePart):
                  plot_legend: bool = False,
                  height_scale: int = 1,
                  width_scale: int = 1,
-                 save_path: str = None):
+                 save_path: Optional[Union[str, SavePathCreator]] = None):
         super().__init__(title, plot_legend, height_scale, width_scale, save_path)
         self.short_diagram = short_diagram
 
@@ -192,7 +194,7 @@ class DrawActivitiesDiagram(InternalDrawingPipelinePart):
                   cached_colors(current_input),
                   title=self.title,
                   plot_legend=self.plot_legend,
-                  save_path=self.save_path,
+                  save_path=self._get_save_path(current_input),
                   height_scale=self.height_scale,
                   width_scale=self.width_scale)
 
@@ -205,7 +207,7 @@ class DrawShortActivitiesDiagram(DrawActivitiesDiagram):
                  plot_legend: bool = False,
                  height_scale: int = 1,
                  width_scale: int = 1,
-                 save_path: str = None):
+                 save_path: Optional[Union[str, SavePathCreator]] = None):
         super().__init__(True,
                          title=title,
                          plot_legend=plot_legend,
@@ -220,7 +222,7 @@ class DrawFullActivitiesDiagram(DrawActivitiesDiagram):
                  plot_legend: bool = False,
                  height_scale: int = 1,
                  width_scale: int = 1,
-                 save_path: str = None):
+                 save_path: Optional[Union[str, SavePathCreator]] = None):
         super().__init__(False,
                          title=title,
                          plot_legend=plot_legend,
@@ -311,7 +313,7 @@ class DrawSingleActivityPlacement(InternalDrawingPipelinePart):
                  plot_legend: bool = False,
                  height_scale: int = 1,
                  width_scale: int = 1,
-                 save_path: str = None):
+                 save_path: Union[str, SavePathCreator] = None):
         super().__init__(title, plot_legend, height_scale, width_scale, save_path)
         self.activity_selector = activity_selector
         self.use_different_colors = use_different_colors
@@ -324,7 +326,7 @@ class DrawSingleActivityPlacement(InternalDrawingPipelinePart):
                                         plot_legend=self.plot_legend,
                                         height_scale=self.height_scale,
                                         title=self.title,
-                                        save_path=self.save_path)
+                                        save_path=self._get_save_path(current_input))
 
         return current_input
 

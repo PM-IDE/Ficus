@@ -100,7 +100,7 @@ class DrawPlacementOfEvents(InternalDrawingPipelinePart):
                                   cached_colors(current_input),
                                   self.predicate,
                                   title=self.title,
-                                  save_path=self.save_path,
+                                  save_path=self._get_save_path(current_input),
                                   height_scale=self.height_scale,
                                   plot_legend=self.plot_legend)
 

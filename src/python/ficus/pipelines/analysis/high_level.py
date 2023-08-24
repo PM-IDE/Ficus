@@ -204,7 +204,9 @@ class DiscoverActivitiesInstancesFromRepeatsUntilNoMore(InternalPipelinePart):
                  should_narrow_activity: bool = True,
                  initial_activity_level: int = 0,
                  increase_activity_level: bool = False,
-                 before_log_creation_pipeline: Pipeline = None):
+                 before_log_creation_pipeline: Pipeline = None,
+                 after_log_creation_pipeline: Pipeline = None):
+        self.after_log_creation_pipeline = after_log_creation_pipeline
         self.before_log_creation_pipeline = before_log_creation_pipeline
         self.initial_activity_level = initial_activity_level
         self.increase_activity_level = increase_activity_level
@@ -240,6 +242,9 @@ class DiscoverActivitiesInstancesFromRepeatsUntilNoMore(InternalPipelinePart):
             current_input = Pipeline(
                 CreateLogFromActivities(use_hashes_as_names=self.use_hashes_as_event_names)
             )(current_input)
+
+            if self.after_log_creation_pipeline is not None:
+                self.after_log_creation_pipeline(current_input)
 
             if self.increase_activity_level:
                 activity_level += 1
