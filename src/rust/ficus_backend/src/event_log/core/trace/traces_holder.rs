@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
 use crate::event_log::core::event::event_hasher::EventHasher;
 
@@ -69,5 +69,20 @@ where
         }
 
         hashes
+    }
+
+    pub fn filter_traces(&mut self, predicate: &impl Fn(&TTrace, &usize) -> bool) {
+        let mut to_remove = HashSet::new();
+        for index in 0..self.traces.len() {
+            if predicate(&self.traces.get(index).unwrap().borrow(), &index) {
+                to_remove.insert(index);
+            }
+        }
+
+        for index in (0..self.traces.len()).rev() {
+            if to_remove.contains(&index) {
+                self.traces.remove(index);
+            }
+        }
     }
 }

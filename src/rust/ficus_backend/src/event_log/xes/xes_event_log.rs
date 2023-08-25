@@ -147,6 +147,10 @@ impl EventLog for XesEventLogImpl {
     {
         self.traces_holder.to_hashes_vectors::<THasher>()
     }
+
+    fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
+        self.traces_holder.filter_traces(predicate);
+    }
 }
 
 pub struct XesTraceImpl {

@@ -1,4 +1,8 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use regex::Regex;
 
@@ -10,16 +14,22 @@ use crate::{
             xes_event::XesEventImpl,
         },
     },
-    features::{analysis::patterns::{
-        activity_instances::{
-            create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-            UndefActivityHandlingStrategy,
+    features::{
+        analysis::patterns::{
+            activity_instances::{
+                create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
+                UndefActivityHandlingStrategy,
+            },
+            contexts::PatternsDiscoveryStrategy,
+            repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
+            repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
+            tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
         },
-        contexts::PatternsDiscoveryStrategy,
-        repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
-        repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
-        tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
-    }, mutations::filtering::{filter_log_by_name, filter_log_by_regex}},
+        mutations::{
+            filtering::{filter_log_by_name, filter_log_by_regex},
+            split::{get_traces_groups_indices, split_by_traces},
+        },
+    },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::user_data::{
         keys::Key,
@@ -134,7 +144,7 @@ impl PipelineParts {
             Self::discover_activities_instances(),
             Self::create_log_from_activities(),
             Self::filter_log_by_event_name(),
-            Self::filter_log_by_regex()
+            Self::filter_log_by_regex(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -344,12 +354,27 @@ impl PipelineParts {
                 Ok(regex) => {
                     filter_log_by_regex(log, &regex);
                     Ok(())
-                },
+                }
                 Err(_) => {
                     let error = format!("Failed to parse regex {}", regex);
                     Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(error)))
                 }
             }
+        })
+    }
+
+    fn filter_log_by_variants() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part("FilterLogByVariants", &|context, keys, _| {
+            let log = Self::get_context_value(context, &keys.event_log())?;
+            let groups_indices: HashSet<usize> = get_traces_groups_indices(log)
+                .into_iter()
+                .map(|group| *(group.first().unwrap()))
+                .collect();
+
+            let log = Self::get_context_value_mut(context, &keys.event_log())?;
+            log.filter_traces(&|_, index| groups_indices.contains(&index));
+
+            Ok(())
         })
     }
 }

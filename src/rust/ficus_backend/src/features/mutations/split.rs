@@ -5,7 +5,11 @@ use std::{
     rc::Rc,
 };
 
-use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
+use crate::event_log::core::{
+    event::{self, event::Event},
+    event_log::EventLog,
+    trace::trace::Trace,
+};
 
 struct TracePointer<TTrace> {
     pub trace: Rc<RefCell<TTrace>>,
@@ -27,7 +31,27 @@ impl<TTrace> Clone for TracePointer<TTrace> {
     }
 }
 
+pub fn get_traces_groups_indices<TLog>(log: &TLog) -> Vec<Vec<usize>>
+where
+    TLog: EventLog,
+{
+    create_trace_pointers_groups(log)
+        .into_iter()
+        .map(|group| group.into_iter().map(|ptr| ptr.index).collect())
+        .collect()
+}
+
 pub fn split_by_traces<TLog>(log: &TLog) -> Vec<Vec<Rc<RefCell<TLog::TTrace>>>>
+where
+    TLog: EventLog,
+{
+    create_trace_pointers_groups(log)
+        .into_iter()
+        .map(|group| group.into_iter().map(|ptr| ptr.trace).collect())
+        .collect()
+}
+
+fn create_trace_pointers_groups<TLog>(log: &TLog) -> Vec<Vec<TracePointer<TLog::TTrace>>>
 where
     TLog: EventLog,
 {
@@ -38,7 +62,8 @@ where
         process_traces_group(traces, &mut result);
     }
 
-    sort_resulting_variants(result)
+    result.sort_by(|first, second| first[0].index.cmp(&second[0].index));
+    result
 }
 
 fn create_len_to_traces_map<TLog>(log: &TLog) -> HashMap<usize, Vec<TracePointer<TLog::TTrace>>>
@@ -139,12 +164,4 @@ where
     }
 
     (new_groups, all_groups_have_one_trace)
-}
-
-fn sort_resulting_variants<TTrace>(mut result: Vec<Vec<TracePointer<TTrace>>>) -> Vec<Vec<Rc<RefCell<TTrace>>>> {
-    result.sort_by(|first, second| first[0].index.cmp(&second[0].index));
-    result
-        .into_iter()
-        .map(|group| group.into_iter().map(|ptr| ptr.trace).collect())
-        .collect()
 }

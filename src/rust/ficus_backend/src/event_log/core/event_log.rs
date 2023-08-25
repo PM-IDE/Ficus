@@ -27,4 +27,6 @@ pub trait EventLog {
     fn mutate_events<TMutator>(&mut self, mutator: TMutator)
     where
         TMutator: Fn(&mut Self::TEvent);
+
+    fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool);
 }
