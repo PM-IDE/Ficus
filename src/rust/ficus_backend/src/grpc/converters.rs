@@ -1,8 +1,18 @@
-use std::{any::Any, sync::Arc, ops::Add, rc::Rc, cell::{RefCell, Ref}};
+use std::{
+    any::Any,
+    cell::{Ref, RefCell},
+    ops::Add,
+    rc::Rc,
+    sync::Arc,
+};
 
-use chrono::{DateTime, Utc, Duration};
+use chrono::{DateTime, Duration, Utc};
 
 use crate::{
+    event_log::{
+        core::{event_log::EventLog, trace::trace::Trace},
+        xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+    },
     features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue,
@@ -14,7 +24,7 @@ use crate::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
-    utils::user_data::{keys::Key, user_data::UserData}, event_log::{xes::{xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl, xes_event::XesEventImpl}, core::{event_log::EventLog, trace::trace::Trace}},
+    utils::user_data::{keys::Key, user_data::UserData},
 };
 
 pub(super) fn create_initial_context(

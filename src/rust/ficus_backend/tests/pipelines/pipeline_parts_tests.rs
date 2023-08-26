@@ -17,7 +17,7 @@ fn test_pipeline_parts() {
         "CreateLogFromActivities",
         "FilterEventsByName",
         "FilterEventsByRegex",
-        "FilterLogByVariants"
+        "FilterLogByVariants",
     ];
 
     for name in names {

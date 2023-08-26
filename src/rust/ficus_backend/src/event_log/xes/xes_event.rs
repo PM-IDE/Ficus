@@ -14,7 +14,7 @@ use crate::{
 pub struct XesEventImpl {
     event_base: EventBase,
     lifecycle: Option<Lifecycle>,
-    payload: HashMap<String, EventPayloadValue>,
+    payload: Option<HashMap<String, EventPayloadValue>>,
 }
 
 impl XesEventImpl {
@@ -27,7 +27,7 @@ impl XesEventImpl {
         Self {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
-            payload,
+            payload: Some(payload),
         }
     }
 
@@ -35,12 +35,16 @@ impl XesEventImpl {
         Self {
             event_base: EventBase::new(name, DateTime::<Utc>::MIN_UTC),
             lifecycle: None,
-            payload: HashMap::new(),
+            payload: None,
         }
     }
 
     pub fn new_with_date(name: String, stamp: DateTime<Utc>) -> Self {
-        Self { event_base: EventBase::new(name, stamp), lifecycle: None, payload: HashMap::new() }
+        Self {
+            event_base: EventBase::new(name, stamp),
+            lifecycle: None,
+            payload: None,
+        }
     }
 }
 
@@ -60,19 +64,22 @@ impl Event for XesEventImpl {
         }
     }
 
-    fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue> {
-        &self.payload
+    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
+        self.payload.as_ref()
     }
 
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
         let mut payload = Vec::new();
-        for (key, value) in self.get_payload_map() {
-            payload.push((key, value));
+        if let Some(payload_map) = self.get_payload_map() {
+            for (key, value) in payload_map {
+                payload.push((key, value));
+            }
+
+            vec_utils::sort_by_first(&mut payload);
+            payload
+        } else {
+            payload
         }
-
-        vec_utils::sort_by_first(&mut payload);
-
-        payload
     }
 
     fn set_name(&mut self, new_name: &String) {
@@ -88,7 +95,11 @@ impl Event for XesEventImpl {
     }
 
     fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue) {
-        *self.payload.get_mut(&key).unwrap() = value;
+        if self.payload.is_none() {
+            self.payload = Some(HashMap::new());
+        }
+
+        *self.payload.as_mut().unwrap().get_mut(&key).unwrap() = value;
     }
 
     fn get_user_data(&mut self) -> &mut UserDataImpl {

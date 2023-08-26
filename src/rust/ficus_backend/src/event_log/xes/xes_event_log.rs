@@ -1,15 +1,12 @@
 use super::{
     reader::file_xes_log_reader::XesEventLogItem,
     shared::{XesClassifier, XesEventLogExtension},
-    xes_event::XesEventImpl, xes_trace::XesTraceImpl,
+    xes_event::XesEventImpl,
+    xes_trace::XesTraceImpl,
 };
 
 use crate::event_log::core::{
-    event::{
-        event::EventPayloadValue,
-        event_hasher::EventHasher,
-        events_holder::EventSequenceInfo,
-    },
+    event::{event::EventPayloadValue, event_hasher::EventHasher, events_holder::EventSequenceInfo},
     event_log::EventLog,
     trace::traces_holder::TracesHolder,
 };

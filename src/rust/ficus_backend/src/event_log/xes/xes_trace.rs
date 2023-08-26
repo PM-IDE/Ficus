@@ -1,9 +1,11 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
-use crate::event_log::core::{event::events_holder::{EventsHolder, EventSequenceInfo, EventsPositions}, trace::trace::Trace};
+use crate::event_log::core::{
+    event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
+    trace::trace::Trace,
+};
 
 use super::xes_event::XesEventImpl;
-
 
 pub struct XesTraceImpl {
     events_holder: EventsHolder<XesEventImpl>,

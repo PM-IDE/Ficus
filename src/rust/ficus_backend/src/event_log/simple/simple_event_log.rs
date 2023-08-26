@@ -205,7 +205,7 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
-    fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue> {
+    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
         panic!("Not supported")
     }
 

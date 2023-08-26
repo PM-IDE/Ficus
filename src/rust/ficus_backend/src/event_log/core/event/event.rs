@@ -29,7 +29,7 @@ pub trait Event: Clone {
     fn get_name(&self) -> &String;
     fn get_timestamp(&self) -> &DateTime<Utc>;
     fn get_lifecycle(&self) -> Option<Lifecycle>;
-    fn get_payload_map(&self) -> &HashMap<String, EventPayloadValue>;
+    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>>;
     fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
     fn get_user_data(&mut self) -> &mut UserDataImpl;
 

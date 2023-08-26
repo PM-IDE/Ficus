@@ -145,7 +145,7 @@ impl PipelineParts {
             Self::create_log_from_activities(),
             Self::filter_log_by_event_name(),
             Self::filter_log_by_regex(),
-            Self::filter_log_by_variants()
+            Self::filter_log_by_variants(),
         ];
 
         let mut names_to_parts = HashMap::new();
