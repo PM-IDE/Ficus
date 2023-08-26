@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use chrono::{DateTime, Utc};
 
@@ -20,23 +20,27 @@ pub struct XesEventImpl {
 impl XesEventImpl {
     pub fn new(
         name: String,
-        timestamp: chrono::DateTime<Utc>,
+        timestamp: DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
         payload: HashMap<String, EventPayloadValue>,
-    ) -> XesEventImpl {
-        XesEventImpl {
+    ) -> Self {
+        Self {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
             payload,
         }
     }
 
-    pub fn new_min_date(name: String) -> XesEventImpl {
-        XesEventImpl {
+    pub fn new_min_date(name: String) -> Self {
+        Self {
             event_base: EventBase::new(name, DateTime::<Utc>::MIN_UTC),
             lifecycle: None,
             payload: HashMap::new(),
         }
+    }
+
+    pub fn new_with_date(name: String, stamp: DateTime<Utc>) -> Self {
+        Self { event_base: EventBase::new(name, stamp), lifecycle: None, payload: HashMap::new() }
     }
 }
 

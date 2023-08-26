@@ -1,4 +1,6 @@
-use std::{any::Any, sync::Arc};
+use std::{any::Any, sync::Arc, ops::Add, rc::Rc, cell::{RefCell, Ref}};
+
+use chrono::{DateTime, Utc, Duration};
 
 use crate::{
     features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
@@ -12,7 +14,7 @@ use crate::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
-    utils::user_data::{keys::Key, user_data::UserData},
+    utils::user_data::{keys::Key, user_data::UserData}, event_log::{xes::{xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl, xes_event::XesEventImpl}, core::{event_log::EventLog, trace::trace::Trace}},
 };
 
 pub(super) fn create_initial_context(
@@ -34,12 +36,31 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
     match value {
         ContextValue::String(string) => user_data.put_any::<String>(key, string.clone()),
         ContextValue::HashesLog(_) => todo!(),
-        ContextValue::NamesLog(_) => todo!(),
+        ContextValue::NamesLog(grpc_log) => put_names_log_to_context(key, grpc_log, user_data),
         ContextValue::Uint32(number) => user_data.put_any::<u32>(key, number.clone()),
         ContextValue::TracesSubArrays(_) => todo!(),
         ContextValue::TraceIndexSubArrays(_) => todo!(),
         ContextValue::Bool(bool) => user_data.put_any::<bool>(key, bool.clone()),
     }
+}
+
+fn put_names_log_to_context(key: &dyn Key, grpc_log: &GrpcNamesEventLogContextValue, user_data: &mut impl UserData) {
+    let grpc_log = grpc_log.log.as_ref().unwrap();
+    let mut log = XesEventLogImpl::empty();
+    for grpc_trace in &grpc_log.traces {
+        let mut trace = XesTraceImpl::empty();
+        let mut date = DateTime::<Utc>::MIN_UTC;
+
+        for grpc_event in &grpc_trace.events {
+            let event = XesEventImpl::new_with_date(grpc_event.clone(), date.clone());
+            trace.push(Rc::new(RefCell::new(event)));
+            date = date + Duration::seconds(1);
+        }
+
+        log.push(Rc::new(RefCell::new(trace)));
+    }
+
+    user_data.put_any::<XesEventLogImpl>(key, log);
 }
 
 pub(super) fn convert_to_grpc_context_value(

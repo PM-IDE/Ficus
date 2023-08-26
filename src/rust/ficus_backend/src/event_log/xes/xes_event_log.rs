@@ -1,17 +1,17 @@
 use super::{
     reader::file_xes_log_reader::XesEventLogItem,
     shared::{XesClassifier, XesEventLogExtension},
-    xes_event::XesEventImpl,
+    xes_event::XesEventImpl, xes_trace::XesTraceImpl,
 };
 
 use crate::event_log::core::{
     event::{
         event::EventPayloadValue,
         event_hasher::EventHasher,
-        events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
+        events_holder::EventSequenceInfo,
     },
     event_log::EventLog,
-    trace::{trace::Trace, traces_holder::TracesHolder},
+    trace::traces_holder::TracesHolder,
 };
 use crate::utils::vec_utils;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
@@ -150,71 +150,5 @@ impl EventLog for XesEventLogImpl {
 
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
         self.traces_holder.filter_traces(predicate);
-    }
-}
-
-pub struct XesTraceImpl {
-    events_holder: EventsHolder<XesEventImpl>,
-}
-
-impl XesTraceImpl {
-    pub fn new<TTraceReader>(trace_reader: TTraceReader) -> Option<XesTraceImpl>
-    where
-        TTraceReader: Iterator<Item = XesEventImpl>,
-    {
-        let mut events: Vec<Rc<RefCell<XesEventImpl>>> = Vec::new();
-        for event in trace_reader {
-            events.push(Rc::new(RefCell::new(event)));
-        }
-
-        Some(XesTraceImpl {
-            events_holder: EventsHolder::new(events),
-        })
-    }
-}
-
-impl Trace for XesTraceImpl {
-    type TEvent = XesEventImpl;
-    type TTraceInfo = EventSequenceInfo;
-    type TTracePositions = EventsPositions;
-
-    fn empty() -> Self {
-        Self {
-            events_holder: EventsHolder::empty(),
-        }
-    }
-
-    fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
-        &self.events_holder.get_events()
-    }
-
-    fn push(&mut self, event: Rc<RefCell<Self::TEvent>>) {
-        self.events_holder.push(event);
-    }
-
-    fn remove_events_by<TPred>(&mut self, predicate: TPred)
-    where
-        TPred: Fn(&Self::TEvent) -> bool,
-    {
-        self.events_holder.remove_events_by(predicate);
-    }
-
-    fn to_names_vec(&self) -> Vec<String> {
-        self.events_holder.to_names_vec()
-    }
-
-    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
-    where
-        TMutator: Fn(&mut Self::TEvent),
-    {
-        self.events_holder.mutate_events(mutator);
-    }
-
-    fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo {
-        self.events_holder.get_or_create_event_sequence_info()
-    }
-
-    fn get_or_create_events_positions(&mut self) -> &Self::TTracePositions {
-        self.events_holder.get_or_create_events_positions()
     }
 }
