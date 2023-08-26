@@ -17,6 +17,7 @@ message GrpcContextValue {
         GrpcEventLogTraceSubArraysContextValue traces_sub_arrays = 5;
         GrpcSubArraysWithTraceIndexContextValue trace_index_sub_arrays = 6;
         bool bool = 7;
+        GrpcNamesEventLogContextValue xes_event_log = 8;
     }
 }
 

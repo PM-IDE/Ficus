@@ -41,6 +41,7 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         ContextValue::TracesSubArrays(_) => todo!(),
         ContextValue::TraceIndexSubArrays(_) => todo!(),
         ContextValue::Bool(bool) => user_data.put_any::<bool>(key, bool.clone()),
+        ContextValue::XesEventLog(grpc_log) => put_names_log_to_context(key, grpc_log, user_data),
     }
 }
 
