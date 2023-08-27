@@ -33,6 +33,8 @@ setuptools.setup(
               'ficus.pipelines.contexts',
               'ficus.pipelines.start',
               'ficus.mutations',
-              'ficus.filtering'],
+              'ficus.filtering',
+              'ficus.grpc_pipelines',
+              'ficus.grpc_pipelines.models'],
     install_requires=install_reqs,
 )
