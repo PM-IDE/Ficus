@@ -5,10 +5,10 @@ from ficus.grpc_pipelines.models.context_pb2 import *
 from ficus.grpc_pipelines.models.pipelines_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import *
 
+
 class Pipeline2:
     def __init__(self, *parts):
         self.parts = parts
-
 
     def execute(self, initial_context: dict[str, ContextValue]) -> GrpcGuid:
         with grpc.insecure_channel('localhost:8080') as channel:
@@ -20,7 +20,6 @@ class Pipeline2:
 
             return stub.ExecutePipeline(request)
 
-
     @staticmethod
     def _create_grpc_pipeline(parts) -> GrpcPipeline:
         pipeline = GrpcPipeline()
@@ -31,7 +30,6 @@ class Pipeline2:
             pipeline.parts.append(part.to_grpc_part())
 
         return pipeline
-
 
     @staticmethod
     def _create_initial_context(context: dict[str, ContextValue]) -> list[GrpcContextKeyValue]:
@@ -55,7 +53,7 @@ class ReadLogFromXes2(PipelinePart2):
         part = _create_empty_pipeline_part()
         part.name = "ReadLogFromXes"
 
-        return GrpcPipelinePartBase(defaultPart = part)
+        return GrpcPipelinePartBase(defaultPart=part)
 
 
 def _create_empty_pipeline_part():
