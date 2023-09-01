@@ -7,7 +7,7 @@ import "context.proto";
 package ficus;
 
 service GrpcBackendService {
-    rpc ExecutePipeline(GrpcPipelineExecutionRequest) returns (GrpcPipelineExecutionResult);
+    rpc ExecutePipeline(GrpcPipelineExecutionRequest) returns (stream GrpcPipelinePartExecutionResult);
     rpc GetContextValue(GrpcGetContextValueRequest) returns (GrpcGetContextValueResult);
 }
 
@@ -21,7 +21,18 @@ message GrpcPipelineExecutionRequest {
     repeated GrpcContextKeyValue initialContext = 2;
 }
 
-message GrpcPipelineExecutionResult {
+message GrpcPipelinePartExecutionResult {
+    oneof result {
+        GrpcPipelineFinalResult finalResult = 1;
+        GrpcPipelinePartResult pipelinePartResult = 2;
+    }
+}
+
+message GrpcPipelinePartResult {
+    GrpcContextValue contextValue = 1;
+}
+
+message GrpcPipelineFinalResult {
     oneof executionResult {
         GrpcGuid success = 1;
         string error = 2;
