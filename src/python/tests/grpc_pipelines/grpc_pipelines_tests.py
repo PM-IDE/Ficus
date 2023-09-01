@@ -11,5 +11,5 @@ def test_simple_pipeline():
         'path': StringContextValue('asdasdasdasdas')
     })
 
-    assert result.success is None
-    assert result.error is not None
+    assert result.finalResult.error is not None
+    assert result.finalResult.error == 'Failed to read event log from asdasdasdasdas'

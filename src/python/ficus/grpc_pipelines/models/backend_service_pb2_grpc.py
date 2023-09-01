@@ -30,13 +30,13 @@ class GrpcBackendServiceStub(object):
 
         """
 
-        self.ExecutePipeline = channel.unary_unary(
+        self.ExecutePipeline = channel.unary_stream(
 
                 '/ficus.GrpcBackendService/ExecutePipeline',
 
                 request_serializer=backend__service__pb2.GrpcPipelineExecutionRequest.SerializeToString,
 
-                response_deserializer=backend__service__pb2.GrpcPipelineExecutionResult.FromString,
+                response_deserializer=backend__service__pb2.GrpcPipelinePartExecutionResult.FromString,
 
                 )
 
@@ -90,13 +90,13 @@ def add_GrpcBackendServiceServicer_to_server(servicer, server):
 
     rpc_method_handlers = {
 
-            'ExecutePipeline': grpc.unary_unary_rpc_method_handler(
+            'ExecutePipeline': grpc.unary_stream_rpc_method_handler(
 
                     servicer.ExecutePipeline,
 
                     request_deserializer=backend__service__pb2.GrpcPipelineExecutionRequest.FromString,
 
-                    response_serializer=backend__service__pb2.GrpcPipelineExecutionResult.SerializeToString,
+                    response_serializer=backend__service__pb2.GrpcPipelinePartExecutionResult.SerializeToString,
 
             ),
 
@@ -152,11 +152,11 @@ class GrpcBackendService(object):
 
             metadata=None):
 
-        return grpc.experimental.unary_unary(request, target, '/ficus.GrpcBackendService/ExecutePipeline',
+        return grpc.experimental.unary_stream(request, target, '/ficus.GrpcBackendService/ExecutePipeline',
 
             backend__service__pb2.GrpcPipelineExecutionRequest.SerializeToString,
 
-            backend__service__pb2.GrpcPipelineExecutionResult.FromString,
+            backend__service__pb2.GrpcPipelinePartExecutionResult.FromString,
 
             options, channel_credentials,
 

@@ -18,7 +18,12 @@ class Pipeline2:
                 initialContext=self._create_initial_context(initial_context)
             )
 
-            return stub.ExecutePipeline(request)
+            last_result = None
+            for part_result in stub.ExecutePipeline(request):
+                last_result = part_result
+
+            return last_result
+
 
     @staticmethod
     def _create_grpc_pipeline(parts) -> GrpcPipeline:
