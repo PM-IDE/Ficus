@@ -3,6 +3,7 @@ syntax = "proto3";
 package ficus;
 
 import "pm_models.proto";
+import "util.proto";
 
 message GrpcContextKey {
     string name = 1;
@@ -18,6 +19,7 @@ message GrpcContextValue {
         GrpcSubArraysWithTraceIndexContextValue trace_index_sub_arrays = 6;
         bool bool = 7;
         GrpcNamesEventLogContextValue xes_event_log = 8;
+        GrpcColorsEventLog colors_log = 9;
     }
 }
 
@@ -54,4 +56,12 @@ message GrpcSubArrayWithTraceIndex {
 
 message GrpcSubArraysWithTraceIndexContextValue {
     repeated GrpcSubArrayWithTraceIndex sub_arrays = 1;
+}
+
+message GrpcColorsEventLog {
+    repeated GrpcColorsTrace traces = 1;
+}
+
+message GrpcColorsTrace {
+    repeated GrpcColor event_colors = 2;
 }
