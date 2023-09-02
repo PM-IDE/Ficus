@@ -40,10 +40,7 @@ use crate::{
 use super::{
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
-    keys::{
-        context_key::{ContextKey, DefaultContextKey},
-        context_keys::ContextKeys,
-    },
+    keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
 };
 
 pub struct Pipeline {
@@ -134,6 +131,22 @@ impl PipelineParts {
 }
 
 impl PipelineParts {
+    pub const READ_LOG_FROM_XES: &str = "ReadLogFromXes";
+    pub const WRITE_LOG_TO_XES: &str = "WriteLogToXes";
+    pub const FIND_PRIMITIVE_TANDEM_ARRAYS: &str = "FindPrimitiveTandemArrays";
+    pub const FIND_MAXIMAL_TANDEM_ARRAYS: &str = "FindMaximalTandemArrays";
+    pub const FIND_MAXIMAL_REPEATS: &str = "FindMaximalRepeats";
+    pub const FIND_SUPER_MAXIMAL_REPEATS: &str = "FindSuperMaximalRepeats";
+    pub const FIND_NEAR_SUPER_MAXIMAL_REPEATS: &str = "FindNearSuperMaximalRepeats";
+    pub const DISCOVER_ACTIVITIES: &str = "DiscoverActivities";
+    pub const DISCOVER_ACTIVITIES_INSTANCES: &str = "DiscoverActivitiesInstances";
+    pub const CREATE_LOG_FROM_ACTIVITIES: &str = "CreateLogFromActivities";
+    pub const FILTER_EVENTS_BY_NAME: &str = "FilterEventsByName";
+    pub const FILTER_EVENTS_BY_REGEX: &str = "FilterEventsByRegex";
+    pub const FILTER_LOG_BY_VARIANTS: &str = "FilterLogByVariants";
+}
+
+impl PipelineParts {
     pub fn new() -> Self {
         let parts = vec![
             Self::read_log_from_xes(),
@@ -160,7 +173,7 @@ impl PipelineParts {
     }
 
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("ReadLogFromXes", &|context, keys, _| {
+        Self::create_pipeline_part(Self::READ_LOG_FROM_XES, &|context, keys, _| {
             let path = Self::get_context_value(context, &keys.path())?;
             let log = read_event_log(path);
             if log.is_none() {
@@ -218,7 +231,7 @@ impl PipelineParts {
     }
 
     fn write_log_to_xes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("WriteLogToXes", &|context, keys, _| {
+        Self::create_pipeline_part(Self::WRITE_LOG_TO_XES, &|context, keys, _| {
             let path = Self::get_context_value(context, &keys.path())?;
             match write_log(&context.get_concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
@@ -230,13 +243,13 @@ impl PipelineParts {
     }
 
     fn find_primitive_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindPrimitiveTandemArrays", &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_PRIMITIVE_TANDEM_ARRAYS, &|context, keys, config| {
             Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_primitive_tandem_arrays)
         })
     }
 
     fn find_maximal_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindMaximalTandemArrays", &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_MAXIMAL_TANDEM_ARRAYS, &|context, keys, config| {
             Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_maximal_tandem_arrays)
         })
     }
@@ -270,25 +283,25 @@ impl PipelineParts {
     }
 
     fn find_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindMaximalRepeats", &|context, keys, _| {
+        Self::create_pipeline_part(Self::FIND_MAXIMAL_REPEATS, &|context, keys, _| {
             Self::find_repeats_and_put_to_context(context, keys, find_maximal_repeats)
         })
     }
 
     fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindSuperMaximalRepeats", &|context, keys, _| {
+        Self::create_pipeline_part(Self::FIND_SUPER_MAXIMAL_REPEATS, &|context, keys, _| {
             Self::find_repeats_and_put_to_context(context, keys, find_super_maximal_repeats)
         })
     }
 
     fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FindNearSuperMaximalRepeats", &|context, keys, _| {
+        Self::create_pipeline_part(Self::FIND_NEAR_SUPER_MAXIMAL_REPEATS, &|context, keys, _| {
             Self::find_repeats_and_put_to_context(context, keys, find_near_super_maximal_repeats)
         })
     }
 
     fn discover_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivities", &|context, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let patterns = Self::get_context_value(context, &keys.patterns())?;
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
@@ -306,7 +319,7 @@ impl PipelineParts {
     }
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("DiscoverActivitiesInstances", &|context, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_INSTANCES, &|context, keys, config| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let mut tree = Self::get_context_value_mut(context, &keys.activities())?;
             let narrow = Self::get_context_value(config, &keys.narrow_activities())?;
@@ -320,7 +333,7 @@ impl PipelineParts {
     }
 
     fn create_log_from_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("CreateLogFromActivities", &|context, keys, config| {
+        Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, config| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let instances = Self::get_context_value(context, &keys.trace_activities())?;
             let log = create_new_log_from_activities_instances(
@@ -341,7 +354,7 @@ impl PipelineParts {
     }
 
     fn filter_log_by_event_name() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FilterEventsByName", &|context, keys, config| {
+        Self::create_pipeline_part(Self::FILTER_EVENTS_BY_NAME, &|context, keys, config| {
             let log = Self::get_context_value_mut(context, &keys.event_log())?;
             let event_name = Self::get_context_value(config, &keys.event_name())?;
             filter_log_by_name(log, &event_name);
@@ -351,7 +364,7 @@ impl PipelineParts {
     }
 
     fn filter_log_by_regex() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FilterEventsByRegex", &|context, keys, config| {
+        Self::create_pipeline_part(Self::FILTER_EVENTS_BY_REGEX, &|context, keys, config| {
             let log = Self::get_context_value_mut(context, &keys.event_log())?;
             let regex = Self::get_context_value(config, &keys.regex())?;
             match Regex::new(&regex) {
@@ -368,7 +381,7 @@ impl PipelineParts {
     }
 
     fn filter_log_by_variants() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part("FilterLogByVariants", &|context, keys, _| {
+        Self::create_pipeline_part(Self::FILTER_LOG_BY_VARIANTS, &|context, keys, _| {
             let log = Self::get_context_value(context, &keys.event_log())?;
             let groups_indices: HashSet<usize> = get_traces_groups_indices(log)
                 .into_iter()
