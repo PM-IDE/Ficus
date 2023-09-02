@@ -30,8 +30,6 @@ use crate::{
             split::get_traces_groups_indices,
         },
     },
-    ficus_proto::{GrpcContextValue, GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
-    grpc::{backend_service::GrpcResult, converters::convert_to_grpc_context_value},
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::user_data::{
         keys::Key,
@@ -91,34 +89,6 @@ impl PipelinePart for ParallelPipelinePart {
         }
 
         Ok(())
-    }
-}
-
-type GetContextHandler =
-    Box<dyn Fn(&mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
-
-pub struct GetContextValuePipelinePart {
-    key_name: String,
-    handler: GetContextHandler,
-}
-
-impl GetContextValuePipelinePart {
-    pub fn new(key_name: String, handler: GetContextHandler) -> Self {
-        Self { key_name, handler }
-    }
-}
-
-impl PipelinePart for GetContextValuePipelinePart {
-    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
-        match keys.find_key(&self.key_name) {
-            Some(key) => {
-                key.try_create_value_into_context(context, keys);
-                (self.handler)(context, keys, key)
-            }
-            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
-                self.key_name.clone(),
-            ))),
-        }
     }
 }
 

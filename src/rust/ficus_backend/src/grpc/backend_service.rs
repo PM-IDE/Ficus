@@ -11,25 +11,25 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
-use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};
+use super::{converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data}, get_context_pipeline::GetContextValuePipelinePart};
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
         grpc_pipeline_final_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue,
         GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
-        GrpcPipelineFinalResult, GrpcPipelinePartExecutionResult, GrpcPipelinePartResult,
+        GrpcPipelineFinalResult, GrpcPipelinePartExecutionResult,
     },
     pipelines::{
         context::PipelineContext,
-        errors::pipeline_errors::{MissingContextError, PipelinePartExecutionError},
+        errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{GetContextValuePipelinePart, Pipeline, PipelinePart, PipelineParts},
+        pipelines::{Pipeline, PipelinePart, PipelineParts},
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
 
-pub type GrpcResult = crate::ficus_proto::grpc_pipeline_part_execution_result::Result;
-type GrpcSender = mpsc::Sender<Result<GrpcPipelinePartExecutionResult, Status>>;
+pub(super) type GrpcResult = crate::ficus_proto::grpc_pipeline_part_execution_result::Result;
+pub(super) type GrpcSender = mpsc::Sender<Result<GrpcPipelinePartExecutionResult, Status>>;
 
 pub struct FicusService {
     pipeline_parts: Arc<Box<PipelineParts>>,
@@ -171,43 +171,12 @@ impl FicusService {
                     let key_name = part.key.as_ref().unwrap().name.clone();
                     let sender = sender.clone();
 
-                    pipeline.push(Self::create_get_context_pipeline_part(key_name, sender));
+                    pipeline.push(GetContextValuePipelinePart::create_get_context_pipeline_part(key_name, sender));
                 }
             }
         }
 
         pipeline
-    }
-
-    fn create_get_context_pipeline_part(
-        key_name: String,
-        sender: Arc<Box<GrpcSender>>,
-    ) -> Box<GetContextValuePipelinePart> {
-        Box::new(GetContextValuePipelinePart::new(
-            key_name,
-            Box::new(move |context, keys, key| {
-                key.try_create_value_into_context(context, keys);
-
-                match context.get_any(key.key()) {
-                    Some(context_value) => {
-                        let grpc_value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
-
-                        sender
-                            .blocking_send(Ok(GrpcPipelinePartExecutionResult {
-                                result: Some(GrpcResult::PipelinePartResult(GrpcPipelinePartResult {
-                                    context_value: grpc_value,
-                                })),
-                            }))
-                            .ok();
-
-                        Ok(())
-                    }
-                    None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
-                        key.key().name().clone(),
-                    ))),
-                }
-            }),
-        ))
     }
 
     fn create_get_context_value_error(message: String) -> GrpcGetContextValueResult {
