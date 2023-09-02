@@ -74,7 +74,7 @@ fn put_names_log_to_context(key: &dyn Key, grpc_log: &GrpcNamesEventLogContextVa
     user_data.put_any::<XesEventLogImpl>(key, log);
 }
 
-pub(super) fn convert_to_grpc_context_value(
+pub fn convert_to_grpc_context_value(
     key: &dyn ContextKey,
     value: &dyn Any,
     keys: &ContextKeys,

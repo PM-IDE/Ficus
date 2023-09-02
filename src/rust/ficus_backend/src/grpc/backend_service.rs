@@ -11,6 +11,7 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
+use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
@@ -22,14 +23,13 @@ use crate::{
         context::PipelineContext,
         errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{Pipeline, PipelinePart, PipelineParts},
+        pipelines::{GetContextValuePipelinePart, Pipeline, PipelinePart, PipelineParts},
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
 
-type GrpcResult = crate::ficus_proto::grpc_pipeline_part_execution_result::Result;
-
-use super::converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data};
+pub type GrpcResult = crate::ficus_proto::grpc_pipeline_part_execution_result::Result;
+type GrpcSender = mpsc::Sender<Result<GrpcPipelinePartExecutionResult, Status>>;
 
 pub struct FicusService {
     pipeline_parts: Arc<Box<PipelineParts>>,
@@ -57,6 +57,7 @@ impl GrpcBackendService for FicusService {
         request: Request<GrpcPipelineExecutionRequest>,
     ) -> Result<Response<Self::ExecutePipelineStream>, Status> {
         let (sender, receiver) = mpsc::channel(4);
+        let sender = Arc::new(Box::new(sender));
         let context_keys = self.context_keys.clone();
         let pipeline_parts = self.pipeline_parts.clone();
         let contexts = self.contexts.clone();
@@ -70,7 +71,7 @@ impl GrpcBackendService for FicusService {
                 initial_context_values,
                 context_keys,
                 pipeline_parts,
-                &sender,
+                sender.clone(),
             ) {
                 Ok((guid, context)) => {
                     contexts.lock().as_mut().unwrap().insert(guid.guid.to_owned(), context);
@@ -129,10 +130,10 @@ impl FicusService {
         initial_context_value: &Vec<GrpcContextKeyValue>,
         context_keys: Arc<Box<ContextKeys>>,
         pipeline_parts: Arc<Box<PipelineParts>>,
-        sender: &mpsc::Sender<Result<GrpcPipelinePartExecutionResult, Status>>,
+        sender: Arc<Box<GrpcSender>>,
     ) -> Result<(GrpcGuid, PipelineContext), PipelinePartExecutionError> {
         let id = Uuid::new_v4();
-        let pipeline = Self::to_pipeline(grpc_pipeline, &context_keys, &pipeline_parts);
+        let pipeline = Self::to_pipeline(grpc_pipeline, &context_keys, &pipeline_parts, sender);
         let mut context = create_initial_context(initial_context_value, &context_keys);
 
         match pipeline.execute(&mut context, &context_keys) {
@@ -145,6 +146,7 @@ impl FicusService {
         grpc_pipeline: &GrpcPipeline,
         context_keys: &ContextKeys,
         pipeline_parts: &PipelineParts,
+        sender: Arc<Box<GrpcSender>>,
     ) -> Pipeline {
         let mut pipeline = Pipeline::empty();
         for grpc_part in &grpc_pipeline.parts {
@@ -164,10 +166,13 @@ impl FicusService {
                     match pipeline_parts.find_part(&grpc_default_part.name) {
                         Some(default_part) => pipeline.push(Box::new(default_part(Box::new(part_config)))),
                         None => todo!(),
-                    }
+                    };
                 }
                 Part::ParallelPart(_) => todo!(),
-                Part::ContextRequestPart(_) => todo!(),
+                Part::ContextRequestPart(part) => {
+                    let key_name = part.key.as_ref().unwrap().name.clone();
+                    pipeline.push(Box::new(GetContextValuePipelinePart::new(key_name, sender.clone())));
+                }
             }
         }
 

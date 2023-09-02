@@ -2,9 +2,12 @@ use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     rc::Rc,
+    sync::Arc,
 };
 
 use regex::Regex;
+use tokio::sync::mpsc::Sender;
+use tonic::Status;
 
 use crate::{
     event_log::{
@@ -27,9 +30,11 @@ use crate::{
         },
         mutations::{
             filtering::{filter_log_by_name, filter_log_by_regex},
-            split::{get_traces_groups_indices, split_by_traces},
+            split::get_traces_groups_indices,
         },
     },
+    ficus_proto::{GrpcContextValue, GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
+    grpc::{backend_service::GrpcResult, converters::convert_to_grpc_context_value},
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::user_data::{
         keys::Key,
@@ -86,6 +91,46 @@ impl PipelinePart for ParallelPipelinePart {
         }
 
         Ok(())
+    }
+}
+
+type SenderPtr = Arc<Box<Sender<Result<GrpcPipelinePartExecutionResult, Status>>>>;
+
+pub struct GetContextValuePipelinePart {
+    key_name: String,
+    sender: SenderPtr,
+}
+
+impl GetContextValuePipelinePart {
+    pub fn new(key_name: String, sender: SenderPtr) -> Self {
+        Self { key_name, sender }
+    }
+}
+
+impl PipelinePart for GetContextValuePipelinePart {
+    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
+        match keys.find_key(&self.key_name) {
+            Some(key) => match context.get_any(key.key()) {
+                Some(context_value) => {
+                    let grpc_value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
+                    self.sender
+                        .blocking_send(Ok(GrpcPipelinePartExecutionResult {
+                            result: Some(GrpcResult::PipelinePartResult(GrpcPipelinePartResult {
+                                context_value: grpc_value,
+                            })),
+                        }))
+                        .ok();
+
+                    Ok(())
+                }
+                None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                    self.key_name.clone(),
+                ))),
+            },
+            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                self.key_name.clone(),
+            ))),
+        }
     }
 }
 
