@@ -1,4 +1,4 @@
-from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log
+from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
@@ -90,7 +90,7 @@ class TracesDiversityDiagram2(PipelinePart2WithCallback):
         return GrpcPipelinePartBase(contextRequestPart=_create_get_context_value_part("colors_event_log"))
 
     def execute_callback(self, context_value: GrpcContextValue):
-        print(context_value.colors_log)
+        print(from_grpc_colors_log(context_value.colors_log))
 
 
 def _create_get_context_value_part(key_name: str):

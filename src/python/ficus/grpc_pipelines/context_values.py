@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from ficus.grpc_pipelines.models.context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
+from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
 
 
 @dataclass
@@ -77,3 +78,25 @@ def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
 
     return result
 
+
+@dataclass
+class Color:
+    red: int
+    green: int
+    blue: int
+
+
+def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[Color]]:
+    result = []
+    for grpc_trace in grpc_colors_log.traces:
+        trace = []
+        for event_color in grpc_trace.event_colors:
+            trace.append(from_grpc_color(event_color))
+
+        result.append(trace)
+
+    return result
+
+
+def from_grpc_color(grpc_color: GrpcColor) -> Color:
+    return Color(grpc_color.red, grpc_color.green, grpc_color.blue)
