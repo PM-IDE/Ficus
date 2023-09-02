@@ -9,16 +9,19 @@ use crate::{
     },
     features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcContextKeyValue, GrpcContextValue,
-        GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace,
-        GrpcNamesEventLog, GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
-        GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
+        grpc_context_value::ContextValue, GrpcColor, GrpcColorsEventLog, GrpcColorsTrace, GrpcContextKeyValue,
+        GrpcContextValue, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog, GrpcHashesEventLogContextValue,
+        GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue, GrpcNamesTrace,
+        GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
     },
     pipelines::{
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
-    utils::user_data::{keys::Key, user_data::UserData},
+    utils::{
+        colors::Color,
+        user_data::{keys::Key, user_data::UserData},
+    },
 };
 
 pub(super) fn create_initial_context(
@@ -46,6 +49,7 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         ContextValue::TraceIndexSubArrays(_) => todo!(),
         ContextValue::Bool(bool) => user_data.put_any::<bool>(key, bool.clone()),
         ContextValue::XesEventLog(grpc_log) => put_names_log_to_context(key, grpc_log, user_data),
+        ContextValue::ColorsLog(_) => {}
     }
 }
 
@@ -83,6 +87,8 @@ pub fn convert_to_grpc_context_value(
         try_convert_to_grpc_traces_sub_arrays(value)
     } else if keys.is_repeat_sets(key) {
         try_convert_to_grpc_sub_arrays_with_index(value)
+    } else if keys.is_colors_event_log(key) {
+        try_convert_to_grpc_colors_event_log(value)
     } else {
         None
     }
@@ -192,5 +198,37 @@ fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcCont
                 GrpcSubArraysWithTraceIndexContextValue { sub_arrays },
             )),
         })
+    }
+}
+
+fn try_convert_to_grpc_colors_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<Vec<Vec<Color>>>() {
+        None
+    } else {
+        let colors_log = value.downcast_ref::<Vec<Vec<Color>>>().unwrap();
+        let mut grpc_traces = vec![];
+
+        for trace in colors_log {
+            let mut grpc_trace = vec![];
+            for color in trace {
+                grpc_trace.push(convert_to_grpc_color(color))
+            }
+
+            grpc_traces.push(GrpcColorsTrace {
+                event_colors: grpc_trace,
+            })
+        }
+
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::ColorsLog(GrpcColorsEventLog { traces: grpc_traces })),
+        })
+    }
+}
+
+fn convert_to_grpc_color(color: &Color) -> GrpcColor {
+    GrpcColor {
+        red: color.red() as u32,
+        green: color.green() as u32,
+        blue: color.blue() as u32,
     }
 }

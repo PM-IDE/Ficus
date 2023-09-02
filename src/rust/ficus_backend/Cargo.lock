@@ -230,6 +230,7 @@ dependencies = [
  "prost",
  "prost-types",
  "quick-xml",
+ "rand",
  "regex",
  "tokio",
  "tokio-stream",

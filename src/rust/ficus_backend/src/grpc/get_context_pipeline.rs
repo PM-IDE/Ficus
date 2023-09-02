@@ -1,13 +1,20 @@
 use std::sync::Arc;
 
-use crate::{pipelines::{
-    context::PipelineContext,
-    errors::pipeline_errors::{MissingContextError, PipelinePartExecutionError},
-    keys::{context_key::ContextKey, context_keys::ContextKeys},
-    pipelines::PipelinePart,
-}, utils::user_data::user_data::UserData, ficus_proto::{GrpcPipelinePartExecutionResult, GrpcPipelinePartResult}};
+use crate::{
+    ficus_proto::{GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
+    pipelines::{
+        context::PipelineContext,
+        errors::pipeline_errors::{MissingContextError, PipelinePartExecutionError},
+        keys::{context_key::ContextKey, context_keys::ContextKeys},
+        pipelines::PipelinePart,
+    },
+    utils::user_data::user_data::UserData,
+};
 
-use super::{backend_service::{GrpcSender, GrpcResult}, converters::convert_to_grpc_context_value};
+use super::{
+    backend_service::{GrpcResult, GrpcSender},
+    converters::convert_to_grpc_context_value,
+};
 
 type GetContextHandler =
     Box<dyn Fn(&mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;

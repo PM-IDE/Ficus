@@ -12,7 +12,7 @@ use std::{
 
 use super::context_keys::ContextKeys;
 
-type ContextKeyValueFactory<T> = Rc<Box<dyn Fn(&PipelineContext, &ContextKeys) -> Option<T>>>;
+type ContextKeyValueFactory<T> = Rc<Box<dyn Fn(&mut PipelineContext, &ContextKeys) -> Option<T>>>;
 
 pub trait ContextKey {
     fn key(&self) -> &dyn Key;
@@ -38,7 +38,8 @@ impl<T> ContextKey for DefaultContextKey<T> {
         }
 
         if let Some(factory) = self.factory.as_ref() {
-            context.put_concrete(&self.key, factory(context, keys).unwrap())
+            let value = factory(context, keys).unwrap();
+            context.put_concrete(&self.key, value);
         }
     }
 }

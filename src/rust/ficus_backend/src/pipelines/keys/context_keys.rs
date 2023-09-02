@@ -1,4 +1,4 @@
-use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
 
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -11,7 +11,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
-    utils::user_data::keys::Key,
+    utils::{colors::Color, user_data::keys::Key},
 };
 
 use super::context_key::{ContextKey, DefaultContextKey};
@@ -165,5 +165,23 @@ impl ContextKeys {
 
     pub fn is_regex(&self, key: &dyn ContextKey) -> bool {
         return self.regex().key().id() == key.key().id();
+    }
+
+    pub fn colors_event_log(&self) -> &DefaultContextKey<Vec<Vec<Color>>> {
+        self.find_concrete_key::<Vec<Vec<Color>>>(Self::COLORS_EVENT_LOG)
+            .unwrap()
+    }
+
+    pub fn is_colors_event_log(&self, key: &dyn ContextKey) -> bool {
+        return self.colors_event_log().key().id() == key.key().id();
+    }
+
+    pub fn names_to_colors(&self) -> &DefaultContextKey<HashMap<&'static str, Color>> {
+        self.find_concrete_key::<HashMap<&'static str, Color>>(Self::NAMES_TO_COLORS)
+            .unwrap()
+    }
+
+    pub fn is_names_to_colors(&self, key: &dyn ContextKey) -> bool {
+        return self.names_to_colors().key().id() == key.key().id();
     }
 }

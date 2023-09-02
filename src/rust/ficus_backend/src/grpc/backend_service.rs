@@ -11,7 +11,10 @@ use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
 
-use super::{converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data}, get_context_pipeline::GetContextValuePipelinePart};
+use super::{
+    converters::{convert_to_grpc_context_value, create_initial_context, put_into_user_data},
+    get_context_pipeline::GetContextValuePipelinePart,
+};
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
@@ -171,7 +174,9 @@ impl FicusService {
                     let key_name = part.key.as_ref().unwrap().name.clone();
                     let sender = sender.clone();
 
-                    pipeline.push(GetContextValuePipelinePart::create_get_context_pipeline_part(key_name, sender));
+                    pipeline.push(GetContextValuePipelinePart::create_get_context_pipeline_part(
+                        key_name, sender,
+                    ));
                 }
             }
         }
