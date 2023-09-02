@@ -12,6 +12,7 @@ def test_simple_pipeline():
         'path': StringContextValue('asdasdasdasdas')
     })
 
+    assert not result.finalResult.HasField('success')
     assert result.finalResult.error is not None
     assert result.finalResult.error == 'Failed to read event log from asdasdasdasdas'
 
@@ -27,4 +28,5 @@ def test_pipeline_with_getting_context_value():
         'path': StringContextValue(log_path)
     })
 
-    assert result.finalResult.success is not None
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')

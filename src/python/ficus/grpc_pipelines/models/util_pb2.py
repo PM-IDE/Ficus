@@ -30,7 +30,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nutil.proto\x12\x05\x66icus\"\x18\n\x08GrpcGuid\x12\x0c\n\x04guid\x18\x01 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nutil.proto\x12\x05\x66icus\"\x18\n\x08GrpcGuid\x12\x0c\n\x04guid\x18\x01 \x01(\t\"5\n\tGrpcColor\x12\x0b\n\x03red\x18\x01 \x01(\r\x12\r\n\x05green\x18\x02 \x01(\r\x12\x0c\n\x04\x62lue\x18\x03 \x01(\rb\x06proto3')
 
 
 
@@ -39,6 +39,8 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nutil.proto\x12\x
 
 
 _GRPCGUID = DESCRIPTOR.message_types_by_name['GrpcGuid']
+
+_GRPCCOLOR = DESCRIPTOR.message_types_by_name['GrpcColor']
 
 GrpcGuid = _reflection.GeneratedProtocolMessageType('GrpcGuid', (_message.Message,), {
 
@@ -54,6 +56,20 @@ _sym_db.RegisterMessage(GrpcGuid)
 
 
 
+GrpcColor = _reflection.GeneratedProtocolMessageType('GrpcColor', (_message.Message,), {
+
+  'DESCRIPTOR' : _GRPCCOLOR,
+
+  '__module__' : 'util_pb2'
+
+  # @@protoc_insertion_point(class_scope:ficus.GrpcColor)
+
+  })
+
+_sym_db.RegisterMessage(GrpcColor)
+
+
+
 if _descriptor._USE_C_DESCRIPTORS == False:
 
 
@@ -63,5 +79,9 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _GRPCGUID._serialized_start=21
 
   _GRPCGUID._serialized_end=45
+
+  _GRPCCOLOR._serialized_start=47
+
+  _GRPCCOLOR._serialized_end=100
 
 # @@protoc_insertion_point(module_scope)
