@@ -2,12 +2,9 @@ use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     rc::Rc,
-    sync::Arc,
 };
 
 use regex::Regex;
-use tokio::sync::mpsc::Sender;
-use tonic::Status;
 
 use crate::{
     event_log::{
@@ -45,7 +42,10 @@ use crate::{
 use super::{
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
-    keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
+    keys::{
+        context_key::{ContextKey, DefaultContextKey},
+        context_keys::ContextKeys,
+    },
 };
 
 pub struct Pipeline {
@@ -94,39 +94,27 @@ impl PipelinePart for ParallelPipelinePart {
     }
 }
 
-type SenderPtr = Arc<Box<Sender<Result<GrpcPipelinePartExecutionResult, Status>>>>;
+type GetContextHandler =
+    Box<dyn Fn(&mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct GetContextValuePipelinePart {
     key_name: String,
-    sender: SenderPtr,
+    handler: GetContextHandler,
 }
 
 impl GetContextValuePipelinePart {
-    pub fn new(key_name: String, sender: SenderPtr) -> Self {
-        Self { key_name, sender }
+    pub fn new(key_name: String, handler: GetContextHandler) -> Self {
+        Self { key_name, handler }
     }
 }
 
 impl PipelinePart for GetContextValuePipelinePart {
     fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
         match keys.find_key(&self.key_name) {
-            Some(key) => match context.get_any(key.key()) {
-                Some(context_value) => {
-                    let grpc_value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
-                    self.sender
-                        .blocking_send(Ok(GrpcPipelinePartExecutionResult {
-                            result: Some(GrpcResult::PipelinePartResult(GrpcPipelinePartResult {
-                                context_value: grpc_value,
-                            })),
-                        }))
-                        .ok();
-
-                    Ok(())
-                }
-                None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
-                    self.key_name.clone(),
-                ))),
-            },
+            Some(key) => {
+                key.try_create_value_into_context(context, keys);
+                (self.handler)(context, keys, key)
+            }
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 self.key_name.clone(),
             ))),

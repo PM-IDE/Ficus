@@ -64,3 +64,16 @@ class NamesLogContextValue(ContextValue):
             log.traces.append(grpc_trace)
 
         return GrpcContextValue(names_log=GrpcNamesEventLogContextValue(log=log))
+
+
+def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
+    result = []
+    for grpc_trace in grpc_names_log.log.traces:
+        trace = []
+        for event in grpc_trace.events:
+            trace.append(event)
+
+        result.append(trace)
+
+    return result
+
