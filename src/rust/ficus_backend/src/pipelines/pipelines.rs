@@ -8,7 +8,11 @@ use regex::Regex;
 
 use crate::{
     event_log::{
-        core::{event::event_hasher::NameEventHasher, event_log::EventLog},
+        core::{
+            event::{event::Event, event_hasher::NameEventHasher},
+            event_log::EventLog,
+            trace::trace::Trace,
+        },
         xes::{
             reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log,
             xes_event::XesEventImpl,
@@ -31,13 +35,17 @@ use crate::{
         },
     },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
-    utils::user_data::{
-        keys::Key,
-        user_data::{UserData, UserDataImpl},
+    utils::{
+        colors::Color,
+        user_data::{
+            keys::Key,
+            user_data::{UserData, UserDataImpl},
+        },
     },
 };
 
 use super::{
+    aliases::NamesToColors,
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
     keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
@@ -144,6 +152,7 @@ impl PipelineParts {
     pub const FILTER_EVENTS_BY_NAME: &str = "FilterEventsByName";
     pub const FILTER_EVENTS_BY_REGEX: &str = "FilterEventsByRegex";
     pub const FILTER_LOG_BY_VARIANTS: &str = "FilterLogByVariants";
+    pub const DRAW_PLACEMENT_OF_EVENT_BY_NAME: &str = "DrawPlacementOfEventByName";
 }
 
 impl PipelineParts {
@@ -162,6 +171,7 @@ impl PipelineParts {
             Self::filter_log_by_event_name(),
             Self::filter_log_by_regex(),
             Self::filter_log_by_variants(),
+            Self::draw_placements_of_event_by_name(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -174,7 +184,7 @@ impl PipelineParts {
 
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::READ_LOG_FROM_XES, &|context, keys, _| {
-            let path = Self::get_context_value(context, &keys.path())?;
+            let path = Self::get_context_value(context, keys.path())?;
             let log = read_event_log(path);
             if log.is_none() {
                 let message = format!("Failed to read event log from {}", path.as_str());
@@ -260,11 +270,11 @@ impl PipelineParts {
         part_config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let log = Self::get_context_value(context, &keys.event_log())?;
+        let log = Self::get_context_value(context, keys.event_log())?;
         let array_length = part_config.get_concrete(keys.tandem_array_length().key()).unwrap();
 
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), *array_length as usize);
-        context.put_concrete(&keys.patterns().key(), arrays);
+        context.put_concrete(keys.patterns().key(), arrays);
         Ok(())
     }
 
@@ -273,11 +283,11 @@ impl PipelineParts {
         keys: &ContextKeys,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let log = Self::get_context_value(context, &keys.event_log())?;
+        let log = Self::get_context_value(context, keys.event_log())?;
         let strategy = PatternsDiscoveryStrategy::FromAllTraces;
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
 
-        context.put_concrete(&keys.patterns().key(), arrays);
+        context.put_concrete(keys.patterns().key(), arrays);
 
         Ok(())
     }
@@ -302,12 +312,12 @@ impl PipelineParts {
 
     fn discover_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {
-            let log = Self::get_context_value(context, &keys.event_log())?;
-            let patterns = Self::get_context_value(context, &keys.patterns())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let patterns = Self::get_context_value(context, keys.patterns())?;
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let repeat_sets = build_repeat_sets(&hashes, patterns);
 
-            let activity_level = Self::get_context_value(config, &keys.activity_level())?;
+            let activity_level = Self::get_context_value(config, keys.activity_level())?;
             let tree =
                 build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level as usize, |sub_array| {
                     create_activity_name(log, sub_array)
@@ -320,9 +330,9 @@ impl PipelineParts {
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_INSTANCES, &|context, keys, config| {
-            let log = Self::get_context_value(context, &keys.event_log())?;
-            let mut tree = Self::get_context_value_mut(context, &keys.activities())?;
-            let narrow = Self::get_context_value(config, &keys.narrow_activities())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let mut tree = Self::get_context_value_mut(context, keys.activities())?;
+            let narrow = Self::get_context_value(config, keys.narrow_activities())?;
 
             let hashes = log.to_hashes_event_log::<NameEventHasher>();
             let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
@@ -334,8 +344,8 @@ impl PipelineParts {
 
     fn create_log_from_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, config| {
-            let log = Self::get_context_value(context, &keys.event_log())?;
-            let instances = Self::get_context_value(context, &keys.trace_activities())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let instances = Self::get_context_value(context, keys.trace_activities())?;
             let log = create_new_log_from_activities_instances(
                 log,
                 instances,
@@ -355,8 +365,8 @@ impl PipelineParts {
 
     fn filter_log_by_event_name() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::FILTER_EVENTS_BY_NAME, &|context, keys, config| {
-            let log = Self::get_context_value_mut(context, &keys.event_log())?;
-            let event_name = Self::get_context_value(config, &keys.event_name())?;
+            let log = Self::get_context_value_mut(context, keys.event_log())?;
+            let event_name = Self::get_context_value(config, keys.event_name())?;
             filter_log_by_name(log, &event_name);
 
             Ok(())
@@ -365,8 +375,9 @@ impl PipelineParts {
 
     fn filter_log_by_regex() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::FILTER_EVENTS_BY_REGEX, &|context, keys, config| {
-            let log = Self::get_context_value_mut(context, &keys.event_log())?;
-            let regex = Self::get_context_value(config, &keys.regex())?;
+            let log = Self::get_context_value_mut(context, keys.event_log())?;
+            let regex = Self::get_context_value(config, keys.regex())?;
+
             match Regex::new(&regex) {
                 Ok(regex) => {
                     filter_log_by_regex(log, &regex);
@@ -382,14 +393,60 @@ impl PipelineParts {
 
     fn filter_log_by_variants() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::FILTER_LOG_BY_VARIANTS, &|context, keys, _| {
-            let log = Self::get_context_value(context, &keys.event_log())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
             let groups_indices: HashSet<usize> = get_traces_groups_indices(log)
                 .into_iter()
                 .map(|group| *(group.first().unwrap()))
                 .collect();
 
-            let log = Self::get_context_value_mut(context, &keys.event_log())?;
+            let log = Self::get_context_value_mut(context, keys.event_log())?;
             log.filter_traces(&|_, index| groups_indices.contains(&index));
+
+            Ok(())
+        })
+    }
+
+    fn draw_placements_of_event_by_name() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_NAME, &|context, keys, config| {
+            let names_to_colors_key = keys.names_to_colors().key();
+            if context.get_concrete(names_to_colors_key).is_none() {
+                context.put_concrete(names_to_colors_key, HashMap::new())
+            }
+
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let event_name = Self::get_context_value(config, keys.event_name())?;
+
+            let names_to_colors = Self::get_context_value_mut(context, keys.names_to_colors())
+                .ok()
+                .unwrap();
+            let used_colors = names_to_colors
+                .values()
+                .into_iter()
+                .map(|c| *c)
+                .collect::<HashSet<Color>>();
+
+            let mut colors_log = vec![];
+            for trace in log.get_traces() {
+                let mut colors_trace = vec![];
+                for event in trace.borrow().get_events() {
+                    let event = event.borrow();
+                    let name = event.get_name();
+                    if name == event_name {
+                        if !names_to_colors.contains_key(name) {
+                            let new_color = Color::random(Some(&used_colors));
+                            names_to_colors.insert(name.to_owned(), new_color);
+                        }
+
+                        colors_trace.push(names_to_colors[name].clone());
+                    } else {
+                        colors_trace.push(Color::black());
+                    }
+                }
+
+                colors_log.push(colors_trace);
+            }
+
+            context.put_concrete(keys.colors_event_log().key(), colors_log);
 
             Ok(())
         })

@@ -1,5 +1,6 @@
 from ficus.analysis.event_log_analysis import draw_colors_event_log
-from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log
+from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log, \
+    StringContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
@@ -86,17 +87,44 @@ class ReadLogFromXes2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=part)
 
 
-class TracesDiversityDiagram2(PipelinePart2WithCallback):
-    def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part("colors_event_log"))
-
+class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
     def execute_callback(self, context_value: GrpcContextValue):
         colors_log = from_grpc_colors_log(context_value.colors_log)
         draw_colors_event_log(colors_log)
 
 
+class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part("colors_event_log"))
+
+
+class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
+    def __init__(self, event_name: str):
+        self.event_name = event_name
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        config.configurationParameters.append(GrpcContextKeyValue(
+            key=GrpcContextKey(name='event_name'),
+            value=StringContextValue(self.event_name).to_grpc_context_value()
+        ))
+
+        part = _create_complex_get_context_part('colors_event_log', 'DrawPlacementOfEventByName', config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
 def _create_simple_get_context_value_part(key_name: str):
     return GrpcSimpleContextRequestPipelinePart(key=GrpcContextKey(name=key_name))
+
+
+def _create_complex_get_context_part(key_name: str, before_part_name: str, config: GrpcPipelinePartConfiguration):
+    return GrpcComplexContextRequestPipelinePart(
+        key=GrpcContextKey(name=key_name),
+        beforePipelinePart=GrpcPipelinePart(
+            name=before_part_name,
+            configuration=config
+        )
+    )
 
 
 def _create_empty_pipeline_part():

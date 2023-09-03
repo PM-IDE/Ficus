@@ -18,6 +18,7 @@ fn test_pipeline_parts() {
         "FilterEventsByName",
         "FilterEventsByRegex",
         "FilterLogByVariants",
+        "DrawPlacementOfEventByName",
     ];
 
     for name in names {

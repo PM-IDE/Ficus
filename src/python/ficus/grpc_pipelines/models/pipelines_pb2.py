@@ -32,7 +32,7 @@ import ficus.grpc_pipelines.models.context_pb2 as context__pb2
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpipelines.proto\x12\x05\x66icus\x1a\rcontext.proto\":\n\x0cGrpcPipeline\x12*\n\x05parts\x18\x01 \x03(\x0b\x32\x1b.ficus.GrpcPipelinePartBase\"\x9c\x02\n\x14GrpcPipelinePartBase\x12.\n\x0b\x64\x65\x66\x61ultPart\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcPipelinePartH\x00\x12\x37\n\x0cparallelPart\x18\x02 \x01(\x0b\x32\x1f.ficus.GrpcParallelPipelinePartH\x00\x12O\n\x18simpleContextRequestPart\x18\x03 \x01(\x0b\x32+.ficus.GrpcSimpleContextRequestPipelinePartH\x00\x12\x42\n\x19\x63omplexContextRequestPart\x18\x04 \x01(\x0b\x32\x1d.ficus.GrpcComplexRequestPartH\x00\x42\x06\n\x04part\"]\n\x10GrpcPipelinePart\x12\x0c\n\x04name\x18\x01 \x01(\t\x12;\n\rconfiguration\x18\x02 \x01(\x0b\x32$.ficus.GrpcPipelinePartConfiguration\"\\\n\x1dGrpcPipelinePartConfiguration\x12;\n\x17\x63onfigurationParameters\x18\x01 \x03(\x0b\x32\x1a.ficus.GrpcContextKeyValue\"N\n\x18GrpcParallelPipelinePart\x12\x32\n\rpipelineParts\x18\x01 \x03(\x0b\x32\x1b.ficus.GrpcPipelinePartBase\"N\n\x19GrpcParallelPipelineParts\x12\x31\n\x08pipeline\x18\x01 \x03(\x0b\x32\x1f.ficus.GrpcParallelPipelinePart\"J\n$GrpcSimpleContextRequestPipelinePart\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\"q\n\x16GrpcComplexRequestPart\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12\x33\n\x12\x62\x65\x66orePipelinePart\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcPipelinePartb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpipelines.proto\x12\x05\x66icus\x1a\rcontext.proto\":\n\x0cGrpcPipeline\x12*\n\x05parts\x18\x01 \x03(\x0b\x32\x1b.ficus.GrpcPipelinePartBase\"\xab\x02\n\x14GrpcPipelinePartBase\x12.\n\x0b\x64\x65\x66\x61ultPart\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcPipelinePartH\x00\x12\x37\n\x0cparallelPart\x18\x02 \x01(\x0b\x32\x1f.ficus.GrpcParallelPipelinePartH\x00\x12O\n\x18simpleContextRequestPart\x18\x03 \x01(\x0b\x32+.ficus.GrpcSimpleContextRequestPipelinePartH\x00\x12Q\n\x19\x63omplexContextRequestPart\x18\x04 \x01(\x0b\x32,.ficus.GrpcComplexContextRequestPipelinePartH\x00\x42\x06\n\x04part\"]\n\x10GrpcPipelinePart\x12\x0c\n\x04name\x18\x01 \x01(\t\x12;\n\rconfiguration\x18\x02 \x01(\x0b\x32$.ficus.GrpcPipelinePartConfiguration\"\\\n\x1dGrpcPipelinePartConfiguration\x12;\n\x17\x63onfigurationParameters\x18\x01 \x03(\x0b\x32\x1a.ficus.GrpcContextKeyValue\"N\n\x18GrpcParallelPipelinePart\x12\x32\n\rpipelineParts\x18\x01 \x03(\x0b\x32\x1b.ficus.GrpcPipelinePartBase\"N\n\x19GrpcParallelPipelineParts\x12\x31\n\x08pipeline\x18\x01 \x03(\x0b\x32\x1f.ficus.GrpcParallelPipelinePart\"J\n$GrpcSimpleContextRequestPipelinePart\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\"\x80\x01\n%GrpcComplexContextRequestPipelinePart\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12\x33\n\x12\x62\x65\x66orePipelinePart\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcPipelinePartb\x06proto3')
 
 
 
@@ -54,7 +54,7 @@ _GRPCPARALLELPIPELINEPARTS = DESCRIPTOR.message_types_by_name['GrpcParallelPipel
 
 _GRPCSIMPLECONTEXTREQUESTPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcSimpleContextRequestPipelinePart']
 
-_GRPCCOMPLEXREQUESTPART = DESCRIPTOR.message_types_by_name['GrpcComplexRequestPart']
+_GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcComplexContextRequestPipelinePart']
 
 GrpcPipeline = _reflection.GeneratedProtocolMessageType('GrpcPipeline', (_message.Message,), {
 
@@ -154,17 +154,17 @@ _sym_db.RegisterMessage(GrpcSimpleContextRequestPipelinePart)
 
 
 
-GrpcComplexRequestPart = _reflection.GeneratedProtocolMessageType('GrpcComplexRequestPart', (_message.Message,), {
+GrpcComplexContextRequestPipelinePart = _reflection.GeneratedProtocolMessageType('GrpcComplexContextRequestPipelinePart', (_message.Message,), {
 
-  'DESCRIPTOR' : _GRPCCOMPLEXREQUESTPART,
+  'DESCRIPTOR' : _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART,
 
   '__module__' : 'pipelines_pb2'
 
-  # @@protoc_insertion_point(class_scope:ficus.GrpcComplexRequestPart)
+  # @@protoc_insertion_point(class_scope:ficus.GrpcComplexContextRequestPipelinePart)
 
   })
 
-_sym_db.RegisterMessage(GrpcComplexRequestPart)
+_sym_db.RegisterMessage(GrpcComplexContextRequestPipelinePart)
 
 
 
@@ -180,30 +180,30 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   _GRPCPIPELINEPARTBASE._serialized_start=102
 
-  _GRPCPIPELINEPARTBASE._serialized_end=386
+  _GRPCPIPELINEPARTBASE._serialized_end=401
 
-  _GRPCPIPELINEPART._serialized_start=388
+  _GRPCPIPELINEPART._serialized_start=403
 
-  _GRPCPIPELINEPART._serialized_end=481
+  _GRPCPIPELINEPART._serialized_end=496
 
-  _GRPCPIPELINEPARTCONFIGURATION._serialized_start=483
+  _GRPCPIPELINEPARTCONFIGURATION._serialized_start=498
 
-  _GRPCPIPELINEPARTCONFIGURATION._serialized_end=575
+  _GRPCPIPELINEPARTCONFIGURATION._serialized_end=590
 
-  _GRPCPARALLELPIPELINEPART._serialized_start=577
+  _GRPCPARALLELPIPELINEPART._serialized_start=592
 
-  _GRPCPARALLELPIPELINEPART._serialized_end=655
+  _GRPCPARALLELPIPELINEPART._serialized_end=670
 
-  _GRPCPARALLELPIPELINEPARTS._serialized_start=657
+  _GRPCPARALLELPIPELINEPARTS._serialized_start=672
 
-  _GRPCPARALLELPIPELINEPARTS._serialized_end=735
+  _GRPCPARALLELPIPELINEPARTS._serialized_end=750
 
-  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_start=737
+  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_start=752
 
-  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_end=811
+  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_end=826
 
-  _GRPCCOMPLEXREQUESTPART._serialized_start=813
+  _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART._serialized_start=829
 
-  _GRPCCOMPLEXREQUESTPART._serialized_end=926
+  _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART._serialized_end=957
 
 # @@protoc_insertion_point(module_scope)
