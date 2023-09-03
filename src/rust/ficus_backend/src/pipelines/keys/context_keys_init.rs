@@ -274,6 +274,7 @@ impl ContextKeys {
                                 } else {
                                     let color = Color::random(Some(&used_colors));
                                     used_colors.insert(color.clone());
+                                    names_to_colors.insert(name.to_owned(), color.clone());
                                     vec.push(color);
                                 }
                             }

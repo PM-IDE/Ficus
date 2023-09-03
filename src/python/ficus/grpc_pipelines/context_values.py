@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from ficus.grpc_pipelines.models.context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
+from ficus.util import to_hex
 
 
 @dataclass
@@ -84,6 +85,9 @@ class Color:
     red: int
     green: int
     blue: int
+
+    def to_hex(self):
+        return to_hex((self.red, self.green, self.blue))
 
 
 def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[Color]]:

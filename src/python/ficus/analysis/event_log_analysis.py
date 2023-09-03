@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt, axes
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
+from ..grpc_pipelines.context_values import Color
 from ..log.event_log import MyEventLog
 from ..log.functions import read_log_from_xes
 from ..util import *
@@ -97,7 +98,7 @@ class TraceDiversityLikeDiagramContext:
         self.height_scale = height_scale
 
 
-def _draw_traces_diversity_like_diagram_internal(log: MyEventLog,
+def _draw_traces_diversity_like_diagram_internal(log: Union[MyEventLog, list[list[Color]]],
                                                  draw_func: Callable[[TraceDiversityLikeDiagramContext], None],
                                                  title: str = None,
                                                  save_path: str = None,
@@ -181,6 +182,32 @@ def _draw_traces_diversity_like_diagram(log: MyEventLog,
 
                 rect = plt.Rectangle((current_x, current_y), ctx.rect_width, ctx.rect_height, fc=color)
                 ctx.names_to_rects[name] = rect
+                ctx.drawer.add_patch(rect)
+                current_x += ctx.rect_width
+
+            current_y += ctx.rect_height + ctx.y_delta_between_traces
+
+    _draw_traces_diversity_like_diagram_internal(log,
+                                                 draw_func,
+                                                 title=title,
+                                                 save_path=save_path,
+                                                 plot_legend=plot_legend,
+                                                 height_scale=height_scale,
+                                                 width_scale=width_scale)
+
+
+def draw_colors_event_log(log: list[list[Color]],
+                          title: str = None,
+                          save_path: str = None,
+                          plot_legend: bool = True,
+                          height_scale: int = 1,
+                          width_scale: int = 1):
+    def draw_func(ctx: TraceDiversityLikeDiagramContext):
+        current_y = 0
+        for trace in log:
+            current_x = 0
+            for event_color in trace:
+                rect = plt.Rectangle((current_x, current_y), ctx.rect_width, ctx.rect_height, fc=event_color.to_hex())
                 ctx.drawer.add_patch(rect)
                 current_x += ctx.rect_width
 

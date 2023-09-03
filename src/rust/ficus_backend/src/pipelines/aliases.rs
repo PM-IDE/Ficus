@@ -16,4 +16,4 @@ pub type RepeatSets = Vec<SubArrayWithTraceIndex>;
 pub type Patterns = Vec<Vec<SubArrayInTraceInfo>>;
 pub type ActivitiesToLogs = HashMap<String, XesEventLogImpl>;
 pub type ColorsEventLog = Vec<Vec<Color>>;
-pub type NamesToColors = HashMap<&'static str, Color>;
+pub type NamesToColors = HashMap<String, Color>;

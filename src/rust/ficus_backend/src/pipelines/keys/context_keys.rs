@@ -167,8 +167,8 @@ impl ContextKeys {
         return self.regex().key().id() == key.key().id();
     }
 
-    pub fn colors_event_log(&self) -> &DefaultContextKey<Vec<Vec<Color>>> {
-        self.find_concrete_key::<Vec<Vec<Color>>>(Self::COLORS_EVENT_LOG)
+    pub fn colors_event_log(&self) -> &DefaultContextKey<ColorsEventLog> {
+        self.find_concrete_key::<ColorsEventLog>(Self::COLORS_EVENT_LOG)
             .unwrap()
     }
 
@@ -176,9 +176,8 @@ impl ContextKeys {
         return self.colors_event_log().key().id() == key.key().id();
     }
 
-    pub fn names_to_colors(&self) -> &DefaultContextKey<HashMap<&'static str, Color>> {
-        self.find_concrete_key::<HashMap<&'static str, Color>>(Self::NAMES_TO_COLORS)
-            .unwrap()
+    pub fn names_to_colors(&self) -> &DefaultContextKey<NamesToColors> {
+        self.find_concrete_key::<NamesToColors>(Self::NAMES_TO_COLORS).unwrap()
     }
 
     pub fn is_names_to_colors(&self, key: &dyn ContextKey) -> bool {
