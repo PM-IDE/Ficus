@@ -88,15 +88,15 @@ class ReadLogFromXes2(PipelinePart2):
 
 class TracesDiversityDiagram2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(contextRequestPart=_create_get_context_value_part("colors_event_log"))
+        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part("colors_event_log"))
 
     def execute_callback(self, context_value: GrpcContextValue):
         colors_log = from_grpc_colors_log(context_value.colors_log)
         draw_colors_event_log(colors_log)
 
 
-def _create_get_context_value_part(key_name: str):
-    return GrpcContextRequestPipelinePart(key=GrpcContextKey(name=key_name))
+def _create_simple_get_context_value_part(key_name: str):
+    return GrpcSimpleContextRequestPipelinePart(key=GrpcContextKey(name=key_name))
 
 
 def _create_empty_pipeline_part():

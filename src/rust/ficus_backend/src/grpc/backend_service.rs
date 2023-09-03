@@ -20,13 +20,13 @@ use crate::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
         grpc_pipeline_final_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue,
         GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
-        GrpcPipelineFinalResult, GrpcPipelinePartExecutionResult,
+        GrpcPipelineFinalResult, GrpcPipelinePart, GrpcPipelinePartExecutionResult,
     },
     pipelines::{
         context::PipelineContext,
         errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{Pipeline, PipelinePart, PipelineParts},
+        pipelines::{DefaultPipelinePart, Pipeline, PipelinePart, PipelineParts},
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
@@ -153,35 +153,63 @@ impl FicusService {
         for grpc_part in &grpc_pipeline.parts {
             match grpc_part.part.as_ref().unwrap() {
                 Part::DefaultPart(grpc_default_part) => {
-                    let mut part_config = UserDataImpl::new();
-                    let grpc_config = &grpc_default_part.configuration.as_ref().unwrap();
-
-                    for conf_value in &grpc_config.configuration_parameters {
-                        let key_name = conf_value.key.as_ref().unwrap().name.as_ref();
-                        if let Some(key) = context_keys.find_key(key_name) {
-                            let value = conf_value.value.as_ref().unwrap().context_value.as_ref().unwrap();
-                            put_into_user_data(key.key(), value, &mut part_config);
+                    match Self::find_default_part(grpc_default_part, context_keys, pipeline_parts) {
+                        Some(found_part) => {
+                            pipeline.push(found_part);
                         }
-                    }
-
-                    match pipeline_parts.find_part(&grpc_default_part.name) {
-                        Some(default_part) => pipeline.push(Box::new(default_part(Box::new(part_config)))),
                         None => todo!(),
-                    };
+                    }
                 }
                 Part::ParallelPart(_) => todo!(),
-                Part::ContextRequestPart(part) => {
+                Part::SimpleContextRequestPart(part) => {
                     let key_name = part.key.as_ref().unwrap().name.clone();
-                    let sender = sender.clone();
-
-                    pipeline.push(GetContextValuePipelinePart::create_get_context_pipeline_part(
-                        key_name, sender,
-                    ));
+                    pipeline.push(Self::create_get_context_part(key_name, &sender, None));
+                }
+                Part::ComplexContextRequestPart(part) => {
+                    let grpc_default_part = part.before_pipeline_part.as_ref().unwrap();
+                    match Self::find_default_part(grpc_default_part, context_keys, pipeline_parts) {
+                        Some(found_part) => {
+                            let key_name = part.key.as_ref().unwrap().name.clone();
+                            pipeline.push(Self::create_get_context_part(key_name, &sender, Some(found_part)));
+                        }
+                        None => todo!(),
+                    }
                 }
             }
         }
 
         pipeline
+    }
+
+    fn create_get_context_part(
+        key_name: String,
+        sender: &Arc<Box<GrpcSender>>,
+        before_part: Option<Box<DefaultPipelinePart>>,
+    ) -> Box<GetContextValuePipelinePart> {
+        let sender = sender.clone();
+        GetContextValuePipelinePart::create_context_pipeline_part(key_name, sender, before_part)
+    }
+
+    fn find_default_part(
+        grpc_default_part: &GrpcPipelinePart,
+        context_keys: &ContextKeys,
+        pipeline_parts: &PipelineParts,
+    ) -> Option<Box<DefaultPipelinePart>> {
+        let mut part_config = UserDataImpl::new();
+        let grpc_config = &grpc_default_part.configuration.as_ref().unwrap();
+
+        for conf_value in &grpc_config.configuration_parameters {
+            let key_name = conf_value.key.as_ref().unwrap().name.as_ref();
+            if let Some(key) = context_keys.find_key(key_name) {
+                let value = conf_value.value.as_ref().unwrap().context_value.as_ref().unwrap();
+                put_into_user_data(key.key(), value, &mut part_config);
+            }
+        }
+
+        match pipeline_parts.find_part(&grpc_default_part.name) {
+            Some(default_part) => Some(Box::new(default_part(Box::new(part_config)))),
+            None => None,
+        }
     }
 
     fn create_get_context_value_error(message: String) -> GrpcGetContextValueResult {

@@ -12,7 +12,8 @@ message GrpcPipelinePartBase {
     oneof part {
         GrpcPipelinePart defaultPart = 1;
         GrpcParallelPipelinePart parallelPart = 2;
-        GrpcContextRequestPipelinePart contextRequestPart = 3;
+        GrpcSimpleContextRequestPipelinePart simpleContextRequestPart = 3;
+        GrpcComplexRequestPart complexContextRequestPart = 4;
     }
 }
 
@@ -33,6 +34,11 @@ message GrpcParallelPipelineParts {
     repeated GrpcParallelPipelinePart pipeline = 1;
 }
 
-message GrpcContextRequestPipelinePart {
+message GrpcSimpleContextRequestPipelinePart {
     GrpcContextKey key = 1;
+}
+
+message GrpcComplexRequestPart {
+    GrpcContextKey key = 1;
+    GrpcPipelinePart beforePipelinePart = 2;    
 }
