@@ -160,6 +160,7 @@ impl PipelineParts {
     pub const FILTER_EVENTS_BY_REGEX: &str = "FilterEventsByRegex";
     pub const FILTER_LOG_BY_VARIANTS: &str = "FilterLogByVariants";
     pub const DRAW_PLACEMENT_OF_EVENT_BY_NAME: &str = "DrawPlacementOfEventByName";
+    pub const DRAW_PLACEMENT_OF_EVENT_BY_REGEX: &str = "DrawPlacementOfEventsByRegex";
 }
 
 impl PipelineParts {
@@ -179,6 +180,7 @@ impl PipelineParts {
             Self::filter_log_by_regex(),
             Self::filter_log_by_variants(),
             Self::draw_placements_of_event_by_name(),
+            Self::draw_events_placements_by_regex(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -187,6 +189,10 @@ impl PipelineParts {
         }
 
         Self { names_to_parts }
+    }
+
+    pub fn len(&self) -> usize {
+        self.names_to_parts.len()
     }
 
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
@@ -415,31 +421,46 @@ impl PipelineParts {
 
     fn draw_placements_of_event_by_name() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_NAME, &|context, keys, config| {
-            let log = Self::get_context_value(context, keys.event_log())?;
             let event_name = Self::get_context_value(config, keys.event_name())?;
-            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())
-                .expect("Default value should be initialized");
+            Self::draw_events_placement(context, keys, &|event| event.get_name() == event_name)
+        })
+    }
 
-            let mut colors_log = vec![];
-            for trace in log.get_traces() {
-                let mut colors_trace = vec![];
-                for event in trace.borrow().get_events() {
-                    let event = event.borrow();
-                    let name = event.get_name();
-                    if name == event_name {
-                        let color = colors_holder.get_or_create(name.as_str());
-                        colors_trace.push(color);
-                    } else {
-                        colors_trace.push(Color::black());
-                    }
+    fn draw_events_placement(
+        context: &mut PipelineContext,
+        keys: &ContextKeys,
+        selector: &impl Fn(&XesEventImpl) -> bool,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let log = Self::get_context_value(context, keys.event_log())?;
+        let colors_holder =
+            Self::get_context_value_mut(context, keys.colors_holder()).expect("Default value should be initialized");
+
+        let mut colors_log = vec![];
+        for trace in log.get_traces() {
+            let mut colors_trace = vec![];
+            for event in trace.borrow().get_events() {
+                let event = event.borrow();
+                let name = event.get_name();
+                if selector(&event) {
+                    let color = colors_holder.get_or_create(name.as_str());
+                    colors_trace.push(color);
+                } else {
+                    colors_trace.push(Color::black());
                 }
-
-                colors_log.push(colors_trace);
             }
 
-            context.put_concrete(keys.colors_event_log().key(), colors_log);
+            colors_log.push(colors_trace);
+        }
 
-            Ok(())
+        context.put_concrete(keys.colors_event_log().key(), colors_log);
+        Ok(())
+    }
+
+    fn draw_events_placements_by_regex() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_REGEX, &|context, keys, config| {
+            let regex = Self::get_context_value(config, keys.regex())?;
+            let regex = Regex::new(regex).ok().unwrap();
+            Self::draw_events_placement(context, keys, &|event| regex.is_match(event.get_name()))
         })
     }
 }

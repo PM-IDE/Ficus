@@ -1,10 +1,7 @@
-use ficus_backend::pipelines::pipelines::PipelineParts;
+use ficus_backend::{pipelines::pipelines::PipelineParts, vecs};
 
-#[test]
-fn test_pipeline_parts() {
-    let parts = PipelineParts::new();
-
-    let names = [
+fn get_test_parts_names() -> Vec<String> {
+    vecs![
         "ReadLogFromXes",
         "WriteLogToXes",
         "FindPrimitiveTandemArrays",
@@ -19,9 +16,24 @@ fn test_pipeline_parts() {
         "FilterEventsByRegex",
         "FilterLogByVariants",
         "DrawPlacementOfEventByName",
-    ];
+        "DrawPlacementOfEventsByRegex"
+    ]
+}
+
+#[test]
+fn test_pipeline_parts() {
+    let parts = PipelineParts::new();
+    let names = get_test_parts_names();
 
     for name in names {
-        assert!(parts.find_part(name).is_some())
+        assert!(parts.find_part(name.as_str()).is_some());
     }
+}
+
+#[test]
+fn test_pipeline_parts_count() {
+    let parts = PipelineParts::new();
+    let names = get_test_parts_names();
+
+    assert_eq!(parts.len(), names.len());
 }

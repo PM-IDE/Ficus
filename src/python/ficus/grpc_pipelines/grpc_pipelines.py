@@ -113,6 +113,21 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
+class DrawPlacementOfEventsByRegex(PipelinePart2WithDrawColorsLogCallback):
+    def __init__(self, regex: str):
+        self.regex = regex
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        config.configurationParameters.append(GrpcContextKeyValue(
+            key=GrpcContextKey(name='regex'),
+            value=StringContextValue(self.regex).to_grpc_context_value()
+        ))
+
+        part = _create_complex_get_context_part('colors_event_log', 'DrawPlacementOfEventsByRegex', config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
 def _create_simple_get_context_value_part(key_name: str):
     return GrpcSimpleContextRequestPipelinePart(key=GrpcContextKey(name=key_name))
 
