@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use rand::Rng;
 
@@ -49,5 +49,30 @@ impl Color {
     }
     pub fn blue(&self) -> u8 {
         self.blue
+    }
+}
+
+pub struct ColorsHolder {
+    names_to_colors: HashMap<String, Color>,
+    used_colors: HashSet<Color>,
+}
+
+impl ColorsHolder {
+    pub fn empty() -> Self {
+        Self {
+            names_to_colors: HashMap::new(),
+            used_colors: HashSet::new(),
+        }
+    }
+
+    pub fn get_or_create(&mut self, name: &str) -> Color {
+        if let Some(existing_color) = self.names_to_colors.get(name) {
+            existing_color.clone()
+        } else {
+            let new_color = Color::random(Some(&self.used_colors));
+            self.used_colors.insert(new_color);
+            self.names_to_colors.insert(name.to_owned(), new_color);
+            new_color
+        }
     }
 }

@@ -1,9 +1,4 @@
-use std::{
-    any::Any,
-    borrow::Cow,
-    collections::{HashMap, HashSet},
-    rc::Rc,
-};
+use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::{
@@ -16,7 +11,7 @@ use crate::{
     },
     features::discovery::petri_net::PetriNet,
     pipelines::aliases::*,
-    utils::{colors::Color, user_data::user_data::UserData},
+    utils::{colors::ColorsHolder, user_data::user_data::UserData},
 };
 
 use super::{
@@ -43,7 +38,7 @@ impl ContextKeys {
     pub const HASHES_EVENT_LOG: &str = "hashes_event_log";
     pub const NAMES_EVENT_LOG: &str = "names_event_log";
     pub const COLORS_EVENT_LOG: &str = "colors_event_log";
-    pub const NAMES_TO_COLORS: &str = "names_to_colors";
+    pub const COLORS_HOLDER: &str = "colors_holder";
 
     pub fn new() -> Self {
         let mut concrete_keys: HashMap<Cow<'static, str>, Box<dyn Any>> = HashMap::new();
@@ -68,7 +63,7 @@ impl ContextKeys {
         Self::insert_hashes_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_names_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_colors_event_log(&mut concrete_keys, &mut context_keys);
-        Self::insert_names_to_colors(&mut concrete_keys, &mut context_keys);
+        Self::insert_colors_holder(&mut concrete_keys, &mut context_keys);
 
         Self {
             concrete_keys,
@@ -246,37 +241,20 @@ impl ContextKeys {
         let key = DefaultContextKey::<ColorsEventLog>::new_with_factory(
             Self::COLORS_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
-                let names_to_colors_key = keys.names_to_colors().key();
-                if pipeline_context.get_concrete(names_to_colors_key).is_none() {
-                    let map = HashMap::new();
-                    pipeline_context.put_concrete(names_to_colors_key, map)
-                }
-
                 match pipeline_context.get_concrete(keys.event_log().key()) {
                     None => None,
                     Some(log) => {
-                        let names_to_colors = pipeline_context.get_concrete_mut(names_to_colors_key).unwrap();
-                        let mut used_colors = names_to_colors
-                            .values()
-                            .into_iter()
-                            .map(|c| *c)
-                            .collect::<HashSet<Color>>();
-
+                        let colors_holder = pipeline_context
+                            .get_concrete_mut(keys.colors_holder().key())
+                            .expect("Should be initialized");
                         let mut result = vec![];
                         for trace in log.get_traces() {
                             let mut vec = vec![];
                             for event in trace.borrow().get_events() {
                                 let event = event.borrow();
                                 let name = event.get_name();
-
-                                if let Some(color) = names_to_colors.get(name.as_str()) {
-                                    vec.push(color.clone())
-                                } else {
-                                    let color = Color::random(Some(&used_colors));
-                                    used_colors.insert(color.clone());
-                                    names_to_colors.insert(name.to_owned(), color.clone());
-                                    vec.push(color);
-                                }
+                                let color = colors_holder.get_or_create(name.as_str());
+                                vec.push(color);
                             }
 
                             result.push(vec);
@@ -291,10 +269,10 @@ impl ContextKeys {
         Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::COLORS_EVENT_LOG);
     }
 
-    fn insert_names_to_colors(
+    fn insert_colors_holder(
         concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
-        Self::insert_key::<NamesToColors>(concrete_keys, context_keys, Self::NAMES_TO_COLORS);
+        Self::insert_key::<ColorsHolder>(concrete_keys, context_keys, Self::COLORS_HOLDER);
     }
 }

@@ -36,7 +36,7 @@ use crate::{
     },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::{
-        colors::Color,
+        colors::{Color, ColorsHolder},
         user_data::{
             keys::Key,
             user_data::{UserData, UserDataImpl},
@@ -45,7 +45,6 @@ use crate::{
 };
 
 use super::{
-    aliases::NamesToColors,
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
     keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
@@ -67,11 +66,19 @@ impl Pipeline {
 
 impl PipelinePart for Pipeline {
     fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
+        self.put_default_concrete_keys(context, keys);
+
         for part in &self.parts {
             part.execute(context, keys)?;
         }
 
         Ok(())
+    }
+}
+
+impl Pipeline {
+    fn put_default_concrete_keys(&self, context: &mut PipelineContext, keys: &ContextKeys) {
+        context.put_concrete(keys.colors_holder().key(), ColorsHolder::empty());
     }
 }
 
@@ -408,22 +415,10 @@ impl PipelineParts {
 
     fn draw_placements_of_event_by_name() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_NAME, &|context, keys, config| {
-            let names_to_colors_key = keys.names_to_colors().key();
-            if context.get_concrete(names_to_colors_key).is_none() {
-                context.put_concrete(names_to_colors_key, HashMap::new())
-            }
-
             let log = Self::get_context_value(context, keys.event_log())?;
             let event_name = Self::get_context_value(config, keys.event_name())?;
-
-            let names_to_colors = Self::get_context_value_mut(context, keys.names_to_colors())
-                .ok()
-                .unwrap();
-            let used_colors = names_to_colors
-                .values()
-                .into_iter()
-                .map(|c| *c)
-                .collect::<HashSet<Color>>();
+            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())
+                .expect("Default value should be initialized");
 
             let mut colors_log = vec![];
             for trace in log.get_traces() {
@@ -432,12 +427,8 @@ impl PipelineParts {
                     let event = event.borrow();
                     let name = event.get_name();
                     if name == event_name {
-                        if !names_to_colors.contains_key(name) {
-                            let new_color = Color::random(Some(&used_colors));
-                            names_to_colors.insert(name.to_owned(), new_color);
-                        }
-
-                        colors_trace.push(names_to_colors[name].clone());
+                        let color = colors_holder.get_or_create(name.as_str());
+                        colors_trace.push(color);
                     } else {
                         colors_trace.push(Color::black());
                     }

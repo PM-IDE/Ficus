@@ -4,13 +4,14 @@ use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
     features::discovery::petri_net::PetriNet,
     pipelines::{
-        aliases::{
-            Activities, ActivitiesToLogs, ColorsEventLog, NamesToColors, Patterns, RepeatSets, TracesActivities,
-        },
+        aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},
         context::PipelineContext,
         keys::context_keys::ContextKeys,
     },
-    utils::user_data::{keys::Key, user_data::UserData},
+    utils::{
+        colors::ColorsHolder,
+        user_data::{keys::Key, user_data::UserData},
+    },
 };
 
 #[test]
@@ -50,7 +51,7 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<TracesActivities>(ContextKeys::TRACE_ACTIVITIES).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::PATH).is_some());
         assert!(keys.find_concrete_key::<ColorsEventLog>(ContextKeys::COLORS_EVENT_LOG).is_some());
-        assert!(keys.find_concrete_key::<NamesToColors>(ContextKeys::NAMES_TO_COLORS).is_some());
+        assert!(keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).is_some());
 
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
@@ -106,6 +107,6 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::EVENT_NAME).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::EVENT_NAME).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::REGEX).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id() == keys.find_concrete_key::<ColorsEventLog>(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id());
-        assert!(keys.find_key(ContextKeys::NAMES_TO_COLORS).unwrap().key().id() == keys.find_concrete_key::<NamesToColors>(ContextKeys::NAMES_TO_COLORS).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::COLORS_HOLDER).unwrap().key().id() == keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).unwrap().key().id());
     })
 }

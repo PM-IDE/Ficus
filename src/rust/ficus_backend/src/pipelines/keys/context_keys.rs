@@ -11,7 +11,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
-    utils::user_data::keys::Key,
+    utils::{colors::ColorsHolder, user_data::keys::Key},
 };
 
 use super::context_key::{ContextKey, DefaultContextKey};
@@ -176,11 +176,11 @@ impl ContextKeys {
         return self.colors_event_log().key().id() == key.key().id();
     }
 
-    pub fn names_to_colors(&self) -> &DefaultContextKey<NamesToColors> {
-        self.find_concrete_key::<NamesToColors>(Self::NAMES_TO_COLORS).unwrap()
+    pub fn colors_holder(&self) -> &DefaultContextKey<ColorsHolder> {
+        self.find_concrete_key::<ColorsHolder>(Self::COLORS_HOLDER).unwrap()
     }
 
-    pub fn is_names_to_colors(&self, key: &dyn ContextKey) -> bool {
-        return self.names_to_colors().key().id() == key.key().id();
+    pub fn is_colors_holder(&self, key: &dyn ContextKey) -> bool {
+        return self.colors_holder().key().id() == key.key().id();
     }
 }
