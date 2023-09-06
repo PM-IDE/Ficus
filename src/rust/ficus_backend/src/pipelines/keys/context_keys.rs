@@ -1,4 +1,4 @@
-use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
+use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -12,7 +12,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
-    utils::{colors::ColorsHolder, user_data::keys::Key},
+    utils::colors::ColorsHolder,
 };
 
 use super::context_key::{ContextKey, DefaultContextKey};
@@ -42,7 +42,11 @@ impl ContextKeys {
     }
 
     pub fn is_path(&self, key: &dyn ContextKey) -> bool {
-        return self.path().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.path())
+    }
+
+    fn are_keys_equal(first: &dyn ContextKey, second: &dyn ContextKey) -> bool {
+        first.key().id() == second.key().id()
     }
 
     pub fn event_log(&self) -> &DefaultContextKey<XesEventLogImpl> {
@@ -50,7 +54,7 @@ impl ContextKeys {
     }
 
     pub fn is_event_log(&self, key: &dyn ContextKey) -> bool {
-        return self.event_log().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.event_log())
     }
 
     pub fn activities(&self) -> &DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>> {
@@ -58,7 +62,7 @@ impl ContextKeys {
     }
 
     pub fn is_activities(&self, key: &dyn ContextKey) -> bool {
-        return self.activities().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.activities())
     }
 
     pub fn repeat_sets(&self) -> &DefaultContextKey<Vec<SubArrayWithTraceIndex>> {
@@ -66,7 +70,7 @@ impl ContextKeys {
     }
 
     pub fn is_repeat_sets(&self, key: &dyn ContextKey) -> bool {
-        return self.repeat_sets().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.repeat_sets())
     }
 
     pub fn trace_activities(&self) -> &DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>> {
@@ -75,7 +79,7 @@ impl ContextKeys {
     }
 
     pub fn is_trace_activities(&self, key: &dyn ContextKey) -> bool {
-        return self.trace_activities().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.trace_activities())
     }
 
     pub fn patterns(&self) -> &DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>> {
@@ -83,7 +87,7 @@ impl ContextKeys {
     }
 
     pub fn is_patterns(&self, key: &dyn ContextKey) -> bool {
-        return self.patterns().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.patterns())
     }
 
     pub fn petri_net(&self) -> &DefaultContextKey<PetriNet> {
@@ -91,7 +95,7 @@ impl ContextKeys {
     }
 
     pub fn is_petri_net(&self, key: &dyn ContextKey) -> bool {
-        return self.petri_net().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.petri_net())
     }
 
     pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
@@ -100,7 +104,7 @@ impl ContextKeys {
     }
 
     pub fn is_activities_to_logs(&self, key: &dyn ContextKey) -> bool {
-        return self.activities_to_logs().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.activities_to_logs())
     }
 
     pub fn activity_name(&self) -> &DefaultContextKey<String> {
@@ -108,7 +112,7 @@ impl ContextKeys {
     }
 
     pub fn is_activity_name(&self, key: &dyn ContextKey) -> bool {
-        return self.activity_name().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.activity_name())
     }
 
     pub fn hashes_event_log(&self) -> &DefaultContextKey<Vec<Vec<u64>>> {
@@ -116,7 +120,7 @@ impl ContextKeys {
     }
 
     pub fn is_hashes_event_log(&self, key: &dyn ContextKey) -> bool {
-        return self.hashes_event_log().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.hashes_event_log())
     }
 
     pub fn names_event_log(&self) -> &DefaultContextKey<Vec<Vec<String>>> {
@@ -125,7 +129,7 @@ impl ContextKeys {
     }
 
     pub fn is_names_event_log(&self, key: &dyn ContextKey) -> bool {
-        return self.names_event_log().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.names_event_log())
     }
 
     pub fn tandem_array_length(&self) -> &DefaultContextKey<u32> {
@@ -133,7 +137,7 @@ impl ContextKeys {
     }
 
     pub fn is_tandem_array_length(&self, key: &dyn ContextKey) -> bool {
-        return self.tandem_array_length().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.tandem_array_length())
     }
 
     pub fn activity_level(&self) -> &DefaultContextKey<u32> {
@@ -141,7 +145,7 @@ impl ContextKeys {
     }
 
     pub fn is_activity_level(&self, key: &dyn ContextKey) -> bool {
-        return self.activity_level().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.activity_level())
     }
 
     pub fn narrow_activities(&self) -> &DefaultContextKey<bool> {
@@ -149,7 +153,7 @@ impl ContextKeys {
     }
 
     pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {
-        return self.narrow_activities().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.narrow_activities())
     }
 
     pub fn event_name(&self) -> &DefaultContextKey<String> {
@@ -157,7 +161,7 @@ impl ContextKeys {
     }
 
     pub fn is_event_name(&self, key: &dyn ContextKey) -> bool {
-        return self.event_name().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.event_name())
     }
 
     pub fn regex(&self) -> &DefaultContextKey<String> {
@@ -165,7 +169,7 @@ impl ContextKeys {
     }
 
     pub fn is_regex(&self, key: &dyn ContextKey) -> bool {
-        return self.regex().key().id() == key.key().id();
+        Self::are_keys_equal(key, self.regex())
     }
 
     pub fn colors_event_log(&self) -> &DefaultContextKey<ColorsEventLog> {
@@ -174,7 +178,7 @@ impl ContextKeys {
     }
 
     pub fn is_colors_event_log(&self, key: &dyn ContextKey) -> bool {
-        self.colors_event_log().key().id() == key.key().id()
+        Self::are_keys_equal(key, self.colors_event_log())
     }
 
     pub fn colors_holder(&self) -> &DefaultContextKey<ColorsHolder> {
@@ -182,7 +186,7 @@ impl ContextKeys {
     }
 
     pub fn is_colors_holder(&self, key: &dyn ContextKey) -> bool {
-        self.colors_holder().key().id() == key.key().id()
+        Self::are_keys_equal(key, self.colors_holder())
     }
 
     pub fn patterns_discovery_strategy(&self) -> &DefaultContextKey<PatternsDiscoveryStrategy> {
@@ -191,6 +195,6 @@ impl ContextKeys {
     }
 
     pub fn is_patterns_discovery_strategy(&self, key: &dyn ContextKey) -> bool {
-        self.patterns_discovery_strategy().key().id() == key.key().id()
+        Self::are_keys_equal(key, self.patterns_discovery_strategy())
     }
 }
