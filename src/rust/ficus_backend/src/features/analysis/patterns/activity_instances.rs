@@ -18,6 +18,11 @@ pub struct ActivityInTraceInfo {
     pub length: usize,
 }
 
+pub enum SubTraceKind<'a> {
+    Attached(&'a ActivityInTraceInfo),
+    Unattached(usize, usize)
+}
+
 impl ActivityInTraceInfo {
     pub fn dump(&self) -> (usize, usize) {
         (self.start_pos, self.start_pos + self.length)

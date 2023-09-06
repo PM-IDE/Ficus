@@ -22,7 +22,7 @@ use crate::{
         analysis::patterns::{
             activity_instances::{
                 create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                UndefActivityHandlingStrategy,
+                UndefActivityHandlingStrategy, ActivityInTraceInfo, SubTraceKind,
             },
             contexts::PatternsDiscoveryStrategy,
             repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -184,6 +184,7 @@ impl PipelineParts {
             Self::draw_placements_of_event_by_name(),
             Self::draw_events_placements_by_regex(),
             Self::draw_full_activities_diagram(),
+            Self::draw_short_activities_diagram()
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -470,7 +471,7 @@ impl PipelineParts {
         })
     }
 
-    fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {
+    fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {        
         Self::create_pipeline_part(Self::DRAW_FULL_ACTIVITIES_DIAGRAM, &|context, keys, _| {
             let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
             let log = Self::get_context_value(context, keys.event_log())?;
@@ -479,22 +480,79 @@ impl PipelineParts {
             let mut colors_log = vec![];
             for (activities, trace) in traces_activities.into_iter().zip(log.get_traces().into_iter()) {
                 let mut colors_trace = vec![];
-                let mut index = 0usize;
-                for activity in activities {
-                    if activity.start_pos > index {
-                        let length = activity.start_pos - index;
-                        colors_trace.push(ColoredRectangle::new(Color::black(), index, length));
-                    }
 
-                    let color = colors_holder.get_or_create(&activity.node.borrow().name);
-                    colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length));
-                    index = activity.start_pos + activity.length;
-                }
+                Self::execute_with_activities_instances(
+                    activities,
+                    trace.borrow().get_events().len(), 
+                    &mut |sub_trace| {
+                        match sub_trace {
+                            SubTraceKind::Attached(activity) => {
+                                let color = colors_holder.get_or_create(&activity.node.borrow().name);
+                                colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length));
+                            }
+                            SubTraceKind::Unattached(start_pos, length) => {
+                                colors_trace.push(ColoredRectangle::new(Color::black(), start_pos, length));
+                            }
+                        }
+                    })?;
 
-                let length = trace.borrow().get_events().len();
-                if index < length {
-                    colors_trace.push(ColoredRectangle::new(Color::black(), index, length))
-                }
+                colors_log.push(colors_trace);
+            }
+
+            context.put_concrete(keys.colors_event_log().key(), colors_log);
+
+            Ok(())
+        })
+    }
+
+    fn execute_with_activities_instances(
+        activities: &Vec<ActivityInTraceInfo>,
+        trace_len: usize,
+        handler: &mut impl FnMut(SubTraceKind) -> (),
+    ) -> Result<(), PipelinePartExecutionError> {
+        let mut index = 0usize;
+        for activity in activities {
+            if activity.start_pos > index {
+                handler(SubTraceKind::Unattached(index, activity.start_pos - index));
+            }
+
+            handler(SubTraceKind::Attached(&activity));
+            index = activity.start_pos + activity.length;
+        }
+
+        if index < trace_len {
+            handler(SubTraceKind::Unattached(index, trace_len - index));
+        }
+        
+        Ok(())
+    }
+
+    fn draw_short_activities_diagram() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DRAW_SHORT_ACTIVITIES_DIAGRAM, &|context, keys, _| {
+            let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())?;
+
+            let mut colors_log = vec![];
+            for (activities, trace) in traces_activities.into_iter().zip(log.get_traces().into_iter()) {
+                let mut colors_trace = vec![];
+                let mut index = 0;
+                Self::execute_with_activities_instances(
+                    activities, 
+                    trace.borrow().get_events().len(), 
+                    &mut |sub_trace| {
+                        match sub_trace {
+                            SubTraceKind::Attached(activity) => {
+                                let color = colors_holder.get_or_create(&activity.node.borrow().name);
+                                colors_trace.push(ColoredRectangle::new(color, index, 1));
+                            }
+                            SubTraceKind::Unattached(_, _) => {
+                                colors_trace.push(ColoredRectangle::new(Color::black(), index, 1));
+                            }
+                        }
+
+                        index += 1;
+                    })?;
 
                 colors_log.push(colors_trace);
             }

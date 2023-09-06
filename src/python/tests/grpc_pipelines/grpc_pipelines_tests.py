@@ -1,7 +1,7 @@
 from ficus.grpc_pipelines.context_values import StringContextValue
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, TracesDiversityDiagram2, \
     DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
-    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2
+    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, DrawShortActivitiesDiagram2
 from tests.test_data_provider import get_example_log_path
 
 
@@ -79,6 +79,7 @@ def test_pipeline_with_getting_context_value5():
 def test_draw_full_activities_diagram():
     pipeline = Pipeline2(
         ReadLogFromXes2(),
+        TracesDiversityDiagram2(),
         FindSuperMaximalRepeats2(),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=True),
@@ -92,3 +93,23 @@ def test_draw_full_activities_diagram():
 
     assert result.finalResult.HasField('success')
     assert not result.finalResult.HasField('error')
+
+
+def test_draw_short_activities_diagram():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        TracesDiversityDiagram2(),
+        FindSuperMaximalRepeats2(),
+        DiscoverActivities2(activity_level=0),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        DrawShortActivitiesDiagram2()
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
