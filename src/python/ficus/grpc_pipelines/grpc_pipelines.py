@@ -1,14 +1,14 @@
 from enum import Enum
 
 from ficus.analysis.event_log_analysis import draw_colors_event_log
-from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log, \
+from ficus.grpc_pipelines.constants import *
+from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
 from ficus.grpc_pipelines.models.pipelines_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import *
-from ficus.pipelines.analysis.patterns.patterns_parts import ActivitiesDiscoveryStrategy
 
 
 class Pipeline2:
@@ -84,7 +84,7 @@ class PipelinePart2WithCallback(PipelinePart2):
 
 class ReadLogFromXes2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('ReadLogFromXes'))
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_read_log_from_xes))
 
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
@@ -124,7 +124,7 @@ class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
                          width_scale=width_scale)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part("colors_event_log"))
+        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part(const_colors_event_log))
 
 
 class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
@@ -146,11 +146,11 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         config.configurationParameters.append(GrpcContextKeyValue(
-            key=GrpcContextKey(name='event_name'),
+            key=GrpcContextKey(name=const_event_name),
             value=StringContextValue(self.event_name).to_grpc_context_value()
         ))
 
-        part = _create_complex_get_context_part('colors_event_log', 'DrawPlacementOfEventByName', config)
+        part = _create_complex_get_context_part(const_colors_event_log, const_draw_placement_of_event_by_name, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -172,9 +172,9 @@ class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_string_value(config, 'regex', self.regex)
+        append_string_value(config, const_regex, self.regex)
 
-        part = _create_complex_get_context_part('colors_event_log', 'DrawPlacementOfEventsByRegex', config)
+        part = _create_complex_get_context_part(const_colors_event_log, const_draw_placement_of_event_by_regex, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -196,7 +196,7 @@ class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part('colors_event_log', self.diagram_kind, config)
+        part = _create_complex_get_context_part(const_colors_event_log, self.diagram_kind, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -207,7 +207,7 @@ class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
                  plot_legend: bool = True,
                  height_scale: int = 1,
                  width_scale: int = 1):
-        super().__init__('DrawFullActivitiesDiagram',
+        super().__init__(const_draw_full_activities_diagram,
                          title=title,
                          save_path=save_path,
                          plot_legend=plot_legend,
@@ -222,7 +222,7 @@ class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
                  plot_legend: bool = True,
                  height_scale: int = 1,
                  width_scale: int = 1):
-        super().__init__('DrawShortActivitiesDiagram',
+        super().__init__(const_draw_short_activities_diagram,
                          title=title,
                          save_path=save_path,
                          plot_legend=plot_legend,
@@ -242,20 +242,20 @@ class FindTandemArrays2(PipelinePart2):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_uint32_value(config, 'tandem_array_length', self.max_array_length)
+        append_uint32_value(config, const_tandem_array_length, self.max_array_length)
 
         return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_type, config))
 
 
 class FindPrimitiveTandemArrays2(FindTandemArrays2):
     def __init__(self, max_array_length: int):
-        super().__init__(part_type='FindPrimitiveTandemArrays',
+        super().__init__(part_type=const_find_primitive_tandem_arrays,
                          max_array_length=max_array_length)
 
 
 class FindMaximalTandemArrays2(FindTandemArrays2):
     def __init__(self, max_array_length: int):
-        super().__init__(part_type='FindMaximalTandemArrays',
+        super().__init__(part_type=const_find_maximal_tandem_arrays,
                          max_array_length=max_array_length)
 
 
@@ -266,23 +266,23 @@ class FindRepeats2(PipelinePart2):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_patterns_discovery_strategy(config, 'patterns_discovery_strategy', self.strategy.name)
+        append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy.name)
         return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_name, config))
 
 
 class FindMaximalRepeats2(FindRepeats2):
     def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name='FindMaximalRepeats', strategy=strategy)
+        super().__init__(part_name=const_find_maximal_repeats, strategy=strategy)
 
 
 class FindSuperMaximalRepeats2(FindRepeats2):
     def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name='FindSuperMaximalRepeats', strategy=strategy)
+        super().__init__(part_name=const_find_super_maximal_repeats, strategy=strategy)
 
 
 class FindNearSuperMaximalRepeats2(FindRepeats2):
     def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name='FindNearSuperMaximalRepeats', strategy=strategy)
+        super().__init__(part_name=const_find_near_super_maximal_repeats, strategy=strategy)
 
 
 class DiscoverActivities2(PipelinePart2):
@@ -291,8 +291,8 @@ class DiscoverActivities2(PipelinePart2):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_uint32_value(config, 'activity_level', self.activity_level)
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('DiscoverActivities', config))
+        append_uint32_value(config, const_activity_level, self.activity_level)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_discover_activities, config))
 
 
 class DiscoverActivitiesInstances2(PipelinePart2):
@@ -301,8 +301,8 @@ class DiscoverActivitiesInstances2(PipelinePart2):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_bool_value(config, 'narrow_activities', self.narrow_activities)
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('DiscoverActivitiesInstances', config))
+        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_discover_activities_instances, config))
 
 
 def _create_simple_get_context_value_part(key_name: str):
@@ -347,4 +347,4 @@ def append_enum_value(config: GrpcPipelinePartConfiguration, key: str, enum_name
 
 
 def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: str):
-    append_enum_value(config, key, 'PatternsDiscoveryStrategy', value)
+    append_enum_value(config, key, const_pattern_discovery_strategy_enum_name, value)

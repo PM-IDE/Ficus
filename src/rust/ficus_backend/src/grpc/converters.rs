@@ -1,7 +1,7 @@
 use std::{any::Any, cell::RefCell, rc::Rc, str::FromStr, sync::Arc};
 
 use chrono::{DateTime, Duration, Utc};
-use nameof::{name_of, name_of_type};
+use nameof::name_of_type;
 
 use crate::{
     event_log::{

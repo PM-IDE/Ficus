@@ -199,7 +199,6 @@ impl FicusService {
         let grpc_config = &grpc_default_part.configuration.as_ref().unwrap();
 
         for conf_value in &grpc_config.configuration_parameters {
-            println!("{:?}", conf_value);
             let key_name = conf_value.key.as_ref().unwrap().name.as_ref();
             if let Some(key) = context_keys.find_key(key_name) {
                 let value = conf_value.value.as_ref().unwrap().context_value.as_ref().unwrap();
