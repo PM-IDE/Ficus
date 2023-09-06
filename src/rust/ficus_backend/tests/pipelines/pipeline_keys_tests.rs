@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
-    features::discovery::petri_net::PetriNet,
+    features::{discovery::petri_net::PetriNet, analysis::patterns::contexts::PatternsDiscoveryStrategy},
     pipelines::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},
         context::PipelineContext,
@@ -58,6 +58,7 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<bool>(ContextKeys::NARROW_ACTIVITIES).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::EVENT_NAME).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::REGEX).is_some());
+        assert!(keys.find_concrete_key::<PatternsDiscoveryStrategy>(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).is_some());
     })
 }
 
@@ -83,6 +84,7 @@ fn test_event_log_all_keys() {
         assert!(keys.find_key(ContextKeys::REGEX).is_some());
         assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).is_some());
         assert!(keys.find_key(ContextKeys::NAMES_EVENT_LOG).is_some());
+        assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).is_some());
     })
 }
 
@@ -108,5 +110,6 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::REGEX).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id() == keys.find_concrete_key::<ColorsEventLog>(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::COLORS_HOLDER).unwrap().key().id() == keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id() == keys.find_concrete_key::<PatternsDiscoveryStrategy>(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id());
     })
 }
