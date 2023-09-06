@@ -113,3 +113,21 @@ def test_draw_short_activities_diagram():
     assert result.finalResult.HasField('success')
     assert not result.finalResult.HasField('error')
 
+
+def test_draw_full_activities_diagram_2():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        TracesDiversityDiagram2(plot_legend=True, title='InitialLog', width_scale=10, height_scale=5),
+        FindSuperMaximalRepeats2(),
+        DiscoverActivities2(activity_level=0),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        DrawFullActivitiesDiagram2()
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')

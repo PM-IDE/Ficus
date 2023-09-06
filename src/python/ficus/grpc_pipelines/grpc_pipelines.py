@@ -85,18 +85,59 @@ class ReadLogFromXes2(PipelinePart2):
 
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
+    def __init__(self,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        self.title = title
+        self.save_path = save_path
+        self.plot_legend = plot_legend
+        self.height_scale = height_scale
+        self.width_scale = width_scale
+
     def execute_callback(self, context_value: GrpcContextValue):
         colors_log = from_grpc_colors_log(context_value.colors_log)
-        draw_colors_event_log(colors_log)
+        draw_colors_event_log(colors_log,
+                              title=self.title,
+                              save_path=self.save_path,
+                              plot_legend=self.plot_legend,
+                              height_scale=self.height_scale,
+                              width_scale=self.width_scale)
 
 
 class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
+    def __init__(self,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part("colors_event_log"))
 
 
 class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
-    def __init__(self, event_name: str):
+    def __init__(self,
+                 event_name: str,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
         self.event_name = event_name
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -111,7 +152,19 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
 
 
 class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
-    def __init__(self, regex: str):
+    def __init__(self,
+                 regex: str,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
         self.regex = regex
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -123,7 +176,19 @@ class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
 
 
 class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
-    def __init__(self, diagram_kind: str):
+    def __init__(self,
+                 diagram_kind: str,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
         self.diagram_kind = diagram_kind
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -133,13 +198,33 @@ class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
 
 
 class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
-    def __init__(self):
-        super().__init__('DrawFullActivitiesDiagram')
+    def __init__(self,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__('DrawFullActivitiesDiagram',
+                         title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
 
 
 class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
-    def __init__(self):
-        super().__init__('DrawShortActivitiesDiagram')
+    def __init__(self,
+                 title: str = None,
+                 save_path: str = None,
+                 plot_legend: bool = True,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__('DrawShortActivitiesDiagram',
+                         title=title,
+                         save_path=save_path,
+                         plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
 
 
 class FindTandemArrays2(PipelinePart2):
