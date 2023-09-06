@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
-    features::{discovery::petri_net::PetriNet, analysis::patterns::contexts::PatternsDiscoveryStrategy},
+    features::{analysis::patterns::contexts::PatternsDiscoveryStrategy, discovery::petri_net::PetriNet},
     pipelines::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},
         context::PipelineContext,

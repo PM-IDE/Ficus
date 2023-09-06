@@ -22,6 +22,42 @@ use super::{
     context_keys::ContextKeys,
 };
 
+pub(super) type ConcreteKeysStorage = HashMap<Cow<'static, str>, Box<dyn Any>>;
+pub(super) type ContextKeysStorage = HashMap<Cow<'static, str>, Box<dyn ContextKey>>;
+
+struct ContextKeysInitContext {
+    concrete_keys: ConcreteKeysStorage,
+    context_keys: ContextKeysStorage,
+}
+
+impl ContextKeysInitContext {
+    fn empty() -> Self {
+        Self {
+            concrete_keys: ConcreteKeysStorage::new(),
+            context_keys: ContextKeysStorage::new(),
+        }
+    }
+
+    fn insert<T>(&mut self, name: &'static str, key: &Box<DefaultContextKey<T>>) {
+        self.insert_concrete(name, key.clone());
+        self.insert_context(name, key.clone());
+    }
+
+    fn insert_concrete<T>(&mut self, name: &'static str, key: Box<DefaultContextKey<T>>) {
+        let prev = self.context_keys.insert(Cow::Borrowed(name), key.clone());
+        assert!(prev.is_none());
+    }
+
+    fn insert_context<T>(&mut self, name: &'static str, key: Box<DefaultContextKey<T>>) {
+        let prev = self.concrete_keys.insert(Cow::Borrowed(name), key.clone());
+        assert!(prev.is_none());
+    }
+
+    fn deconstruct(self) -> (ConcreteKeysStorage, ContextKeysStorage) {
+        (self.concrete_keys, self.context_keys)
+    }
+}
+
 impl ContextKeys {
     pub const PATH: &str = "path";
     pub const TANDEM_ARRAY_LENGTH: &str = "tandem_array_length";
@@ -45,30 +81,31 @@ impl ContextKeys {
     pub const COLORS_HOLDER: &str = "colors_holder";
 
     pub fn new() -> Self {
-        let mut concrete_keys: HashMap<Cow<'static, str>, Box<dyn Any>> = HashMap::new();
-        let mut context_keys: HashMap<Cow<'static, str>, Box<dyn ContextKey>> = HashMap::new();
+        let mut context = ContextKeysInitContext::empty();
 
-        Self::insert_path(&mut concrete_keys, &mut context_keys);
-        Self::insert_tandem_arrays_length(&mut concrete_keys, &mut context_keys);
-        Self::insert_activity_level(&mut concrete_keys, &mut context_keys);
-        Self::insert_narrow_activities(&mut concrete_keys, &mut context_keys);
-        Self::insert_event_name(&mut concrete_keys, &mut context_keys);
-        Self::insert_regex(&mut concrete_keys, &mut context_keys);
-        Self::insert_patterns_discovery_strategy(&mut concrete_keys, &mut context_keys);
+        Self::insert_path(&mut context);
+        Self::insert_tandem_arrays_length(&mut context);
+        Self::insert_activity_level(&mut context);
+        Self::insert_narrow_activities(&mut context);
+        Self::insert_event_name(&mut context);
+        Self::insert_regex(&mut context);
+        Self::insert_patterns_discovery_strategy(&mut context);
 
-        Self::insert_event_log(&mut concrete_keys, &mut context_keys);
-        Self::insert_activities(&mut concrete_keys, &mut context_keys);
-        Self::insert_repeat_sets(&mut concrete_keys, &mut context_keys);
-        Self::insert_trace_activities(&mut concrete_keys, &mut context_keys);
-        Self::insert_patterns(&mut concrete_keys, &mut context_keys);
-        Self::insert_petri_net(&mut concrete_keys, &mut context_keys);
-        Self::insert_activities_to_logs(&mut concrete_keys, &mut context_keys);
-        Self::insert_activity_name(&mut concrete_keys, &mut context_keys);
+        Self::insert_event_log(&mut context);
+        Self::insert_activities(&mut context);
+        Self::insert_repeat_sets(&mut context);
+        Self::insert_trace_activities(&mut context);
+        Self::insert_patterns(&mut context);
+        Self::insert_petri_net(&mut context);
+        Self::insert_activities_to_logs(&mut context);
+        Self::insert_activity_name(&mut context);
 
-        Self::insert_hashes_event_log(&mut concrete_keys, &mut context_keys);
-        Self::insert_names_event_log(&mut concrete_keys, &mut context_keys);
-        Self::insert_colors_event_log(&mut concrete_keys, &mut context_keys);
-        Self::insert_colors_holder(&mut concrete_keys, &mut context_keys);
+        Self::insert_hashes_event_log(&mut context);
+        Self::insert_names_event_log(&mut context);
+        Self::insert_colors_event_log(&mut context);
+        Self::insert_colors_holder(&mut context);
+
+        let (concrete_keys, context_keys) = context.deconstruct();
 
         Self {
             concrete_keys,
@@ -76,137 +113,80 @@ impl ContextKeys {
         }
     }
 
-    fn insert_path(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<String>(concrete_keys, context_keys, Self::PATH);
+    fn insert_path(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::PATH);
     }
 
-    fn insert_key<T: 'static>(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-        name: &'static str,
-    ) {
+    fn insert_key<T: 'static>(context: &mut ContextKeysInitContext, name: &'static str) {
         let key = Box::new(DefaultContextKey::<T>::new(name));
-        Self::insert_key_to_map(concrete_keys, context_keys, key, name);
+        Self::insert_key_to_map(context, key, name);
     }
 
     fn insert_key_to_map<T: 'static>(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+        context: &mut ContextKeysInitContext,
         key: Box<DefaultContextKey<T>>,
         name: &'static str,
     ) {
-        let prev = context_keys.insert(Cow::Borrowed(name), key.clone());
-        assert!(prev.is_none());
-
-        let prev = concrete_keys.insert(Cow::Borrowed(name), key.clone());
-        assert!(prev.is_none());
+        context.insert(name, &key);
     }
 
-    fn insert_tandem_arrays_length(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<u32>(concrete_keys, context_keys, Self::TANDEM_ARRAY_LENGTH);
+    fn insert_tandem_arrays_length(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::TANDEM_ARRAY_LENGTH);
     }
 
-    fn insert_activity_level(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<u32>(concrete_keys, context_keys, Self::ACTIVITY_LEVEL);
+    fn insert_activity_level(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::ACTIVITY_LEVEL);
     }
 
-    fn insert_narrow_activities(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<bool>(concrete_keys, context_keys, Self::NARROW_ACTIVITIES);
+    fn insert_narrow_activities(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<bool>(context, Self::NARROW_ACTIVITIES);
     }
 
-    fn insert_event_name(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<String>(concrete_keys, context_keys, Self::EVENT_NAME);
+    fn insert_event_name(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::EVENT_NAME);
     }
 
-    fn insert_regex(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<String>(concrete_keys, context_keys, Self::REGEX);
+    fn insert_regex(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::REGEX);
     }
 
-    fn insert_patterns_discovery_strategy(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<PatternsDiscoveryStrategy>(concrete_keys, context_keys, Self::PATTERNS_DISCOVERY_STRATEGY);
+    fn insert_patterns_discovery_strategy(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<PatternsDiscoveryStrategy>(context, Self::PATTERNS_DISCOVERY_STRATEGY);
     }
 
-    fn insert_event_log(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<XesEventLogImpl>(concrete_keys, context_keys, Self::EVENT_LOG);
+    fn insert_event_log(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<XesEventLogImpl>(context, Self::EVENT_LOG);
     }
 
-    fn insert_activities(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<Activities>(concrete_keys, context_keys, Self::ACTIVITIES);
+    fn insert_activities(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<Activities>(context, Self::ACTIVITIES);
     }
 
-    fn insert_repeat_sets(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<RepeatSets>(concrete_keys, context_keys, Self::REPEAT_SETS);
+    fn insert_repeat_sets(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<RepeatSets>(context, Self::REPEAT_SETS);
     }
 
-    fn insert_trace_activities(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<TracesActivities>(concrete_keys, context_keys, Self::TRACE_ACTIVITIES);
+    fn insert_trace_activities(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<TracesActivities>(context, Self::TRACE_ACTIVITIES);
     }
 
-    fn insert_patterns(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<Patterns>(concrete_keys, context_keys, Self::PATTERNS);
+    fn insert_patterns(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<Patterns>(context, Self::PATTERNS);
     }
 
-    fn insert_petri_net(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<PetriNet>(concrete_keys, context_keys, Self::PETRI_NET);
+    fn insert_petri_net(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<PetriNet>(context, Self::PETRI_NET);
     }
 
-    fn insert_activities_to_logs(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<ActivitiesToLogs>(concrete_keys, context_keys, Self::ACTIVITIES_TO_LOGS);
+    fn insert_activities_to_logs(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<ActivitiesToLogs>(context, Self::ACTIVITIES_TO_LOGS);
     }
 
-    fn insert_activity_name(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<String>(concrete_keys, context_keys, Self::ACTIVITY_NAME);
+    fn insert_activity_name(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::ACTIVITY_NAME);
     }
 
-    fn insert_hashes_event_log(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
+    fn insert_hashes_event_log(context: &mut ContextKeysInitContext) {
         let key = DefaultContextKey::<Vec<Vec<u64>>>::new_with_factory(
             Self::HASHES_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
@@ -217,13 +197,10 @@ impl ContextKeys {
             })),
         );
 
-        Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::HASHES_EVENT_LOG);
+        Self::insert_key_to_map(context, Box::new(key), Self::HASHES_EVENT_LOG);
     }
 
-    fn insert_names_event_log(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
+    fn insert_names_event_log(context: &mut ContextKeysInitContext) {
         let key = DefaultContextKey::<Vec<Vec<String>>>::new_with_factory(
             Self::NAMES_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
@@ -246,13 +223,10 @@ impl ContextKeys {
             })),
         );
 
-        Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::NAMES_EVENT_LOG);
+        Self::insert_key_to_map(context, Box::new(key), Self::NAMES_EVENT_LOG);
     }
 
-    fn insert_colors_event_log(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
+    fn insert_colors_event_log(context: &mut ContextKeysInitContext) {
         let key = DefaultContextKey::<ColorsEventLog>::new_with_factory(
             Self::COLORS_EVENT_LOG.to_string(),
             Rc::new(Box::new(|pipeline_context, keys| {
@@ -285,13 +259,10 @@ impl ContextKeys {
             })),
         );
 
-        Self::insert_key_to_map(concrete_keys, context_keys, Box::new(key), Self::COLORS_EVENT_LOG);
+        Self::insert_key_to_map(context, Box::new(key), Self::COLORS_EVENT_LOG);
     }
 
-    fn insert_colors_holder(
-        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
-        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
-    ) {
-        Self::insert_key::<ColorsHolder>(concrete_keys, context_keys, Self::COLORS_HOLDER);
+    fn insert_colors_holder(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<ColorsHolder>(context, Self::COLORS_HOLDER);
     }
 }

@@ -15,11 +15,14 @@ use crate::{
     utils::colors::ColorsHolder,
 };
 
-use super::context_key::{ContextKey, DefaultContextKey};
+use super::{
+    context_key::{ContextKey, DefaultContextKey},
+    context_keys_init::{ConcreteKeysStorage, ContextKeysStorage},
+};
 
 pub struct ContextKeys {
-    pub(super) concrete_keys: HashMap<Cow<'static, str>, Box<dyn Any>>,
-    pub(super) context_keys: HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    pub(super) concrete_keys: ConcreteKeysStorage,
+    pub(super) context_keys: ContextKeysStorage,
 }
 
 unsafe impl Sync for ContextKeys {}
