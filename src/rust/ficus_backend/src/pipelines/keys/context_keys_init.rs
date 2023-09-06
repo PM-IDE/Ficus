@@ -1,4 +1,4 @@
-use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc};
+use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc, str::ParseBoolError};
 
 use crate::{
     event_log::{
@@ -96,8 +96,11 @@ impl ContextKeys {
         key: Box<DefaultContextKey<T>>,
         name: &'static str,
     ) {
-        context_keys.insert(Cow::Borrowed(name), key.clone());
-        concrete_keys.insert(Cow::Borrowed(name), key.clone());
+        let prev = context_keys.insert(Cow::Borrowed(name), key.clone());
+        assert!(prev.is_none());
+
+        let prev = concrete_keys.insert(Cow::Borrowed(name), key.clone());
+        assert!(prev.is_none());
     }
 
     fn insert_tandem_arrays_length(
@@ -259,9 +262,8 @@ impl ContextKeys {
                                 let event = event.borrow();
                                 let name = event.get_name();
                                 let color = colors_holder.get_or_create(name.as_str());
-                                let name = event.get_name().to_owned();
 
-                                vec.push(ColoredRectangle::square(color, index, name));
+                                vec.push(ColoredRectangle::square(color, index, name.to_owned()));
                                 index += 1;
                             }
 

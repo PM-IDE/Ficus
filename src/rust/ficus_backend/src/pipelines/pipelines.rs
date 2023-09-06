@@ -189,7 +189,8 @@ impl PipelineParts {
 
         let mut names_to_parts = HashMap::new();
         for part in parts {
-            names_to_parts.insert((&part.0).to_owned(), part.1);
+            let prev = names_to_parts.insert((&part.0).to_owned(), part.1);
+            assert!(prev.is_none());
         }
 
         Self { names_to_parts }
