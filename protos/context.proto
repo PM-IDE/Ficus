@@ -63,5 +63,11 @@ message GrpcColorsEventLog {
 }
 
 message GrpcColorsTrace {
-    repeated GrpcColor event_colors = 2;
+    repeated GrpcColoredRectangle event_colors = 2;
+}
+
+message GrpcColoredRectangle {
+    GrpcColor color = 1;
+    uint32 start_index = 2;
+    uint32 length = 3;
 }

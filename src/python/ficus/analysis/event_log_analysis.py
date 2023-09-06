@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt, axes
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
-from ..grpc_pipelines.context_values import Color
+from ..grpc_pipelines.context_values import Color, ColoredRectangle
 from ..log.event_log import MyEventLog
 from ..log.functions import read_log_from_xes
 from ..util import *
@@ -98,7 +98,7 @@ class TraceDiversityLikeDiagramContext:
         self.height_scale = height_scale
 
 
-def _draw_traces_diversity_like_diagram_internal(log: Union[MyEventLog, list[list[Color]]],
+def _draw_traces_diversity_like_diagram_internal(log: Union[MyEventLog, list[list[ColoredRectangle]]],
                                                  draw_func: Callable[[TraceDiversityLikeDiagramContext], None],
                                                  title: str = None,
                                                  save_path: str = None,
@@ -196,7 +196,7 @@ def _draw_traces_diversity_like_diagram(log: MyEventLog,
                                                  width_scale=width_scale)
 
 
-def draw_colors_event_log(log: list[list[Color]],
+def draw_colors_event_log(log: list[list[ColoredRectangle]],
                           title: str = None,
                           save_path: str = None,
                           plot_legend: bool = True,
@@ -207,9 +207,10 @@ def draw_colors_event_log(log: list[list[Color]],
         for trace in log:
             current_x = 0
             for event_color in trace:
-                rect = plt.Rectangle((current_x, current_y), ctx.rect_width, ctx.rect_height, fc=event_color.to_hex())
+                width = ctx.rect_width * event_color.length
+                rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=event_color.color.to_hex())
                 ctx.drawer.add_patch(rect)
-                current_x += ctx.rect_width
+                current_x += width
 
             current_y += ctx.rect_height + ctx.y_delta_between_traces
 

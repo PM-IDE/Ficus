@@ -90,17 +90,28 @@ class Color:
         return to_hex((self.red, self.green, self.blue))
 
 
-def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[Color]]:
+@dataclass
+class ColoredRectangle:
+    color: Color
+    start_pos: int
+    length: int
+
+
+def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[ColoredRectangle]]:
     result = []
     for grpc_trace in grpc_colors_log.traces:
         trace = []
-        for event_color in grpc_trace.event_colors:
-            trace.append(from_grpc_color(event_color))
+        for colored_rectangle in grpc_trace.event_colors:
+            trace.append(from_grpc_colored_rectangle(colored_rectangle))
 
         result.append(trace)
 
     return result
 
 
-def from_grpc_color(grpc_color: GrpcColor) -> Color:
+def from_grpc_colored_rectangle(grpc_color: GrpcColoredRectangle) -> ColoredRectangle:
+    return ColoredRectangle(from_grpc_color(grpc_color.color), grpc_color.start_index, grpc_color.length)
+
+
+def from_grpc_color(grpc_color: GrpcColor):
     return Color(grpc_color.red, grpc_color.green, grpc_color.blue)

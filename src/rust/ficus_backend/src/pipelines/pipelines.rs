@@ -36,7 +36,7 @@ use crate::{
     },
     pipelines::errors::pipeline_errors::{MissingContextError, RawPartExecutionError},
     utils::{
-        colors::{Color, ColorsHolder},
+        colors::{Color, ColoredRectangle, ColorsHolder},
         user_data::{
             keys::Key,
             user_data::{UserData, UserDataImpl},
@@ -161,6 +161,8 @@ impl PipelineParts {
     pub const FILTER_LOG_BY_VARIANTS: &str = "FilterLogByVariants";
     pub const DRAW_PLACEMENT_OF_EVENT_BY_NAME: &str = "DrawPlacementOfEventByName";
     pub const DRAW_PLACEMENT_OF_EVENT_BY_REGEX: &str = "DrawPlacementOfEventsByRegex";
+    pub const DRAW_FULL_ACTIVITIES_DIAGRAM: &str = "DrawFullActivitiesDiagram";
+    pub const DRAW_SHORT_ACTIVITIES_DIAGRAM: &str = "DrawShortActivitiesDiagram";
 }
 
 impl PipelineParts {
@@ -181,6 +183,7 @@ impl PipelineParts {
             Self::filter_log_by_variants(),
             Self::draw_placements_of_event_by_name(),
             Self::draw_events_placements_by_regex(),
+            Self::draw_full_activities_diagram(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -438,15 +441,18 @@ impl PipelineParts {
         let mut colors_log = vec![];
         for trace in log.get_traces() {
             let mut colors_trace = vec![];
+            let mut index = 0usize;
             for event in trace.borrow().get_events() {
                 let event = event.borrow();
                 let name = event.get_name();
                 if selector(&event) {
                     let color = colors_holder.get_or_create(name.as_str());
-                    colors_trace.push(color);
+                    colors_trace.push(ColoredRectangle::square(color, index));
                 } else {
-                    colors_trace.push(Color::black());
+                    colors_trace.push(ColoredRectangle::square(Color::black(), index));
                 }
+
+                index += 1;
             }
 
             colors_log.push(colors_trace);
@@ -461,6 +467,41 @@ impl PipelineParts {
             let regex = Self::get_context_value(config, keys.regex())?;
             let regex = Regex::new(regex).ok().unwrap();
             Self::draw_events_placement(context, keys, &|event| regex.is_match(event.get_name()))
+        })
+    }
+
+    fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DRAW_FULL_ACTIVITIES_DIAGRAM, &|context, keys, _| {
+            let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())?;
+
+            let mut colors_log = vec![];
+            for (activities, trace) in traces_activities.into_iter().zip(log.get_traces().into_iter()) {
+                let mut colors_trace = vec![];
+                let mut index = 0usize;
+                for activity in activities {
+                    if activity.start_pos > index {
+                        let length = activity.start_pos - index;
+                        colors_trace.push(ColoredRectangle::new(Color::black(), index, length));
+                    }
+
+                    let color = colors_holder.get_or_create(&activity.node.borrow().name);
+                    colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length));
+                    index = activity.start_pos + activity.length;
+                }
+
+                let length = trace.borrow().get_events().len();
+                if index < length {
+                    colors_trace.push(ColoredRectangle::new(Color::black(), index, length))
+                }
+
+                colors_log.push(colors_trace);
+            }
+
+            context.put_concrete(keys.colors_event_log().key(), colors_log);
+
+            Ok(())
         })
     }
 }

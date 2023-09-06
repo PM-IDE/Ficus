@@ -34,7 +34,7 @@ import ficus.grpc_pipelines.models.util_pb2 as util__pb2
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcontext.proto\x12\x05\x66icus\x1a\x0fpm_models.proto\x1a\nutil.proto\"\x1e\n\x0eGrpcContextKey\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xdc\x03\n\x10GrpcContextValue\x12\x10\n\x06string\x18\x01 \x01(\tH\x00\x12;\n\nhashes_log\x18\x02 \x01(\x0b\x32%.ficus.GrpcHashesEventLogContextValueH\x00\x12\x39\n\tnames_log\x18\x03 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12\x10\n\x06uint32\x18\x04 \x01(\rH\x00\x12J\n\x11traces_sub_arrays\x18\x05 \x01(\x0b\x32-.ficus.GrpcEventLogTraceSubArraysContextValueH\x00\x12P\n\x16trace_index_sub_arrays\x18\x06 \x01(\x0b\x32..ficus.GrpcSubArraysWithTraceIndexContextValueH\x00\x12\x0e\n\x04\x62ool\x18\x07 \x01(\x08H\x00\x12=\n\rxes_event_log\x18\x08 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12/\n\ncolors_log\x18\t \x01(\x0b\x32\x19.ficus.GrpcColorsEventLogH\x00\x42\x0e\n\x0c\x63ontextValue\"a\n\x13GrpcContextKeyValue\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"H\n\x1eGrpcHashesEventLogContextValue\x12&\n\x03log\x18\x01 \x01(\x0b\x32\x19.ficus.GrpcHashesEventLog\"F\n\x1dGrpcNamesEventLogContextValue\x12%\n\x03log\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcNamesEventLog\"^\n&GrpcEventLogTraceSubArraysContextValue\x12\x34\n\x11traces_sub_arrays\x18\x01 \x03(\x0b\x32\x19.ficus.GrpcTraceSubArrays\"/\n\x11GrpcTraceSubArray\x12\r\n\x05start\x18\x01 \x01(\r\x12\x0b\n\x03\x65nd\x18\x02 \x01(\r\"B\n\x12GrpcTraceSubArrays\x12,\n\nsub_arrays\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcTraceSubArray\"^\n\x1aGrpcSubArrayWithTraceIndex\x12+\n\tsub_array\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcTraceSubArray\x12\x13\n\x0btrace_index\x18\x02 \x01(\r\"`\n\'GrpcSubArraysWithTraceIndexContextValue\x12\x35\n\nsub_arrays\x18\x01 \x03(\x0b\x32!.ficus.GrpcSubArrayWithTraceIndex\"<\n\x12GrpcColorsEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcColorsTrace\"9\n\x0fGrpcColorsTrace\x12&\n\x0c\x65vent_colors\x18\x02 \x03(\x0b\x32\x10.ficus.GrpcColorb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcontext.proto\x12\x05\x66icus\x1a\x0fpm_models.proto\x1a\nutil.proto\"\x1e\n\x0eGrpcContextKey\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xdc\x03\n\x10GrpcContextValue\x12\x10\n\x06string\x18\x01 \x01(\tH\x00\x12;\n\nhashes_log\x18\x02 \x01(\x0b\x32%.ficus.GrpcHashesEventLogContextValueH\x00\x12\x39\n\tnames_log\x18\x03 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12\x10\n\x06uint32\x18\x04 \x01(\rH\x00\x12J\n\x11traces_sub_arrays\x18\x05 \x01(\x0b\x32-.ficus.GrpcEventLogTraceSubArraysContextValueH\x00\x12P\n\x16trace_index_sub_arrays\x18\x06 \x01(\x0b\x32..ficus.GrpcSubArraysWithTraceIndexContextValueH\x00\x12\x0e\n\x04\x62ool\x18\x07 \x01(\x08H\x00\x12=\n\rxes_event_log\x18\x08 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12/\n\ncolors_log\x18\t \x01(\x0b\x32\x19.ficus.GrpcColorsEventLogH\x00\x42\x0e\n\x0c\x63ontextValue\"a\n\x13GrpcContextKeyValue\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"H\n\x1eGrpcHashesEventLogContextValue\x12&\n\x03log\x18\x01 \x01(\x0b\x32\x19.ficus.GrpcHashesEventLog\"F\n\x1dGrpcNamesEventLogContextValue\x12%\n\x03log\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcNamesEventLog\"^\n&GrpcEventLogTraceSubArraysContextValue\x12\x34\n\x11traces_sub_arrays\x18\x01 \x03(\x0b\x32\x19.ficus.GrpcTraceSubArrays\"/\n\x11GrpcTraceSubArray\x12\r\n\x05start\x18\x01 \x01(\r\x12\x0b\n\x03\x65nd\x18\x02 \x01(\r\"B\n\x12GrpcTraceSubArrays\x12,\n\nsub_arrays\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcTraceSubArray\"^\n\x1aGrpcSubArrayWithTraceIndex\x12+\n\tsub_array\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcTraceSubArray\x12\x13\n\x0btrace_index\x18\x02 \x01(\r\"`\n\'GrpcSubArraysWithTraceIndexContextValue\x12\x35\n\nsub_arrays\x18\x01 \x03(\x0b\x32!.ficus.GrpcSubArrayWithTraceIndex\"<\n\x12GrpcColorsEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcColorsTrace\"D\n\x0fGrpcColorsTrace\x12\x31\n\x0c\x65vent_colors\x18\x02 \x03(\x0b\x32\x1b.ficus.GrpcColoredRectangle\"\\\n\x14GrpcColoredRectangle\x12\x1f\n\x05\x63olor\x18\x01 \x01(\x0b\x32\x10.ficus.GrpcColor\x12\x13\n\x0bstart_index\x18\x02 \x01(\r\x12\x0e\n\x06length\x18\x03 \x01(\rb\x06proto3')
 
 
 
@@ -65,6 +65,8 @@ _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE = DESCRIPTOR.message_types_by_name['Grp
 _GRPCCOLORSEVENTLOG = DESCRIPTOR.message_types_by_name['GrpcColorsEventLog']
 
 _GRPCCOLORSTRACE = DESCRIPTOR.message_types_by_name['GrpcColorsTrace']
+
+_GRPCCOLOREDRECTANGLE = DESCRIPTOR.message_types_by_name['GrpcColoredRectangle']
 
 GrpcContextKey = _reflection.GeneratedProtocolMessageType('GrpcContextKey', (_message.Message,), {
 
@@ -234,6 +236,20 @@ _sym_db.RegisterMessage(GrpcColorsTrace)
 
 
 
+GrpcColoredRectangle = _reflection.GeneratedProtocolMessageType('GrpcColoredRectangle', (_message.Message,), {
+
+  'DESCRIPTOR' : _GRPCCOLOREDRECTANGLE,
+
+  '__module__' : 'context_pb2'
+
+  # @@protoc_insertion_point(class_scope:ficus.GrpcColoredRectangle)
+
+  })
+
+_sym_db.RegisterMessage(GrpcColoredRectangle)
+
+
+
 if _descriptor._USE_C_DESCRIPTORS == False:
 
 
@@ -286,6 +302,10 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   _GRPCCOLORSTRACE._serialized_start=1278
 
-  _GRPCCOLORSTRACE._serialized_end=1335
+  _GRPCCOLORSTRACE._serialized_end=1346
+
+  _GRPCCOLOREDRECTANGLE._serialized_start=1348
+
+  _GRPCCOLOREDRECTANGLE._serialized_end=1440
 
 # @@protoc_insertion_point(module_scope)

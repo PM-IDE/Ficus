@@ -1,6 +1,6 @@
 from ficus.analysis.event_log_analysis import draw_colors_event_log
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log, \
-    StringContextValue
+    StringContextValue, Uint32ContextValue, BoolContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
@@ -81,10 +81,7 @@ class PipelinePart2WithCallback(PipelinePart2):
 
 class ReadLogFromXes2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        part = _create_empty_pipeline_part()
-        part.name = "ReadLogFromXes"
-
-        return GrpcPipelinePartBase(defaultPart=part)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('ReadLogFromXes'))
 
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
@@ -113,19 +110,93 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class DrawPlacementOfEventsByRegex(PipelinePart2WithDrawColorsLogCallback):
+class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
     def __init__(self, regex: str):
         self.regex = regex
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        config.configurationParameters.append(GrpcContextKeyValue(
-            key=GrpcContextKey(name='regex'),
-            value=StringContextValue(self.regex).to_grpc_context_value()
-        ))
+        append_string_value(config, 'regex', self.regex)
 
         part = _create_complex_get_context_part('colors_event_log', 'DrawPlacementOfEventsByRegex', config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
+    def __init__(self, diagram_kind: str):
+        self.diagram_kind = diagram_kind
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        part = _create_complex_get_context_part('colors_event_log', self.diagram_kind, config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
+    def __init__(self):
+        super().__init__('DrawFullActivitiesDiagram')
+
+
+class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
+    def __init__(self):
+        super().__init__('DrawShortActivitiesDiagram')
+
+
+class FindTandemArrays2(PipelinePart2):
+    def __init__(self, part_type: str, max_array_length: int):
+        self.max_array_length = max_array_length
+        self.part_type = part_type
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, 'tandem_array_length', self.max_array_length)
+
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_type, config))
+
+
+class FindPrimitiveTandemArrays2(FindTandemArrays2):
+    def __init__(self, max_array_length: int):
+        super().__init__(part_type='FindPrimitiveTandemArrays', max_array_length=max_array_length)
+
+
+class FindMaximalTandemArrays2(FindTandemArrays2):
+    def __init__(self, max_array_length: int):
+        super().__init__(part_type='FindMaximalTandemArrays', max_array_length=max_array_length)
+
+
+class FindMaximalRepeats2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindMaximalRepeats'))
+
+
+class FindSuperMaximalRepeats2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindSuperMaximalRepeats'))
+
+
+class FindNearSuperMaximalRepeats2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindNearSuperMaximalRepeats'))
+
+
+class DiscoverActivities2(PipelinePart2):
+    def __init__(self, activity_level: int):
+        self.activity_level = activity_level
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, 'activity_level', self.activity_level)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('DiscoverActivities', config))
+
+
+class DiscoverActivitiesInstances2(PipelinePart2):
+    def __init__(self, narrow_activities: bool):
+        self.narrow_activities = narrow_activities
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_bool_value(config, 'narrow_activities', self.narrow_activities)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('DiscoverActivitiesInstances', config))
 
 
 def _create_simple_get_context_value_part(key_name: str):
@@ -142,5 +213,24 @@ def _create_complex_get_context_part(key_name: str, before_part_name: str, confi
     )
 
 
-def _create_empty_pipeline_part():
-    return GrpcPipelinePart(configuration=GrpcPipelinePartConfiguration())
+def _create_empty_pipeline_part(name: str, config=GrpcPipelinePartConfiguration()):
+    return GrpcPipelinePart(configuration=config, name=name)
+
+
+def append_string_value(config: GrpcPipelinePartConfiguration, key: str, value: str):
+    _append_context_value(config, key, StringContextValue(value))
+
+
+def _append_context_value(config: GrpcPipelinePartConfiguration, key: str, value: ContextValue):
+    config.configurationParameters.append(GrpcContextKeyValue(
+        key=GrpcContextKey(name=key),
+        value=value.to_grpc_context_value()
+    ))
+
+
+def append_uint32_value(config: GrpcPipelinePartConfiguration, key: str, value: int):
+    _append_context_value(config, key, Uint32ContextValue(value))
+
+
+def append_bool_value(config: GrpcPipelinePartConfiguration, key: str, value: bool):
+    _append_context_value(config, key, BoolContextValue(value))

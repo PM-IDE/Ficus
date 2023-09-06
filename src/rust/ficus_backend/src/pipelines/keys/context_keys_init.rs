@@ -11,7 +11,10 @@ use crate::{
     },
     features::discovery::petri_net::PetriNet,
     pipelines::aliases::*,
-    utils::{colors::ColorsHolder, user_data::user_data::UserData},
+    utils::{
+        colors::{ColoredRectangle, ColorsHolder},
+        user_data::user_data::UserData,
+    },
 };
 
 use super::{
@@ -247,14 +250,17 @@ impl ContextKeys {
                         let colors_holder = pipeline_context
                             .get_concrete_mut(keys.colors_holder().key())
                             .expect("Should be initialized");
+
                         let mut result = vec![];
                         for trace in log.get_traces() {
                             let mut vec = vec![];
+                            let mut index = 0usize;
                             for event in trace.borrow().get_events() {
                                 let event = event.borrow();
                                 let name = event.get_name();
                                 let color = colors_holder.get_or_create(name.as_str());
-                                vec.push(color);
+                                vec.push(ColoredRectangle::square(color, index));
+                                index += 1;
                             }
 
                             result.push(vec);

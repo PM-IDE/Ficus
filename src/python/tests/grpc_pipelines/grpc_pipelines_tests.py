@@ -1,6 +1,7 @@
 from ficus.grpc_pipelines.context_values import StringContextValue
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, TracesDiversityDiagram2, \
-    DrawPlacementsOfEventByName2, DrawPlacementOfEventsByRegex
+    DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
+    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2
 from tests.test_data_provider import get_example_log_path
 
 
@@ -55,7 +56,7 @@ def test_pipeline_with_getting_context_value3():
 def _do_simple_test_with_regex(regex: str):
     pipeline = Pipeline2(
         ReadLogFromXes2(),
-        DrawPlacementOfEventsByRegex(regex)
+        DrawPlacementOfEventsByRegex2(regex)
     )
 
     log_path = get_example_log_path('exercise1.xes')
@@ -73,3 +74,21 @@ def test_pipeline_with_getting_context_value4():
 
 def test_pipeline_with_getting_context_value5():
     _do_simple_test_with_regex('A|B|C|D')
+
+
+def test_draw_full_activities_diagram():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        FindSuperMaximalRepeats2(),
+        DiscoverActivities2(activity_level=0),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        DrawFullActivitiesDiagram2()
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')

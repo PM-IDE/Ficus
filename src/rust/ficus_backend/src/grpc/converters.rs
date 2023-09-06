@@ -9,17 +9,19 @@ use crate::{
     },
     features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcColor, GrpcColorsEventLog, GrpcColorsTrace, GrpcContextKeyValue,
-        GrpcContextValue, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog, GrpcHashesEventLogContextValue,
-        GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue, GrpcNamesTrace,
-        GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
+        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
+        GrpcContextKeyValue, GrpcContextValue, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog,
+        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
+        GrpcNamesTrace, GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray,
+        GrpcTraceSubArrays,
     },
     pipelines::{
+        aliases::ColorsEventLog,
         context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
     utils::{
-        colors::Color,
+        colors::{Color, ColoredRectangle},
         user_data::{keys::Key, user_data::UserData},
     },
 };
@@ -202,16 +204,16 @@ fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcCont
 }
 
 fn try_convert_to_grpc_colors_event_log(value: &dyn Any) -> Option<GrpcContextValue> {
-    if !value.is::<Vec<Vec<Color>>>() {
+    if !value.is::<ColorsEventLog>() {
         None
     } else {
-        let colors_log = value.downcast_ref::<Vec<Vec<Color>>>().unwrap();
+        let colors_log = value.downcast_ref::<ColorsEventLog>().unwrap();
         let mut grpc_traces = vec![];
 
         for trace in colors_log {
             let mut grpc_trace = vec![];
-            for color in trace {
-                grpc_trace.push(convert_to_grpc_color(color))
+            for colored_rect in trace {
+                grpc_trace.push(convert_to_grpc_colored_rect(colored_rect))
             }
 
             grpc_traces.push(GrpcColorsTrace {
@@ -222,6 +224,14 @@ fn try_convert_to_grpc_colors_event_log(value: &dyn Any) -> Option<GrpcContextVa
         Some(GrpcContextValue {
             context_value: Some(ContextValue::ColorsLog(GrpcColorsEventLog { traces: grpc_traces })),
         })
+    }
+}
+
+fn convert_to_grpc_colored_rect(colored_rect: &ColoredRectangle) -> GrpcColoredRectangle {
+    GrpcColoredRectangle {
+        color: Some(convert_to_grpc_color(&colored_rect.color())),
+        start_index: colored_rect.start_pos() as u32,
+        length: colored_rect.len() as u32,
     }
 }
 

@@ -76,3 +76,35 @@ impl ColorsHolder {
         }
     }
 }
+
+pub struct ColoredRectangle {
+    color: Color,
+    start_pos: usize,
+    length: usize,
+}
+
+impl ColoredRectangle {
+    pub fn new(color: Color, start_pos: usize, length: usize) -> Self {
+        Self {
+            color,
+            start_pos,
+            length,
+        }
+    }
+
+    pub fn square(color: Color, start_pos: usize) -> Self {
+        Self::new(color, start_pos, 1)
+    }
+
+    pub fn color(&self) -> Color {
+        self.color
+    }
+
+    pub fn start_pos(&self) -> usize {
+        self.start_pos
+    }
+
+    pub fn len(&self) -> usize {
+        self.length
+    }
+}
