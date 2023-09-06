@@ -232,6 +232,7 @@ fn convert_to_grpc_colored_rect(colored_rect: &ColoredRectangle) -> GrpcColoredR
         color: Some(convert_to_grpc_color(&colored_rect.color())),
         start_index: colored_rect.start_pos() as u32,
         length: colored_rect.len() as u32,
+        name: colored_rect.name().to_owned()
     }
 }
 

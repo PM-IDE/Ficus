@@ -22,7 +22,7 @@ use crate::{
         analysis::patterns::{
             activity_instances::{
                 create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                UndefActivityHandlingStrategy, ActivityInTraceInfo, SubTraceKind,
+                UndefActivityHandlingStrategy, ActivityInTraceInfo, SubTraceKind, UNDEF_ACTIVITY_NAME,
             },
             contexts::PatternsDiscoveryStrategy,
             repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -448,9 +448,9 @@ impl PipelineParts {
                 let name = event.get_name();
                 if selector(&event) {
                     let color = colors_holder.get_or_create(name.as_str());
-                    colors_trace.push(ColoredRectangle::square(color, index));
+                    colors_trace.push(ColoredRectangle::square(color, index, name.to_owned()));
                 } else {
-                    colors_trace.push(ColoredRectangle::square(Color::black(), index));
+                    colors_trace.push(ColoredRectangle::square(Color::black(), index, UNDEF_ACTIVITY_NAME.to_owned()));
                 }
 
                 index += 1;
@@ -488,10 +488,11 @@ impl PipelineParts {
                         match sub_trace {
                             SubTraceKind::Attached(activity) => {
                                 let color = colors_holder.get_or_create(&activity.node.borrow().name);
-                                colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length));
+                                let name = activity.node.borrow().name.to_owned();
+                                colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length, name));
                             }
                             SubTraceKind::Unattached(start_pos, length) => {
-                                colors_trace.push(ColoredRectangle::new(Color::black(), start_pos, length));
+                                colors_trace.push(ColoredRectangle::new(Color::black(), start_pos, length, UNDEF_ACTIVITY_NAME.to_string()));
                             }
                         }
                     })?;
@@ -544,10 +545,11 @@ impl PipelineParts {
                         match sub_trace {
                             SubTraceKind::Attached(activity) => {
                                 let color = colors_holder.get_or_create(&activity.node.borrow().name);
-                                colors_trace.push(ColoredRectangle::new(color, index, 1));
+                                let name = activity.node.borrow().name.to_owned();
+                                colors_trace.push(ColoredRectangle::new(color, index, 1, name));
                             }
                             SubTraceKind::Unattached(_, _) => {
-                                colors_trace.push(ColoredRectangle::new(Color::black(), index, 1));
+                                colors_trace.push(ColoredRectangle::new(Color::black(), index, 1, UNDEF_ACTIVITY_NAME.to_owned()));
                             }
                         }
 

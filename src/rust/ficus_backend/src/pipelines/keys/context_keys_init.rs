@@ -259,7 +259,9 @@ impl ContextKeys {
                                 let event = event.borrow();
                                 let name = event.get_name();
                                 let color = colors_holder.get_or_create(name.as_str());
-                                vec.push(ColoredRectangle::square(color, index));
+                                let name = event.get_name().to_owned();
+
+                                vec.push(ColoredRectangle::square(color, index, name));
                                 index += 1;
                             }
 

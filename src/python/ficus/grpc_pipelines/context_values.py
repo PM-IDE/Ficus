@@ -95,6 +95,7 @@ class ColoredRectangle:
     color: Color
     start_pos: int
     length: int
+    name: str
 
 
 def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[ColoredRectangle]]:
@@ -110,7 +111,8 @@ def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[Color
 
 
 def from_grpc_colored_rectangle(grpc_color: GrpcColoredRectangle) -> ColoredRectangle:
-    return ColoredRectangle(from_grpc_color(grpc_color.color), grpc_color.start_index, grpc_color.length)
+    color = from_grpc_color(grpc_color.color)
+    return ColoredRectangle(color, grpc_color.start_index, grpc_color.length, grpc_color.name)
 
 
 def from_grpc_color(grpc_color: GrpcColor):

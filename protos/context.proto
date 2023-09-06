@@ -70,4 +70,5 @@ message GrpcColoredRectangle {
     GrpcColor color = 1;
     uint32 start_index = 2;
     uint32 length = 3;
+    string name = 4;
 }

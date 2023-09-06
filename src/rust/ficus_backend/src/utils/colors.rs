@@ -81,19 +81,21 @@ pub struct ColoredRectangle {
     color: Color,
     start_pos: usize,
     length: usize,
+    name: String,
 }
 
 impl ColoredRectangle {
-    pub fn new(color: Color, start_pos: usize, length: usize) -> Self {
+    pub fn new(color: Color, start_pos: usize, length: usize, name: String) -> Self {
         Self {
             color,
             start_pos,
             length,
+            name
         }
     }
 
-    pub fn square(color: Color, start_pos: usize) -> Self {
-        Self::new(color, start_pos, 1)
+    pub fn square(color: Color, start_pos: usize, name: String) -> Self {
+        Self::new(color, start_pos, 1, name)
     }
 
     pub fn color(&self) -> Color {
@@ -106,5 +108,9 @@ impl ColoredRectangle {
 
     pub fn len(&self) -> usize {
         self.length
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }

@@ -18,6 +18,8 @@ pub struct ActivityInTraceInfo {
     pub length: usize,
 }
 
+pub const UNATTACHED_SUB_TRACE_NAME: &str = "UndefinedActivity";
+
 pub enum SubTraceKind<'a> {
     Attached(&'a ActivityInTraceInfo),
     Unattached(usize, usize)
