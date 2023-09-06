@@ -90,7 +90,7 @@ impl ColoredRectangle {
             color,
             start_pos,
             length,
-            name
+            name,
         }
     }
 

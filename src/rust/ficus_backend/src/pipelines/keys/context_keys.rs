@@ -5,6 +5,7 @@ use crate::{
     features::{
         analysis::patterns::{
             activity_instances::ActivityInTraceInfo,
+            contexts::PatternsDiscoveryStrategy,
             repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
             tandem_arrays::SubArrayInTraceInfo,
         },
@@ -173,7 +174,7 @@ impl ContextKeys {
     }
 
     pub fn is_colors_event_log(&self, key: &dyn ContextKey) -> bool {
-        return self.colors_event_log().key().id() == key.key().id();
+        self.colors_event_log().key().id() == key.key().id()
     }
 
     pub fn colors_holder(&self) -> &DefaultContextKey<ColorsHolder> {
@@ -181,6 +182,15 @@ impl ContextKeys {
     }
 
     pub fn is_colors_holder(&self, key: &dyn ContextKey) -> bool {
-        return self.colors_holder().key().id() == key.key().id();
+        self.colors_holder().key().id() == key.key().id()
+    }
+
+    pub fn patterns_discovery_strategy(&self) -> &DefaultContextKey<PatternsDiscoveryStrategy> {
+        self.find_concrete_key::<PatternsDiscoveryStrategy>(Self::PATTERNS_DISCOVERY_STRATEGY)
+            .unwrap()
+    }
+
+    pub fn is_patterns_discovery_strategy(&self, key: &dyn ContextKey) -> bool {
+        self.patterns_discovery_strategy().key().id() == key.key().id()
     }
 }

@@ -22,7 +22,7 @@ use crate::{
         analysis::patterns::{
             activity_instances::{
                 create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                UndefActivityHandlingStrategy, ActivityInTraceInfo, SubTraceKind, UNDEF_ACTIVITY_NAME,
+                ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
             },
             contexts::PatternsDiscoveryStrategy,
             repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -184,7 +184,7 @@ impl PipelineParts {
             Self::draw_placements_of_event_by_name(),
             Self::draw_events_placements_by_regex(),
             Self::draw_full_activities_diagram(),
-            Self::draw_short_activities_diagram()
+            Self::draw_short_activities_diagram(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -299,10 +299,11 @@ impl PipelineParts {
     fn find_repeats_and_put_to_context(
         context: &mut PipelineContext,
         keys: &ContextKeys,
+        config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
-        let strategy = PatternsDiscoveryStrategy::FromAllTraces;
+        let strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
         let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
 
         context.put_concrete(keys.patterns().key(), arrays);
@@ -311,20 +312,20 @@ impl PipelineParts {
     }
 
     fn find_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_MAXIMAL_REPEATS, &|context, keys, _| {
-            Self::find_repeats_and_put_to_context(context, keys, find_maximal_repeats)
+        Self::create_pipeline_part(Self::FIND_MAXIMAL_REPEATS, &|context, keys, config| {
+            Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)
         })
     }
 
     fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_SUPER_MAXIMAL_REPEATS, &|context, keys, _| {
-            Self::find_repeats_and_put_to_context(context, keys, find_super_maximal_repeats)
+        Self::create_pipeline_part(Self::FIND_SUPER_MAXIMAL_REPEATS, &|context, keys, config| {
+            Self::find_repeats_and_put_to_context(context, keys, config, find_super_maximal_repeats)
         })
     }
 
     fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_NEAR_SUPER_MAXIMAL_REPEATS, &|context, keys, _| {
-            Self::find_repeats_and_put_to_context(context, keys, find_near_super_maximal_repeats)
+        Self::create_pipeline_part(Self::FIND_NEAR_SUPER_MAXIMAL_REPEATS, &|context, keys, config| {
+            Self::find_repeats_and_put_to_context(context, keys, config, find_near_super_maximal_repeats)
         })
     }
 
@@ -451,7 +452,11 @@ impl PipelineParts {
                     let color = colors_holder.get_or_create(name.as_str());
                     colors_trace.push(ColoredRectangle::square(color, index, name.to_owned()));
                 } else {
-                    colors_trace.push(ColoredRectangle::square(Color::black(), index, UNDEF_ACTIVITY_NAME.to_owned()));
+                    colors_trace.push(ColoredRectangle::square(
+                        Color::black(),
+                        index,
+                        UNDEF_ACTIVITY_NAME.to_owned(),
+                    ));
                 }
 
                 index += 1;
@@ -472,7 +477,7 @@ impl PipelineParts {
         })
     }
 
-    fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {        
+    fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_FULL_ACTIVITIES_DIAGRAM, &|context, keys, _| {
             let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
             let log = Self::get_context_value(context, keys.event_log())?;
@@ -484,19 +489,23 @@ impl PipelineParts {
 
                 Self::execute_with_activities_instances(
                     activities,
-                    trace.borrow().get_events().len(), 
-                    &mut |sub_trace| {
-                        match sub_trace {
-                            SubTraceKind::Attached(activity) => {
-                                let color = colors_holder.get_or_create(&activity.node.borrow().name);
-                                let name = activity.node.borrow().name.to_owned();
-                                colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length, name));
-                            }
-                            SubTraceKind::Unattached(start_pos, length) => {
-                                colors_trace.push(ColoredRectangle::new(Color::black(), start_pos, length, UNDEF_ACTIVITY_NAME.to_string()));
-                            }
+                    trace.borrow().get_events().len(),
+                    &mut |sub_trace| match sub_trace {
+                        SubTraceKind::Attached(activity) => {
+                            let color = colors_holder.get_or_create(&activity.node.borrow().name);
+                            let name = activity.node.borrow().name.to_owned();
+                            colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length, name));
                         }
-                    })?;
+                        SubTraceKind::Unattached(start_pos, length) => {
+                            colors_trace.push(ColoredRectangle::new(
+                                Color::black(),
+                                start_pos,
+                                length,
+                                UNDEF_ACTIVITY_NAME.to_string(),
+                            ));
+                        }
+                    },
+                )?;
 
                 colors_log.push(colors_trace);
             }
@@ -525,7 +534,7 @@ impl PipelineParts {
         if index < trace_len {
             handler(SubTraceKind::Unattached(index, trace_len - index));
         }
-        
+
         Ok(())
     }
 
@@ -540,8 +549,8 @@ impl PipelineParts {
                 let mut colors_trace = vec![];
                 let mut index = 0;
                 Self::execute_with_activities_instances(
-                    activities, 
-                    trace.borrow().get_events().len(), 
+                    activities,
+                    trace.borrow().get_events().len(),
                     &mut |sub_trace| {
                         match sub_trace {
                             SubTraceKind::Attached(activity) => {
@@ -550,12 +559,18 @@ impl PipelineParts {
                                 colors_trace.push(ColoredRectangle::new(color, index, 1, name));
                             }
                             SubTraceKind::Unattached(_, _) => {
-                                colors_trace.push(ColoredRectangle::new(Color::black(), index, 1, UNDEF_ACTIVITY_NAME.to_owned()));
+                                colors_trace.push(ColoredRectangle::new(
+                                    Color::black(),
+                                    index,
+                                    1,
+                                    UNDEF_ACTIVITY_NAME.to_owned(),
+                                ));
                             }
                         }
 
                         index += 1;
-                    })?;
+                    },
+                )?;
 
                 colors_log.push(colors_trace);
             }

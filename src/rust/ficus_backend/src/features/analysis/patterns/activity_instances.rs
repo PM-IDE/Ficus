@@ -22,7 +22,7 @@ pub const UNATTACHED_SUB_TRACE_NAME: &str = "UndefinedActivity";
 
 pub enum SubTraceKind<'a> {
     Attached(&'a ActivityInTraceInfo),
-    Unattached(usize, usize)
+    Unattached(usize, usize),
 }
 
 impl ActivityInTraceInfo {

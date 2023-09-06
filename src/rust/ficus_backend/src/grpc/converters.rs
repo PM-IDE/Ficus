@@ -1,13 +1,16 @@
-use std::{any::Any, cell::RefCell, rc::Rc, sync::Arc};
+use std::{any::Any, cell::RefCell, rc::Rc, str::FromStr, sync::Arc};
 
 use chrono::{DateTime, Duration, Utc};
+use nameof::{name_of, name_of_type};
 
 use crate::{
     event_log::{
         core::{event_log::EventLog, trace::trace::Trace},
         xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
     },
-    features::analysis::patterns::{repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo},
+    features::analysis::patterns::{
+        contexts::PatternsDiscoveryStrategy, repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
+    },
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
         GrpcContextKeyValue, GrpcContextValue, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog,
@@ -52,6 +55,14 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         ContextValue::Bool(bool) => user_data.put_any::<bool>(key, bool.clone()),
         ContextValue::XesEventLog(grpc_log) => put_names_log_to_context(key, grpc_log, user_data),
         ContextValue::ColorsLog(_) => {}
+        ContextValue::Enum(grpc_enum) => {
+            let enum_name = &grpc_enum.enum_type;
+            if enum_name == name_of_type!(PatternsDiscoveryStrategy) {
+                if let Ok(strategy) = PatternsDiscoveryStrategy::from_str(&grpc_enum.value) {
+                    user_data.put_any::<PatternsDiscoveryStrategy>(key, strategy);
+                }
+            }
+        }
     }
 }
 
@@ -232,7 +243,7 @@ fn convert_to_grpc_colored_rect(colored_rect: &ColoredRectangle) -> GrpcColoredR
         color: Some(convert_to_grpc_color(&colored_rect.color())),
         start_index: colored_rect.start_pos() as u32,
         length: colored_rect.len() as u32,
-        name: colored_rect.name().to_owned()
+        name: colored_rect.name().to_owned(),
     }
 }
 

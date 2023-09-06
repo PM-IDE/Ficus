@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use std::rc::Rc;
+use std::{cell::RefCell, str::FromStr};
 
 use crate::event_log::core::{event_log::EventLog, trace::trace::Trace};
 
@@ -12,6 +12,18 @@ use super::{
 pub enum PatternsDiscoveryStrategy {
     FromAllTraces,
     FromSingleMergedTrace,
+}
+
+impl FromStr for PatternsDiscoveryStrategy {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "FromAllTraces" => Ok(PatternsDiscoveryStrategy::FromAllTraces),
+            "FromSingleMergedTrace" => Ok(PatternsDiscoveryStrategy::FromSingleMergedTrace),
+            _ => Err(()),
+        }
+    }
 }
 
 pub struct PatternsDiscoveryContext<TClassExtractor, TLog>

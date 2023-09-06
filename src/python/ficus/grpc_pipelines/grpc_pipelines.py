@@ -1,11 +1,14 @@
+from enum import Enum
+
 from ficus.analysis.event_log_analysis import draw_colors_event_log
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_names_log, from_grpc_colors_log, \
-    StringContextValue, Uint32ContextValue, BoolContextValue
+    StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
 from ficus.grpc_pipelines.models.pipelines_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import *
+from ficus.pipelines.analysis.patterns.patterns_parts import ActivitiesDiscoveryStrategy
 
 
 class Pipeline2:
@@ -227,6 +230,11 @@ class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
                          width_scale=width_scale)
 
 
+class PatternsDiscoveryStrategy(Enum):
+    FromAllTraces = 0
+    FromSingleMergedTrace = 1
+
+
 class FindTandemArrays2(PipelinePart2):
     def __init__(self, part_type: str, max_array_length: int):
         self.max_array_length = max_array_length
@@ -241,27 +249,40 @@ class FindTandemArrays2(PipelinePart2):
 
 class FindPrimitiveTandemArrays2(FindTandemArrays2):
     def __init__(self, max_array_length: int):
-        super().__init__(part_type='FindPrimitiveTandemArrays', max_array_length=max_array_length)
+        super().__init__(part_type='FindPrimitiveTandemArrays',
+                         max_array_length=max_array_length)
 
 
 class FindMaximalTandemArrays2(FindTandemArrays2):
     def __init__(self, max_array_length: int):
-        super().__init__(part_type='FindMaximalTandemArrays', max_array_length=max_array_length)
+        super().__init__(part_type='FindMaximalTandemArrays',
+                         max_array_length=max_array_length)
 
 
-class FindMaximalRepeats2(PipelinePart2):
+class FindRepeats2(PipelinePart2):
+    def __init__(self, part_name: str, strategy: PatternsDiscoveryStrategy):
+        self.strategy = strategy
+        self.part_name = part_name
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindMaximalRepeats'))
+        config = GrpcPipelinePartConfiguration()
+        append_patterns_discovery_strategy(config, 'patterns_discovery_strategy', self.strategy.name)
+        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_name, config))
 
 
-class FindSuperMaximalRepeats2(PipelinePart2):
-    def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindSuperMaximalRepeats'))
+class FindMaximalRepeats2(FindRepeats2):
+    def __init__(self, strategy: PatternsDiscoveryStrategy):
+        super().__init__(part_name='FindMaximalRepeats', strategy=strategy)
 
 
-class FindNearSuperMaximalRepeats2(PipelinePart2):
-    def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part('FindNearSuperMaximalRepeats'))
+class FindSuperMaximalRepeats2(FindRepeats2):
+    def __init__(self, strategy: PatternsDiscoveryStrategy):
+        super().__init__(part_name='FindSuperMaximalRepeats', strategy=strategy)
+
+
+class FindNearSuperMaximalRepeats2(FindRepeats2):
+    def __init__(self, strategy: PatternsDiscoveryStrategy):
+        super().__init__(part_name='FindNearSuperMaximalRepeats', strategy=strategy)
 
 
 class DiscoverActivities2(PipelinePart2):
@@ -319,3 +340,11 @@ def append_uint32_value(config: GrpcPipelinePartConfiguration, key: str, value: 
 
 def append_bool_value(config: GrpcPipelinePartConfiguration, key: str, value: bool):
     _append_context_value(config, key, BoolContextValue(value))
+
+
+def append_enum_value(config: GrpcPipelinePartConfiguration, key: str, enum_name: str, value: str):
+    _append_context_value(config, key, EnumContextValue(enum_name, value))
+
+
+def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: str):
+    append_enum_value(config, key, 'PatternsDiscoveryStrategy', value)

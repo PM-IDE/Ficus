@@ -18,6 +18,7 @@ regex = "1.9.3"
 futures = "0.3.28"
 tokio-stream = "0.1.14"
 rand = "0.8.5"
+nameof = "1.2.2"
 
 [dependencies.uuid]
 version = "1.4.1"

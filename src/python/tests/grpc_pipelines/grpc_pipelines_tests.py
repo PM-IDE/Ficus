@@ -1,7 +1,8 @@
 from ficus.grpc_pipelines.context_values import StringContextValue
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, TracesDiversityDiagram2, \
     DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
-    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, DrawShortActivitiesDiagram2
+    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, \
+    DrawShortActivitiesDiagram2, PatternsDiscoveryStrategy
 from tests.test_data_provider import get_example_log_path
 
 
@@ -80,7 +81,7 @@ def test_draw_full_activities_diagram():
     pipeline = Pipeline2(
         ReadLogFromXes2(),
         TracesDiversityDiagram2(),
-        FindSuperMaximalRepeats2(),
+        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=True),
         DrawFullActivitiesDiagram2()
@@ -99,7 +100,7 @@ def test_draw_short_activities_diagram():
     pipeline = Pipeline2(
         ReadLogFromXes2(),
         TracesDiversityDiagram2(),
-        FindSuperMaximalRepeats2(),
+        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=True),
         DrawShortActivitiesDiagram2()
@@ -118,7 +119,7 @@ def test_draw_full_activities_diagram_2():
     pipeline = Pipeline2(
         ReadLogFromXes2(),
         TracesDiversityDiagram2(plot_legend=True, title='InitialLog', width_scale=10, height_scale=5),
-        FindSuperMaximalRepeats2(),
+        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=True),
         DrawFullActivitiesDiagram2()

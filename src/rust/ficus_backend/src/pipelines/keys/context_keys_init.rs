@@ -9,7 +9,7 @@ use crate::{
         },
         xes::xes_event_log::XesEventLogImpl,
     },
-    features::discovery::petri_net::PetriNet,
+    features::{analysis::patterns::contexts::PatternsDiscoveryStrategy, discovery::petri_net::PetriNet},
     pipelines::aliases::*,
     utils::{
         colors::{ColoredRectangle, ColorsHolder},
@@ -29,6 +29,7 @@ impl ContextKeys {
     pub const NARROW_ACTIVITIES: &str = "narrow_activities";
     pub const EVENT_NAME: &str = "event_name";
     pub const REGEX: &str = "regex";
+    pub const PATTERNS_DISCOVERY_STRATEGY: &str = "patterns_discovery_strategy";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -53,6 +54,7 @@ impl ContextKeys {
         Self::insert_narrow_activities(&mut concrete_keys, &mut context_keys);
         Self::insert_event_name(&mut concrete_keys, &mut context_keys);
         Self::insert_regex(&mut concrete_keys, &mut context_keys);
+        Self::insert_patterns_discovery_strategy(&mut concrete_keys, &mut context_keys);
 
         Self::insert_event_log(&mut concrete_keys, &mut context_keys);
         Self::insert_activities(&mut concrete_keys, &mut context_keys);
@@ -136,6 +138,13 @@ impl ContextKeys {
         context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
     ) {
         Self::insert_key::<String>(concrete_keys, context_keys, Self::REGEX);
+    }
+
+    fn insert_patterns_discovery_strategy(
+        concrete_keys: &mut HashMap<Cow<'static, str>, Box<dyn Any>>,
+        context_keys: &mut HashMap<Cow<'static, str>, Box<dyn ContextKey>>,
+    ) {
+        Self::insert_key::<PatternsDiscoveryStrategy>(concrete_keys, context_keys, Self::PATTERNS_DISCOVERY_STRATEGY);
     }
 
     fn insert_event_log(
