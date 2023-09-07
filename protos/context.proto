@@ -21,6 +21,7 @@ message GrpcContextValue {
         GrpcNamesEventLogContextValue xes_event_log = 8;
         GrpcColorsEventLog colors_log = 9;
         GrpcEnum enum = 10;
+        GrpcEventLogInfo event_log_info = 11;
     }
 }
 
@@ -77,4 +78,10 @@ message GrpcColoredRectangle {
 message GrpcEnum {
     string enumType = 1;
     string value = 2;
+}
+
+message GrpcEventLogInfo {
+    uint32 events_count = 1;
+    uint32 traces_count = 2;
+    uint32 event_classes_count = 3;
 }

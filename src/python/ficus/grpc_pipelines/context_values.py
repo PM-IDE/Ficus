@@ -107,6 +107,18 @@ class ColoredRectangle:
     name: str
 
 
+@dataclass
+class EventLogInfo(ContextValue):
+    events_count: int
+    event_classes_count: int
+    traces_count: int
+
+    def to_grpc_context_value(self) -> GrpcContextValue:
+        return GrpcEventLogInfo(events_count = self.events_count,
+                                traces_count = self.traces_count,
+                                event_classes_count = self.event_classes_count)
+
+
 def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[ColoredRectangle]]:
     result = []
     for grpc_trace in grpc_colors_log.traces:
@@ -126,3 +138,9 @@ def from_grpc_colored_rectangle(grpc_color: GrpcColoredRectangle) -> ColoredRect
 
 def from_grpc_color(grpc_color: GrpcColor):
     return Color(grpc_color.red, grpc_color.green, grpc_color.blue)
+
+
+def from_grpc_event_log_info(grpc_event_log_info: GrpcEventLogInfo) -> EventLogInfo:
+    return EventLogInfo(events_count=grpc_event_log_info.events_count,
+                        traces_count=grpc_event_log_info.traces_count,
+                        event_classes_count=grpc_event_log_info.event_classes_count)

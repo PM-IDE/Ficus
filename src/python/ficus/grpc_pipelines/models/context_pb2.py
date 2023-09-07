@@ -34,7 +34,7 @@ import ficus.grpc_pipelines.models.util_pb2 as util__pb2
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcontext.proto\x12\x05\x66icus\x1a\x0fpm_models.proto\x1a\nutil.proto\"\x1e\n\x0eGrpcContextKey\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xfd\x03\n\x10GrpcContextValue\x12\x10\n\x06string\x18\x01 \x01(\tH\x00\x12;\n\nhashes_log\x18\x02 \x01(\x0b\x32%.ficus.GrpcHashesEventLogContextValueH\x00\x12\x39\n\tnames_log\x18\x03 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12\x10\n\x06uint32\x18\x04 \x01(\rH\x00\x12J\n\x11traces_sub_arrays\x18\x05 \x01(\x0b\x32-.ficus.GrpcEventLogTraceSubArraysContextValueH\x00\x12P\n\x16trace_index_sub_arrays\x18\x06 \x01(\x0b\x32..ficus.GrpcSubArraysWithTraceIndexContextValueH\x00\x12\x0e\n\x04\x62ool\x18\x07 \x01(\x08H\x00\x12=\n\rxes_event_log\x18\x08 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12/\n\ncolors_log\x18\t \x01(\x0b\x32\x19.ficus.GrpcColorsEventLogH\x00\x12\x1f\n\x04\x65num\x18\n \x01(\x0b\x32\x0f.ficus.GrpcEnumH\x00\x42\x0e\n\x0c\x63ontextValue\"a\n\x13GrpcContextKeyValue\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"H\n\x1eGrpcHashesEventLogContextValue\x12&\n\x03log\x18\x01 \x01(\x0b\x32\x19.ficus.GrpcHashesEventLog\"F\n\x1dGrpcNamesEventLogContextValue\x12%\n\x03log\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcNamesEventLog\"^\n&GrpcEventLogTraceSubArraysContextValue\x12\x34\n\x11traces_sub_arrays\x18\x01 \x03(\x0b\x32\x19.ficus.GrpcTraceSubArrays\"/\n\x11GrpcTraceSubArray\x12\r\n\x05start\x18\x01 \x01(\r\x12\x0b\n\x03\x65nd\x18\x02 \x01(\r\"B\n\x12GrpcTraceSubArrays\x12,\n\nsub_arrays\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcTraceSubArray\"^\n\x1aGrpcSubArrayWithTraceIndex\x12+\n\tsub_array\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcTraceSubArray\x12\x13\n\x0btrace_index\x18\x02 \x01(\r\"`\n\'GrpcSubArraysWithTraceIndexContextValue\x12\x35\n\nsub_arrays\x18\x01 \x03(\x0b\x32!.ficus.GrpcSubArrayWithTraceIndex\"<\n\x12GrpcColorsEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcColorsTrace\"D\n\x0fGrpcColorsTrace\x12\x31\n\x0c\x65vent_colors\x18\x02 \x03(\x0b\x32\x1b.ficus.GrpcColoredRectangle\"j\n\x14GrpcColoredRectangle\x12\x1f\n\x05\x63olor\x18\x01 \x01(\x0b\x32\x10.ficus.GrpcColor\x12\x13\n\x0bstart_index\x18\x02 \x01(\r\x12\x0e\n\x06length\x18\x03 \x01(\r\x12\x0c\n\x04name\x18\x04 \x01(\t\"+\n\x08GrpcEnum\x12\x10\n\x08\x65numType\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcontext.proto\x12\x05\x66icus\x1a\x0fpm_models.proto\x1a\nutil.proto\"\x1e\n\x0eGrpcContextKey\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xb0\x04\n\x10GrpcContextValue\x12\x10\n\x06string\x18\x01 \x01(\tH\x00\x12;\n\nhashes_log\x18\x02 \x01(\x0b\x32%.ficus.GrpcHashesEventLogContextValueH\x00\x12\x39\n\tnames_log\x18\x03 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12\x10\n\x06uint32\x18\x04 \x01(\rH\x00\x12J\n\x11traces_sub_arrays\x18\x05 \x01(\x0b\x32-.ficus.GrpcEventLogTraceSubArraysContextValueH\x00\x12P\n\x16trace_index_sub_arrays\x18\x06 \x01(\x0b\x32..ficus.GrpcSubArraysWithTraceIndexContextValueH\x00\x12\x0e\n\x04\x62ool\x18\x07 \x01(\x08H\x00\x12=\n\rxes_event_log\x18\x08 \x01(\x0b\x32$.ficus.GrpcNamesEventLogContextValueH\x00\x12/\n\ncolors_log\x18\t \x01(\x0b\x32\x19.ficus.GrpcColorsEventLogH\x00\x12\x1f\n\x04\x65num\x18\n \x01(\x0b\x32\x0f.ficus.GrpcEnumH\x00\x12\x31\n\x0e\x65vent_log_info\x18\x0b \x01(\x0b\x32\x17.ficus.GrpcEventLogInfoH\x00\x42\x0e\n\x0c\x63ontextValue\"a\n\x13GrpcContextKeyValue\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"H\n\x1eGrpcHashesEventLogContextValue\x12&\n\x03log\x18\x01 \x01(\x0b\x32\x19.ficus.GrpcHashesEventLog\"F\n\x1dGrpcNamesEventLogContextValue\x12%\n\x03log\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcNamesEventLog\"^\n&GrpcEventLogTraceSubArraysContextValue\x12\x34\n\x11traces_sub_arrays\x18\x01 \x03(\x0b\x32\x19.ficus.GrpcTraceSubArrays\"/\n\x11GrpcTraceSubArray\x12\r\n\x05start\x18\x01 \x01(\r\x12\x0b\n\x03\x65nd\x18\x02 \x01(\r\"B\n\x12GrpcTraceSubArrays\x12,\n\nsub_arrays\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcTraceSubArray\"^\n\x1aGrpcSubArrayWithTraceIndex\x12+\n\tsub_array\x18\x01 \x01(\x0b\x32\x18.ficus.GrpcTraceSubArray\x12\x13\n\x0btrace_index\x18\x02 \x01(\r\"`\n\'GrpcSubArraysWithTraceIndexContextValue\x12\x35\n\nsub_arrays\x18\x01 \x03(\x0b\x32!.ficus.GrpcSubArrayWithTraceIndex\"<\n\x12GrpcColorsEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcColorsTrace\"D\n\x0fGrpcColorsTrace\x12\x31\n\x0c\x65vent_colors\x18\x02 \x03(\x0b\x32\x1b.ficus.GrpcColoredRectangle\"j\n\x14GrpcColoredRectangle\x12\x1f\n\x05\x63olor\x18\x01 \x01(\x0b\x32\x10.ficus.GrpcColor\x12\x13\n\x0bstart_index\x18\x02 \x01(\r\x12\x0e\n\x06length\x18\x03 \x01(\r\x12\x0c\n\x04name\x18\x04 \x01(\t\"+\n\x08GrpcEnum\x12\x10\n\x08\x65numType\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"[\n\x10GrpcEventLogInfo\x12\x14\n\x0c\x65vents_count\x18\x01 \x01(\r\x12\x14\n\x0ctraces_count\x18\x02 \x01(\r\x12\x1b\n\x13\x65vent_classes_count\x18\x03 \x01(\rb\x06proto3')
 
 
 
@@ -69,6 +69,8 @@ _GRPCCOLORSTRACE = DESCRIPTOR.message_types_by_name['GrpcColorsTrace']
 _GRPCCOLOREDRECTANGLE = DESCRIPTOR.message_types_by_name['GrpcColoredRectangle']
 
 _GRPCENUM = DESCRIPTOR.message_types_by_name['GrpcEnum']
+
+_GRPCEVENTLOGINFO = DESCRIPTOR.message_types_by_name['GrpcEventLogInfo']
 
 GrpcContextKey = _reflection.GeneratedProtocolMessageType('GrpcContextKey', (_message.Message,), {
 
@@ -266,6 +268,20 @@ _sym_db.RegisterMessage(GrpcEnum)
 
 
 
+GrpcEventLogInfo = _reflection.GeneratedProtocolMessageType('GrpcEventLogInfo', (_message.Message,), {
+
+  'DESCRIPTOR' : _GRPCEVENTLOGINFO,
+
+  '__module__' : 'context_pb2'
+
+  # @@protoc_insertion_point(class_scope:ficus.GrpcEventLogInfo)
+
+  })
+
+_sym_db.RegisterMessage(GrpcEventLogInfo)
+
+
+
 if _descriptor._USE_C_DESCRIPTORS == False:
 
 
@@ -278,54 +294,58 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   _GRPCCONTEXTVALUE._serialized_start=86
 
-  _GRPCCONTEXTVALUE._serialized_end=595
+  _GRPCCONTEXTVALUE._serialized_end=646
 
-  _GRPCCONTEXTKEYVALUE._serialized_start=597
+  _GRPCCONTEXTKEYVALUE._serialized_start=648
 
-  _GRPCCONTEXTKEYVALUE._serialized_end=694
+  _GRPCCONTEXTKEYVALUE._serialized_end=745
 
-  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_start=696
+  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_start=747
 
-  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_end=768
+  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_end=819
 
-  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_start=770
+  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_start=821
 
-  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_end=840
+  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_end=891
 
-  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_start=842
+  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_start=893
 
-  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_end=936
+  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_end=987
 
-  _GRPCTRACESUBARRAY._serialized_start=938
+  _GRPCTRACESUBARRAY._serialized_start=989
 
-  _GRPCTRACESUBARRAY._serialized_end=985
+  _GRPCTRACESUBARRAY._serialized_end=1036
 
-  _GRPCTRACESUBARRAYS._serialized_start=987
+  _GRPCTRACESUBARRAYS._serialized_start=1038
 
-  _GRPCTRACESUBARRAYS._serialized_end=1053
+  _GRPCTRACESUBARRAYS._serialized_end=1104
 
-  _GRPCSUBARRAYWITHTRACEINDEX._serialized_start=1055
+  _GRPCSUBARRAYWITHTRACEINDEX._serialized_start=1106
 
-  _GRPCSUBARRAYWITHTRACEINDEX._serialized_end=1149
+  _GRPCSUBARRAYWITHTRACEINDEX._serialized_end=1200
 
-  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_start=1151
+  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_start=1202
 
-  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_end=1247
+  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_end=1298
 
-  _GRPCCOLORSEVENTLOG._serialized_start=1249
+  _GRPCCOLORSEVENTLOG._serialized_start=1300
 
-  _GRPCCOLORSEVENTLOG._serialized_end=1309
+  _GRPCCOLORSEVENTLOG._serialized_end=1360
 
-  _GRPCCOLORSTRACE._serialized_start=1311
+  _GRPCCOLORSTRACE._serialized_start=1362
 
-  _GRPCCOLORSTRACE._serialized_end=1379
+  _GRPCCOLORSTRACE._serialized_end=1430
 
-  _GRPCCOLOREDRECTANGLE._serialized_start=1381
+  _GRPCCOLOREDRECTANGLE._serialized_start=1432
 
-  _GRPCCOLOREDRECTANGLE._serialized_end=1487
+  _GRPCCOLOREDRECTANGLE._serialized_end=1538
 
-  _GRPCENUM._serialized_start=1489
+  _GRPCENUM._serialized_start=1540
 
-  _GRPCENUM._serialized_end=1532
+  _GRPCENUM._serialized_end=1583
+
+  _GRPCEVENTLOGINFO._serialized_start=1585
+
+  _GRPCEVENTLOGINFO._serialized_end=1676
 
 # @@protoc_insertion_point(module_scope)

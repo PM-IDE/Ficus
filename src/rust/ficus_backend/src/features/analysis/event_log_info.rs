@@ -9,6 +9,7 @@ pub struct EventLogInfo {
     events_count: usize,
     event_classes_counts: HashMap<String, usize>,
     dfg_info: DfgInfo,
+    traces_count: usize,
 }
 
 pub struct EventLogInfoCreationDto<'a, TLog>
@@ -137,14 +138,19 @@ impl EventLogInfo {
                 followed_events,
                 events_with_single_follower,
             },
+            traces_count: log.get_traces().len(),
         }
+    }
+
+    pub fn traces_count(&self) -> usize {
+        self.traces_count
     }
 
     pub fn get_events_count(&self) -> usize {
         self.events_count
     }
 
-    pub fn get_event_classes_count(&self) -> usize {
+    pub fn event_classes_count(&self) -> usize {
         self.event_classes_counts.len()
     }
 

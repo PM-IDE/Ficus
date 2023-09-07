@@ -3,7 +3,7 @@ from enum import Enum
 from ficus.analysis.event_log_analysis import draw_colors_event_log
 from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
-    StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue
+    StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
@@ -303,6 +303,17 @@ class DiscoverActivitiesInstances2(PipelinePart2):
         config = GrpcPipelinePartConfiguration()
         append_bool_value(config, const_narrow_activities, self.narrow_activities)
         return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_discover_activities_instances, config))
+
+
+class PrintEventLogInfo2(PipelinePart2WithCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        part = _create_complex_get_context_part(const_event_log_info, const_get_event_log_info, config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        log_info = from_grpc_event_log_info(context_value.event_log_info)
+        print(log_info)
 
 
 def _create_simple_get_context_value_part(key_name: str):

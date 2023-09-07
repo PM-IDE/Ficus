@@ -23,14 +23,14 @@ where
         let pair = (first.to_owned(), second.to_owned());
         let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
         let first_count = log_info.get_event_count(first);
-        dfr_or_dpr_calculator(pair_count, log_info.get_event_classes_count(), first_count)
+        dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let pair = (second.to_owned(), first.to_owned());
         let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
         let first_count = log_info.get_event_count(first);
-        dfr_or_dpr_calculator(pair_count, log_info.get_event_classes_count(), first_count)
+        dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
 
     let creation_dto = EventLogInfoCreationDto::default_fake_ignored(log, ignored_events);

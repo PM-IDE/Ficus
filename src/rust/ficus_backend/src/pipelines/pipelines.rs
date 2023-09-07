@@ -19,15 +19,18 @@ use crate::{
         },
     },
     features::{
-        analysis::patterns::{
-            activity_instances::{
-                create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
+        analysis::{
+            event_log_info::{EventLogInfo, EventLogInfoCreationDto},
+            patterns::{
+                activity_instances::{
+                    create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
+                    ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
+                },
+                contexts::PatternsDiscoveryStrategy,
+                repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
+                repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
+                tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
             },
-            contexts::PatternsDiscoveryStrategy,
-            repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
-            repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
-            tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
         },
         mutations::{
             filtering::{filter_log_by_name, filter_log_by_regex},
@@ -163,6 +166,7 @@ impl PipelineParts {
     pub const DRAW_PLACEMENT_OF_EVENT_BY_REGEX: &str = "DrawPlacementOfEventsByRegex";
     pub const DRAW_FULL_ACTIVITIES_DIAGRAM: &str = "DrawFullActivitiesDiagram";
     pub const DRAW_SHORT_ACTIVITIES_DIAGRAM: &str = "DrawShortActivitiesDiagram";
+    pub const GET_EVENT_LOG_INFO: &str = "GetEventLogInfo";
 }
 
 impl PipelineParts {
@@ -185,6 +189,7 @@ impl PipelineParts {
             Self::draw_events_placements_by_regex(),
             Self::draw_full_activities_diagram(),
             Self::draw_short_activities_diagram(),
+            Self::get_event_log_info(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -576,6 +581,16 @@ impl PipelineParts {
             }
 
             context.put_concrete(keys.colors_event_log().key(), colors_log);
+
+            Ok(())
+        })
+    }
+
+    fn get_event_log_info() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::GET_EVENT_LOG_INFO, &|context, keys, _| {
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
+            context.put_concrete(keys.event_log_info().key(), log_info);
 
             Ok(())
         })

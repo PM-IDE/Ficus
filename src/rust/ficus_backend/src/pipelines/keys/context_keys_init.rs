@@ -9,7 +9,10 @@ use crate::{
         },
         xes::xes_event_log::XesEventLogImpl,
     },
-    features::{analysis::patterns::contexts::PatternsDiscoveryStrategy, discovery::petri_net::PetriNet},
+    features::{
+        analysis::{event_log_info::EventLogInfo, patterns::contexts::PatternsDiscoveryStrategy},
+        discovery::petri_net::PetriNet,
+    },
     pipelines::aliases::*,
     utils::{
         colors::{ColoredRectangle, ColorsHolder},
@@ -66,6 +69,8 @@ impl ContextKeys {
     pub const EVENT_NAME: &str = "event_name";
     pub const REGEX: &str = "regex";
     pub const PATTERNS_DISCOVERY_STRATEGY: &str = "patterns_discovery_strategy";
+    pub const OUTPUT_STRING: &str = "output_string";
+    pub const EVENT_LOG_INFO: &str = "event_log_info";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -90,6 +95,8 @@ impl ContextKeys {
         Self::insert_event_name(&mut context);
         Self::insert_regex(&mut context);
         Self::insert_patterns_discovery_strategy(&mut context);
+        Self::insert_output_string(&mut context);
+        Self::insert_event_log_info(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -152,6 +159,14 @@ impl ContextKeys {
 
     fn insert_patterns_discovery_strategy(context: &mut ContextKeysInitContext) {
         Self::insert_key::<PatternsDiscoveryStrategy>(context, Self::PATTERNS_DISCOVERY_STRATEGY);
+    }
+
+    fn insert_output_string(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::OUTPUT_STRING);
+    }
+
+    fn insert_event_log_info(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<EventLogInfo>(context, Self::EVENT_LOG_INFO);
     }
 
     fn insert_event_log(context: &mut ContextKeysInitContext) {

@@ -3,11 +3,14 @@ use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, rc::Rc};
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
-        analysis::patterns::{
-            activity_instances::ActivityInTraceInfo,
-            contexts::PatternsDiscoveryStrategy,
-            repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
-            tandem_arrays::SubArrayInTraceInfo,
+        analysis::{
+            event_log_info::EventLogInfo,
+            patterns::{
+                activity_instances::ActivityInTraceInfo,
+                contexts::PatternsDiscoveryStrategy,
+                repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
+                tandem_arrays::SubArrayInTraceInfo,
+            },
         },
         discovery::petri_net::PetriNet,
     },
@@ -199,5 +202,21 @@ impl ContextKeys {
 
     pub fn is_patterns_discovery_strategy(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(key, self.patterns_discovery_strategy())
+    }
+
+    pub fn output_string(&self) -> &DefaultContextKey<String> {
+        self.find_concrete_key::<String>(Self::OUTPUT_STRING).unwrap()
+    }
+
+    pub fn is_output_string(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.output_string(), key)
+    }
+
+    pub fn event_log_info(&self) -> &DefaultContextKey<EventLogInfo> {
+        self.find_concrete_key::<EventLogInfo>(Self::EVENT_LOG_INFO).unwrap()
+    }
+
+    pub fn is_event_log_info(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.event_log_info(), key)
     }
 }

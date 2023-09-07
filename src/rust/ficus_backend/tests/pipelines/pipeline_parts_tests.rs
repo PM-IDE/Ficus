@@ -18,7 +18,8 @@ fn get_test_parts_names() -> Vec<String> {
         "DrawPlacementOfEventByName",
         "DrawPlacementOfEventsByRegex",
         "DrawFullActivitiesDiagram",
-        "DrawShortActivitiesDiagram"
+        "DrawShortActivitiesDiagram",
+        "GetEventLogInfo"
     ]
 }
 

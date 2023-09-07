@@ -8,15 +8,19 @@ use crate::{
         core::{event_log::EventLog, trace::trace::Trace},
         xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
     },
-    features::analysis::patterns::{
-        contexts::PatternsDiscoveryStrategy, repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
+    features::analysis::{
+        event_log_info::EventLogInfo,
+        patterns::{
+            contexts::PatternsDiscoveryStrategy, repeat_sets::SubArrayWithTraceIndex,
+            tandem_arrays::SubArrayInTraceInfo,
+        },
     },
     ficus_proto::{
         grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
-        GrpcContextKeyValue, GrpcContextValue, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog,
-        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
-        GrpcNamesTrace, GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray,
-        GrpcTraceSubArrays,
+        GrpcContextKeyValue, GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue,
+        GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog,
+        GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
+        GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
     },
     pipelines::{
         aliases::ColorsEventLog,
@@ -63,6 +67,7 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
                 }
             }
         }
+        ContextValue::EventLogInfo(_) => todo!(),
     }
 }
 
@@ -102,6 +107,8 @@ pub fn convert_to_grpc_context_value(
         try_convert_to_grpc_sub_arrays_with_index(value)
     } else if keys.is_colors_event_log(key) {
         try_convert_to_grpc_colors_event_log(value)
+    } else if keys.is_event_log_info(key) {
+        try_convert_to_grpc_event_log_info(value)
     } else {
         None
     }
@@ -252,5 +259,20 @@ fn convert_to_grpc_color(color: &Color) -> GrpcColor {
         red: color.red() as u32,
         green: color.green() as u32,
         blue: color.blue() as u32,
+    }
+}
+
+fn try_convert_to_grpc_event_log_info(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<EventLogInfo>() {
+        None
+    } else {
+        let log_info = value.downcast_ref::<EventLogInfo>().unwrap();
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::EventLogInfo(GrpcEventLogInfo {
+                events_count: log_info.get_events_count() as u32,
+                traces_count: log_info.traces_count() as u32,
+                event_classes_count: log_info.event_classes_count() as u32,
+            })),
+        })
     }
 }
