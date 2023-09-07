@@ -15,6 +15,8 @@ pub trait UserData {
     fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
     fn get_any(&self, key: &dyn Key) -> Option<&dyn Any>;
     fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T>;
+    fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>);
+    fn remove_any<T: 'static>(&mut self, key: &dyn Key);
 }
 
 impl UserData for UserDataImpl {
@@ -48,6 +50,18 @@ impl UserData for UserDataImpl {
 
     fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
         self.get_mut(key)
+    }
+
+    fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>) {
+        if let Some(values_map) = self.values_map.as_mut() {
+            values_map.remove(&key.id());
+        }
+    }
+
+    fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
+        if let Some(values_map) = self.values_map.as_mut() {
+            values_map.remove(&key.id());
+        }
     }
 }
 

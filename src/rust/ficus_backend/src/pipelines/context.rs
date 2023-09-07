@@ -53,6 +53,14 @@ impl UserData for PipelineContext {
     fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
         self.user_data.get_concrete_mut(key)
     }
+
+    fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>) {
+        self.user_data.remove_concrete(key)
+    }
+
+    fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
+        self.user_data.remove_any::<T>(key)
+    }
 }
 
 impl PipelineContext {

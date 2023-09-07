@@ -167,6 +167,7 @@ impl PipelineParts {
     pub const DRAW_FULL_ACTIVITIES_DIAGRAM: &str = "DrawFullActivitiesDiagram";
     pub const DRAW_SHORT_ACTIVITIES_DIAGRAM: &str = "DrawShortActivitiesDiagram";
     pub const GET_EVENT_LOG_INFO: &str = "GetEventLogInfo";
+    pub const CLEAR_ACTIVITIES: &str = "ClearActivities";
 }
 
 impl PipelineParts {
@@ -190,6 +191,7 @@ impl PipelineParts {
             Self::draw_full_activities_diagram(),
             Self::draw_short_activities_diagram(),
             Self::get_event_log_info(),
+            Self::clear_activities_related_stuff(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -369,7 +371,7 @@ impl PipelineParts {
     }
 
     fn create_log_from_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, config| {
+        Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, _| {
             let log = Self::get_context_value(context, keys.event_log())?;
             let instances = Self::get_context_value(context, keys.trace_activities())?;
             let log = create_new_log_from_activities_instances(
@@ -593,6 +595,17 @@ impl PipelineParts {
             let log = Self::get_context_value(context, keys.event_log())?;
             let log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
             context.put_concrete(keys.event_log_info().key(), log_info);
+
+            Ok(())
+        })
+    }
+
+    fn clear_activities_related_stuff() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CLEAR_ACTIVITIES, &|context, keys, _| {
+            context.remove_concrete(keys.activities().key());
+            context.remove_concrete(keys.trace_activities().key());
+            context.remove_concrete(keys.patterns().key());
+            context.remove_concrete(keys.repeat_sets().key());
 
             Ok(())
         })
