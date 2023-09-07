@@ -24,7 +24,7 @@ use crate::{
     },
     pipelines::{
         aliases::ColorsEventLog,
-        context::PipelineContext,
+        context::{PipelineContext, LogMessageHandler},
         keys::{context_key::ContextKey, context_keys::ContextKeys},
     },
     utils::{
@@ -36,8 +36,9 @@ use crate::{
 pub(super) fn create_initial_context(
     values: &Vec<GrpcContextKeyValue>,
     keys: &Arc<Box<ContextKeys>>,
+    log_message_handler: Arc<Box<dyn LogMessageHandler>>
 ) -> PipelineContext {
-    let mut context = PipelineContext::new(keys);
+    let mut context = PipelineContext::new(keys, log_message_handler);
 
     for value in values {
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();

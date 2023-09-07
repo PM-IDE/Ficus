@@ -208,6 +208,8 @@ impl PipelineParts {
     fn read_log_from_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::READ_LOG_FROM_XES, &|context, keys, _| {
             let path = Self::get_context_value(context, keys.path())?;
+            context.log(format!("Reading event log from {}", &path))?;
+
             let log = read_event_log(path);
             if log.is_none() {
                 let message = format!("Failed to read event log from {}", path.as_str());

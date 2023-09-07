@@ -6,7 +6,7 @@ use std::{
 };
 
 use futures::Stream;
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, Sender};
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 use uuid::Uuid;
@@ -20,11 +20,11 @@ use crate::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
         grpc_pipeline_final_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue,
         GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
-        GrpcPipelineFinalResult, GrpcPipelinePart, GrpcPipelinePartExecutionResult,
+        GrpcPipelineFinalResult, GrpcPipelinePart, GrpcPipelinePartExecutionResult, GrpcPipelinePartLogMessage,
     },
     pipelines::{
-        context::PipelineContext,
-        errors::pipeline_errors::PipelinePartExecutionError,
+        context::{PipelineContext, LogMessageHandler},
+        errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError},
         keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{DefaultPipelinePart, Pipeline, PipelinePart, PipelineParts},
     },
@@ -66,6 +66,8 @@ impl GrpcBackendService for FicusService {
         let contexts = self.contexts.clone();
 
         tokio::task::spawn_blocking(move || {
+            let log_message_handler = Box::new(LogMessageHandlerImpl::new(sender.clone())) as Box<dyn LogMessageHandler>;
+            let log_message_handler = Arc::new(log_message_handler);
             let grpc_pipeline = request.get_ref().pipeline.as_ref().unwrap();
             let initial_context_values = &request.get_ref().initial_context;
 
@@ -75,6 +77,7 @@ impl GrpcBackendService for FicusService {
                 context_keys,
                 pipeline_parts,
                 sender.clone(),
+                log_message_handler
             ) {
                 Ok((guid, context)) => {
                     contexts.lock().as_mut().unwrap().insert(guid.guid.to_owned(), context);
@@ -132,10 +135,11 @@ impl FicusService {
         context_keys: Arc<Box<ContextKeys>>,
         pipeline_parts: Arc<Box<PipelineParts>>,
         sender: Arc<Box<GrpcSender>>,
+        log_message_handler: Arc<Box<dyn LogMessageHandler>>
     ) -> Result<(GrpcGuid, PipelineContext), PipelinePartExecutionError> {
         let id = Uuid::new_v4();
         let pipeline = Self::to_pipeline(grpc_pipeline, &context_keys, &pipeline_parts, sender);
-        let mut context = create_initial_context(initial_context_value, &context_keys);
+        let mut context = create_initial_context(initial_context_value, &context_keys, log_message_handler);
 
         match pipeline.execute(&mut context, &context_keys) {
             Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context)),
@@ -239,6 +243,34 @@ impl FicusService {
             result: Some(GrpcResult::FinalResult(GrpcPipelineFinalResult {
                 execution_result: Some(execution_result),
             })),
+        }
+    }
+}
+
+struct LogMessageHandlerImpl {
+    sender: Arc<Box<Sender<Result<GrpcPipelinePartExecutionResult, Status>>>>
+}
+
+impl LogMessageHandler for LogMessageHandlerImpl {
+    fn handle(&self, message: String) -> Result<(), PipelinePartExecutionError> {
+        match self.sender.blocking_send(Ok(Self::create_log_message_result(&message))) {
+            Ok(_) => Ok(()),
+            Err(_) => {
+                let message = format!("Failed to send log message: {}", &message);
+                Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
+            } 
+        }
+    }
+}
+
+impl LogMessageHandlerImpl {
+    pub fn new(sender: Arc<Box<Sender<Result<GrpcPipelinePartExecutionResult, Status>>>>) -> Self {
+        Self { sender }
+    }
+
+    fn create_log_message_result(message: &String) -> GrpcPipelinePartExecutionResult {
+        GrpcPipelinePartExecutionResult {
+            result: Some(GrpcResult::LogMessage(GrpcPipelinePartLogMessage { message: message.to_owned() })),
         }
     }
 }

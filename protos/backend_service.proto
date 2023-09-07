@@ -25,7 +25,12 @@ message GrpcPipelinePartExecutionResult {
     oneof result {
         GrpcPipelineFinalResult finalResult = 1;
         GrpcPipelinePartResult pipelinePartResult = 2;
+        GrpcPipelinePartLogMessage logMessage = 3;
     }
+}
+
+message GrpcPipelinePartLogMessage {
+    string message  = 1;
 }
 
 message GrpcPipelinePartResult {

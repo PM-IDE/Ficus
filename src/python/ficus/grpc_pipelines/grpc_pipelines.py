@@ -38,6 +38,9 @@ class Pipeline2:
                     callback_parts[callback_part_index].execute_callback(part_result.pipelinePartResult.contextValue)
                     callback_part_index += 1
 
+                if last_result.HasField('logMessage'):
+                    print(part_result.logMessage.message)
+
             return last_result
 
     @staticmethod
