@@ -7,9 +7,9 @@ use super::{
 use crate::event_log::core::event::event::Event;
 
 pub trait EventLog {
-    type TEvent: Event;
-    type TTraceInfo: TraceInfo;
-    type TTrace: Trace<TEvent = Self::TEvent, TTraceInfo = Self::TTraceInfo>;
+    type TEvent: Event + 'static;
+    type TTraceInfo: TraceInfo + 'static;
+    type TTrace: Trace<TEvent = Self::TEvent, TTraceInfo = Self::TTraceInfo> + 'static;
 
     fn empty() -> Self;
 

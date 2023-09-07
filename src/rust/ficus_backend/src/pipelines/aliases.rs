@@ -7,7 +7,7 @@ use crate::{
         repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
         tandem_arrays::SubArrayInTraceInfo,
     },
-    utils::colors::{Color, ColoredRectangle},
+    utils::colors::ColoredRectangle,
 };
 
 pub type TracesActivities = Vec<Vec<ActivityInTraceInfo>>;

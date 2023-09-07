@@ -52,6 +52,7 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<String>(ContextKeys::PATH).is_some());
         assert!(keys.find_concrete_key::<ColorsEventLog>(ContextKeys::COLORS_EVENT_LOG).is_some());
         assert!(keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).is_some());
+        assert!(keys.find_concrete_key::<usize>(ContextKeys::UNDERLYING_EVENTS_COUNT).is_some());
 
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
@@ -85,6 +86,7 @@ fn test_event_log_all_keys() {
         assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).is_some());
         assert!(keys.find_key(ContextKeys::NAMES_EVENT_LOG).is_some());
         assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).is_some());
+        assert!(keys.find_key(ContextKeys::UNDERLYING_EVENTS_COUNT).is_some());
     })
 }
 
@@ -111,5 +113,6 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id() == keys.find_concrete_key::<ColorsEventLog>(ContextKeys::COLORS_EVENT_LOG).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::COLORS_HOLDER).unwrap().key().id() == keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id() == keys.find_concrete_key::<PatternsDiscoveryStrategy>(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::UNDERLYING_EVENTS_COUNT).unwrap().key().id() == keys.find_concrete_key::<usize>(ContextKeys::UNDERLYING_EVENTS_COUNT).unwrap().key().id());
     })
 }

@@ -24,7 +24,7 @@ use crate::{
             patterns::{
                 activity_instances::{
                     create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                    ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
+                    ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME, count_underlying_events,
                 },
                 contexts::PatternsDiscoveryStrategy,
                 repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -168,6 +168,7 @@ impl PipelineParts {
     pub const DRAW_SHORT_ACTIVITIES_DIAGRAM: &str = "DrawShortActivitiesDiagram";
     pub const GET_EVENT_LOG_INFO: &str = "GetEventLogInfo";
     pub const CLEAR_ACTIVITIES: &str = "ClearActivities";
+    pub const GET_UNDERLYING_EVENTS_COUNT: &str = "GetUnderlyingEventsCount";
 }
 
 impl PipelineParts {
@@ -192,6 +193,7 @@ impl PipelineParts {
             Self::draw_short_activities_diagram(),
             Self::get_event_log_info(),
             Self::clear_activities_related_stuff(),
+            Self::get_number_of_underlying_events(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -607,6 +609,14 @@ impl PipelineParts {
             context.remove_concrete(keys.patterns().key());
             context.remove_concrete(keys.repeat_sets().key());
 
+            Ok(())
+        })
+    }
+
+    fn get_number_of_underlying_events() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::GET_UNDERLYING_EVENTS_COUNT, &|context, keys, _| {
+            let log = Self::get_context_value(context, keys.event_log())?;
+            context.put_concrete(keys.underlying_events_count().key(), count_underlying_events(log));
             Ok(())
         })
     }

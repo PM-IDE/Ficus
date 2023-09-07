@@ -71,6 +71,7 @@ impl ContextKeys {
     pub const PATTERNS_DISCOVERY_STRATEGY: &str = "patterns_discovery_strategy";
     pub const OUTPUT_STRING: &str = "output_string";
     pub const EVENT_LOG_INFO: &str = "event_log_info";
+    pub const UNDERLYING_EVENTS_COUNT: &str = "underlying_events_count";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -97,6 +98,7 @@ impl ContextKeys {
         Self::insert_patterns_discovery_strategy(&mut context);
         Self::insert_output_string(&mut context);
         Self::insert_event_log_info(&mut context);
+        Self::insert_underlying_events_count(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -279,5 +281,9 @@ impl ContextKeys {
 
     fn insert_colors_holder(context: &mut ContextKeysInitContext) {
         Self::insert_key::<ColorsHolder>(context, Self::COLORS_HOLDER);
+    }
+
+    fn insert_underlying_events_count(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<usize>(context, Self::UNDERLYING_EVENTS_COUNT);
     }
 }

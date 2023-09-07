@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet, VecDeque},
+    ops::DerefMut,
     rc::Rc,
 };
 
@@ -420,4 +421,39 @@ where
     }
 
     name
+}
+
+pub fn count_underlying_events<TLog>(log: &TLog) -> usize
+where
+    TLog: EventLog,
+{
+    let mut count = 0usize;
+    for trace in log.get_traces() {
+        let mut trace_count = 0usize;
+        for event in trace.borrow().get_events() {
+            trace_count += count_underlying_events_for_event(event.borrow_mut().deref_mut());
+        }
+
+        count += trace_count;
+    }
+
+    count
+}
+
+fn count_underlying_events_for_event<TEvent>(event: &mut TEvent) -> usize
+where
+    TEvent: Event + 'static,
+{
+    let key = underlying_events_key::<TEvent>();
+
+    if let Some(underlying_events) = event.get_user_data().get_concrete_mut(&key) {
+        let mut result = 0usize;
+        for underlying_event in underlying_events {
+            result += count_underlying_events_for_event(underlying_event.borrow_mut().deref_mut())
+        }
+
+        result
+    } else {
+        1
+    }
 }
