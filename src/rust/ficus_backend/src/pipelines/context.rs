@@ -14,14 +14,21 @@ pub trait LogMessageHandler: Send + Sync {
 #[derive(Clone)]
 pub struct PipelineContext {
     user_data: UserDataImpl,
-    log_message_handler: Arc<Box<dyn LogMessageHandler>>,
+    log_message_handler: Option<Arc<Box<dyn LogMessageHandler>>>,
 }
 
 impl PipelineContext {
-    pub fn new(types: &Arc<Box<ContextKeys>>, message_handler: Arc<Box<dyn LogMessageHandler>>) -> Self {
+    pub fn new_with_logging(message_handler: Arc<Box<dyn LogMessageHandler>>) -> Self {
         Self {
             user_data: UserDataImpl::new(),
-            log_message_handler: message_handler,
+            log_message_handler: Some(message_handler),
+        }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            user_data: UserDataImpl::new(),
+            log_message_handler: None,
         }
     }
 }
@@ -50,6 +57,10 @@ impl UserData for PipelineContext {
 
 impl PipelineContext {
     pub fn log(&self, message: String) -> Result<(), PipelinePartExecutionError> {
-        self.log_message_handler.handle(message)
+        if let Some(handler) = self.log_message_handler.as_ref() {
+            handler.handle(message)
+        } else {
+            Ok(())
+        }
     }
 }

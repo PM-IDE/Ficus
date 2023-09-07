@@ -30,7 +30,7 @@ fn test_event_log_key() {
 
 fn execute_test(test: impl Fn(&ContextKeys, &mut PipelineContext) -> ()) {
     let keys = Arc::new(Box::new(ContextKeys::new()));
-    let mut context = PipelineContext::new(&keys);
+    let mut context = PipelineContext::empty();
 
     test(&keys, &mut context);
 }
