@@ -43,6 +43,11 @@ def generate_models():
         for file in [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]:
             process_file(file, packages, common_files, package_name)
 
+    init_path = os.path.join(models_dir, '__init__.py')
+    if not os.path.exists(init_path):
+         with open(init_path, 'w'):
+             pass
+
 
 def patch_common_types(file, common_files, package_name):
     result_lines = []
