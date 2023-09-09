@@ -290,6 +290,6 @@ impl ContextKeys {
     }
 
     fn insert_events_count(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<usize>(context, Self::EVENTS_COUNT);
+        Self::insert_key::<u32>(context, Self::EVENTS_COUNT);
     }
 }

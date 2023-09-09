@@ -153,7 +153,7 @@ def test_filter_traces_by_events_count():
     pipeline = Pipeline2(
         ReadLogFromXes2(),
         TracesDiversityDiagram2(),
-        FilterTracesByEventsCount2(min_events_in_trace=4),
+        FilterTracesByEventsCount2(min_events_in_trace=5),
         TracesDiversityDiagram2(),
     )
 

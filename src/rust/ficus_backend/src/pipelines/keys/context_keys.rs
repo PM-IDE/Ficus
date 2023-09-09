@@ -228,8 +228,8 @@ impl ContextKeys {
         Self::are_keys_equal(self.underlying_events_count(), key)
     }
 
-    pub fn events_count(&self) -> &DefaultContextKey<usize> {
-        self.find_concrete_key::<usize>(Self::EVENTS_COUNT).unwrap()
+    pub fn events_count(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::EVENTS_COUNT).unwrap()
     }
 
     pub fn is_events_count(&self, key: &dyn ContextKey) -> bool {
