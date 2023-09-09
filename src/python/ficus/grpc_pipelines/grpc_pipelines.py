@@ -87,7 +87,7 @@ class PipelinePart2WithCallback(PipelinePart2):
 
 class ReadLogFromXes2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_read_log_from_xes))
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_read_log_from_xes))
 
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
@@ -247,7 +247,7 @@ class FindTandemArrays2(PipelinePart2):
         config = GrpcPipelinePartConfiguration()
         append_uint32_value(config, const_tandem_array_length, self.max_array_length)
 
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_type, config))
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(self.part_type, config))
 
 
 class FindPrimitiveTandemArrays2(FindTandemArrays2):
@@ -270,7 +270,7 @@ class FindRepeats2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy.name)
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(self.part_name, config))
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(self.part_name, config))
 
 
 class FindMaximalRepeats2(FindRepeats2):
@@ -295,7 +295,7 @@ class DiscoverActivities2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_uint32_value(config, const_activity_level, self.activity_level)
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_discover_activities, config))
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_activities, config))
 
 
 class DiscoverActivitiesInstances2(PipelinePart2):
@@ -305,7 +305,7 @@ class DiscoverActivitiesInstances2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_bool_value(config, const_narrow_activities, self.narrow_activities)
-        return GrpcPipelinePartBase(defaultPart=_create_empty_pipeline_part(const_discover_activities_instances, config))
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
 
 
 class PrintEventLogInfo2(PipelinePart2WithCallback):
@@ -317,6 +317,17 @@ class PrintEventLogInfo2(PipelinePart2WithCallback):
     def execute_callback(self, context_value: GrpcContextValue):
         log_info = from_grpc_event_log_info(context_value.event_log_info)
         print(log_info)
+
+
+class FilterTracesByEventsCount2(PipelinePart2):
+    def __init__(self, min_events_in_trace: int):
+        self.min_events_in_trace = min_events_in_trace
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_events_count, self.min_events_in_trace)
+        part = _create_default_pipeline_part(const_filter_traces_by_events_count, config)
+        return GrpcPipelinePartBase(defaultPart=part)
 
 
 def _create_simple_get_context_value_part(key_name: str):
@@ -333,7 +344,7 @@ def _create_complex_get_context_part(key_name: str, before_part_name: str, confi
     )
 
 
-def _create_empty_pipeline_part(name: str, config=GrpcPipelinePartConfiguration()):
+def _create_default_pipeline_part(name: str, config=GrpcPipelinePartConfiguration()):
     return GrpcPipelinePart(configuration=config, name=name)
 
 
