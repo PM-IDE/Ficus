@@ -32,6 +32,10 @@ unsafe impl Sync for ContextKeys {}
 unsafe impl Send for ContextKeys {}
 
 impl ContextKeys {
+    pub fn len(&self) -> usize {
+        self.concrete_keys.len()
+    }
+
     pub fn find_key(&self, name: &str) -> Option<&Box<dyn ContextKey>> {
         self.context_keys.get(name)
     }

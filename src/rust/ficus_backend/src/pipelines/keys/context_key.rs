@@ -1,18 +1,5 @@
-use crate::{
-    pipelines::context::PipelineContext,
-    utils::user_data::{
-        keys::{DefaultKey, Key},
-        user_data::UserData,
-    },
-};
-use std::{
-    hash::{Hash, Hasher},
-    rc::Rc,
-};
-
-use super::context_keys::ContextKeys;
-
-type ContextKeyValueFactory<T> = Rc<Box<dyn Fn(&mut PipelineContext, &ContextKeys) -> Option<T>>>;
+use crate::utils::user_data::keys::{DefaultKey, Key};
+use std::hash::{Hash, Hasher};
 
 pub trait ContextKey {
     fn key(&self) -> &dyn Key;

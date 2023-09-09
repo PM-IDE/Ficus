@@ -61,6 +61,10 @@ impl UserData for PipelineContext {
     fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
         self.user_data.remove_any::<T>(key)
     }
+
+    fn len(&self) -> usize {
+        self.user_data.len()
+    }
 }
 
 impl PipelineContext {

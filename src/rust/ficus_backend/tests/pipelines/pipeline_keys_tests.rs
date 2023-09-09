@@ -12,6 +12,7 @@ use ficus_backend::{
         colors::ColorsHolder,
         user_data::{keys::Key, user_data::UserData},
     },
+    vecs,
 };
 
 #[test]
@@ -64,32 +65,46 @@ fn test_event_log_all_concrete_keys() {
     })
 }
 
+fn get_all_keys_names() -> Vec<String> {
+    vecs![
+        "path",
+        "tandem_array_length",
+        "activity_level",
+        "narrow_activities",
+        "event_name",
+        "regex",
+        "patterns_discovery_strategy",
+        "output_string",
+        "event_log_info",
+        "underlying_events_count",
+        "events_count",
+        "event_log",
+        "activities",
+        "repeat_sets",
+        "trace_activities",
+        "patterns",
+        "petri_net",
+        "activities_to_logs",
+        "activity_name",
+        "hashes_event_log",
+        "names_event_log",
+        "colors_event_log",
+        "colors_holder"
+    ]
+}
+
 #[test]
-#[rustfmt::skip]
 fn test_event_log_all_keys() {
     execute_test(|keys, _| {
-        assert!(keys.find_key(ContextKeys::EVENT_LOG).is_some());
-        assert!(keys.find_key(ContextKeys::ACTIVITIES).is_some());
-        assert!(keys.find_key(ContextKeys::ACTIVITIES_TO_LOGS).is_some());
-        assert!(keys.find_key(ContextKeys::ACTIVITY_NAME).is_some());
-        assert!(keys.find_key(ContextKeys::PATTERNS).is_some());
-        assert!(keys.find_key(ContextKeys::HASHES_EVENT_LOG).is_some());
-        assert!(keys.find_key(ContextKeys::NAMES_EVENT_LOG).is_some());
-        assert!(keys.find_key(ContextKeys::PETRI_NET).is_some());
-        assert!(keys.find_key(ContextKeys::REPEAT_SETS).is_some());
-        assert!(keys.find_key(ContextKeys::TRACE_ACTIVITIES).is_some());
-        assert!(keys.find_key(ContextKeys::PATH).is_some());
-        assert!(keys.find_key(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
-        assert!(keys.find_key(ContextKeys::ACTIVITY_LEVEL).is_some());
-        assert!(keys.find_key(ContextKeys::NARROW_ACTIVITIES).is_some());
-        assert!(keys.find_key(ContextKeys::EVENT_NAME).is_some());
-        assert!(keys.find_key(ContextKeys::REGEX).is_some());
-        assert!(keys.find_key(ContextKeys::COLORS_EVENT_LOG).is_some());
-        assert!(keys.find_key(ContextKeys::NAMES_EVENT_LOG).is_some());
-        assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).is_some());
-        assert!(keys.find_key(ContextKeys::UNDERLYING_EVENTS_COUNT).is_some());
-        assert!(keys.find_key(ContextKeys::EVENTS_COUNT).is_some());
+        for key_name in get_all_keys_names() {
+            assert!(keys.find_key(&key_name).is_some());
+        }
     })
+}
+
+#[test]
+fn test_keys_count() {
+    execute_test(|keys, _| assert_eq!(keys.len(), get_all_keys_names().len()))
 }
 
 #[test]

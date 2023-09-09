@@ -10,6 +10,7 @@ pub struct UserDataImpl {
 unsafe impl Send for UserDataImpl {}
 
 pub trait UserData {
+    fn len(&self) -> usize;
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T);
     fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T);
     fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
@@ -61,6 +62,14 @@ impl UserData for UserDataImpl {
     fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
         if let Some(values_map) = self.values_map.as_mut() {
             values_map.remove(&key.id());
+        }
+    }
+
+    fn len(&self) -> usize {
+        if let Some(map) = self.values_map.as_ref() {
+            map.len()
+        } else {
+            0
         }
     }
 }
