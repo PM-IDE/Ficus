@@ -58,8 +58,9 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<ColorsHolder>(ContextKeys::COLORS_HOLDER).is_some());
         assert!(keys.find_concrete_key::<usize>(ContextKeys::UNDERLYING_EVENTS_COUNT).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::EVENTS_COUNT).is_some());
-        assert!(keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES).is_some());
+        assert!(keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES_REGEXES).is_some());
         assert!(keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).is_some());
+        assert!(keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).is_some());
 
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
@@ -84,8 +85,9 @@ fn get_all_keys_names() -> Vec<String> {
         "event_log_info",
         "underlying_events_count",
         "events_count",
-        "event_classes",
+        "event_classes_regexes",
         "adjusting_mode",
+        "event_class_regex",
 
         "event_log",
         "activities",
@@ -141,7 +143,8 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id() == keys.find_concrete_key::<PatternsDiscoveryStrategy>(ContextKeys::PATTERNS_DISCOVERY_STRATEGY).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::UNDERLYING_EVENTS_COUNT).unwrap().key().id() == keys.find_concrete_key::<usize>(ContextKeys::UNDERLYING_EVENTS_COUNT).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::EVENTS_COUNT).unwrap().key().id() == keys.find_concrete_key::<u32>(ContextKeys::EVENTS_COUNT).unwrap().key().id());
-        assert!(keys.find_key(ContextKeys::EVENT_CLASSES).unwrap().key().id() == keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::EVENT_CLASSES_REGEXES).unwrap().key().id() == keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES_REGEXES).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::ADJUSTING_MODE).unwrap().key().id() == keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id());
     })
 }

@@ -54,7 +54,7 @@ where
         }
     }
 
-    pub fn to_hashes_vectors<THasher>(&self) -> Vec<Vec<u64>>
+    pub fn to_hashes_vectors<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
     where
         THasher: EventHasher<TTrace::TEvent>,
     {
@@ -62,7 +62,7 @@ where
         for trace in &self.traces {
             let mut trace_hashes = Vec::new();
             for event in trace.borrow().get_events() {
-                trace_hashes.push(THasher::hash(&event.borrow()));
+                trace_hashes.push(hasher.hash(&event.borrow()));
             }
 
             hashes.push(trace_hashes);

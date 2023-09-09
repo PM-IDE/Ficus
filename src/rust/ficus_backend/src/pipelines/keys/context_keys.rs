@@ -240,12 +240,13 @@ impl ContextKeys {
         Self::are_keys_equal(self.events_count(), key)
     }
 
-    pub fn event_classes(&self) -> &DefaultContextKey<Vec<String>> {
-        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES).unwrap()
+    pub fn event_classes_regexes(&self) -> &DefaultContextKey<Vec<String>> {
+        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES_REGEXES)
+            .unwrap()
     }
 
-    pub fn is_event_classes(&self, key: &dyn ContextKey) -> bool {
-        Self::are_keys_equal(self.event_classes(), key)
+    pub fn is_event_classes_regexes(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.event_classes_regexes(), key)
     }
 
     pub fn adjusting_mode(&self) -> &DefaultContextKey<AdjustingMode> {
@@ -254,5 +255,13 @@ impl ContextKeys {
 
     pub fn is_adjusting_mode(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.adjusting_mode(), key)
+    }
+
+    pub fn event_class_regex(&self) -> &DefaultContextKey<String> {
+        self.find_concrete_key::<String>(Self::EVENT_CLASS_REGEX).unwrap()
+    }
+
+    pub fn is_vent_class_regex(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.event_class_regex(), key)
     }
 }

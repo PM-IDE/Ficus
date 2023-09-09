@@ -66,8 +66,9 @@ impl ContextKeys {
     pub const EVENT_LOG_INFO: &str = "event_log_info";
     pub const UNDERLYING_EVENTS_COUNT: &str = "underlying_events_count";
     pub const EVENTS_COUNT: &str = "events_count";
-    pub const EVENT_CLASSES: &str = "event_classes";
+    pub const EVENT_CLASSES_REGEXES: &str = "event_classes_regexes";
     pub const ADJUSTING_MODE: &str = "adjusting_mode";
+    pub const EVENT_CLASS_REGEX: &str = "event_class_regex";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -96,8 +97,9 @@ impl ContextKeys {
         Self::insert_event_log_info(&mut context);
         Self::insert_underlying_events_count(&mut context);
         Self::insert_events_count(&mut context);
-        Self::insert_event_classes(&mut context);
+        Self::insert_event_classes_regexes(&mut context);
         Self::insert_adjusting_mode(&mut context);
+        Self::insert_event_class_regex(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -226,11 +228,15 @@ impl ContextKeys {
         Self::insert_key::<u32>(context, Self::EVENTS_COUNT);
     }
 
-    fn insert_event_classes(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<Vec<String>>(context, Self::EVENT_CLASSES);
+    fn insert_event_classes_regexes(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<Vec<String>>(context, Self::EVENT_CLASSES_REGEXES);
     }
 
     fn insert_adjusting_mode(context: &mut ContextKeysInitContext) {
         Self::insert_key::<AdjustingMode>(context, Self::ADJUSTING_MODE)
+    }
+
+    fn insert_event_class_regex(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::EVENT_CLASS_REGEX)
     }
 }

@@ -9,13 +9,16 @@ use regex::Regex;
 use crate::{
     event_log::{
         core::{
-            event::{event::Event, event_hasher::NameEventHasher},
+            event::{
+                event::Event,
+                event_hasher::{NameEventHasher, RegexEventHasher},
+            },
             event_log::EventLog,
             trace::trace::Trace,
         },
         xes::{
             reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log,
-            xes_event::XesEventImpl,
+            xes_event::XesEventImpl, xes_event_log::XesEventLogImpl,
         },
     },
     features::{
@@ -309,10 +312,15 @@ impl PipelineParts {
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
-        let array_length = part_config.get_concrete(keys.tandem_array_length().key()).unwrap();
+        let array_length = *part_config.get_concrete(keys.tandem_array_length().key()).unwrap() as usize;
 
-        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), *array_length as usize);
+        let hashed_log = Self::create_hashed_event_log(context, keys, log);
+
+        let arrays = patterns_finder(&hashed_log, array_length);
+
+        context.put_concrete(keys.hashes_event_log().key(), hashed_log);
         context.put_concrete(keys.patterns().key(), arrays);
+
         Ok(())
     }
 
@@ -324,11 +332,25 @@ impl PipelineParts {
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
         let strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
-        let arrays = patterns_finder(&log.to_hashes_event_log::<NameEventHasher>(), &strategy);
 
-        context.put_concrete(keys.patterns().key(), arrays);
+        let hashed_log = Self::create_hashed_event_log(context, keys, log);
+
+        let repeats = patterns_finder(&hashed_log, &strategy);
+
+        context.put_concrete(keys.hashes_event_log().key(), hashed_log);
+        context.put_concrete(keys.patterns().key(), repeats);
 
         Ok(())
+    }
+
+    fn create_hashed_event_log(context: &PipelineContext, keys: &ContextKeys, log: &XesEventLogImpl) -> Vec<Vec<u64>> {
+        match Self::get_context_value(context, keys.event_class_regex()) {
+            Ok(regex) => {
+                let hasher = RegexEventHasher::new(regex).ok().unwrap();
+                log.to_hashes_event_log(&hasher)
+            }
+            Err(_) => log.to_hashes_event_log(&NameEventHasher::new()),
+        }
     }
 
     fn find_maximal_repeats() -> (String, PipelinePartFactory) {
@@ -353,12 +375,12 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {
             let log = Self::get_context_value(context, keys.event_log())?;
             let patterns = Self::get_context_value(context, keys.patterns())?;
-            let hashes = log.to_hashes_event_log::<NameEventHasher>();
-            let repeat_sets = build_repeat_sets(&hashes, patterns);
+            let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
+            let repeat_sets = build_repeat_sets(&hashed_log, patterns);
 
             let activity_level = Self::get_context_value(config, keys.activity_level())?;
             let tree =
-                build_repeat_set_tree_from_repeats(&hashes, &repeat_sets, *activity_level as usize, |sub_array| {
+                build_repeat_set_tree_from_repeats(&hashed_log, &repeat_sets, *activity_level as usize, |sub_array| {
                     create_activity_name(log, sub_array)
                 });
 
@@ -372,9 +394,9 @@ impl PipelineParts {
             let log = Self::get_context_value(context, keys.event_log())?;
             let mut tree = Self::get_context_value_mut(context, keys.activities())?;
             let narrow = Self::get_context_value(config, keys.narrow_activities())?;
+            let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
 
-            let hashes = log.to_hashes_event_log::<NameEventHasher>();
-            let instances = extract_activities_instances(&hashes, &mut tree, *narrow);
+            let instances = extract_activities_instances(&hashed_log, &mut tree, *narrow);
 
             context.put_concrete(&keys.trace_activities().key(), instances);
             Ok(())
@@ -672,7 +694,7 @@ impl PipelineParts {
     fn get_hashes_event_log() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, keys, _| {
             let log = Self::get_context_value(context, keys.event_log())?;
-            let hashes_event_log = log.to_hashes_event_log::<NameEventHasher>();
+            let hashes_event_log = Self::create_hashed_event_log(context, keys, log);
 
             context.put_concrete(keys.hashes_event_log().key(), hashes_event_log);
 

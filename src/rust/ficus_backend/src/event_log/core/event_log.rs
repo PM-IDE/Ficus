@@ -16,7 +16,7 @@ pub trait EventLog {
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
     fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>);
 
-    fn to_hashes_event_log<THasher>(&self) -> Vec<Vec<u64>>
+    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
     where
         THasher: EventHasher<Self::TEvent>;
 

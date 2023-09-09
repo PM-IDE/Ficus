@@ -138,11 +138,11 @@ impl EventLog for XesEventLogImpl {
         self.traces_holder.mutate_events(mutator);
     }
 
-    fn to_hashes_event_log<THasher>(&self) -> Vec<Vec<u64>>
+    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
     where
         THasher: EventHasher<Self::TEvent>,
     {
-        self.traces_holder.to_hashes_vectors::<THasher>()
+        self.traces_holder.to_hashes_vectors(hasher)
     }
 
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
