@@ -41,8 +41,6 @@ impl GetContextValuePipelinePart {
                     before_part.execute(context, keys)?;
                 }
 
-                key.try_create_value_into_context(context, keys);
-
                 match context.get_any(key.key()) {
                     Some(context_value) => {
                         let grpc_value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
@@ -69,10 +67,7 @@ impl GetContextValuePipelinePart {
 impl PipelinePart for GetContextValuePipelinePart {
     fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
         match keys.find_key(&self.key_name) {
-            Some(key) => {
-                key.try_create_value_into_context(context, keys);
-                (self.handler)(context, keys, key)
-            }
+            Some(key) => (self.handler)(context, keys, key),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 self.key_name.clone(),
             ))),

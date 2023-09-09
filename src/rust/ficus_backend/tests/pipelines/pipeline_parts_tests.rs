@@ -22,7 +22,10 @@ fn get_test_parts_names() -> Vec<String> {
         "GetEventLogInfo",
         "ClearActivities",
         "GetUnderlyingEventsCount",
-        "FilterTracesByEventsCount"
+        "FilterTracesByEventsCount",
+        "TracesDiversityDiagram",
+        "GetHashesEventLog",
+        "GetNamesEventLog"
     ]
 }
 

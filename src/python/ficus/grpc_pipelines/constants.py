@@ -22,5 +22,8 @@ const_discover_activities = 'DiscoverActivities'
 const_discover_activities_instances = 'DiscoverActivitiesInstances'
 const_get_event_log_info = 'GetEventLogInfo'
 const_filter_traces_by_events_count = 'FilterTracesByEventsCount'
+const_get_hashes_event_log = 'GetHashesEventLog'
+const_get_names_event_log = 'GetNamesEventLog'
+const_traces_diversity_diagram = 'TracesDiversityDiagram'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'

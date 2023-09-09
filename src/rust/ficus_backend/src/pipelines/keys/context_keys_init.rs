@@ -2,11 +2,7 @@ use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::{
-        core::{
-            event::{event::Event, event_hasher::NameEventHasher},
-            event_log::EventLog,
-            trace::trace::Trace,
-        },
+        core::{event_log::EventLog, trace::trace::Trace},
         xes::xes_event_log::XesEventLogImpl,
     },
     features::{
@@ -14,10 +10,7 @@ use crate::{
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
-    utils::{
-        colors::{ColoredRectangle, ColorsHolder},
-        user_data::user_data::UserData,
-    },
+    utils::colors::ColorsHolder,
 };
 
 use super::{
@@ -206,79 +199,15 @@ impl ContextKeys {
     }
 
     fn insert_hashes_event_log(context: &mut ContextKeysInitContext) {
-        let key = DefaultContextKey::<Vec<Vec<u64>>>::new_with_factory(
-            Self::HASHES_EVENT_LOG.to_string(),
-            Rc::new(Box::new(|pipeline_context, keys| {
-                match pipeline_context.get_concrete(keys.event_log().key()) {
-                    None => None,
-                    Some(log) => Some(log.to_hashes_event_log::<NameEventHasher>()),
-                }
-            })),
-        );
-
-        Self::insert_key_to_map(context, Box::new(key), Self::HASHES_EVENT_LOG);
+        Self::insert_key::<Vec<Vec<u64>>>(context, Self::HASHES_EVENT_LOG);
     }
 
     fn insert_names_event_log(context: &mut ContextKeysInitContext) {
-        let key = DefaultContextKey::<Vec<Vec<String>>>::new_with_factory(
-            Self::NAMES_EVENT_LOG.to_string(),
-            Rc::new(Box::new(|pipeline_context, keys| {
-                match pipeline_context.get_concrete(keys.event_log().key()) {
-                    None => None,
-                    Some(log) => {
-                        let mut result = vec![];
-                        for trace in log.get_traces() {
-                            let mut vec = vec![];
-                            for event in trace.borrow().get_events() {
-                                vec.push(event.borrow().get_name().to_string());
-                            }
-
-                            result.push(vec);
-                        }
-
-                        Some(result)
-                    }
-                }
-            })),
-        );
-
-        Self::insert_key_to_map(context, Box::new(key), Self::NAMES_EVENT_LOG);
+        Self::insert_key::<Vec<Vec<String>>>(context, Self::NAMES_EVENT_LOG);
     }
 
     fn insert_colors_event_log(context: &mut ContextKeysInitContext) {
-        let key = DefaultContextKey::<ColorsEventLog>::new_with_factory(
-            Self::COLORS_EVENT_LOG.to_string(),
-            Rc::new(Box::new(|pipeline_context, keys| {
-                match pipeline_context.get_concrete(keys.event_log().key()) {
-                    None => None,
-                    Some(log) => {
-                        let colors_holder = pipeline_context
-                            .get_concrete_mut(keys.colors_holder().key())
-                            .expect("Should be initialized");
-
-                        let mut result = vec![];
-                        for trace in log.get_traces() {
-                            let mut vec = vec![];
-                            let mut index = 0usize;
-                            for event in trace.borrow().get_events() {
-                                let event = event.borrow();
-                                let name = event.get_name();
-                                let color = colors_holder.get_or_create(name.as_str());
-
-                                vec.push(ColoredRectangle::square(color, index, name.to_owned()));
-                                index += 1;
-                            }
-
-                            result.push(vec);
-                        }
-
-                        Some(result)
-                    }
-                }
-            })),
-        );
-
-        Self::insert_key_to_map(context, Box::new(key), Self::COLORS_EVENT_LOG);
+        Self::insert_key::<ColorsEventLog>(context, Self::COLORS_EVENT_LOG);
     }
 
     fn insert_colors_holder(context: &mut ContextKeysInitContext) {

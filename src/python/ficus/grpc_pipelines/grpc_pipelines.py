@@ -127,7 +127,9 @@ class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
                          width_scale=width_scale)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(simpleContextRequestPart=_create_simple_get_context_value_part(const_colors_event_log))
+        config = GrpcPipelinePartConfiguration()
+        part = _create_complex_get_context_part(const_colors_event_log, const_traces_diversity_diagram, config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
 class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):

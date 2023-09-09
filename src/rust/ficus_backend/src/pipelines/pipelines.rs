@@ -171,6 +171,9 @@ impl PipelineParts {
     pub const CLEAR_ACTIVITIES: &str = "ClearActivities";
     pub const GET_UNDERLYING_EVENTS_COUNT: &str = "GetUnderlyingEventsCount";
     pub const FILTER_TRACES_BY_EVENTS_COUNT: &str = "FilterTracesByEventsCount";
+    pub const TRACES_DIVERSITY_DIAGRAM: &str = "TracesDiversityDiagram";
+    pub const GET_NAMES_EVENT_LOG: &str = "GetNamesEventLog";
+    pub const GET_HASHES_EVENT_LOG: &str = "GetHashesEventLog";
 }
 
 impl PipelineParts {
@@ -197,6 +200,9 @@ impl PipelineParts {
             Self::clear_activities_related_stuff(),
             Self::get_number_of_underlying_events(),
             Self::filter_traces_by_count(),
+            Self::traces_diversity_diagram(),
+            Self::get_names_event_log(),
+            Self::get_hashes_event_log(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -629,6 +635,66 @@ impl PipelineParts {
             let log = Self::get_context_value_mut(context, keys.event_log())?;
             let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
             log.filter_traces(&|trace, _| trace.get_events().len() < min_events_count);
+
+            Ok(())
+        })
+    }
+
+    fn traces_diversity_diagram() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::TRACES_DIVERSITY_DIAGRAM, &|context, keys, _| {
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let colors_holder = context
+                .get_concrete_mut(keys.colors_holder().key())
+                .expect("Should be initialized");
+
+            let mut result = vec![];
+            for trace in log.get_traces() {
+                let mut vec = vec![];
+                let mut index = 0usize;
+                for event in trace.borrow().get_events() {
+                    let event = event.borrow();
+                    let name = event.get_name();
+                    let color = colors_holder.get_or_create(name.as_str());
+
+                    vec.push(ColoredRectangle::square(color, index, name.to_owned()));
+                    index += 1;
+                }
+
+                result.push(vec);
+            }
+
+            context.put_concrete(keys.colors_event_log().key(), result);
+
+            Ok(())
+        })
+    }
+
+    fn get_hashes_event_log() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, keys, _| {
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let hashes_event_log = log.to_hashes_event_log::<NameEventHasher>();
+
+            context.put_concrete(keys.hashes_event_log().key(), hashes_event_log);
+
+            Ok(())
+        })
+    }
+
+    fn get_names_event_log() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::GET_NAMES_EVENT_LOG, &|context, keys, _| {
+            let log = Self::get_context_value(context, keys.event_log())?;
+
+            let mut result = vec![];
+            for trace in log.get_traces() {
+                let mut vec = vec![];
+                for event in trace.borrow().get_events() {
+                    vec.push(event.borrow().get_name().to_string());
+                }
+
+                result.push(vec);
+            }
+
+            context.put_concrete(keys.names_event_log().key(), result);
 
             Ok(())
         })
