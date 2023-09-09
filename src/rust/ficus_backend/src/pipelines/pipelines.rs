@@ -23,8 +23,9 @@ use crate::{
             event_log_info::{EventLogInfo, EventLogInfoCreationDto},
             patterns::{
                 activity_instances::{
-                    create_activity_name, create_new_log_from_activities_instances, extract_activities_instances,
-                    ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME, count_underlying_events,
+                    count_underlying_events, create_activity_name, create_new_log_from_activities_instances,
+                    extract_activities_instances, ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy,
+                    UNDEF_ACTIVITY_NAME,
                 },
                 contexts::PatternsDiscoveryStrategy,
                 repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -169,6 +170,7 @@ impl PipelineParts {
     pub const GET_EVENT_LOG_INFO: &str = "GetEventLogInfo";
     pub const CLEAR_ACTIVITIES: &str = "ClearActivities";
     pub const GET_UNDERLYING_EVENTS_COUNT: &str = "GetUnderlyingEventsCount";
+    pub const FILTER_TRACES_BY_EVENTS_COUNT: &str = "FilterTracesByEventsCount";
 }
 
 impl PipelineParts {
@@ -194,6 +196,7 @@ impl PipelineParts {
             Self::get_event_log_info(),
             Self::clear_activities_related_stuff(),
             Self::get_number_of_underlying_events(),
+            Self::filter_traces_by_count(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -617,6 +620,16 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::GET_UNDERLYING_EVENTS_COUNT, &|context, keys, _| {
             let log = Self::get_context_value(context, keys.event_log())?;
             context.put_concrete(keys.underlying_events_count().key(), count_underlying_events(log));
+            Ok(())
+        })
+    }
+
+    fn filter_traces_by_count() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::FILTER_TRACES_BY_EVENTS_COUNT, &|context, keys, config| {
+            let log = Self::get_context_value_mut(context, keys.event_log())?;
+            let min_events_count = *Self::get_context_value(config, keys.events_count())?;
+            log.filter_traces(&|trace, _| trace.get_events().len() < min_events_count);
+
             Ok(())
         })
     }

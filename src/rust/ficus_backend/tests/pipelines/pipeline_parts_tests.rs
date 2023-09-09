@@ -21,7 +21,8 @@ fn get_test_parts_names() -> Vec<String> {
         "DrawShortActivitiesDiagram",
         "GetEventLogInfo",
         "ClearActivities",
-        "GetUnderlyingEventsCount"
+        "GetUnderlyingEventsCount",
+        "FilterTracesByEventsCount"
     ]
 }
 

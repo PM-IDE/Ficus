@@ -72,6 +72,7 @@ impl ContextKeys {
     pub const OUTPUT_STRING: &str = "output_string";
     pub const EVENT_LOG_INFO: &str = "event_log_info";
     pub const UNDERLYING_EVENTS_COUNT: &str = "underlying_events_count";
+    pub const EVENTS_COUNT: &str = "events_count";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -99,6 +100,7 @@ impl ContextKeys {
         Self::insert_output_string(&mut context);
         Self::insert_event_log_info(&mut context);
         Self::insert_underlying_events_count(&mut context);
+        Self::insert_events_count(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -285,5 +287,9 @@ impl ContextKeys {
 
     fn insert_underlying_events_count(context: &mut ContextKeysInitContext) {
         Self::insert_key::<usize>(context, Self::UNDERLYING_EVENTS_COUNT);
+    }
+
+    fn insert_events_count(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<usize>(context, Self::EVENTS_COUNT);
     }
 }

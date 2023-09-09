@@ -1,4 +1,4 @@
-use std::{any::Any, borrow::Cow, cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -226,5 +226,13 @@ impl ContextKeys {
 
     pub fn is_underlying_events_count(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.underlying_events_count(), key)
+    }
+
+    pub fn events_count(&self) -> &DefaultContextKey<usize> {
+        self.find_concrete_key::<usize>(Self::EVENTS_COUNT).unwrap()
+    }
+
+    pub fn is_events_count(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.events_count(), key)
     }
 }
