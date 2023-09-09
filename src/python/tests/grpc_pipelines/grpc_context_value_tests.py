@@ -31,3 +31,18 @@ def test_hashes_log_context_value():
     context_value = HashesLogContextValue(raw_log).to_grpc_context_value()
     assert raw_log[0][0] == context_value.log.traces[0].events[0]
     assert raw_log[0][1] == context_value.log.traces[0].events[1]
+
+
+def test_enum_context_value():
+    enum_name = 'ASDASDSDSD'
+    enum_value = 'ASDasdasdasdadasd'
+    context_value = EnumContextValue(enum_name=enum_name, value=enum_value).to_grpc_context_value()
+    assert enum_name == context_value.enum.enumType
+    assert enum_value == context_value.enum.value
+
+
+def test_strings_context_value():
+    raw_strings = ['12312312', '323123123']
+    context_value = StringsContextValue(raw_strings).to_grpc_context_value()
+    assert raw_strings[0] == context_value.strings.strings[0]
+    assert raw_strings[1] == context_value.strings.strings[1]

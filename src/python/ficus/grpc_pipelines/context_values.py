@@ -77,6 +77,17 @@ class EnumContextValue(ContextValue):
         return GrpcContextValue(enum=GrpcEnum(enumType=self.enum_name, value=self.value))
 
 
+@dataclass
+class StringsContextValue(ContextValue):
+    strings: list[str]
+
+
+    def to_grpc_context_value(self) -> GrpcContextValue:
+        strings = GrpcStrings()
+        strings.strings.extend(self.strings)
+        return GrpcContextValue(strings=strings)
+
+
 def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
     result = []
     for grpc_trace in grpc_names_log.log.traces:
