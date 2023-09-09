@@ -1,12 +1,12 @@
-use std::{any::Any, borrow::Cow, collections::HashMap, rc::Rc};
+use std::{any::Any, borrow::Cow, collections::HashMap};
 
 use crate::{
-    event_log::{
-        core::{event_log::EventLog, trace::trace::Trace},
-        xes::xes_event_log::XesEventLogImpl,
-    },
+    event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
-        analysis::{event_log_info::EventLogInfo, patterns::contexts::PatternsDiscoveryStrategy},
+        analysis::{
+            event_log_info::EventLogInfo,
+            patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
+        },
         discovery::petri_net::PetriNet,
     },
     pipelines::aliases::*,
@@ -66,6 +66,8 @@ impl ContextKeys {
     pub const EVENT_LOG_INFO: &str = "event_log_info";
     pub const UNDERLYING_EVENTS_COUNT: &str = "underlying_events_count";
     pub const EVENTS_COUNT: &str = "events_count";
+    pub const EVENT_CLASSES: &str = "event_classes";
+    pub const ADJUSTING_MODE: &str = "adjusting_mode";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -94,6 +96,8 @@ impl ContextKeys {
         Self::insert_event_log_info(&mut context);
         Self::insert_underlying_events_count(&mut context);
         Self::insert_events_count(&mut context);
+        Self::insert_event_classes(&mut context);
+        Self::insert_adjusting_mode(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -220,5 +224,13 @@ impl ContextKeys {
 
     fn insert_events_count(context: &mut ContextKeysInitContext) {
         Self::insert_key::<u32>(context, Self::EVENTS_COUNT);
+    }
+
+    fn insert_event_classes(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<Vec<String>>(context, Self::EVENT_CLASSES);
+    }
+
+    fn insert_adjusting_mode(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<AdjustingMode>(context, Self::ADJUSTING_MODE)
     }
 }

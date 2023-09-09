@@ -69,6 +69,7 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
             }
         }
         ContextValue::EventLogInfo(_) => todo!(),
+        ContextValue::Strings(strings) => user_data.put_any::<Vec<String>>(key, strings.strings.clone()),
     }
 }
 

@@ -22,6 +22,7 @@ message GrpcContextValue {
         GrpcColorsEventLog colors_log = 9;
         GrpcEnum enum = 10;
         GrpcEventLogInfo event_log_info = 11;
+        GrpcStrings strings = 12;
     }
 }
 
@@ -84,4 +85,8 @@ message GrpcEventLogInfo {
     uint32 events_count = 1;
     uint32 traces_count = 2;
     uint32 event_classes_count = 3;
+}
+
+message GrpcStrings {
+    repeated string strings = 1;
 }

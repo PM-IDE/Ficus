@@ -243,6 +243,11 @@ pub enum UndefActivityHandlingStrategy<TEvent> {
     InsertAllEvents,
 }
 
+pub enum AdjustingMode {
+    FromAllLog,
+    FromUnattachedSubTraces,
+}
+
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 
 pub fn underlying_events_key<TEvent>() -> DefaultKey<Vec<Rc<RefCell<TEvent>>>>

@@ -6,7 +6,7 @@ use crate::{
         analysis::{
             event_log_info::EventLogInfo,
             patterns::{
-                activity_instances::ActivityInTraceInfo,
+                activity_instances::{ActivityInTraceInfo, AdjustingMode},
                 contexts::PatternsDiscoveryStrategy,
                 repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
                 tandem_arrays::SubArrayInTraceInfo,
@@ -238,5 +238,21 @@ impl ContextKeys {
 
     pub fn is_events_count(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.events_count(), key)
+    }
+
+    pub fn event_classes(&self) -> &DefaultContextKey<Vec<String>> {
+        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES).unwrap()
+    }
+
+    pub fn is_event_classes(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.event_classes(), key)
+    }
+
+    pub fn adjusting_mode(&self) -> &DefaultContextKey<AdjustingMode> {
+        self.find_concrete_key::<AdjustingMode>(Self::ADJUSTING_MODE).unwrap()
+    }
+
+    pub fn is_adjusting_mode(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.adjusting_mode(), key)
     }
 }
