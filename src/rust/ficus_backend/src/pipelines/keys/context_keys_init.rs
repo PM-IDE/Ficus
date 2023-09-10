@@ -5,7 +5,9 @@ use crate::{
     features::{
         analysis::{
             event_log_info::EventLogInfo,
-            patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
+            patterns::{
+                activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, entry_points::PatternsKind,
+            },
         },
         discovery::petri_net::PetriNet,
     },
@@ -69,6 +71,7 @@ impl ContextKeys {
     pub const EVENT_CLASSES_REGEXES: &str = "event_classes_regexes";
     pub const ADJUSTING_MODE: &str = "adjusting_mode";
     pub const EVENT_CLASS_REGEX: &str = "event_class_regex";
+    pub const PATTERNS_KIND: &str = "patterns_kind";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -100,6 +103,7 @@ impl ContextKeys {
         Self::insert_event_classes_regexes(&mut context);
         Self::insert_adjusting_mode(&mut context);
         Self::insert_event_class_regex(&mut context);
+        Self::insert_patterns_kind(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -238,5 +242,9 @@ impl ContextKeys {
 
     fn insert_event_class_regex(context: &mut ContextKeysInitContext) {
         Self::insert_key::<String>(context, Self::EVENT_CLASS_REGEX)
+    }
+
+    fn insert_patterns_kind(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<PatternsKind>(context, Self::PATTERNS_KIND)
     }
 }

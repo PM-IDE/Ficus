@@ -3,7 +3,9 @@ use std::sync::Arc;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
     features::{
-        analysis::patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
+        analysis::patterns::{
+            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, entry_points::PatternsKind,
+        },
         discovery::petri_net::PetriNet,
     },
     pipelines::{
@@ -61,6 +63,7 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES_REGEXES).is_some());
         assert!(keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).is_some());
+        assert!(keys.find_concrete_key::<PatternsKind>(ContextKeys::PATTERNS_KIND).is_some());
 
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
@@ -88,6 +91,7 @@ fn get_all_keys_names() -> Vec<String> {
         "event_classes_regexes",
         "adjusting_mode",
         "event_class_regex",
+        "patterns_kind",
 
         "event_log",
         "activities",
@@ -146,5 +150,6 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::EVENT_CLASSES_REGEXES).unwrap().key().id() == keys.find_concrete_key::<Vec<String>>(ContextKeys::EVENT_CLASSES_REGEXES).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::ADJUSTING_MODE).unwrap().key().id() == keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::PATTERNS_KIND).unwrap().key().id() == keys.find_concrete_key::<PatternsKind>(ContextKeys::PATTERNS_KIND).unwrap().key().id());
     })
 }

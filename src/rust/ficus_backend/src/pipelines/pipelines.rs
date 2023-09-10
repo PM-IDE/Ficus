@@ -784,9 +784,10 @@ impl PipelineParts {
                     existing_activities = activities;
                 }
 
-                let narrow_activities = *Self::get_context_value(context, keys.narrow_activities())?;
-                let hashed_log = Self::create_hashed_event_log(config, keys, log);
                 let activities = Self::get_context_value_mut(context, keys.activities())?;
+
+                let narrow_activities = *Self::get_context_value(config, keys.narrow_activities())?;
+                let hashed_log = Self::create_hashed_event_log(config, keys, log);
                 let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
 
                 let new_activities = add_unattached_activities(

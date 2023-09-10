@@ -8,6 +8,7 @@ use crate::{
             patterns::{
                 activity_instances::{ActivityInTraceInfo, AdjustingMode},
                 contexts::PatternsDiscoveryStrategy,
+                entry_points::PatternsKind,
                 repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
                 tandem_arrays::SubArrayInTraceInfo,
             },
@@ -263,5 +264,13 @@ impl ContextKeys {
 
     pub fn is_vent_class_regex(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.event_class_regex(), key)
+    }
+
+    pub fn patterns_kind(&self) -> &DefaultContextKey<PatternsKind> {
+        self.find_concrete_key::<PatternsKind>(Self::PATTERNS_KIND).unwrap()
+    }
+
+    pub fn is_patterns_kind(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.patterns_kind(), key)
     }
 }
