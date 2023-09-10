@@ -4,7 +4,8 @@ from typing import Optional
 from ficus.analysis.event_log_analysis import draw_colors_event_log
 from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
-    StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info
+    StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
+    StringsContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.context_pb2 import *
@@ -343,6 +344,33 @@ class DiscoverActivitiesInstances2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
 
 
+class PatternsKind(Enum):
+    PrimitiveTandemArrays = 0,
+    MaximalTandemArrays = 1,
+    MaximalRepeats = 2,
+    SuperMaximalRepeats = 3,
+    NearSuperMaximalRepeats = 4,
+
+
+class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
+    def __init__(self,
+                 event_classes: list[str],
+                 patterns_kind: PatternsKind,
+                 narrow_activities: bool = True):
+        self.event_classes = event_classes
+        self.narrow_activities = narrow_activities
+        self.patterns_kind = patterns_kind
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        append_strings_context_value(config, const_event_classes_regexes, self.event_classes)
+        append_patterns_kind(config, const_patterns_kind, self.patterns_kind.name)
+
+        default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
+        return GrpcPipelinePartBase(defaultPart=default_part)
+
+
 class PrintEventLogInfo2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -408,3 +436,9 @@ def append_enum_value(config: GrpcPipelinePartConfiguration, key: str, enum_name
 
 def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: str):
     append_enum_value(config, key, const_pattern_discovery_strategy_enum_name, value)
+
+def append_strings_context_value(config: GrpcPipelinePartConfiguration, key: str, value: list[str]):
+    _append_context_value(config, key, StringsContextValue(value))
+
+def append_patterns_kind(config: GrpcPipelinePartConfiguration, key: str, value: str):
+    append_enum_value(config, key, const_patterns_kind_enum_name, value)
