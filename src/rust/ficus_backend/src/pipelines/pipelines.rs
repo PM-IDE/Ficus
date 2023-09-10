@@ -4,6 +4,7 @@ use std::{
     rc::Rc,
 };
 
+use chrono::{DateTime, Duration, Utc};
 use regex::Regex;
 
 use crate::{
@@ -18,7 +19,7 @@ use crate::{
         },
         xes::{
             reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log,
-            xes_event::XesEventImpl, xes_event_log::XesEventLogImpl,
+            xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl,
         },
     },
     features::{
@@ -177,6 +178,7 @@ impl PipelineParts {
     pub const TRACES_DIVERSITY_DIAGRAM: &str = "TracesDiversityDiagram";
     pub const GET_NAMES_EVENT_LOG: &str = "GetNamesEventLog";
     pub const GET_HASHES_EVENT_LOG: &str = "GetHashesEventLog";
+    pub const USE_NAMES_EVENT_LOG: &str = "UseNamesEventLog";
 }
 
 impl PipelineParts {
@@ -206,6 +208,7 @@ impl PipelineParts {
             Self::traces_diversity_diagram(),
             Self::get_names_event_log(),
             Self::get_hashes_event_log(),
+            Self::use_names_event_log(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -391,7 +394,6 @@ impl PipelineParts {
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_INSTANCES, &|context, keys, config| {
-            let log = Self::get_context_value(context, keys.event_log())?;
             let mut tree = Self::get_context_value_mut(context, keys.activities())?;
             let narrow = Self::get_context_value(config, keys.narrow_activities())?;
             let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
@@ -717,6 +719,29 @@ impl PipelineParts {
             }
 
             context.put_concrete(keys.names_event_log().key(), result);
+
+            Ok(())
+        })
+    }
+
+    fn use_names_event_log() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::USE_NAMES_EVENT_LOG, &|context, keys, _| {
+            let names_log = Self::get_context_value(context, keys.names_event_log())?;
+            let mut log = XesEventLogImpl::empty();
+            for names_trace in names_log {
+                let mut trace = XesTraceImpl::empty();
+                let mut date = DateTime::<Utc>::MIN_UTC;
+
+                for name in names_trace {
+                    let event = XesEventImpl::new_with_date(name.clone(), date.clone());
+                    trace.push(Rc::new(RefCell::new(event)));
+                    date = date + Duration::seconds(1);
+                }
+
+                log.push(Rc::new(RefCell::new(trace)));
+            }
+
+            context.put_concrete::<XesEventLogImpl>(keys.event_log().key(), log);
 
             Ok(())
         })

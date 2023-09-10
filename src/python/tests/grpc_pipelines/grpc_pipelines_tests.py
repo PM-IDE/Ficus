@@ -1,8 +1,10 @@
-from ficus.grpc_pipelines.context_values import StringContextValue
+from ficus.grpc_pipelines.constants import const_names_event_log
+from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, TracesDiversityDiagram2, \
     DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
     DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, \
-    DrawShortActivitiesDiagram2, PatternsDiscoveryStrategy, PrintEventLogInfo2, FilterTracesByEventsCount2
+    DrawShortActivitiesDiagram2, PatternsDiscoveryStrategy, PrintEventLogInfo2, FilterTracesByEventsCount2, \
+    UseNamesEventLog2
 from tests.test_data_provider import get_example_log_path
 
 
@@ -160,6 +162,23 @@ def test_filter_traces_by_events_count():
     log_path = get_example_log_path('exercise4.xes')
     result = pipeline.execute({
         'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def test_class_extractors():
+    pipeline = Pipeline2(
+        UseNamesEventLog2(),
+        TracesDiversityDiagram2(plot_legend=True, title='InitialLog', width_scale=10, height_scale=5),
+    )
+
+    result = pipeline.execute({
+        const_names_event_log: NamesLogContextValue([
+            ['A.A', 'B.B', 'A.C', 'B.D'],
+            ['A.D', 'B.C', 'A.A', 'B.B'],
+        ])
     })
 
     assert result.finalResult.HasField('success')

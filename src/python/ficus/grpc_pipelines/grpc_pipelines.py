@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from ficus.analysis.event_log_analysis import draw_colors_event_log
 from ficus.grpc_pipelines.constants import *
@@ -88,6 +89,11 @@ class PipelinePart2WithCallback(PipelinePart2):
 class ReadLogFromXes2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_read_log_from_xes))
+
+
+class UseNamesEventLog2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_use_names_event_log))
 
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
@@ -241,13 +247,19 @@ class PatternsDiscoveryStrategy(Enum):
 
 
 class FindTandemArrays2(PipelinePart2):
-    def __init__(self, part_type: str, max_array_length: int):
+    def __init__(self,
+                 part_type: str,
+                 max_array_length: int,
+                 class_extractor: Optional[str]):
         self.max_array_length = max_array_length
         self.part_type = part_type
+        self.class_extractor = class_extractor
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_uint32_value(config, const_tandem_array_length, self.max_array_length)
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
 
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(self.part_type, config))
 
@@ -265,13 +277,20 @@ class FindMaximalTandemArrays2(FindTandemArrays2):
 
 
 class FindRepeats2(PipelinePart2):
-    def __init__(self, part_name: str, strategy: PatternsDiscoveryStrategy):
+    def __init__(self,
+                 part_name: str,
+                 strategy: PatternsDiscoveryStrategy,
+                 class_extractor: Optional[str] = None):
         self.strategy = strategy
         self.part_name = part_name
+        self.class_extractor = class_extractor
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy.name)
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
+
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(self.part_name, config))
 
 

@@ -75,21 +75,17 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
 
 fn put_names_log_to_context(key: &dyn Key, grpc_log: &GrpcNamesEventLogContextValue, user_data: &mut impl UserData) {
     let grpc_log = grpc_log.log.as_ref().unwrap();
-    let mut log = XesEventLogImpl::empty();
+    let mut names_log = vec![];
     for grpc_trace in &grpc_log.traces {
-        let mut trace = XesTraceImpl::empty();
-        let mut date = DateTime::<Utc>::MIN_UTC;
-
+        let mut trace = vec![];
         for grpc_event in &grpc_trace.events {
-            let event = XesEventImpl::new_with_date(grpc_event.clone(), date.clone());
-            trace.push(Rc::new(RefCell::new(event)));
-            date = date + Duration::seconds(1);
+            trace.push(grpc_event.clone());
         }
 
-        log.push(Rc::new(RefCell::new(trace)));
+        names_log.push(trace);
     }
 
-    user_data.put_any::<XesEventLogImpl>(key, log);
+    user_data.put_any::<Vec<Vec<String>>>(key, names_log);
 }
 
 pub fn convert_to_grpc_context_value(

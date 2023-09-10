@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use rand::Rng;
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub struct Color {
     red: u8,
     green: u8,
