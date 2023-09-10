@@ -171,13 +171,17 @@ def test_filter_traces_by_events_count():
 def test_class_extractors():
     pipeline = Pipeline2(
         UseNamesEventLog2(),
-        TracesDiversityDiagram2(plot_legend=True, title='InitialLog', width_scale=10, height_scale=5),
+        TracesDiversityDiagram2(plot_legend=True, title='InitialLog'),
+        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces, class_extractor='^(.*?)\.'),
+        DiscoverActivities2(activity_level=0),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        DrawFullActivitiesDiagram2()
     )
 
     result = pipeline.execute({
         const_names_event_log: NamesLogContextValue([
-            ['A.A', 'B.B', 'A.C', 'B.D'],
-            ['A.D', 'B.C', 'A.A', 'B.B'],
+            ['A.A', 'B.B', 'C', 'A.C', 'B.D'],
+            ['A.D', 'B.C', 'C', 'A.A', 'B.B'],
         ])
     })
 

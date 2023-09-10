@@ -311,13 +311,13 @@ impl PipelineParts {
     fn find_tandem_arrays_and_put_to_context(
         context: &mut PipelineContext,
         keys: &ContextKeys,
-        part_config: &UserDataImpl,
+        config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
-        let array_length = *part_config.get_concrete(keys.tandem_array_length().key()).unwrap() as usize;
+        let array_length = *config.get_concrete(keys.tandem_array_length().key()).unwrap() as usize;
 
-        let hashed_log = Self::create_hashed_event_log(context, keys, log);
+        let hashed_log = Self::create_hashed_event_log(config, keys, log);
 
         let arrays = patterns_finder(&hashed_log, array_length);
 
@@ -336,7 +336,7 @@ impl PipelineParts {
         let log = Self::get_context_value(context, keys.event_log())?;
         let strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
 
-        let hashed_log = Self::create_hashed_event_log(context, keys, log);
+        let hashed_log = Self::create_hashed_event_log(config, keys, log);
 
         let repeats = patterns_finder(&hashed_log, &strategy);
 
@@ -346,8 +346,8 @@ impl PipelineParts {
         Ok(())
     }
 
-    fn create_hashed_event_log(context: &PipelineContext, keys: &ContextKeys, log: &XesEventLogImpl) -> Vec<Vec<u64>> {
-        match Self::get_context_value(context, keys.event_class_regex()) {
+    fn create_hashed_event_log(config: &UserDataImpl, keys: &ContextKeys, log: &XesEventLogImpl) -> Vec<Vec<u64>> {
+        match Self::get_context_value(config, keys.event_class_regex()) {
             Ok(regex) => {
                 let hasher = RegexEventHasher::new(regex).ok().unwrap();
                 log.to_hashes_event_log(&hasher)
@@ -694,9 +694,9 @@ impl PipelineParts {
     }
 
     fn get_hashes_event_log() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, keys, _| {
+        Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, keys, config| {
             let log = Self::get_context_value(context, keys.event_log())?;
-            let hashes_event_log = Self::create_hashed_event_log(context, keys, log);
+            let hashes_event_log = Self::create_hashed_event_log(config, keys, log);
 
             context.put_concrete(keys.hashes_event_log().key(), hashes_event_log);
 

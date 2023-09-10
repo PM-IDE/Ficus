@@ -265,15 +265,17 @@ class FindTandemArrays2(PipelinePart2):
 
 
 class FindPrimitiveTandemArrays2(FindTandemArrays2):
-    def __init__(self, max_array_length: int):
+    def __init__(self, max_array_length: int, class_extractor: Optional[str] = None):
         super().__init__(part_type=const_find_primitive_tandem_arrays,
-                         max_array_length=max_array_length)
+                         max_array_length=max_array_length,
+                         class_extractor=class_extractor)
 
 
 class FindMaximalTandemArrays2(FindTandemArrays2):
-    def __init__(self, max_array_length: int):
+    def __init__(self, max_array_length: int, class_extractor: Optional[str] = None):
         super().__init__(part_type=const_find_maximal_tandem_arrays,
-                         max_array_length=max_array_length)
+                         max_array_length=max_array_length,
+                         class_extractor=class_extractor)
 
 
 class FindRepeats2(PipelinePart2):
@@ -295,18 +297,30 @@ class FindRepeats2(PipelinePart2):
 
 
 class FindMaximalRepeats2(FindRepeats2):
-    def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name=const_find_maximal_repeats, strategy=strategy)
+    def __init__(self,
+                 strategy: PatternsDiscoveryStrategy,
+                 class_extractor: Optional[str] = None):
+        super().__init__(part_name=const_find_maximal_repeats,
+                         strategy=strategy,
+                         class_extractor=class_extractor)
 
 
 class FindSuperMaximalRepeats2(FindRepeats2):
-    def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name=const_find_super_maximal_repeats, strategy=strategy)
+    def __init__(self,
+                 strategy: PatternsDiscoveryStrategy,
+                 class_extractor: Optional[str] = None):
+        super().__init__(part_name=const_find_super_maximal_repeats,
+                         strategy=strategy,
+                         class_extractor=class_extractor)
 
 
 class FindNearSuperMaximalRepeats2(FindRepeats2):
-    def __init__(self, strategy: PatternsDiscoveryStrategy):
-        super().__init__(part_name=const_find_near_super_maximal_repeats, strategy=strategy)
+    def __init__(self,
+                 strategy: PatternsDiscoveryStrategy,
+                 class_extractor: Optional[str] = None):
+        super().__init__(part_name=const_find_near_super_maximal_repeats,
+                         strategy=strategy,
+                         class_extractor=class_extractor)
 
 
 class DiscoverActivities2(PipelinePart2):
