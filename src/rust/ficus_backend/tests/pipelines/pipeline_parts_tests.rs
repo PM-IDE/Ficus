@@ -26,7 +26,9 @@ fn get_test_parts_names() -> Vec<String> {
         "TracesDiversityDiagram",
         "GetHashesEventLog",
         "GetNamesEventLog",
-        "UseNamesEventLog"
+        "UseNamesEventLog",
+        "DiscoverActivitiesForSeveralLevels",
+        "DiscoverActivitiesInUnattachedSubTraces"
     ]
 }
 

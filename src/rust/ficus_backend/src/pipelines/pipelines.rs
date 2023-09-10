@@ -5,6 +5,7 @@ use std::{
 };
 
 use chrono::{DateTime, Duration, Utc};
+use prost::bytes::BufMut;
 use regex::Regex;
 
 use crate::{
@@ -27,9 +28,9 @@ use crate::{
             event_log_info::{EventLogInfo, EventLogInfoCreationDto},
             patterns::{
                 activity_instances::{
-                    count_underlying_events, create_activity_name, create_new_log_from_activities_instances,
-                    extract_activities_instances, ActivityInTraceInfo, SubTraceKind, UndefActivityHandlingStrategy,
-                    UNDEF_ACTIVITY_NAME,
+                    add_unattached_activities, count_underlying_events, create_activity_name,
+                    create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo,
+                    SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
                 },
                 contexts::PatternsDiscoveryStrategy,
                 repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -53,6 +54,7 @@ use crate::{
 };
 
 use super::{
+    aliases::TracesActivities,
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
     keys::{context_key::DefaultContextKey, context_keys::ContextKeys},
@@ -179,6 +181,8 @@ impl PipelineParts {
     pub const GET_NAMES_EVENT_LOG: &str = "GetNamesEventLog";
     pub const GET_HASHES_EVENT_LOG: &str = "GetHashesEventLog";
     pub const USE_NAMES_EVENT_LOG: &str = "UseNamesEventLog";
+    pub const DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL: &str = "DiscoverActivitiesForSeveralLevels";
+    pub const DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES: &str = "DiscoverActivitiesInUnattachedSubTraces";
 }
 
 impl PipelineParts {
@@ -209,6 +213,8 @@ impl PipelineParts {
             Self::get_names_event_log(),
             Self::get_hashes_event_log(),
             Self::use_names_event_log(),
+            Self::discover_activities_instances_for_several_levels(),
+            Self::discover_activities_in_unattached_subtraces(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -745,6 +751,66 @@ impl PipelineParts {
 
             Ok(())
         })
+    }
+
+    fn discover_activities_instances_for_several_levels() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL, &|context, keys, config| {
+            let event_classes = Self::get_context_value(config, keys.event_classes_regexes())?;
+
+            let name = Self::DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES;
+
+            for event_class_regex in event_classes.into_iter().rev() {
+                let add_unattached_events_factory = context.pipeline_parts().unwrap().find_part(name).unwrap();
+                let mut new_config = config.clone();
+                new_config.put_concrete(keys.event_class_regex().key(), event_class_regex.clone());
+
+                let part = add_unattached_events_factory(Box::new(new_config));
+
+                part.execute(context, keys)?;
+            }
+
+            Ok(())
+        })
+    }
+
+    fn discover_activities_in_unattached_subtraces() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(
+            Self::DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES,
+            &|context, keys, config| {
+                let log = Self::get_context_value(context, keys.event_log())?;
+                let mut existing_activities = &Self::create_empty_activities(log);
+
+                if let Ok(activities) = Self::get_context_value(context, keys.trace_activities()) {
+                    existing_activities = activities;
+                }
+
+                let narrow_activities = *Self::get_context_value(context, keys.narrow_activities())?;
+                let hashed_log = Self::create_hashed_event_log(config, keys, log);
+                let activities = Self::get_context_value_mut(context, keys.activities())?;
+                let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
+
+                let new_activities = add_unattached_activities(
+                    &hashed_log,
+                    activities,
+                    existing_activities,
+                    min_events_count,
+                    narrow_activities,
+                );
+
+                context.put_concrete(keys.trace_activities().key(), new_activities);
+
+                Ok(())
+            },
+        )
+    }
+
+    fn create_empty_activities(log: &XesEventLogImpl) -> TracesActivities {
+        let mut activities = vec![];
+        for _ in log.get_traces() {
+            activities.push(vec![]);
+        }
+
+        return activities;
     }
 }
 

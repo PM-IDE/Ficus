@@ -24,7 +24,7 @@ use crate::{
         GrpcPipelineFinalResult, GrpcPipelinePart, GrpcPipelinePartExecutionResult,
     },
     pipelines::{
-        context::{LogMessageHandler, PipelineContext},
+        context::LogMessageHandler,
         errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
         pipelines::{DefaultPipelinePart, Pipeline, PipelinePart, PipelineParts},
@@ -38,7 +38,7 @@ pub(super) type GrpcSender = Sender<Result<GrpcPipelinePartExecutionResult, Stat
 pub struct FicusService {
     pipeline_parts: Arc<Box<PipelineParts>>,
     context_keys: Arc<Box<ContextKeys>>,
-    contexts: Arc<Box<Mutex<HashMap<String, PipelineContext>>>>,
+    contexts: Arc<Box<Mutex<HashMap<String, UserDataImpl>>>>,
 }
 
 impl FicusService {
@@ -126,20 +126,25 @@ impl GrpcBackendService for FicusService {
 }
 
 impl FicusService {
-    fn execute_grpc_pipeline(
-        grpc_pipeline: &GrpcPipeline,
+    fn execute_grpc_pipeline<'a>(
+        grpc_pipeline: &'a GrpcPipeline,
         initial_context_value: &Vec<GrpcContextKeyValue>,
         context_keys: Arc<Box<ContextKeys>>,
         pipeline_parts: Arc<Box<PipelineParts>>,
         sender: Arc<Box<GrpcSender>>,
         log_message_handler: Arc<Box<dyn LogMessageHandler>>,
-    ) -> Result<(GrpcGuid, PipelineContext), PipelinePartExecutionError> {
+    ) -> Result<(GrpcGuid, UserDataImpl), PipelinePartExecutionError> {
         let id = Uuid::new_v4();
         let pipeline = Self::to_pipeline(grpc_pipeline, &context_keys, &pipeline_parts, sender);
-        let mut context = create_initial_context(initial_context_value, &context_keys, log_message_handler);
+        let mut context = create_initial_context(
+            initial_context_value,
+            &context_keys,
+            &pipeline_parts,
+            log_message_handler,
+        );
 
         match pipeline.execute(&mut context, &context_keys) {
-            Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context)),
+            Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, context.devastate_user_data())),
             Err(err) => Err(err),
         }
     }

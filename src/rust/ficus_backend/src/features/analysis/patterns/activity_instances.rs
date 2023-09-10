@@ -310,22 +310,16 @@ where
     new_log
 }
 
-pub fn add_unattached_activities<TLog, TClassExtractor>(
-    log: &TLog,
-    activities: Rc<RefCell<Vec<Rc<RefCell<ActivityNode>>>>>,
+pub fn add_unattached_activities(
+    log: &Vec<Vec<u64>>,
+    activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     existing_instances: &Vec<Vec<ActivityInTraceInfo>>,
-    class_extractor: TClassExtractor,
     min_numbers_of_events: usize,
     should_narrow: bool,
-) -> Rc<RefCell<Vec<Vec<ActivityInTraceInfo>>>>
-where
-    TLog: EventLog,
-    TClassExtractor: Fn(&TLog::TEvent) -> u64,
-{
-    let new_activities_ptr = Rc::new(RefCell::new(vec![]));
-    let mut new_activities = new_activities_ptr.borrow_mut();
+) -> Vec<Vec<ActivityInTraceInfo>> {
+    let mut new_activities = vec![];
 
-    for (trace_activities, trace) in existing_instances.iter().zip(log.get_traces()) {
+    for (trace_activities, trace) in existing_instances.iter().zip(log) {
         let mut new_trace_activities = vec![];
 
         let handle_unattached_events = |start_index: usize, end_index: usize| {
@@ -333,14 +327,7 @@ where
                 return;
             }
 
-            let trace = trace.borrow();
-            let sub_trace = trace.get_events();
-            let mut hashes = vec![];
-            for i in start_index..end_index {
-                hashes.push(class_extractor(&sub_trace[i].borrow()))
-            }
-
-            let activities = extract_activities_instances(&vec![hashes], &mut activities.borrow_mut(), should_narrow);
+            let activities = extract_activities_instances(&vec![trace.clone()], activities, should_narrow);
             new_trace_activities.extend(
                 activities[0]
                     .iter()
@@ -353,7 +340,7 @@ where
             );
         };
 
-        let length = trace.borrow().get_events().len();
+        let length = trace.len();
         process_activities_in_trace(length, trace_activities, handle_unattached_events, |_| {});
 
         new_trace_activities.extend(trace_activities.iter().map(|instance| instance.clone()));
@@ -362,7 +349,7 @@ where
         new_activities.push(new_trace_activities);
     }
 
-    Rc::clone(&new_activities_ptr)
+    new_activities
 }
 
 pub fn create_logs_for_activities<TLog>(

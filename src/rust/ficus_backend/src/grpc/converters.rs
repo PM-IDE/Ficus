@@ -1,13 +1,8 @@
-use std::{any::Any, cell::RefCell, rc::Rc, str::FromStr, sync::Arc};
+use std::{any::Any, str::FromStr, sync::Arc};
 
-use chrono::{DateTime, Duration, Utc};
 use nameof::name_of_type;
 
 use crate::{
-    event_log::{
-        core::{event_log::EventLog, trace::trace::Trace},
-        xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
-    },
     features::analysis::{
         event_log_info::EventLogInfo,
         patterns::{
@@ -26,6 +21,7 @@ use crate::{
         aliases::ColorsEventLog,
         context::{LogMessageHandler, PipelineContext},
         keys::{context_key::ContextKey, context_keys::ContextKeys},
+        pipelines::PipelineParts,
     },
     utils::{
         colors::{Color, ColoredRectangle},
@@ -33,12 +29,13 @@ use crate::{
     },
 };
 
-pub(super) fn create_initial_context(
+pub(super) fn create_initial_context<'a>(
     values: &Vec<GrpcContextKeyValue>,
     keys: &Arc<Box<ContextKeys>>,
+    pipeline_parts: &'a PipelineParts,
     log_message_handler: Arc<Box<dyn LogMessageHandler>>,
-) -> PipelineContext {
-    let mut context = PipelineContext::new_with_logging(log_message_handler);
+) -> PipelineContext<'a> {
+    let mut context = PipelineContext::new_with_logging(pipeline_parts, log_message_handler);
 
     for value in values {
         let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();

@@ -5,23 +5,27 @@ use crate::utils::user_data::{
     user_data::{UserData, UserDataImpl},
 };
 
-use super::{errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys};
+use super::{
+    errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys, pipelines::PipelineParts,
+};
 
 pub trait LogMessageHandler: Send + Sync {
     fn handle(&self, message: String) -> Result<(), PipelinePartExecutionError>;
 }
 
 #[derive(Clone)]
-pub struct PipelineContext {
+pub struct PipelineContext<'a> {
     user_data: UserDataImpl,
     log_message_handler: Option<Arc<Box<dyn LogMessageHandler>>>,
+    pipeline_parts: Option<&'a PipelineParts>,
 }
 
-impl PipelineContext {
-    pub fn new_with_logging(message_handler: Arc<Box<dyn LogMessageHandler>>) -> Self {
+impl<'a> PipelineContext<'a> {
+    pub fn new_with_logging(parts: &'a PipelineParts, message_handler: Arc<Box<dyn LogMessageHandler>>) -> Self {
         Self {
             user_data: UserDataImpl::new(),
             log_message_handler: Some(message_handler),
+            pipeline_parts: Some(parts),
         }
     }
 
@@ -29,11 +33,12 @@ impl PipelineContext {
         Self {
             user_data: UserDataImpl::new(),
             log_message_handler: None,
+            pipeline_parts: None,
         }
     }
 }
 
-impl UserData for PipelineContext {
+impl<'a> UserData for PipelineContext<'a> {
     fn get_any(&self, key: &dyn Key) -> Option<&dyn Any> {
         self.user_data.get_any(key)
     }
@@ -67,12 +72,20 @@ impl UserData for PipelineContext {
     }
 }
 
-impl PipelineContext {
+impl<'a> PipelineContext<'a> {
     pub fn log(&self, message: String) -> Result<(), PipelinePartExecutionError> {
         if let Some(handler) = self.log_message_handler.as_ref() {
             handler.handle(message)
         } else {
             Ok(())
         }
+    }
+
+    pub fn pipeline_parts(&self) -> Option<&PipelineParts> {
+        self.pipeline_parts
+    }
+
+    pub fn devastate_user_data(self) -> UserDataImpl {
+        self.user_data
     }
 }
