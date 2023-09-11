@@ -31,7 +31,7 @@ use crate::{
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 
-pub(super) fn create_initial_context<'a>(context: &ServicePipelineExecutionContext) -> PipelineContext<'a> {
+pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
     let mut pipeline_context = PipelineContext::new_with_logging(context.parts(), context.log_message_handler());
 
     for value in context.context_values() {

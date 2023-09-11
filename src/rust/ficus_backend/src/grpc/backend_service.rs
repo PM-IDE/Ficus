@@ -111,14 +111,14 @@ impl<'a> ServicePipelineExecutionContext<'a> {
         self.log_message_handler.clone()
     }
 
-    pub fn with_pipeline(&self, new_grpc_pipeline: &GrpcPipeline) -> Self {
+    pub fn with_pipeline(&self, new_grpc_pipeline: &'a GrpcPipeline) -> Self {
         Self {
             grpc_pipeline: new_grpc_pipeline,
             context_values: self.context_values,
-            context_keys: self.context_keys,
-            pipeline_parts: self.pipeline_parts,
-            sender: self.sender,
-            log_message_handler: self.log_message_handler,
+            context_keys: self.context_keys.clone(),
+            pipeline_parts: self.pipeline_parts.clone(),
+            sender: self.sender.clone(),
+            log_message_handler: self.log_message_handler.clone(),
         }
     }
 }
@@ -219,7 +219,7 @@ impl FicusService {
         }
     }
 
-    pub fn to_pipeline(context: &ServicePipelineExecutionContext) -> Pipeline {
+    pub(super) fn to_pipeline(context: &ServicePipelineExecutionContext) -> Pipeline {
         let mut pipeline = Pipeline::empty();
         for grpc_part in &context.grpc_pipeline().parts {
             match grpc_part.part.as_ref().unwrap() {
