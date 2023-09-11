@@ -12,6 +12,7 @@ use ficus_backend::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},
         context::PipelineContext,
         keys::context_keys::ContextKeys,
+        pipelines::Pipeline,
     },
     utils::{
         colors::ColorsHolder,
@@ -64,6 +65,7 @@ fn test_event_log_all_concrete_keys() {
         assert!(keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).is_some());
         assert!(keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).is_some());
         assert!(keys.find_concrete_key::<PatternsKind>(ContextKeys::PATTERNS_KIND).is_some());
+        assert!(keys.find_concrete_key::<Pipeline>(ContextKeys::PIPELINE).is_some());
 
         assert!(keys.find_concrete_key::<u32>(ContextKeys::TANDEM_ARRAY_LENGTH).is_some());
         assert!(keys.find_concrete_key::<u32>(ContextKeys::ACTIVITY_LEVEL).is_some());
@@ -92,6 +94,7 @@ fn get_all_keys_names() -> Vec<String> {
         "adjusting_mode",
         "event_class_regex",
         "patterns_kind",
+        "pipeline",
 
         "event_log",
         "activities",
@@ -151,5 +154,6 @@ fn test_equivalence_of_keys() {
         assert!(keys.find_key(ContextKeys::ADJUSTING_MODE).unwrap().key().id() == keys.find_concrete_key::<AdjustingMode>(ContextKeys::ADJUSTING_MODE).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id() == keys.find_concrete_key::<String>(ContextKeys::EVENT_CLASS_REGEX).unwrap().key().id());
         assert!(keys.find_key(ContextKeys::PATTERNS_KIND).unwrap().key().id() == keys.find_concrete_key::<PatternsKind>(ContextKeys::PATTERNS_KIND).unwrap().key().id());
+        assert!(keys.find_key(ContextKeys::PIPELINE).unwrap().key().id() == keys.find_concrete_key::<Pipeline>(ContextKeys::PIPELINE).unwrap().key().id());
     })
 }

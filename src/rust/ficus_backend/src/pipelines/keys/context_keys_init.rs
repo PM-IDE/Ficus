@@ -105,6 +105,7 @@ impl ContextKeys {
         Self::insert_adjusting_mode(&mut context);
         Self::insert_event_class_regex(&mut context);
         Self::insert_patterns_kind(&mut context);
+        Self::insert_pipeline(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);

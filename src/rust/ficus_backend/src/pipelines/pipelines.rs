@@ -183,6 +183,7 @@ impl PipelineParts {
     pub const USE_NAMES_EVENT_LOG: &str = "UseNamesEventLog";
     pub const DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL: &str = "DiscoverActivitiesForSeveralLevels";
     pub const DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES: &str = "DiscoverActivitiesInUnattachedSubTraces";
+    pub const DISCOVER_ACTIVITIES_FROM_PATTERNS: &str = "DiscoverActivitiesFromPatterns";
 }
 
 impl PipelineParts {
@@ -215,6 +216,7 @@ impl PipelineParts {
             Self::use_names_event_log(),
             Self::discover_activities_instances_for_several_levels(),
             Self::discover_activities_in_unattached_subtraces(),
+            Self::discover_activities_from_pattern_source(),
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -757,20 +759,26 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL, &|context, keys, config| {
             let event_classes = Self::get_context_value(config, keys.event_classes_regexes())?;
 
-            let name = Self::DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES;
-
             for event_class_regex in event_classes.into_iter().rev() {
-                let add_unattached_events_factory = context.pipeline_parts().unwrap().find_part(name).unwrap();
                 let mut new_config = config.clone();
                 new_config.put_concrete(keys.event_class_regex().key(), event_class_regex.clone());
 
-                let part = add_unattached_events_factory(Box::new(new_config));
-
-                part.execute(context, keys)?;
+                context
+                    .pipeline_parts()
+                    .unwrap()
+                    .create_add_unattached_events_part(new_config)
+                    .execute(context, keys)?;
             }
 
             Ok(())
         })
+    }
+
+    fn create_add_unattached_events_part(&self, config: UserDataImpl) -> DefaultPipelinePart {
+        let name = Self::DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES;
+        let add_unattached_events_factory = self.find_part(name).unwrap();
+
+        add_unattached_events_factory(Box::new(config))
     }
 
     fn discover_activities_in_unattached_subtraces() -> (String, PipelinePartFactory) {
@@ -812,6 +820,13 @@ impl PipelineParts {
         }
 
         return activities;
+    }
+
+    fn discover_activities_from_pattern_source() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FROM_PATTERNS, &|context, keys, config| {
+            let pipeline = Self::get_context_value(config, keys.pipeline())?;
+            pipeline.execute(context, keys)
+        })
     }
 }
 

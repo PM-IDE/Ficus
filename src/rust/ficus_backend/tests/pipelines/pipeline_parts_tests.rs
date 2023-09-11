@@ -28,7 +28,8 @@ fn get_test_parts_names() -> Vec<String> {
         "GetNamesEventLog",
         "UseNamesEventLog",
         "DiscoverActivitiesForSeveralLevels",
-        "DiscoverActivitiesInUnattachedSubTraces"
+        "DiscoverActivitiesInUnattachedSubTraces",
+        "DiscoverActivitiesFromPatterns"
     ]
 }
 
