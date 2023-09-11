@@ -23,6 +23,7 @@ message GrpcContextValue {
         GrpcEnum enum = 10;
         GrpcEventLogInfo event_log_info = 11;
         GrpcStrings strings = 12;
+        GrpcPipeline pipeline = 13;
     }
 }
 
@@ -89,4 +90,44 @@ message GrpcEventLogInfo {
 
 message GrpcStrings {
     repeated string strings = 1;
+}
+
+
+message GrpcPipeline {
+    repeated GrpcPipelinePartBase parts = 1;
+}
+
+message GrpcPipelinePartBase {
+    oneof part {
+        GrpcPipelinePart defaultPart = 1;
+        GrpcParallelPipelinePart parallelPart = 2;
+        GrpcSimpleContextRequestPipelinePart simpleContextRequestPart = 3;
+        GrpcComplexContextRequestPipelinePart complexContextRequestPart = 4;
+    }
+}
+
+message GrpcPipelinePart {
+    string name = 1;
+    GrpcPipelinePartConfiguration configuration = 2;
+}
+
+message GrpcPipelinePartConfiguration {
+    repeated GrpcContextKeyValue configurationParameters = 1;
+}
+
+message GrpcParallelPipelinePart {
+    repeated GrpcPipelinePartBase pipelineParts = 1;
+}
+
+message GrpcParallelPipelineParts {
+    repeated GrpcParallelPipelinePart pipeline = 1;
+}
+
+message GrpcSimpleContextRequestPipelinePart {
+    GrpcContextKey key = 1;
+}
+
+message GrpcComplexContextRequestPipelinePart {
+    GrpcContextKey key = 1;
+    GrpcPipelinePart beforePipelinePart = 2;    
 }

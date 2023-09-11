@@ -1,8 +1,7 @@
 syntax = "proto3";
 
-import "pipelines.proto";
+import "pipelines_and_context.proto";
 import "util.proto";
-import "context.proto";
 
 package ficus;
 
