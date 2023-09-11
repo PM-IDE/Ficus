@@ -26,17 +26,15 @@ _sym_db = _symbol_database.Default()
 
 
 
-import ficus.grpc_pipelines.models.pipelines_pb2 as pipelines__pb2
+import ficus.grpc_pipelines.models.pipelines_and_context_pb2 as pipelines__and__context__pb2
 
 import ficus.grpc_pipelines.models.util_pb2 as util__pb2
 
-import ficus.grpc_pipelines.models.context_pb2 as context__pb2
 
 
 
 
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x62\x61\x63kend_service.proto\x12\x05\x66icus\x1a\x0fpipelines.proto\x1a\nutil.proto\x1a\rcontext.proto\"f\n\x1aGrpcGetContextValueRequest\x12$\n\x0b\x65xecutionId\x18\x02 \x01(\x0b\x32\x0f.ficus.GrpcGuid\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\"y\n\x1cGrpcPipelineExecutionRequest\x12%\n\x08pipeline\x18\x01 \x01(\x0b\x32\x13.ficus.GrpcPipeline\x12\x32\n\x0einitialContext\x18\x02 \x03(\x0b\x32\x1a.ficus.GrpcContextKeyValue\"\xd8\x01\n\x1fGrpcPipelinePartExecutionResult\x12\x35\n\x0b\x66inalResult\x18\x01 \x01(\x0b\x32\x1e.ficus.GrpcPipelineFinalResultH\x00\x12;\n\x12pipelinePartResult\x18\x02 \x01(\x0b\x32\x1d.ficus.GrpcPipelinePartResultH\x00\x12\x37\n\nlogMessage\x18\x03 \x01(\x0b\x32!.ficus.GrpcPipelinePartLogMessageH\x00\x42\x08\n\x06result\"-\n\x1aGrpcPipelinePartLogMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\"G\n\x16GrpcPipelinePartResult\x12-\n\x0c\x63ontextValue\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"a\n\x17GrpcPipelineFinalResult\x12\"\n\x07success\x18\x01 \x01(\x0b\x32\x0f.ficus.GrpcGuidH\x00\x12\x0f\n\x05\x65rror\x18\x02 \x01(\tH\x00\x42\x11\n\x0f\x65xecutionResult\"l\n\x19GrpcGetContextValueResult\x12(\n\x05value\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcContextValueH\x00\x12\x0f\n\x05\x65rror\x18\x02 \x01(\tH\x00\x42\x14\n\x12\x63ontextValueResult2\xce\x01\n\x12GrpcBackendService\x12`\n\x0f\x45xecutePipeline\x12#.ficus.GrpcPipelineExecutionRequest\x1a&.ficus.GrpcPipelinePartExecutionResult0\x01\x12V\n\x0fGetContextValue\x12!.ficus.GrpcGetContextValueRequest\x1a .ficus.GrpcGetContextValueResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x62\x61\x63kend_service.proto\x12\x05\x66icus\x1a\x1bpipelines_and_context.proto\x1a\nutil.proto\"f\n\x1aGrpcGetContextValueRequest\x12$\n\x0b\x65xecutionId\x18\x02 \x01(\x0b\x32\x0f.ficus.GrpcGuid\x12\"\n\x03key\x18\x01 \x01(\x0b\x32\x15.ficus.GrpcContextKey\"y\n\x1cGrpcPipelineExecutionRequest\x12%\n\x08pipeline\x18\x01 \x01(\x0b\x32\x13.ficus.GrpcPipeline\x12\x32\n\x0einitialContext\x18\x02 \x03(\x0b\x32\x1a.ficus.GrpcContextKeyValue\"\xd8\x01\n\x1fGrpcPipelinePartExecutionResult\x12\x35\n\x0b\x66inalResult\x18\x01 \x01(\x0b\x32\x1e.ficus.GrpcPipelineFinalResultH\x00\x12;\n\x12pipelinePartResult\x18\x02 \x01(\x0b\x32\x1d.ficus.GrpcPipelinePartResultH\x00\x12\x37\n\nlogMessage\x18\x03 \x01(\x0b\x32!.ficus.GrpcPipelinePartLogMessageH\x00\x42\x08\n\x06result\"-\n\x1aGrpcPipelinePartLogMessage\x12\x0f\n\x07message\x18\x01 \x01(\t\"G\n\x16GrpcPipelinePartResult\x12-\n\x0c\x63ontextValue\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcContextValue\"a\n\x17GrpcPipelineFinalResult\x12\"\n\x07success\x18\x01 \x01(\x0b\x32\x0f.ficus.GrpcGuidH\x00\x12\x0f\n\x05\x65rror\x18\x02 \x01(\tH\x00\x42\x11\n\x0f\x65xecutionResult\"l\n\x19GrpcGetContextValueResult\x12(\n\x05value\x18\x01 \x01(\x0b\x32\x17.ficus.GrpcContextValueH\x00\x12\x0f\n\x05\x65rror\x18\x02 \x01(\tH\x00\x42\x14\n\x12\x63ontextValueResult2\xce\x01\n\x12GrpcBackendService\x12`\n\x0f\x45xecutePipeline\x12#.ficus.GrpcPipelineExecutionRequest\x1a&.ficus.GrpcPipelinePartExecutionResult0\x01\x12V\n\x0fGetContextValue\x12!.ficus.GrpcGetContextValueRequest\x1a .ficus.GrpcGetContextValueResultb\x06proto3')
 
 
 
@@ -164,36 +162,36 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
 
-  _GRPCGETCONTEXTVALUEREQUEST._serialized_start=76
+  _GRPCGETCONTEXTVALUEREQUEST._serialized_start=73
 
-  _GRPCGETCONTEXTVALUEREQUEST._serialized_end=178
+  _GRPCGETCONTEXTVALUEREQUEST._serialized_end=175
 
-  _GRPCPIPELINEEXECUTIONREQUEST._serialized_start=180
+  _GRPCPIPELINEEXECUTIONREQUEST._serialized_start=177
 
-  _GRPCPIPELINEEXECUTIONREQUEST._serialized_end=301
+  _GRPCPIPELINEEXECUTIONREQUEST._serialized_end=298
 
-  _GRPCPIPELINEPARTEXECUTIONRESULT._serialized_start=304
+  _GRPCPIPELINEPARTEXECUTIONRESULT._serialized_start=301
 
-  _GRPCPIPELINEPARTEXECUTIONRESULT._serialized_end=520
+  _GRPCPIPELINEPARTEXECUTIONRESULT._serialized_end=517
 
-  _GRPCPIPELINEPARTLOGMESSAGE._serialized_start=522
+  _GRPCPIPELINEPARTLOGMESSAGE._serialized_start=519
 
-  _GRPCPIPELINEPARTLOGMESSAGE._serialized_end=567
+  _GRPCPIPELINEPARTLOGMESSAGE._serialized_end=564
 
-  _GRPCPIPELINEPARTRESULT._serialized_start=569
+  _GRPCPIPELINEPARTRESULT._serialized_start=566
 
-  _GRPCPIPELINEPARTRESULT._serialized_end=640
+  _GRPCPIPELINEPARTRESULT._serialized_end=637
 
-  _GRPCPIPELINEFINALRESULT._serialized_start=642
+  _GRPCPIPELINEFINALRESULT._serialized_start=639
 
-  _GRPCPIPELINEFINALRESULT._serialized_end=739
+  _GRPCPIPELINEFINALRESULT._serialized_end=736
 
-  _GRPCGETCONTEXTVALUERESULT._serialized_start=741
+  _GRPCGETCONTEXTVALUERESULT._serialized_start=738
 
-  _GRPCGETCONTEXTVALUERESULT._serialized_end=849
+  _GRPCGETCONTEXTVALUERESULT._serialized_end=846
 
-  _GRPCBACKENDSERVICE._serialized_start=852
+  _GRPCBACKENDSERVICE._serialized_start=849
 
-  _GRPCBACKENDSERVICE._serialized_end=1058
+  _GRPCBACKENDSERVICE._serialized_end=1055
 
 # @@protoc_insertion_point(module_scope)
