@@ -11,7 +11,7 @@ use crate::{
         },
         discovery::petri_net::PetriNet,
     },
-    pipelines::aliases::*,
+    pipelines::{aliases::*, pipelines::Pipeline},
     utils::colors::ColorsHolder,
 };
 
@@ -72,6 +72,7 @@ impl ContextKeys {
     pub const ADJUSTING_MODE: &str = "adjusting_mode";
     pub const EVENT_CLASS_REGEX: &str = "event_class_regex";
     pub const PATTERNS_KIND: &str = "patterns_kind";
+    pub const PIPELINE: &str = "pipeline";
 
     pub const EVENT_LOG: &str = "event_log";
     pub const ACTIVITIES: &str = "activities";
@@ -246,5 +247,9 @@ impl ContextKeys {
 
     fn insert_patterns_kind(context: &mut ContextKeysInitContext) {
         Self::insert_key::<PatternsKind>(context, Self::PATTERNS_KIND)
+    }
+
+    fn insert_pipeline(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<Pipeline>(context, Self::PIPELINE)
     }
 }

@@ -15,7 +15,7 @@ use crate::{
         },
         discovery::petri_net::PetriNet,
     },
-    pipelines::aliases::*,
+    pipelines::{aliases::*, pipelines::Pipeline},
     utils::colors::ColorsHolder,
 };
 
@@ -272,5 +272,13 @@ impl ContextKeys {
 
     pub fn is_patterns_kind(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.patterns_kind(), key)
+    }
+
+    pub fn pipeline(&self) -> &DefaultContextKey<Pipeline> {
+        self.find_concrete_key::<Pipeline>(Self::PIPELINE).unwrap()
+    }
+
+    pub fn is_pipeline(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.pipeline(), key)
     }
 }

@@ -21,7 +21,7 @@ use crate::{
         aliases::ColorsEventLog,
         context::{LogMessageHandler, PipelineContext},
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::PipelineParts,
+        pipelines::{Pipeline, PipelinePart, PipelineParts},
     },
     utils::{
         colors::{Color, ColoredRectangle},
@@ -29,24 +29,26 @@ use crate::{
     },
 };
 
-pub(super) fn create_initial_context<'a>(
-    values: &Vec<GrpcContextKeyValue>,
-    keys: &Arc<Box<ContextKeys>>,
-    pipeline_parts: &'a PipelineParts,
-    log_message_handler: Arc<Box<dyn LogMessageHandler>>,
-) -> PipelineContext<'a> {
-    let mut context = PipelineContext::new_with_logging(pipeline_parts, log_message_handler);
+use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 
-    for value in values {
-        let key = keys.find_key(&value.key.as_ref().unwrap().name).unwrap();
+pub(super) fn create_initial_context<'a>(context: &ServicePipelineExecutionContext) -> PipelineContext<'a> {
+    let mut pipeline_context = PipelineContext::new_with_logging(context.parts(), context.log_message_handler());
+
+    for value in context.context_values() {
+        let key = context.keys().find_key(&value.key.as_ref().unwrap().name).unwrap();
         let value = value.value.as_ref().unwrap().context_value.as_ref().unwrap();
-        put_into_user_data(key.key(), value, &mut context);
+        put_into_user_data(key.key(), value, &mut pipeline_context, context);
     }
 
-    context
+    pipeline_context
 }
 
-pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data: &mut impl UserData) {
+pub(super) fn put_into_user_data(
+    key: &dyn Key,
+    value: &ContextValue,
+    user_data: &mut impl UserData,
+    context: &ServicePipelineExecutionContext,
+) {
     match value {
         ContextValue::String(string) => user_data.put_any::<String>(key, string.clone()),
         ContextValue::HashesLog(_) => todo!(),
@@ -67,6 +69,10 @@ pub(super) fn put_into_user_data(key: &dyn Key, value: &ContextValue, user_data:
         }
         ContextValue::EventLogInfo(_) => todo!(),
         ContextValue::Strings(strings) => user_data.put_any::<Vec<String>>(key, strings.strings.clone()),
+        ContextValue::Pipeline(pipeline) => {
+            let pipeline = FicusService::to_pipeline(&context.with_pipeline(pipeline));
+            user_data.put_any::<Pipeline>(key, pipeline);
+        }
     }
 }
 
