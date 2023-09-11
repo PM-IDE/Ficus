@@ -1,15 +1,32 @@
 import math
 import os
 from typing import List, Union, Callable
-
+from dataclasses import dataclass
 from matplotlib import pyplot as plt, axes
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
-from ..grpc_pipelines.context_values import Color, ColoredRectangle
 from ..log.event_log import MyEventLog
 from ..log.functions import read_log_from_xes
 from ..util import *
+
+
+@dataclass
+class Color:
+    red: int
+    green: int
+    blue: int
+
+    def to_hex(self):
+        return to_hex((self.red, self.green, self.blue))
+
+
+@dataclass
+class ColoredRectangle:
+    color: Color
+    start_pos: int
+    length: int
+    name: str
 
 
 def _create_array_for_hist(log: MyEventLog) -> (List[int], int):

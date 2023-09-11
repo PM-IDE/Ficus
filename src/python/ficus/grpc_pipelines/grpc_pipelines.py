@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
@@ -8,8 +9,7 @@ from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_l
     StringsContextValue
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
-from ficus.grpc_pipelines.models.context_pb2 import *
-from ficus.grpc_pipelines.models.pipelines_pb2 import *
+from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import *
 
 
@@ -44,6 +44,9 @@ class Pipeline2:
                     print(part_result.logMessage.message)
 
             return last_result
+
+    def to_grpc_pipeline(self):
+        return self._create_grpc_pipeline(list(self.parts))
 
     @staticmethod
     def _create_grpc_pipeline(parts) -> GrpcPipeline:
@@ -371,6 +374,44 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=default_part)
 
 
+class DiscoverActivitiesFromPatterns2(PipelinePart2):
+    def __init__(self,
+                 patterns_kind: PatternsKind,
+                 strategy: PatternsDiscoveryStrategy = PatternsDiscoveryStrategy.FromAllTraces,
+                 max_array_length: int = 20,
+                 activity_level: int = 0):
+        self.patterns_kind = patterns_kind
+        self.strategy = strategy
+        self.max_array_length = max_array_length
+        self.activity_level = activity_level
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        if self.patterns_kind == PatternsKind.MaximalRepeats:
+            patterns_part = FindMaximalRepeats2(strategy=self.strategy)
+        elif self.patterns_kind == PatternsKind.SuperMaximalRepeats:
+            patterns_part = FindSuperMaximalRepeats2(strategy=self.strategy)
+        elif self.patterns_kind == PatternsKind.NearSuperMaximalRepeats:
+            patterns_part = FindNearSuperMaximalRepeats2(strategy=self.strategy)
+        elif self.patterns_kind == PatternsKind.PrimitiveTandemArrays:
+            patterns_part = FindPrimitiveTandemArrays2(max_array_length=self.max_array_length)
+        elif self.patterns_kind == PatternsKind.MaximalTandemArrays:
+            patterns_part = FindMaximalTandemArrays2(max_array_length=self.max_array_length)
+        else:
+            print(f"Unknown patterns_kind: {self.patterns_kind}")
+            raise ValueError()
+
+        pipeline = Pipeline2(
+            patterns_part,
+            DiscoverActivities2(activity_level=self.activity_level),
+        )
+
+        config = GrpcPipelinePartConfiguration()
+        append_pipeline_value(config, const_pipeline, pipeline)
+
+        default_part = _create_default_pipeline_part(const_discover_activities_from_patterns, config)
+        return GrpcPipelinePartBase(defaultPart=default_part)
+
+
 class PrintEventLogInfo2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -442,3 +483,16 @@ def append_strings_context_value(config: GrpcPipelinePartConfiguration, key: str
 
 def append_patterns_kind(config: GrpcPipelinePartConfiguration, key: str, value: str):
     append_enum_value(config, key, const_patterns_kind_enum_name, value)
+
+
+@dataclass
+class PipelineContextValue(ContextValue):
+    pipeline: Pipeline2
+
+
+    def to_grpc_context_value(self) -> GrpcContextValue:
+        return GrpcContextValue(pipeline=self.pipeline.to_grpc_pipeline())
+
+
+def append_pipeline_value(config: GrpcPipelinePartConfiguration, key: str, value: Pipeline2):
+    _append_context_value(config, key, PipelineContextValue(value))

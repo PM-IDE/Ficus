@@ -1,5 +1,6 @@
 import copy
 import random
+from dataclasses import dataclass
 from typing import Any, Hashable
 
 mod = 10 ** 9 + 7

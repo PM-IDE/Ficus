@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from ficus.grpc_pipelines.models.context_pb2 import *
+from ficus.analysis.event_log_analysis import ColoredRectangle, Color
+from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
-from ficus.util import to_hex
 
 
 @dataclass
@@ -87,7 +87,6 @@ class StringsContextValue(ContextValue):
         strings.strings.extend(self.strings)
         return GrpcContextValue(strings=strings)
 
-
 def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
     result = []
     for grpc_trace in grpc_names_log.log.traces:
@@ -98,25 +97,6 @@ def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
         result.append(trace)
 
     return result
-
-
-@dataclass
-class Color:
-    red: int
-    green: int
-    blue: int
-
-    def to_hex(self):
-        return to_hex((self.red, self.green, self.blue))
-
-
-@dataclass
-class ColoredRectangle:
-    color: Color
-    start_pos: int
-    length: int
-    name: str
-
 
 @dataclass
 class EventLogInfo(ContextValue):
