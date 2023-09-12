@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, str::FromStr};
 
 use crate::event_log::core::event_log::EventLog;
 
@@ -12,6 +12,7 @@ use super::{
     tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
 };
 
+#[derive(Clone, Copy)]
 pub enum PatternsKind {
     PrimitiveTandemArrays(usize),
     MaximalTandemArrays(usize),
@@ -19,6 +20,21 @@ pub enum PatternsKind {
     MaximalRepeats,
     SuperMaximalRepeats,
     NearSuperMaximalRepeats,
+}
+
+impl FromStr for PatternsKind {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "PrimitiveTandemArrays" => Ok(PatternsKind::PrimitiveTandemArrays(0)),
+            "MaximalTandemArrays" => Ok(PatternsKind::MaximalTandemArrays(0)),
+            "MaximalRepeats" => Ok(PatternsKind::MaximalRepeats),
+            "SuperMaximalRepeats" => Ok(PatternsKind::SuperMaximalRepeats),
+            "NearSuperMaximalRepeats" => Ok(PatternsKind::NearSuperMaximalRepeats),
+            _ => Err(()),
+        }
+    }
 }
 
 pub fn find_patterns<TClassExtractor, TLog>(

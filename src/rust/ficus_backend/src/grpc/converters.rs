@@ -6,7 +6,7 @@ use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
         patterns::{
-            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
+            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, entry_points::PatternsKind,
             repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
         },
     },
@@ -68,6 +68,10 @@ pub(super) fn put_into_user_data(
             } else if enum_name == name_of_type!(AdjustingMode) {
                 if let Ok(strategy) = AdjustingMode::from_str(&grpc_enum.value) {
                     user_data.put_any::<AdjustingMode>(key, strategy);
+                }
+            } else if enum_name == name_of_type!(PatternsKind) {
+                if let Ok(kind) = PatternsKind::from_str(&grpc_enum.value) {
+                    user_data.put_any::<PatternsKind>(key, kind)
                 }
             }
         }

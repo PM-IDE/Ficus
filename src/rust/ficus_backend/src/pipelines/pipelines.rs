@@ -35,6 +35,7 @@ use crate::{
                     UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
                 },
                 contexts::PatternsDiscoveryStrategy,
+                entry_points::PatternsKind,
                 repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
                 repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
                 tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
@@ -386,20 +387,28 @@ impl PipelineParts {
 
     fn discover_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {
-            let log = Self::get_context_value(context, keys.event_log())?;
-            let patterns = Self::get_context_value(context, keys.patterns())?;
-            let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
-            let repeat_sets = build_repeat_sets(&hashed_log, patterns);
-
-            let activity_level = Self::get_context_value(config, keys.activity_level())?;
-            let tree =
-                build_repeat_set_tree_from_repeats(&hashed_log, &repeat_sets, *activity_level as usize, |sub_array| {
-                    create_activity_name(log, sub_array)
-                });
-
-            context.put_concrete(&keys.activities().key(), tree);
-            Ok(())
+            let activity_level = Self::get_context_value(context, keys.activity_level())?;
+            Self::do_discover_activities(context, keys, *activity_level)
         })
+    }
+
+    fn do_discover_activities(
+        context: &mut PipelineContext,
+        keys: &ContextKeys,
+        activity_level: u32,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let log = Self::get_context_value(context, keys.event_log())?;
+        let patterns = Self::get_context_value(context, keys.patterns())?;
+        let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
+        let repeat_sets = build_repeat_sets(&hashed_log, patterns);
+
+        let tree =
+            build_repeat_set_tree_from_repeats(&hashed_log, &repeat_sets, activity_level as usize, |sub_array| {
+                create_activity_name(log, sub_array)
+            });
+
+        context.put_concrete(&keys.activities().key(), tree);
+        Ok(())
     }
 
     fn discover_activities_instances() -> (String, PipelinePartFactory) {
@@ -761,21 +770,27 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL, &|context, keys, config| {
             let event_classes = Self::get_context_value(config, keys.event_classes_regexes())?;
             let initial_activity_level = *Self::get_context_value(config, keys.activity_level())?;
+            let patterns_kind = Self::get_context_value(config, keys.patterns_kind())?;
+            let adjusting_mode = Self::get_context_value(config, keys.adjusting_mode())?;
+            let patterns_discovery_strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
+            let narrow_activities = Self::get_context_value(config, keys.narrow_activities())?;
+            let events_count = Self::get_context_value(config, keys.events_count())?;
 
             let mut index = 0;
             for event_class_regex in event_classes.into_iter().rev() {
-                context.put_concrete(keys.activity_level().key(), initial_activity_level + index);
-                Self::adjust_with_activities_from_unattached_events(
-                    context,
-                    keys,
-                    config,
-                    event_class_regex.to_owned(),
-                )?;
+                let mut config = UserDataImpl::new();
+                config.put_concrete(keys.patterns_kind().key(), *patterns_kind);
+                config.put_concrete(keys.event_class_regex().key(), event_class_regex.to_owned());
+                config.put_concrete(keys.adjusting_mode().key(), *adjusting_mode);
+                config.put_concrete(keys.activity_level().key(), initial_activity_level + index);
+                config.put_concrete(keys.patterns_discovery_strategy().key(), *patterns_discovery_strategy);
+                config.put_concrete(keys.narrow_activities().key(), *narrow_activities);
+                config.put_concrete(keys.events_count().key(), *events_count);
+
+                Self::adjust_with_activities_from_unattached_events(context, keys, &config)?;
 
                 index += 1;
             }
-
-            context.put_concrete(keys.activity_level().key(), initial_activity_level);
 
             Ok(())
         })
@@ -785,13 +800,11 @@ impl PipelineParts {
         old_context: &mut PipelineContext,
         keys: &ContextKeys,
         config: &UserDataImpl,
-        event_class: String,
     ) -> Result<(), PipelinePartExecutionError> {
         if Self::get_context_value(old_context, keys.activities()).is_err() {
             old_context.put_concrete(keys.activities().key(), vec![])
         }
 
-        let activities_pipeline = Self::get_context_value(config, keys.pipeline())?;
         let adjusting_mode = *Self::get_context_value(config, keys.adjusting_mode())?;
         let log = Self::get_context_value(old_context, keys.event_log())?;
 
@@ -809,7 +822,7 @@ impl PipelineParts {
             new_context.put_concrete(keys.event_log().key(), log.clone());
         }
 
-        activities_pipeline.execute(&mut new_context, keys)?;
+        Self::find_patterns(&mut new_context, keys, config)?;
 
         let old_activities = Self::get_context_value_mut(old_context, keys.activities())?;
         let new_activities = Self::get_context_value(&new_context, keys.activities())?;
@@ -817,14 +830,41 @@ impl PipelineParts {
             old_activities.push(new_activity.clone());
         }
 
-        let mut new_config = config.clone();
-        new_config.put_concrete(keys.event_class_regex().key(), event_class);
-
         old_context
             .pipeline_parts()
             .unwrap()
-            .create_add_unattached_events_part(new_config)
+            .create_add_unattached_events_part(config.clone())
             .execute(old_context, keys)?;
+
+        Ok(())
+    }
+
+    fn find_patterns(
+        context: &mut PipelineContext,
+        keys: &ContextKeys,
+        config: &UserDataImpl,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let patterns_kind = Self::get_context_value(config, keys.patterns_kind())?;
+        match patterns_kind {
+            PatternsKind::PrimitiveTandemArrays(_) => {
+                Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_primitive_tandem_arrays)?
+            }
+            PatternsKind::MaximalTandemArrays(_) => {
+                Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_maximal_tandem_arrays)?
+            }
+            PatternsKind::MaximalRepeats => {
+                Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)?
+            }
+            PatternsKind::SuperMaximalRepeats => {
+                Self::find_repeats_and_put_to_context(context, keys, config, find_super_maximal_repeats)?
+            }
+            PatternsKind::NearSuperMaximalRepeats => {
+                Self::find_repeats_and_put_to_context(context, keys, config, find_near_super_maximal_repeats)?
+            }
+        };
+
+        let activity_level = Self::get_context_value(config, keys.activity_level())?;
+        Self::do_discover_activities(context, keys, *activity_level)?;
 
         Ok(())
     }

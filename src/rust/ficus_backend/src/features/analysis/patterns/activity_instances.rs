@@ -474,6 +474,7 @@ where
     for (trace, trace_activities) in log.get_traces().into_iter().zip(activities) {
         let trace = trace.borrow();
         let mut new_trace = TLog::TTrace::empty();
+
         let process_undef_activity = |start, end| {
             for event in &trace.get_events()[start..end] {
                 new_trace.push(event.clone());
@@ -486,6 +487,7 @@ where
             process_undef_activity,
             |_| {},
         );
+
         new_log.push(Rc::new(RefCell::new(new_trace)));
     }
 

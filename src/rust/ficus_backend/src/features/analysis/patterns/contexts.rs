@@ -9,6 +9,7 @@ use super::{
     repeat_sets::SubArrayWithTraceIndex,
 };
 
+#[derive(Clone, Copy)]
 pub enum PatternsDiscoveryStrategy {
     FromAllTraces,
     FromSingleMergedTrace,
