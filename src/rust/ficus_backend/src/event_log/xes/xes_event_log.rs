@@ -160,4 +160,8 @@ impl EventLog for XesEventLogImpl {
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
         self.traces_holder.filter_traces(predicate);
     }
+
+    fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        self.traces_holder.to_raw_vector()
+    }
 }

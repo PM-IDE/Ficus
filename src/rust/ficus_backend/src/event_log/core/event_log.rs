@@ -16,6 +16,8 @@ pub trait EventLog: Clone {
     fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
     fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>);
 
+    fn to_raw_vector(&self) -> Vec<Vec<String>>;
+
     fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
     where
         THasher: EventHasher<Self::TEvent>;

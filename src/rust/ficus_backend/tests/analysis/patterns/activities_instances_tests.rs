@@ -2,7 +2,7 @@ use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use ficus_backend::{
     event_log::{
-        core::event::event_hasher::default_class_extractor,
+        core::{event::event_hasher::default_class_extractor, event_log::EventLog},
         simple::simple_event_log::{SimpleEvent, SimpleEventLog},
     },
     features::analysis::patterns::{

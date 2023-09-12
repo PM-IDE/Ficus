@@ -31,20 +31,6 @@ impl SimpleEventLog {
         }
     }
 
-    pub fn to_raw_vector(&self) -> Vec<Vec<String>> {
-        let mut raw_log = Vec::new();
-        for trace in self.traces_holder.get_traces() {
-            let mut events = Vec::new();
-            for event in trace.borrow().get_events() {
-                events.push(event.borrow().get_name().to_owned());
-            }
-
-            raw_log.push(events);
-        }
-
-        raw_log
-    }
-
     pub fn push(&mut self, trace: Rc<RefCell<<SimpleEventLog as EventLog>::TTrace>>) {
         self.traces_holder.push(trace);
     }
@@ -100,6 +86,10 @@ impl EventLog for SimpleEventLog {
 
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
         self.traces_holder.filter_traces(predicate);
+    }
+
+    fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        self.traces_holder.to_raw_vector()
     }
 }
 

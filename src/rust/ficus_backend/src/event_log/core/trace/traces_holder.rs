@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashSet, rc::Rc};
 
-use crate::event_log::core::event::event_hasher::EventHasher;
+use crate::event_log::core::event::{event_hasher::EventHasher, event::Event};
 
 use super::trace::Trace;
 
@@ -98,5 +98,19 @@ where
                 self.traces.remove(index);
             }
         }
+    }
+
+    pub fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        let mut raw_log = Vec::new();
+        for trace in self.get_traces() {
+            let mut events = Vec::new();
+            for event in trace.borrow().get_events() {
+                events.push(event.borrow().get_name().to_owned());
+            }
+
+            raw_log.push(events);
+        }
+
+        raw_log
     }
 }
