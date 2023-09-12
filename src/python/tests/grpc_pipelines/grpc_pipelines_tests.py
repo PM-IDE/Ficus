@@ -193,14 +193,14 @@ def test_several_levels():
     pipeline = Pipeline2(
         UseNamesEventLog2(),
         TracesDiversityDiagram2(plot_legend=True, title='InitialLog'),
-        DiscoverActivitiesForSeveralLevels2(event_classes=['^(.*?)\.'], patterns_kind=PatternsKind.MaximalRepeats),
+        DiscoverActivitiesForSeveralLevels2(event_classes=['^(.*?)\.', '.*'], patterns_kind=PatternsKind.MaximalRepeats),
         DrawFullActivitiesDiagram2()
     )
 
     result = pipeline.execute({
         const_names_event_log: NamesLogContextValue([
-            ['A.A', 'B.B', 'C', 'A.C', 'B.D'],
-            ['A.D', 'B.C', 'C', 'A.A', 'B.B'],
+            ['A.A', 'B.B', 'C', 'D', 'A.C', 'B.D', 'C', 'D'],
+            ['A.D', 'B.C', 'C', 'D', 'A.A', 'B.B'],
         ])
     })
 

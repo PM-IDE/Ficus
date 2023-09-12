@@ -295,7 +295,7 @@ class FindRepeats2(PipelinePart2):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy.name)
+        append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
 
@@ -384,11 +384,8 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
         append_adjusting_mode(config, const_adjusting_mode, self.adjusting_mode)
         append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_events_count, self.min_events_count)
-        append_pipeline_value(config, const_pipeline, Pipeline2(DiscoverActivitiesFromPatterns2(
-            patterns_kind=self.patterns_kind,
-            strategy=self.strategy,
-            max_array_length=self.max_array_length,
-        )))
+        append_patterns_kind(config, const_patterns_kind, self.patterns_kind)
+        append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
 
         default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
@@ -496,14 +493,14 @@ def append_enum_value(config: GrpcPipelinePartConfiguration, key: str, enum_name
     _append_context_value(config, key, EnumContextValue(enum_name, value))
 
 
-def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: str):
-    append_enum_value(config, key, const_pattern_discovery_strategy_enum_name, value)
+def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: PatternsDiscoveryStrategy):
+    append_enum_value(config, key, const_pattern_discovery_strategy_enum_name, value.name)
 
 def append_strings_context_value(config: GrpcPipelinePartConfiguration, key: str, value: list[str]):
     _append_context_value(config, key, StringsContextValue(value))
 
-def append_patterns_kind(config: GrpcPipelinePartConfiguration, key: str, value: str):
-    append_enum_value(config, key, const_patterns_kind_enum_name, value)
+def append_patterns_kind(config: GrpcPipelinePartConfiguration, key: str, value: PatternsKind):
+    append_enum_value(config, key, const_patterns_kind_enum_name, value.name)
 
 def append_adjusting_mode(config: GrpcPipelinePartConfiguration, key: str, value: AdjustingMode):
     append_enum_value(config, key, const_adjusting_mode_enum_name, value.name)
