@@ -1,12 +1,13 @@
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet, VecDeque},
-    ops::DerefMut,
+    ops::{Deref, DerefMut},
     rc::Rc,
 };
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    pipelines::aliases::TracesActivities,
     utils::user_data::{keys::DefaultKey, user_data::UserData},
 };
 
@@ -243,6 +244,7 @@ pub enum UndefActivityHandlingStrategy<TEvent> {
     InsertAllEvents,
 }
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum AdjustingMode {
     FromAllLog,
     FromUnattachedSubTraces,
@@ -448,4 +450,31 @@ where
     } else {
         1
     }
+}
+
+pub fn create_log_from_unattached_events<TLog>(log: &TLog, activities: &TracesActivities) -> TLog
+where
+    TLog: EventLog,
+{
+    let mut new_log = TLog::empty();
+
+    for (trace, trace_activities) in log.get_traces().into_iter().zip(activities) {
+        let trace = trace.borrow();
+        let mut new_trace = TLog::TTrace::empty();
+        let process_undef_activity = |start, end| {
+            for event in &trace.get_events()[start..end] {
+                new_trace.push(event.clone());
+            }
+        };
+
+        process_activities_in_trace(
+            trace.get_events().len(),
+            trace_activities,
+            process_undef_activity,
+            |_| {},
+        );
+        new_log.push(Rc::new(RefCell::new(new_trace)));
+    }
+
+    new_log
 }

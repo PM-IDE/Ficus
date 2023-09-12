@@ -11,6 +11,7 @@ unsafe impl Send for UserDataImpl {}
 
 pub trait UserData {
     fn len(&self) -> usize;
+
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T);
     fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T);
     fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;

@@ -2,6 +2,7 @@ use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
     rc::Rc,
+    task::Context,
 };
 
 use chrono::{DateTime, Duration, Utc};
@@ -29,8 +30,9 @@ use crate::{
             patterns::{
                 activity_instances::{
                     add_unattached_activities, count_underlying_events, create_activity_name,
-                    create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo,
-                    SubTraceKind, UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
+                    create_log_from_unattached_events, create_new_log_from_activities_instances,
+                    extract_activities_instances, ActivityInTraceInfo, AdjustingMode, SubTraceKind,
+                    UndefActivityHandlingStrategy, UNDEF_ACTIVITY_NAME,
                 },
                 contexts::PatternsDiscoveryStrategy,
                 repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets},
@@ -758,20 +760,64 @@ impl PipelineParts {
     fn discover_activities_instances_for_several_levels() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL, &|context, keys, config| {
             let event_classes = Self::get_context_value(config, keys.event_classes_regexes())?;
-
+            let initial_activity_level = *Self::get_context_value(context, keys.activity_level())?;
+            
+            let mut index = 0;
             for event_class_regex in event_classes.into_iter().rev() {
-                let mut new_config = config.clone();
-                new_config.put_concrete(keys.event_class_regex().key(), event_class_regex.clone());
+                context.put_concrete(keys.activity_level().key(), initial_activity_level + index);
+                Self::adjust_with_activities_from_unattached_events(context, keys, config, event_class_regex.to_owned())?;
 
-                context
-                    .pipeline_parts()
-                    .unwrap()
-                    .create_add_unattached_events_part(new_config)
-                    .execute(context, keys)?;
+                index += 1;
             }
+
+            context.put_concrete(keys.activity_level().key(), initial_activity_level);
 
             Ok(())
         })
+    }
+
+    fn adjust_with_activities_from_unattached_events(
+        old_context: &mut PipelineContext,
+        keys: &ContextKeys,
+        config: &UserDataImpl,
+        event_class: String,
+    ) -> Result<(), PipelinePartExecutionError> {
+        let activities_pipeline = Self::get_context_value(config, keys.pipeline())?;
+        let adjusting_mode = *Self::get_context_value(config, keys.adjusting_mode())?;
+        let log = Self::get_context_value(old_context, keys.event_log())?;
+
+        let mut new_context = PipelineContext::empty_from(&old_context);
+
+        if adjusting_mode == AdjustingMode::FromUnattachedSubTraces {
+            match Self::get_context_value(old_context, keys.trace_activities()) {
+                Ok(activities) => new_context.put_concrete(
+                    keys.event_log().key(),
+                    create_log_from_unattached_events(log, activities),
+                ),
+                Err(_) => {}
+            }
+        } else {
+            new_context.put_concrete(keys.event_log().key(), log.clone());
+        }
+
+        activities_pipeline.execute(&mut new_context, keys)?;
+
+        let old_activities = Self::get_context_value_mut(old_context, keys.activities())?;
+        let new_activities = Self::get_context_value(&new_context, keys.activities())?;
+        for new_activity in new_activities {
+            old_activities.push(new_activity.clone());
+        }
+
+        let mut new_config = config.clone();
+        new_config.put_concrete(keys.event_class_regex().key(), event_class);
+
+        old_context
+            .pipeline_parts()
+            .unwrap()
+            .create_add_unattached_events_part(new_config)
+            .execute(old_context, keys)?;
+
+        Ok(())
     }
 
     fn create_add_unattached_events_part(&self, config: UserDataImpl) -> DefaultPipelinePart {

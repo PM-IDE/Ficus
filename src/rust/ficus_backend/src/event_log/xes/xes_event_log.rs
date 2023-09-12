@@ -101,6 +101,18 @@ impl XesEventLogImpl {
     }
 }
 
+impl Clone for XesEventLogImpl {
+    fn clone(&self) -> Self {
+        Self {
+            traces_holder: self.traces_holder.clone(),
+            globals: self.globals.clone(),
+            extensions: self.extensions.clone(),
+            classifiers: self.classifiers.clone(),
+            properties: self.properties.clone(),
+        }
+    }
+}
+
 impl EventLog for XesEventLogImpl {
     type TEvent = XesEventImpl;
     type TTrace = XesTraceImpl;

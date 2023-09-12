@@ -50,6 +50,14 @@ impl SimpleEventLog {
     }
 }
 
+impl Clone for SimpleEventLog {
+    fn clone(&self) -> Self {
+        Self {
+            traces_holder: self.traces_holder.clone(),
+        }
+    }
+}
+
 impl EventLog for SimpleEventLog {
     type TEvent = SimpleEvent;
     type TTrace = SimpleTrace;
@@ -98,6 +106,14 @@ impl EventLog for SimpleEventLog {
 #[derive(Debug)]
 pub struct SimpleTrace {
     events_holder: EventsHolder<SimpleEvent>,
+}
+
+impl Clone for SimpleTrace {
+    fn clone(&self) -> Self {
+        Self {
+            events_holder: self.events_holder.clone(),
+        }
+    }
 }
 
 impl Trace for SimpleTrace {

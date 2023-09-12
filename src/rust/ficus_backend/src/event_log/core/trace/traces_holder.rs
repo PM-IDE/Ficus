@@ -12,6 +12,17 @@ where
     traces: Vec<Rc<RefCell<TTrace>>>,
 }
 
+impl<TTrace> Clone for TracesHolder<TTrace>
+where
+    TTrace: Trace,
+{
+    fn clone(&self) -> Self {
+        Self {
+            traces: (&self.traces).into_iter().map(|ptr| Rc::new(RefCell::new(ptr.borrow().clone()))).collect(),
+        }
+    }
+}
+
 impl<TTrace> TracesHolder<TTrace>
 where
     TTrace: Trace,

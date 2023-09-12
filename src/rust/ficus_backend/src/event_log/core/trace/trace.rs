@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::event_log::core::event::event::Event;
 
-pub trait Trace {
+pub trait Trace: Clone {
     type TEvent: Event;
     type TTraceInfo: TraceInfo;
     type TTracePositions: TraceEventsPositions;

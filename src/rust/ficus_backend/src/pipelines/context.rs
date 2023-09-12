@@ -6,7 +6,7 @@ use crate::utils::user_data::{
 };
 
 use super::{
-    errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys, pipelines::PipelineParts,
+    errors::pipeline_errors::PipelinePartExecutionError, keys::context_key::ContextKey, pipelines::PipelineParts,
 };
 
 pub trait LogMessageHandler: Send + Sync {
@@ -34,6 +34,14 @@ impl<'a> PipelineContext<'a> {
             user_data: UserDataImpl::new(),
             log_message_handler: None,
             pipeline_parts: None,
+        }
+    }
+
+    pub fn empty_from(other: &'a PipelineContext) -> Self {
+        Self {
+            user_data: UserDataImpl::new(),
+            log_message_handler: other.log_message_handler.clone(),
+            pipeline_parts: other.pipeline_parts.clone(),
         }
     }
 }

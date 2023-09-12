@@ -18,6 +18,19 @@ where
     events_positions: LazyCell<EventsPositions>,
 }
 
+impl<TEvent> Clone for EventsHolder<TEvent>
+where
+    TEvent: Event,
+{
+    fn clone(&self) -> Self {
+        Self {
+            events: (&self.events).into_iter().map(|ptr| Rc::new(RefCell::new(ptr.borrow().clone()))).collect(),
+            events_sequence_info: LazyCell::new(),
+            events_positions: LazyCell::new(),
+        }
+    }
+}
+
 impl<TEvent> EventsHolder<TEvent>
 where
     TEvent: Event,

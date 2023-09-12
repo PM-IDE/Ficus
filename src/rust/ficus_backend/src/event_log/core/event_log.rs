@@ -6,7 +6,7 @@ use super::{
 };
 use crate::event_log::core::event::event::Event;
 
-pub trait EventLog {
+pub trait EventLog: Clone {
     type TEvent: Event + 'static;
     type TTraceInfo: TraceInfo + 'static;
     type TTrace: Trace<TEvent = Self::TEvent, TTraceInfo = Self::TTraceInfo> + 'static;
