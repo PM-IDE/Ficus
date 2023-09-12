@@ -387,7 +387,7 @@ impl PipelineParts {
 
     fn discover_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {
-            let activity_level = Self::get_context_value(context, keys.activity_level())?;
+            let activity_level = Self::get_context_value(config, keys.activity_level())?;
             Self::do_discover_activities(context, keys, *activity_level)
         })
     }

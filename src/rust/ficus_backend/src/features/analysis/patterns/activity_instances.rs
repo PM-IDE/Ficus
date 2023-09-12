@@ -342,7 +342,7 @@ pub fn add_unattached_activities(
                 return;
             }
 
-            let activities = extract_activities_instances(&vec![trace.clone()], activities, should_narrow);
+            let activities = extract_activities_instances(&vec![trace[start_index..end_index].to_vec()], activities, should_narrow);
             new_trace_activities.extend(
                 activities[0]
                     .iter()
