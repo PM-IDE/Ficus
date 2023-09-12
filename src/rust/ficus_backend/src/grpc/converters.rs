@@ -6,8 +6,8 @@ use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
         patterns::{
-            contexts::PatternsDiscoveryStrategy, repeat_sets::SubArrayWithTraceIndex,
-            tandem_arrays::SubArrayInTraceInfo,
+            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
+            repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
         },
     },
     ficus_proto::{
@@ -64,6 +64,10 @@ pub(super) fn put_into_user_data(
             if enum_name == name_of_type!(PatternsDiscoveryStrategy) {
                 if let Ok(strategy) = PatternsDiscoveryStrategy::from_str(&grpc_enum.value) {
                     user_data.put_any::<PatternsDiscoveryStrategy>(key, strategy);
+                }
+            } else if enum_name == name_of_type!(AdjustingMode) {
+                if let Ok(strategy) = AdjustingMode::from_str(&grpc_enum.value) {
+                    user_data.put_any::<AdjustingMode>(key, strategy);
                 }
             }
         }

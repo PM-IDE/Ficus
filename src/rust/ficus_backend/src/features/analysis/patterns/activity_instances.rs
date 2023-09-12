@@ -3,6 +3,7 @@ use std::{
     collections::{HashMap, HashSet, VecDeque},
     ops::{Deref, DerefMut},
     rc::Rc,
+    str::FromStr,
 };
 
 use crate::{
@@ -248,6 +249,18 @@ pub enum UndefActivityHandlingStrategy<TEvent> {
 pub enum AdjustingMode {
     FromAllLog,
     FromUnattachedSubTraces,
+}
+
+impl FromStr for AdjustingMode {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "FromAllLog" => Ok(AdjustingMode::FromAllLog),
+            "FromUnattachedSubTraces" => Ok(AdjustingMode::FromUnattachedSubTraces),
+            _ => Err(()),
+        }
+    }
 }
 
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";

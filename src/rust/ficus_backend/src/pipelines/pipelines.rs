@@ -760,12 +760,17 @@ impl PipelineParts {
     fn discover_activities_instances_for_several_levels() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL, &|context, keys, config| {
             let event_classes = Self::get_context_value(config, keys.event_classes_regexes())?;
-            let initial_activity_level = *Self::get_context_value(context, keys.activity_level())?;
-            
+            let initial_activity_level = *Self::get_context_value(config, keys.activity_level())?;
+
             let mut index = 0;
             for event_class_regex in event_classes.into_iter().rev() {
                 context.put_concrete(keys.activity_level().key(), initial_activity_level + index);
-                Self::adjust_with_activities_from_unattached_events(context, keys, config, event_class_regex.to_owned())?;
+                Self::adjust_with_activities_from_unattached_events(
+                    context,
+                    keys,
+                    config,
+                    event_class_regex.to_owned(),
+                )?;
 
                 index += 1;
             }
@@ -782,6 +787,10 @@ impl PipelineParts {
         config: &UserDataImpl,
         event_class: String,
     ) -> Result<(), PipelinePartExecutionError> {
+        if Self::get_context_value(old_context, keys.activities()).is_err() {
+            old_context.put_concrete(keys.activities().key(), vec![])
+        }
+
         let activities_pipeline = Self::get_context_value(config, keys.pipeline())?;
         let adjusting_mode = *Self::get_context_value(config, keys.adjusting_mode())?;
         let log = Self::get_context_value(old_context, keys.event_log())?;

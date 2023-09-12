@@ -29,7 +29,9 @@ impl XesTraceImpl {
 
 impl Clone for XesTraceImpl {
     fn clone(&self) -> Self {
-        Self { events_holder: self.events_holder.clone() }
+        Self {
+            events_holder: self.events_holder.clone(),
+        }
     }
 }
 

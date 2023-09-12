@@ -18,7 +18,10 @@ where
 {
     fn clone(&self) -> Self {
         Self {
-            traces: (&self.traces).into_iter().map(|ptr| Rc::new(RefCell::new(ptr.borrow().clone()))).collect(),
+            traces: (&self.traces)
+                .into_iter()
+                .map(|ptr| Rc::new(RefCell::new(ptr.borrow().clone())))
+                .collect(),
         }
     }
 }
