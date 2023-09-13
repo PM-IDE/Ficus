@@ -232,13 +232,16 @@ impl PipelineParts {
 
     pub(super) fn clear_activities_related_stuff() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLEAR_ACTIVITIES, &|context, keys, _| {
-            context.remove_concrete(keys.activities().key());
-            context.remove_concrete(keys.trace_activities().key());
-            context.remove_concrete(keys.patterns().key());
-            context.remove_concrete(keys.repeat_sets().key());
-
+            Self::do_clear_activities_related_stuff(context, keys);
             Ok(())
         })
+    }
+
+    pub(super) fn do_clear_activities_related_stuff(context: &mut PipelineContext, keys: &ContextKeys) {
+        context.remove_concrete(keys.activities().key());
+        context.remove_concrete(keys.trace_activities().key());
+        context.remove_concrete(keys.patterns().key());
+        context.remove_concrete(keys.repeat_sets().key());
     }
 
     pub(super) fn get_number_of_underlying_events() -> (String, PipelinePartFactory) {
@@ -279,6 +282,7 @@ impl PipelineParts {
                 let log = Self::get_context_value(context, keys.event_log())?;
                 let events_count = count_events(log);
 
+                Self::do_clear_activities_related_stuff(context, keys);
                 Self::find_patterns(context, keys, config)?;
                 Self::do_discover_activities(context, keys, activity_level)?;
                 Self::do_discover_activities_instances(context, keys, config)?;
