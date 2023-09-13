@@ -29,4 +29,5 @@ impl PipelineParts {
     pub const DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL: &str = "DiscoverActivitiesForSeveralLevels";
     pub const DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES: &str = "DiscoverActivitiesInUnattachedSubTraces";
     pub const DISCOVER_ACTIVITIES_FROM_PATTERNS: &str = "DiscoverActivitiesFromPatterns";
+    pub const DISCOVER_ACTIVITIES_UNTIL_NO_MORE: &str = "DiscoverActivitiesUntilNoMore";
 }

@@ -196,3 +196,10 @@ impl DfgInfo {
         self.events_with_single_follower.contains(event_class)
     }
 }
+
+pub fn count_events(log: &impl EventLog) -> usize {
+    log.get_traces()
+        .iter()
+        .map(|trace| trace.borrow().get_events().len())
+        .sum()
+}
