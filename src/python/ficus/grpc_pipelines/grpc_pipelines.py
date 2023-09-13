@@ -463,7 +463,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         if self.event_class is not None:
             append_string_value(config, const_event_class_regex, self.event_class)
 
-        default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
+        default_part = _create_default_pipeline_part(const_discover_activities_until_no_more, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
 
 

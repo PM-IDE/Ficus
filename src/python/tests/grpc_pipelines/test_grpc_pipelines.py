@@ -173,7 +173,7 @@ def test_class_extractors():
     pipeline = Pipeline2(
         UseNamesEventLog2(),
         TracesDiversityDiagram2(plot_legend=True, title='InitialLog'),
-        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces, class_extractor='^(.*?)\.'),
+        FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces, class_extractor='^(.*?)\\.'),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=True),
         DrawFullActivitiesDiagram2()
@@ -194,7 +194,7 @@ def test_several_levels():
     pipeline = Pipeline2(
         UseNamesEventLog2(),
         TracesDiversityDiagram2(plot_legend=True, title='InitialLog'),
-        DiscoverActivitiesForSeveralLevels2(event_classes=['^(.*?)\.', '.*'], patterns_kind=PatternsKind.MaximalRepeats),
+        DiscoverActivitiesForSeveralLevels2(event_classes=['^(.*?)\\.', '.*'], patterns_kind=PatternsKind.MaximalRepeats),
         DrawFullActivitiesDiagram2()
     )
 
@@ -231,7 +231,7 @@ def test_discover_activities_from_patterns():
 def test_discover_activities_until_no_more():
     pipeline = Pipeline2(
         UseNamesEventLog2(),
-        DiscoverActivitiesUntilNoMore2(event_class='^(.*?)\.'),
+        DiscoverActivitiesUntilNoMore2(event_class='^(.*?)\\.'),
         DrawFullActivitiesDiagram2()
     )
 
