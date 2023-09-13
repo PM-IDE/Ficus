@@ -346,7 +346,8 @@ class DiscoverActivitiesInstances2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_bool_value(config, const_narrow_activities, self.narrow_activities)
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
+        return GrpcPipelinePartBase(
+            defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
 
 
 class PatternsKind(Enum):
@@ -430,6 +431,42 @@ class DiscoverActivitiesFromPatterns2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=default_part)
 
 
+class DiscoverActivitiesUntilNoMore2(PipelinePart2):
+    def __init__(self,
+                 event_class: str = None,
+                 patterns_kind: PatternsKind = PatternsKind.MaximalRepeats,
+                 narrow_activities: bool = True,
+                 activity_level: int = 0,
+                 strategy: PatternsDiscoveryStrategy = PatternsDiscoveryStrategy.FromAllTraces,
+                 max_array_length: int = 20,
+                 adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
+                 min_events_count: int = 0):
+        self.event_class = event_class
+        self.narrow_activities = narrow_activities
+        self.patterns_kind = patterns_kind
+        self.activity_level = activity_level
+        self.strategy = strategy
+        self.max_array_length = max_array_length
+        self.adjusting_mode = adjusting_mode
+        self.min_events_count = min_events_count
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+
+        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        append_adjusting_mode(config, const_adjusting_mode, self.adjusting_mode)
+        append_uint32_value(config, const_activity_level, self.activity_level)
+        append_uint32_value(config, const_events_count, self.min_events_count)
+        append_patterns_kind(config, const_patterns_kind, self.patterns_kind)
+        append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
+
+        if self.event_class is not None:
+            append_string_value(config, const_event_class_regex, self.event_class)
+
+        default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
+        return GrpcPipelinePartBase(defaultPart=default_part)
+
+
 class PrintEventLogInfo2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -493,14 +530,18 @@ def append_enum_value(config: GrpcPipelinePartConfiguration, key: str, enum_name
     _append_context_value(config, key, EnumContextValue(enum_name, value))
 
 
-def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str, value: PatternsDiscoveryStrategy):
+def append_patterns_discovery_strategy(config: GrpcPipelinePartConfiguration, key: str,
+                                       value: PatternsDiscoveryStrategy):
     append_enum_value(config, key, const_pattern_discovery_strategy_enum_name, value.name)
+
 
 def append_strings_context_value(config: GrpcPipelinePartConfiguration, key: str, value: list[str]):
     _append_context_value(config, key, StringsContextValue(value))
 
+
 def append_patterns_kind(config: GrpcPipelinePartConfiguration, key: str, value: PatternsKind):
     append_enum_value(config, key, const_patterns_kind_enum_name, value.name)
+
 
 def append_adjusting_mode(config: GrpcPipelinePartConfiguration, key: str, value: AdjustingMode):
     append_enum_value(config, key, const_adjusting_mode_enum_name, value.name)
@@ -509,7 +550,6 @@ def append_adjusting_mode(config: GrpcPipelinePartConfiguration, key: str, value
 @dataclass
 class PipelineContextValue(ContextValue):
     pipeline: Pipeline2
-
 
     def to_grpc_context_value(self) -> GrpcContextValue:
         return GrpcContextValue(pipeline=self.pipeline.to_grpc_pipeline())

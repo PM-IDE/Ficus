@@ -4,7 +4,8 @@ from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, Trac
     DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
     DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, \
     DrawShortActivitiesDiagram2, PatternsDiscoveryStrategy, PrintEventLogInfo2, FilterTracesByEventsCount2, \
-    UseNamesEventLog2, DiscoverActivitiesForSeveralLevels2, PatternsKind, DiscoverActivitiesFromPatterns2
+    UseNamesEventLog2, DiscoverActivitiesForSeveralLevels2, PatternsKind, DiscoverActivitiesFromPatterns2, \
+    DiscoverActivitiesUntilNoMore2
 from tests.test_data_provider import get_example_log_path
 
 
@@ -220,6 +221,24 @@ def test_discover_activities_from_patterns():
         const_names_event_log: NamesLogContextValue([
             ['A', 'B', 'C', 'A', 'B'],
             ['A', 'B', 'C', 'A', 'B'],
+        ])
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def test_discover_activities_until_no_more():
+    pipeline = Pipeline2(
+        UseNamesEventLog2(),
+        DiscoverActivitiesUntilNoMore2(event_class='^(.*?)\.'),
+        DrawFullActivitiesDiagram2()
+    )
+
+    result = pipeline.execute({
+        const_names_event_log: NamesLogContextValue([
+            ['A.A', 'B.B', 'C', 'D', 'A.C', 'B.D', 'C', 'D'],
+            ['A.D', 'B.C', 'C', 'D', 'A.A', 'B.B'],
         ])
     })
 
