@@ -81,11 +81,11 @@ class EnumContextValue(ContextValue):
 class StringsContextValue(ContextValue):
     strings: list[str]
 
-
     def to_grpc_context_value(self) -> GrpcContextValue:
         strings = GrpcStrings()
         strings.strings.extend(self.strings)
         return GrpcContextValue(strings=strings)
+
 
 def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
     result = []
@@ -98,6 +98,7 @@ def from_grpc_names_log(grpc_names_log: GrpcNamesEventLog) -> list[list[str]]:
 
     return result
 
+
 @dataclass
 class EventLogInfo(ContextValue):
     events_count: int
@@ -105,9 +106,9 @@ class EventLogInfo(ContextValue):
     traces_count: int
 
     def to_grpc_context_value(self) -> GrpcContextValue:
-        return GrpcEventLogInfo(events_count = self.events_count,
-                                traces_count = self.traces_count,
-                                event_classes_count = self.event_classes_count)
+        return GrpcEventLogInfo(events_count=self.events_count,
+                                traces_count=self.traces_count,
+                                event_classes_count=self.event_classes_count)
 
 
 def from_grpc_colors_log(grpc_colors_log: GrpcColorsEventLog) -> list[list[ColoredRectangle]]:

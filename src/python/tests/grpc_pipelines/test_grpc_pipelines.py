@@ -1,14 +1,16 @@
-from ficus.grpc_pipelines.constants import const_names_event_log, const_get_names_event_log
+from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
+    CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
+    DiscoverActivitiesFromPatterns2
+from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, ReadLogFromXes2, TracesDiversityDiagram2, \
-    DrawPlacementsOfEventByName2, FindSuperMaximalRepeats2, DiscoverActivities2, \
-    DiscoverActivitiesInstances2, DrawFullActivitiesDiagram2, DrawPlacementOfEventsByRegex2, \
-    DrawShortActivitiesDiagram2, PatternsDiscoveryStrategy, PrintEventLogInfo2, FilterTracesByEventsCount2, \
-    UseNamesEventLog2, DiscoverActivitiesForSeveralLevels2, PatternsKind, DiscoverActivitiesFromPatterns2, \
-    DiscoverActivitiesUntilNoMore2, PrintEventLog2, PipelinePart2WithCallback, _create_complex_get_context_part, \
-    CreateLogFromActivitiesInstances2
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
-    GrpcContextValue
+from ficus.grpc_pipelines.data_models import PatternsKind
+from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
+    DrawPlacementOfEventsByRegex2
+from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2
+from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
+from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, PatternsDiscoveryStrategy
+from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
+from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 from tests.grpc_pipelines.pipeline_parts_for_tests import AssertNamesLogTestPart
 from tests.test_data_provider import get_example_log_path
 
@@ -82,6 +84,7 @@ def test_pipeline_with_getting_context_value4():
 
 def test_pipeline_with_getting_context_value5():
     _do_simple_test_with_regex('A|B|C|D')
+
 
 def test_draw_short_activities_diagram():
     pipeline = Pipeline2(
