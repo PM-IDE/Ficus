@@ -9,7 +9,6 @@ use crate::{
             patterns::{
                 activity_instances::{ActivityInTraceInfo, AdjustingMode},
                 contexts::PatternsDiscoveryStrategy,
-                entry_points::PatternsKind,
                 repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
                 tandem_arrays::SubArrayInTraceInfo,
             },

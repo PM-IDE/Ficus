@@ -1,4 +1,4 @@
-use std::{any::Any, str::FromStr, sync::Arc};
+use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
 
@@ -7,22 +7,21 @@ use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
         patterns::{
-            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, entry_points::PatternsKind,
+            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
             repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
         },
     },
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
-        GrpcContextKeyValue, GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue,
+        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace, GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue,
         GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog,
         GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
         GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
     },
     pipelines::{
         aliases::ColorsEventLog,
-        context::{LogMessageHandler, PipelineContext},
+        context::PipelineContext,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{Pipeline, PipelinePart, PipelineParts},
+        pipelines::Pipeline,
     },
     utils::{
         colors::{Color, ColoredRectangle},

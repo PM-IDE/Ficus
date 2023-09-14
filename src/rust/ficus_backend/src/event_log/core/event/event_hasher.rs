@@ -1,6 +1,5 @@
 use std::{
     collections::hash_map::DefaultHasher,
-    f32::consts::E,
     hash::{Hash, Hasher},
 };
 

@@ -1,7 +1,6 @@
 use crate::{
     features::analysis::patterns::{
         contexts::PatternsDiscoveryStrategy,
-        entry_points::PatternsKind,
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{find_maximal_tandem_arrays, find_primitive_tandem_arrays, SubArrayInTraceInfo},
     },

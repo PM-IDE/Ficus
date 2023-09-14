@@ -7,7 +7,7 @@ use ficus_backend::{
         analysis::{
             event_log_info::EventLogInfo,
             patterns::{
-                activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, entry_points::PatternsKind,
+                activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
             },
         },
         discovery::petri_net::PetriNet,

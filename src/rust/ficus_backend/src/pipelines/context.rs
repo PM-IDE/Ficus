@@ -6,7 +6,7 @@ use crate::utils::user_data::{
 };
 
 use super::{
-    errors::pipeline_errors::PipelinePartExecutionError, keys::context_key::ContextKey, pipelines::PipelineParts,
+    errors::pipeline_errors::PipelinePartExecutionError, pipelines::PipelineParts,
 };
 
 pub trait LogMessageHandler: Send + Sync {
