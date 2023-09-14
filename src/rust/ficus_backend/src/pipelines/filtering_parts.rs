@@ -53,7 +53,7 @@ impl PipelineParts {
                 .collect();
 
             let log = Self::get_context_value_mut(context, keys.event_log())?;
-            log.filter_traces(&|_, index| groups_indices.contains(&index));
+            log.filter_traces(&|_, index| !groups_indices.contains(&index));
 
             Ok(())
         })
