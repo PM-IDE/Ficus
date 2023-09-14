@@ -36,6 +36,9 @@ const_discover_activities_for_several_levels = 'DiscoverActivitiesForSeveralLeve
 const_discover_activities_from_patterns = 'DiscoverActivitiesFromPatterns'
 const_discover_activities_until_no_more = 'DiscoverActivitiesUntilNoMore'
 const_create_log_from_activities = 'CreateLogFromActivities'
+const_filter_events_by_name = 'FilterEventsByName'
+const_filter_events_by_regex = 'FilterEventsByRegex'
+const_filter_log_by_variants = 'FilterLogByVariants'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

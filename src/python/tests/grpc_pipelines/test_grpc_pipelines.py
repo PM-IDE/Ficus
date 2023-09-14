@@ -6,7 +6,8 @@ from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogCont
 from ficus.grpc_pipelines.data_models import PatternsKind
 from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
     DrawPlacementOfEventsByRegex2
-from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2
+from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
+    FilterLogByVariants2
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
 from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
@@ -254,6 +255,75 @@ def test_discover_activities_until_no_more():
             ['A.A', 'B.B', 'C', 'D', 'A.C', 'B.D', 'C', 'D'],
             ['A.D', 'B.C', 'C', 'D', 'A.A', 'B.B'],
         ])
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def test_filter_events_by_name():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        FilterEventsByName2(event_name='a'),
+        AssertNamesLogTestPart([
+            ['b', 'd', 'c', 'f'],
+            ['c', 'b', 'd', 'f'],
+            ['c', 'd', 'b', 'f'],
+            ['d', 'e', 'f'],
+            ['b', 'c', 'd', 'f'],
+            ['e', 'd', 'f']
+        ])
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def test_filter_events_by_regex():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        FilterEventsByRegex2(regex='a|b'),
+        AssertNamesLogTestPart([
+            ['d', 'c', 'f'],
+            ['c', 'd', 'f'],
+            ['c', 'd', 'f'],
+            ['d', 'e', 'f'],
+            ['c', 'd', 'f'],
+            ['e', 'd', 'f']
+        ])
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
+    })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def test_filter_log_by_variants():
+    pipeline = Pipeline2(
+        ReadLogFromXes2(),
+        FilterLogByVariants2(),
+        AssertNamesLogTestPart([
+            ['a', 'b', 'd', 'c', 'f'],
+            ['a', 'c', 'b', 'd', 'f'],
+            ['a', 'c', 'd', 'b', 'f'],
+            ['a', 'd', 'e', 'f'],
+            ['a', 'b', 'c', 'd', 'f'],
+            ['a', 'e', 'd', 'f']
+        ])
+    )
+
+    log_path = get_example_log_path('exercise4.xes')
+    result = pipeline.execute({
+        'path': StringContextValue(log_path)
     })
 
     assert result.finalResult.HasField('success')
