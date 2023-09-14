@@ -6,11 +6,12 @@ from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePa
 
 class AssertNamesLogTestPart(PipelinePart2WithCallback):
     def __init__(self, expected_names_log: list[list[str]]):
+        super().__init__()
         self.expected_names_log = expected_names_log
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(const_names_event_log, const_get_names_event_log, config)
+        part = _create_complex_get_context_part(self.uuid, const_names_event_log, const_get_names_event_log, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):

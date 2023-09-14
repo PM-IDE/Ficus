@@ -4,6 +4,7 @@ use std::{
     pin::Pin,
     sync::{Arc, Mutex},
 };
+use std::str::FromStr;
 
 use futures::Stream;
 use tokio::sync::mpsc::{self, Sender};
@@ -232,15 +233,20 @@ impl FicusService {
                 Part::ParallelPart(_) => todo!(),
                 Part::SimpleContextRequestPart(part) => {
                     let key_name = part.key.as_ref().unwrap().name.clone();
-                    pipeline.push(Self::create_get_context_part(key_name, &context.sender(), None));
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
+
+                    pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), None));
                 }
                 Part::ComplexContextRequestPart(part) => {
                     let grpc_default_part = part.before_pipeline_part.as_ref().unwrap();
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
+
                     match Self::find_default_part(grpc_default_part, context) {
                         Some(found_part) => {
                             let key_name = part.key.as_ref().unwrap().name.clone();
                             pipeline.push(Self::create_get_context_part(
                                 key_name,
+                                uuid,
                                 &context.sender(),
                                 Some(found_part),
                             ));
@@ -256,11 +262,12 @@ impl FicusService {
 
     fn create_get_context_part(
         key_name: String,
+        uuid: Uuid,
         sender: &Arc<Box<GrpcSender>>,
         before_part: Option<Box<DefaultPipelinePart>>,
     ) -> Box<GetContextValuePipelinePart> {
         let sender = sender.clone();
-        GetContextValuePipelinePart::create_context_pipeline_part(key_name, sender, before_part)
+        GetContextValuePipelinePart::create_context_pipeline_part(key_name, uuid, sender, before_part)
     }
 
     fn find_default_part(
