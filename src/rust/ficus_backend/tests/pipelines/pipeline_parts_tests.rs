@@ -30,7 +30,8 @@ fn get_test_parts_names() -> Vec<String> {
         "DiscoverActivitiesForSeveralLevels",
         "DiscoverActivitiesInUnattachedSubTraces",
         "DiscoverActivitiesFromPatterns",
-        "DiscoverActivitiesUntilNoMore"
+        "DiscoverActivitiesUntilNoMore",
+        "ExecuteWithEachActivityLog"
     ]
 }
 

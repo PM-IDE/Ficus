@@ -2,7 +2,7 @@ from ficus.grpc_pipelines.constants import const_activity_level, const_discover_
     const_discover_activities_instances, const_create_log_from_activities, const_event_classes_regexes, \
     const_adjusting_mode, const_events_count, const_patterns_kind, const_patterns_discovery_strategy, \
     const_discover_activities_for_several_levels, const_pipeline, const_discover_activities_from_patterns, \
-    const_event_class_regex, const_discover_activities_until_no_more
+    const_event_class_regex, const_discover_activities_until_no_more, const_execute_with_each_activity_log
 from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, Pipeline2, \
     append_uint32_value, append_bool_value, append_strings_context_value, append_adjusting_mode, append_patterns_kind, \
@@ -145,4 +145,18 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
             append_string_value(config, const_event_class_regex, self.event_class)
 
         default_part = _create_default_pipeline_part(const_discover_activities_until_no_more, config)
+        return GrpcPipelinePartBase(defaultPart=default_part)
+
+
+class ExecuteWithEachActivityLog2(PipelinePart2):
+    def __init__(self, activity_level: int, activity_log_pipeline: Pipeline2):
+        self.activity_level = activity_level
+        self.activity_log_pipeline = activity_log_pipeline
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_pipeline_value(config, const_pipeline, self.activity_log_pipeline)
+        append_uint32_value(config, const_activity_level, self.activity_level)
+
+        default_part = _create_default_pipeline_part(const_execute_with_each_activity_log, config)
         return GrpcPipelinePartBase(defaultPart=default_part)

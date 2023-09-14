@@ -39,6 +39,7 @@ const_create_log_from_activities = 'CreateLogFromActivities'
 const_filter_events_by_name = 'FilterEventsByName'
 const_filter_events_by_regex = 'FilterEventsByRegex'
 const_filter_log_by_variants = 'FilterLogByVariants'
+const_execute_with_each_activity_log = 'ExecuteWithEachActivityLog'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

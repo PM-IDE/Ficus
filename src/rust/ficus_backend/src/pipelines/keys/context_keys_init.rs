@@ -6,9 +6,7 @@ use crate::{
     features::{
         analysis::{
             event_log_info::EventLogInfo,
-            patterns::{
-                activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
-            },
+            patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
         },
         discovery::petri_net::PetriNet,
     },

@@ -124,7 +124,12 @@ fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
         UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
             Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))
         })),
-        &vec![vec![UNDEF_ACTIVITY_NAME, "(a)::(b)::(c)", UNDEF_ACTIVITY_NAME, "(a)::(b)::(c)"]],
+        &vec![vec![
+            UNDEF_ACTIVITY_NAME,
+            "(a)::(b)::(c)",
+            UNDEF_ACTIVITY_NAME,
+            "(a)::(b)::(c)",
+        ]],
     );
 }
 

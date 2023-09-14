@@ -1,6 +1,6 @@
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
-    DiscoverActivitiesFromPatterns2
+    DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
 from ficus.grpc_pipelines.data_models import PatternsKind
@@ -248,4 +248,15 @@ def test_filter_log_by_variants():
             ['a', 'b', 'c', 'd', 'f'],
             ['a', 'e', 'd', 'f']
         ])
+    ))
+
+
+def test_execute_with_each_activity_log():
+    _execute_test_with_exercise_log('exercise4', Pipeline2(
+        ReadLogFromXes2(),
+        DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats, strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        ExecuteWithEachActivityLog2(0, Pipeline2(
+            TracesDiversityDiagram2(plot_legend=True)
+        ))
     ))

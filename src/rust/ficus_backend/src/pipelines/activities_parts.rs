@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::features::analysis::event_log_info::count_events;
+use crate::features::analysis::patterns::activity_instances;
 use crate::{
     event_log::{
         core::event_log::EventLog,
@@ -295,6 +296,27 @@ impl PipelineParts {
 
                 activity_level += 1;
             }
+        })
+    }
+
+    pub(super) fn execute_with_each_activity_log() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::EXECUTE_WITH_EACH_ACTIVITY_LOG, &|context, keys, config| {
+            let activity_level = *Self::get_context_value(config, keys.activity_level())?;
+            let log = Self::get_context_value(context, keys.event_log())?;
+            let activities = Self::get_context_value(context, keys.trace_activities())?;
+            let pipeline = Self::get_context_value(config, keys.pipeline())?;
+
+            let activities_to_logs =
+                activity_instances::create_logs_for_activities(log, activities, activity_level as usize);
+
+            for (_, activity_log) in activities_to_logs {
+                let mut temp_context = PipelineContext::empty_from(context);
+                temp_context.put_concrete(keys.event_log().key(), activity_log.borrow().clone());
+
+                pipeline.execute(&mut temp_context, keys)?;
+            }
+
+            Ok(())
         })
     }
 }

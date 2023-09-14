@@ -12,10 +12,11 @@ use crate::{
         },
     },
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace, GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue,
-        GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog,
-        GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
-        GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
+        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
+        GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog,
+        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
+        GrpcNamesTrace, GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray,
+        GrpcTraceSubArrays,
     },
     pipelines::{
         aliases::ColorsEventLog,

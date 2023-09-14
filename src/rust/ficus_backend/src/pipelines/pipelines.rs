@@ -147,6 +147,7 @@ impl PipelineParts {
             Self::discover_activities_in_unattached_subtraces(),
             Self::discover_activities_from_pattern_source(),
             Self::discover_activities_until_no_more(),
+            Self::execute_with_each_activity_log(),
         ];
 
         let mut names_to_parts = HashMap::new();
