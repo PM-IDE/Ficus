@@ -424,8 +424,14 @@ where
     let right = left + sub_array.sub_array.length;
     let trace = log.get_traces().get(sub_array.trace_index).unwrap().borrow();
     let events = trace.get_events();
-    for event in &events[left..right] {
-        name.push_str(event.borrow().get_name());
+    for index in left..right {
+        name.push('(');
+        name.push_str(events[index].borrow().get_name());
+        name.push(')');
+
+        if index != right - 1 {
+            name.push_str("::");
+        }
     }
 
     name
