@@ -125,9 +125,11 @@ message GrpcParallelPipelineParts {
 
 message GrpcSimpleContextRequestPipelinePart {
     GrpcContextKey key = 1;
+    GrpcUuid frontendPartUuid = 2;
 }
 
 message GrpcComplexContextRequestPipelinePart {
     GrpcContextKey key = 1;
-    GrpcPipelinePart beforePipelinePart = 2;    
+    GrpcPipelinePart beforePipelinePart = 2;
+    GrpcUuid frontendPartUuid = 3;
 }

@@ -34,6 +34,7 @@ message GrpcPipelinePartLogMessage {
 
 message GrpcPipelinePartResult {
     GrpcContextValue contextValue = 1;
+    GrpcUuid uuid = 2;
 }
 
 message GrpcPipelineFinalResult {
