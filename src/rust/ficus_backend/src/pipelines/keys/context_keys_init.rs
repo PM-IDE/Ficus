@@ -56,35 +56,35 @@ impl ContextKeysInitContext {
 }
 
 impl ContextKeys {
-    pub const PATH: &str = "path";
-    pub const TANDEM_ARRAY_LENGTH: &str = "tandem_array_length";
-    pub const ACTIVITY_LEVEL: &str = "activity_level";
-    pub const NARROW_ACTIVITIES: &str = "narrow_activities";
-    pub const EVENT_NAME: &str = "event_name";
-    pub const REGEX: &str = "regex";
-    pub const PATTERNS_DISCOVERY_STRATEGY: &str = "patterns_discovery_strategy";
-    pub const OUTPUT_STRING: &str = "output_string";
-    pub const EVENT_LOG_INFO: &str = "event_log_info";
-    pub const UNDERLYING_EVENTS_COUNT: &str = "underlying_events_count";
-    pub const EVENTS_COUNT: &str = "events_count";
-    pub const EVENT_CLASSES_REGEXES: &str = "event_classes_regexes";
-    pub const ADJUSTING_MODE: &str = "adjusting_mode";
-    pub const EVENT_CLASS_REGEX: &str = "event_class_regex";
-    pub const PATTERNS_KIND: &str = "patterns_kind";
-    pub const PIPELINE: &str = "pipeline";
+    pub const PATH: &'static str = "path";
+    pub const TANDEM_ARRAY_LENGTH: &'static str = "tandem_array_length";
+    pub const ACTIVITY_LEVEL: &'static str = "activity_level";
+    pub const NARROW_ACTIVITIES: &'static str = "narrow_activities";
+    pub const EVENT_NAME: &'static str = "event_name";
+    pub const REGEX: &'static str = "regex";
+    pub const PATTERNS_DISCOVERY_STRATEGY: &'static str = "patterns_discovery_strategy";
+    pub const OUTPUT_STRING: &'static str = "output_string";
+    pub const EVENT_LOG_INFO: &'static str = "event_log_info";
+    pub const UNDERLYING_EVENTS_COUNT: &'static str = "underlying_events_count";
+    pub const EVENTS_COUNT: &'static str = "events_count";
+    pub const EVENT_CLASSES_REGEXES: &'static str = "event_classes_regexes";
+    pub const ADJUSTING_MODE: &'static str = "adjusting_mode";
+    pub const EVENT_CLASS_REGEX: &'static str = "event_class_regex";
+    pub const PATTERNS_KIND: &'static str = "patterns_kind";
+    pub const PIPELINE: &'static str = "pipeline";
 
-    pub const EVENT_LOG: &str = "event_log";
-    pub const ACTIVITIES: &str = "activities";
-    pub const REPEAT_SETS: &str = "repeat_sets";
-    pub const TRACE_ACTIVITIES: &str = "trace_activities";
-    pub const PATTERNS: &str = "patterns";
-    pub const PETRI_NET: &str = "petri_net";
-    pub const ACTIVITIES_TO_LOGS: &str = "activities_to_logs";
-    pub const ACTIVITY_NAME: &str = "activity_name";
-    pub const HASHES_EVENT_LOG: &str = "hashes_event_log";
-    pub const NAMES_EVENT_LOG: &str = "names_event_log";
-    pub const COLORS_EVENT_LOG: &str = "colors_event_log";
-    pub const COLORS_HOLDER: &str = "colors_holder";
+    pub const EVENT_LOG: &'static str = "event_log";
+    pub const ACTIVITIES: &'static str = "activities";
+    pub const REPEAT_SETS: &'static str = "repeat_sets";
+    pub const TRACE_ACTIVITIES: &'static str = "trace_activities";
+    pub const PATTERNS: &'static str = "patterns";
+    pub const PETRI_NET: &'static str = "petri_net";
+    pub const ACTIVITIES_TO_LOGS: &'static str = "activities_to_logs";
+    pub const ACTIVITY_NAME: &'static str = "activity_name";
+    pub const HASHES_EVENT_LOG: &'static str = "hashes_event_log";
+    pub const NAMES_EVENT_LOG: &'static str = "names_event_log";
+    pub const COLORS_EVENT_LOG: &'static str = "colors_event_log";
+    pub const COLORS_HOLDER: &'static str = "colors_holder";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
