@@ -26,7 +26,8 @@ class Pipeline2:
                 initialContext=self._create_initial_context(initial_context)
             )
 
-            callback_parts = self._find_pipeline_parts_with_callbacks(parts)
+            callback_parts = []
+            self.append_parts_with_callbacks(callback_parts)
             last_result = None
             callback_part_index = 0
 
@@ -47,6 +48,10 @@ class Pipeline2:
 
     def to_grpc_pipeline(self):
         return self._create_grpc_pipeline(list(self.parts))
+
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        for part in list(self.parts):
+            part.append_parts_with_callbacks(parts)
 
     @staticmethod
     def _create_grpc_pipeline(parts) -> GrpcPipeline:
@@ -84,6 +89,9 @@ class PipelinePart2:
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         raise NotImplementedError()
 
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        pass
+
 
 class PipelinePart2WithCallback(PipelinePart2):
     def execute_callback(self, context_value: GrpcContextValue):
@@ -111,6 +119,10 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
                               plot_legend=self.plot_legend,
                               height_scale=self.height_scale,
                               width_scale=self.width_scale)
+
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        super().append_parts_with_callbacks(parts)
+        parts.append(self)
 
 
 class PrintEventLogInfo2(PipelinePart2WithCallback):

@@ -160,3 +160,7 @@ class ExecuteWithEachActivityLog2(PipelinePart2):
 
         default_part = _create_default_pipeline_part(const_execute_with_each_activity_log, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
+
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        super().append_parts_with_callbacks(parts)
+        self.activity_log_pipeline.append_parts_with_callbacks(parts)
