@@ -35,6 +35,7 @@ const_use_names_event_log = 'UseNamesEventLog'
 const_discover_activities_for_several_levels = 'DiscoverActivitiesForSeveralLevels'
 const_discover_activities_from_patterns = 'DiscoverActivitiesFromPatterns'
 const_discover_activities_until_no_more = 'DiscoverActivitiesUntilNoMore'
+const_create_log_from_activities = 'CreateLogFromActivities'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

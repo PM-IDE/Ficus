@@ -102,6 +102,17 @@ class UseNamesEventLog2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_use_names_event_log))
 
 
+class PrintEventLog2(PipelinePart2WithCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        part = _create_complex_get_context_part(const_names_event_log, const_get_names_event_log, config)
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        for trace in context_value.names_log.log.traces:
+            print(list(trace.events))
+
+
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
     def __init__(self,
                  title: str = None,
@@ -348,6 +359,11 @@ class DiscoverActivitiesInstances2(PipelinePart2):
         append_bool_value(config, const_narrow_activities, self.narrow_activities)
         return GrpcPipelinePartBase(
             defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
+
+
+class CreateLogFromActivitiesInstances2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_create_log_from_activities))
 
 
 class PatternsKind(Enum):
