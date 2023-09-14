@@ -15,6 +15,7 @@ from ficus.pipelines.analysis.patterns.models import AdjustingMode
 
 class DiscoverActivities2(PipelinePart2):
     def __init__(self, activity_level: int):
+        super().__init__()
         self.activity_level = activity_level
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -25,6 +26,7 @@ class DiscoverActivities2(PipelinePart2):
 
 class DiscoverActivitiesInstances2(PipelinePart2):
     def __init__(self, narrow_activities: bool):
+        super().__init__()
         self.narrow_activities = narrow_activities
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -49,6 +51,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
                  max_array_length: int = 20,
                  adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
                  min_events_count: int = 0):
+        super().__init__()
         self.event_classes = event_classes
         self.narrow_activities = narrow_activities
         self.patterns_kind = patterns_kind
@@ -79,6 +82,7 @@ class DiscoverActivitiesFromPatterns2(PipelinePart2):
                  strategy: PatternsDiscoveryStrategy = PatternsDiscoveryStrategy.FromAllTraces,
                  max_array_length: int = 20,
                  activity_level: int = 0):
+        super().__init__()
         self.patterns_kind = patterns_kind
         self.strategy = strategy
         self.max_array_length = max_array_length
@@ -122,6 +126,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
                  max_array_length: int = 20,
                  adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
                  min_events_count: int = 0):
+        super().__init__()
         self.event_class = event_class
         self.narrow_activities = narrow_activities
         self.patterns_kind = patterns_kind
@@ -150,6 +155,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
 
 class ExecuteWithEachActivityLog2(PipelinePart2):
     def __init__(self, activity_level: int, activity_log_pipeline: Pipeline2):
+        super().__init__()
         self.activity_level = activity_level
         self.activity_log_pipeline = activity_log_pipeline
 

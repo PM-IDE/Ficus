@@ -14,6 +14,7 @@ class FindTandemArrays2(PipelinePart2):
                  part_type: str,
                  max_array_length: int,
                  class_extractor: Optional[str]):
+        super().__init__()
         self.max_array_length = max_array_length
         self.part_type = part_type
         self.class_extractor = class_extractor
@@ -46,6 +47,7 @@ class FindRepeats2(PipelinePart2):
                  part_name: str,
                  strategy: PatternsDiscoveryStrategy,
                  class_extractor: Optional[str] = None):
+        super().__init__()
         self.strategy = strategy
         self.part_name = part_name
         self.class_extractor = class_extractor

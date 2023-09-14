@@ -7,6 +7,7 @@ from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePa
 
 class FilterTracesByEventsCount2(PipelinePart2):
     def __init__(self, min_events_in_trace: int):
+        super().__init__()
         self.min_events_in_trace = min_events_in_trace
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -18,6 +19,7 @@ class FilterTracesByEventsCount2(PipelinePart2):
 
 class FilterEventsByName2(PipelinePart2):
     def __init__(self, event_name: str):
+        super().__init__()
         self.event_name = event_name
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
@@ -29,6 +31,7 @@ class FilterEventsByName2(PipelinePart2):
 
 class FilterEventsByRegex2(PipelinePart2):
     def __init__(self, regex: str):
+        super().__init__()
         self.regex = regex
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:

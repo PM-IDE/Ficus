@@ -23,7 +23,7 @@ class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(const_colors_event_log, const_traces_diversity_diagram, config)
+        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_traces_diversity_diagram, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -50,7 +50,7 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
             value=StringContextValue(self.event_name).to_grpc_context_value()
         ))
 
-        part = _create_complex_get_context_part(const_colors_event_log, const_draw_placement_of_event_by_name, config)
+        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_draw_placement_of_event_by_name, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -74,7 +74,7 @@ class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
         config = GrpcPipelinePartConfiguration()
         append_string_value(config, const_regex, self.regex)
 
-        part = _create_complex_get_context_part(const_colors_event_log, const_draw_placement_of_event_by_regex, config)
+        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_draw_placement_of_event_by_regex, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
@@ -96,7 +96,7 @@ class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(const_colors_event_log, self.diagram_kind, config)
+        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, self.diagram_kind, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 

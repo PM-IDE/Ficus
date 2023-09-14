@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 
 from ficus.analysis.event_log_analysis import draw_colors_event_log
@@ -28,8 +29,11 @@ class Pipeline2:
 
             callback_parts = []
             self.append_parts_with_callbacks(callback_parts)
+            uuid_to_pipeline_with_callback = {}
+            for part in callback_parts:
+                uuid_to_pipeline_with_callback[part.uuid] = part
+
             last_result = None
-            callback_part_index = 0
 
             for part_result in stub.ExecutePipeline(request):
                 last_result = part_result
@@ -37,9 +41,11 @@ class Pipeline2:
                 if last_result.HasField('finalResult'):
                     break
 
-                if last_result.HasField('pipelinePartResult') and callback_part_index < len(callback_parts):
-                    callback_parts[callback_part_index].execute_callback(part_result.pipelinePartResult.contextValue)
-                    callback_part_index += 1
+                if last_result.HasField('pipelinePartResult'):
+                    issued_part_uuid = uuid.UUID(part_result.pipelinePartResult.uuid.uuid)
+                    if issued_part_uuid in uuid_to_pipeline_with_callback:
+                        context_value = part_result.pipelinePartResult.contextValue
+                        uuid_to_pipeline_with_callback[issued_part_uuid].execute_callback(context_value)
 
                 if last_result.HasField('logMessage'):
                     print(part_result.logMessage.message)
@@ -86,6 +92,9 @@ class Pipeline2:
 
 
 class PipelinePart2:
+    def __init__(self):
+        self.uuid = uuid.uuid4()
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         raise NotImplementedError()
 
@@ -105,6 +114,7 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
                  plot_legend: bool = True,
                  height_scale: int = 1,
                  width_scale: int = 1):
+        super().__init__()
         self.title = title
         self.save_path = save_path
         self.plot_legend = plot_legend
@@ -128,7 +138,7 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
 class PrintEventLogInfo2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(const_event_log_info, const_get_event_log_info, config)
+        part = _create_complex_get_context_part(self.uuid, const_event_log_info, const_get_event_log_info, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):
@@ -136,17 +146,28 @@ class PrintEventLogInfo2(PipelinePart2WithCallback):
         print(log_info)
 
 
-def _create_simple_get_context_value_part(key_name: str):
-    return GrpcSimpleContextRequestPipelinePart(key=GrpcContextKey(name=key_name))
+def _create_simple_get_context_value_part(frontend_part_uuid: uuid.UUID, key_name: str):
+    return GrpcSimpleContextRequestPipelinePart(
+        frontendPartUuid=_create_grpc_uuid(frontend_part_uuid),
+        key=GrpcContextKey(name=key_name)
+    )
 
 
-def _create_complex_get_context_part(key_name: str, before_part_name: str, config: GrpcPipelinePartConfiguration):
+def _create_grpc_uuid(uuid: uuid.UUID) -> GrpcUuid:
+    return GrpcUuid(uuid=str(uuid))
+
+
+def _create_complex_get_context_part(frontend_part_uuid: uuid.UUID,
+                                     key_name: str,
+                                     before_part_name: str,
+                                     config: GrpcPipelinePartConfiguration):
     return GrpcComplexContextRequestPipelinePart(
+        frontendPartUuid=_create_grpc_uuid(frontend_part_uuid),
         key=GrpcContextKey(name=key_name),
         beforePipelinePart=GrpcPipelinePart(
             name=before_part_name,
             configuration=config
-        )
+        ),
     )
 
 
