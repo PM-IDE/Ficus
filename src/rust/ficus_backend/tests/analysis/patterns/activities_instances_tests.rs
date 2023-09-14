@@ -86,7 +86,7 @@ fn test_creating_new_log_from_activity_instances_insert_all_events() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::<SimpleEvent>::InsertAllEvents,
-        &vec![vec!["g", "d", "abc", "f", "i", "abc"]],
+        &vec![vec!["g", "d", "(a)::(b)::(c)", "f", "i", "(a)::(b)::(c)"]],
     );
 }
 
@@ -124,7 +124,7 @@ fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
         UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
             Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))
         })),
-        &vec![vec![UNDEF_ACTIVITY_NAME, "abc", UNDEF_ACTIVITY_NAME, "abc"]],
+        &vec![vec![UNDEF_ACTIVITY_NAME, "(a)::(b)::(c)", UNDEF_ACTIVITY_NAME, "(a)::(b)::(c)"]],
     );
 }
 
@@ -133,7 +133,7 @@ fn test_creating_new_log_from_activity_instances_dont_insert() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::<SimpleEvent>::DontInsert,
-        &vec![vec!["abc", "abc"]],
+        &vec![vec!["(a)::(b)::(c)", "(a)::(b)::(c)"]],
     );
 }
 
@@ -143,7 +143,7 @@ fn test_creating_log_for_activities() {
         create_log_from_taxonomy_of_patterns(),
         PatternsKind::PrimitiveTandemArrays(20),
         vec![(
-            "abc".to_owned(),
+            "(a)::(b)::(c)".to_owned(),
             vec![
                 vecs!["a", "b", "c", "a", "b", "c", "a", "b", "c", "a", "b", "c", "a"],
                 vecs!["c", "a"],
@@ -158,9 +158,9 @@ fn test_creating_log_for_activities1() {
         create_maximal_repeats_log(),
         PatternsKind::MaximalRepeats,
         vec![
-            ("bcd".to_owned(), vec![vecs!["b", "d", "c"]]),
+            ("(b)::(c)::(d)".to_owned(), vec![vecs!["b", "d", "c"]]),
             (
-                "dabc".to_owned(),
+                "(d)::(a)::(b)::(c)".to_owned(),
                 vec![
                     vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
                     vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
@@ -170,7 +170,7 @@ fn test_creating_log_for_activities1() {
                     vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
                 ],
             ),
-            ("e".to_owned(), vec![vecs!["e"], vecs!["e"]]),
+            ("(e)".to_owned(), vec![vecs!["e"], vecs!["e"]]),
         ],
     )
 }
@@ -181,9 +181,9 @@ fn test_creating_log_for_activities2() {
         create_maximal_repeats_log(),
         PatternsKind::NearSuperMaximalRepeats,
         vec![
-            ("bcd".to_owned(), vec![vecs!["b", "d", "c"]]),
+            ("(b)::(c)::(d)".to_owned(), vec![vecs!["b", "d", "c"]]),
             (
-                "dabc".to_owned(),
+                "(d)::(a)::(b)::(c)".to_owned(),
                 vec![
                     vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
                     vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
@@ -193,7 +193,7 @@ fn test_creating_log_for_activities2() {
                     vecs!["d", "b", "c", "c", "b", "a", "d", "b", "d"],
                 ],
             ),
-            ("e".to_owned(), vec![vecs!["e"], vecs!["e"]]),
+            ("(e)".to_owned(), vec![vecs!["e"], vecs!["e"]]),
         ],
     )
 }
@@ -204,7 +204,7 @@ fn test_creating_log_for_activities3() {
         create_maximal_repeats_log(),
         PatternsKind::PrimitiveTandemArrays(20),
         vec![(
-            "dabc".to_owned(),
+            "(d)::(a)::(b)::(c)".to_owned(),
             vec![
                 vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
                 vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
@@ -224,7 +224,7 @@ fn test_creating_log_for_activities4() {
         create_maximal_repeats_log(),
         PatternsKind::MaximalTandemArrays(20),
         vec![(
-            "dabc".to_owned(),
+            "(d)::(a)::(b)::(c)".to_owned(),
             vec![
                 vecs!["a", "a", "b", "c", "d", "b", "b", "c", "d", "a"],
                 vecs!["d", "a", "b", "c", "d", "a", "b", "c", "b", "b"],
