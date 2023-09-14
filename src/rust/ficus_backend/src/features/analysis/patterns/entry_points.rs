@@ -22,21 +22,6 @@ pub enum PatternsKind {
     NearSuperMaximalRepeats,
 }
 
-impl FromStr for PatternsKind {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "PrimitiveTandemArrays" => Ok(PatternsKind::PrimitiveTandemArrays(0)),
-            "MaximalTandemArrays" => Ok(PatternsKind::MaximalTandemArrays(0)),
-            "MaximalRepeats" => Ok(PatternsKind::MaximalRepeats),
-            "SuperMaximalRepeats" => Ok(PatternsKind::SuperMaximalRepeats),
-            "NearSuperMaximalRepeats" => Ok(PatternsKind::NearSuperMaximalRepeats),
-            _ => Err(()),
-        }
-    }
-}
-
 pub fn find_patterns<TClassExtractor, TLog>(
     context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
 ) -> Vec<Vec<SubArrayInTraceInfo>>

@@ -1,5 +1,6 @@
 use std::{collections::HashSet, sync::Arc};
 
+use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
     features::{
@@ -65,7 +66,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<Vec<String>>(keys, ContextKeys::EVENT_CLASSES_REGEXES, &mut used);
         assert_existence::<AdjustingMode>(keys, ContextKeys::ADJUSTING_MODE, &mut used);
         assert_existence::<String>(keys, ContextKeys::EVENT_CLASS_REGEX, &mut used);
-        assert_existence::<PatternsKind>(keys, ContextKeys::PATTERNS_KIND, &mut used);
+        assert_existence::<PatternsKindDto>(keys, ContextKeys::PATTERNS_KIND, &mut used);
         assert_existence::<Pipeline>(keys, ContextKeys::PIPELINE, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
@@ -165,7 +166,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<Vec<String>>(keys, ContextKeys::EVENT_CLASSES_REGEXES, &mut used);        
         assert_keys_equivalence::<AdjustingMode>(keys, ContextKeys::ADJUSTING_MODE, &mut used);        
         assert_keys_equivalence::<String>(keys, ContextKeys::EVENT_CLASS_REGEX, &mut used);        
-        assert_keys_equivalence::<PatternsKind>(keys, ContextKeys::PATTERNS_KIND, &mut used);        
+        assert_keys_equivalence::<PatternsKindDto>(keys, ContextKeys::PATTERNS_KIND, &mut used);
         assert_keys_equivalence::<Pipeline>(keys, ContextKeys::PIPELINE, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
@@ -189,5 +190,8 @@ fn assert_keys_equivalence<T: 'static>(keys: &ContextKeys, name: &str, used: &mu
     }
 
     used.insert(name.to_owned());
-    assert!(keys.find_key(name).unwrap().key().id() == keys.find_concrete_key::<T>(name).unwrap().key().id());
+    assert_eq!(
+        keys.find_key(name).unwrap().key().id(),
+        keys.find_concrete_key::<T>(name).unwrap().key().id()
+    );
 }

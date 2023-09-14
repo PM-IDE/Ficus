@@ -37,5 +37,5 @@ const_discover_activities_from_patterns = 'DiscoverActivitiesFromPatterns'
 const_discover_activities_until_no_more = 'DiscoverActivitiesUntilNoMore'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
-const_patterns_kind_enum_name = 'PatternsKind'
+const_patterns_kind_enum_name = 'PatternsKindDto'
 const_adjusting_mode_enum_name = 'AdjustingMode'

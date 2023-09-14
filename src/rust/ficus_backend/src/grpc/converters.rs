@@ -2,6 +2,7 @@ use std::{any::Any, str::FromStr, sync::Arc};
 
 use nameof::name_of_type;
 
+use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
@@ -69,9 +70,9 @@ pub(super) fn put_into_user_data(
                 if let Ok(strategy) = AdjustingMode::from_str(&grpc_enum.value) {
                     user_data.put_any::<AdjustingMode>(key, strategy);
                 }
-            } else if enum_name == name_of_type!(PatternsKind) {
-                if let Ok(kind) = PatternsKind::from_str(&grpc_enum.value) {
-                    user_data.put_any::<PatternsKind>(key, kind)
+            } else if enum_name == name_of_type!(PatternsKindDto) {
+                if let Ok(kind) = PatternsKindDto::from_str(&grpc_enum.value) {
+                    user_data.put_any::<PatternsKindDto>(key, kind)
                 }
             }
         }

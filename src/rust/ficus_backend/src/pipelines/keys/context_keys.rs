@@ -1,5 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
@@ -266,8 +267,8 @@ impl ContextKeys {
         Self::are_keys_equal(self.event_class_regex(), key)
     }
 
-    pub fn patterns_kind(&self) -> &DefaultContextKey<PatternsKind> {
-        self.find_concrete_key::<PatternsKind>(Self::PATTERNS_KIND).unwrap()
+    pub fn patterns_kind(&self) -> &DefaultContextKey<PatternsKindDto> {
+        self.find_concrete_key::<PatternsKindDto>(Self::PATTERNS_KIND).unwrap()
     }
 
     pub fn is_patterns_kind(&self, key: &dyn ContextKey) -> bool {

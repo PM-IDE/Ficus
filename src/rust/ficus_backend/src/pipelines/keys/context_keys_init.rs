@@ -1,5 +1,6 @@
 use std::{any::Any, borrow::Cow, collections::HashMap};
 
+use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
@@ -247,7 +248,7 @@ impl ContextKeys {
     }
 
     fn insert_patterns_kind(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<PatternsKind>(context, Self::PATTERNS_KIND)
+        Self::insert_key::<PatternsKindDto>(context, Self::PATTERNS_KIND)
     }
 
     fn insert_pipeline(context: &mut ContextKeysInitContext) {

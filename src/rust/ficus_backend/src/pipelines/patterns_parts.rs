@@ -7,6 +7,7 @@ use crate::{
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
+use std::str::FromStr;
 
 use super::{
     context::PipelineContext,
@@ -14,6 +15,31 @@ use super::{
     keys::context_keys::ContextKeys,
     pipelines::{PipelinePartFactory, PipelineParts},
 };
+
+#[derive(Clone, Copy)]
+pub enum PatternsKindDto {
+    PrimitiveTandemArrays,
+    MaximalTandemArrays,
+
+    MaximalRepeats,
+    SuperMaximalRepeats,
+    NearSuperMaximalRepeats,
+}
+
+impl FromStr for PatternsKindDto {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "PrimitiveTandemArrays" => Ok(Self::PrimitiveTandemArrays),
+            "MaximalTandemArrays" => Ok(Self::MaximalTandemArrays),
+            "MaximalRepeats" => Ok(Self::MaximalRepeats),
+            "SuperMaximalRepeats" => Ok(Self::SuperMaximalRepeats),
+            "NearSuperMaximalRepeats" => Ok(Self::NearSuperMaximalRepeats),
+            _ => Err(()),
+        }
+    }
+}
 
 impl PipelineParts {
     pub(super) fn find_maximal_repeats() -> (String, PipelinePartFactory) {
@@ -91,19 +117,19 @@ impl PipelineParts {
     ) -> Result<(), PipelinePartExecutionError> {
         let patterns_kind = Self::get_context_value(config, keys.patterns_kind())?;
         match patterns_kind {
-            PatternsKind::PrimitiveTandemArrays(_) => {
+            PatternsKindDto::PrimitiveTandemArrays => {
                 Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_primitive_tandem_arrays)?
             }
-            PatternsKind::MaximalTandemArrays(_) => {
+            PatternsKindDto::MaximalTandemArrays => {
                 Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_maximal_tandem_arrays)?
             }
-            PatternsKind::MaximalRepeats => {
+            PatternsKindDto::MaximalRepeats => {
                 Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)?
             }
-            PatternsKind::SuperMaximalRepeats => {
+            PatternsKindDto::SuperMaximalRepeats => {
                 Self::find_repeats_and_put_to_context(context, keys, config, find_super_maximal_repeats)?
             }
-            PatternsKind::NearSuperMaximalRepeats => {
+            PatternsKindDto::NearSuperMaximalRepeats => {
                 Self::find_repeats_and_put_to_context(context, keys, config, find_near_super_maximal_repeats)?
             }
         };
