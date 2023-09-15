@@ -37,9 +37,8 @@ impl PipelineParts {
                     filter_log_by_regex(log, &regex);
                     Ok(())
                 }
-                Err(_) => {
-                    let error = format!("Failed to parse regex {}", regex);
-                    Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(error)))
+                Err(err) => {
+                    Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(err.to_string())))
                 }
             }
         })
