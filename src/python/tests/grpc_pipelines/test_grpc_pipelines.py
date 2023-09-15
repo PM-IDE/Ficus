@@ -1,6 +1,7 @@
+from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
-    DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2
+    DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2, ClearActivitiesRelatedStuff2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
 from ficus.grpc_pipelines.data_models import PatternsKind
@@ -41,6 +42,13 @@ def _execute_test_with_exercise_log(log_name: str, pipeline: Pipeline2):
     result = pipeline.execute({
         'path': StringContextValue(get_example_log_path(f'{log_name}.xes'))
     })
+
+    assert result.finalResult.HasField('success')
+    assert not result.finalResult.HasField('error')
+
+
+def _execute_test_with_context(pipeline: Pipeline2, context: dict[str, ContextValue]):
+    result = pipeline.execute(context)
 
     assert result.finalResult.HasField('success')
     assert not result.finalResult.HasField('error')
@@ -260,3 +268,29 @@ def test_execute_with_each_activity_log():
             TracesDiversityDiagram2(plot_legend=True)
         ))
     ))
+
+
+def test_console_app1_log():
+    _execute_test_with_context(Pipeline2(
+        ReadLogFromXes2(),
+        FilterEventsByRegex2('Procfiler.*'),
+        TracesDiversityDiagram2(plot_legend=False),
+        FilterEventsByRegex2(r'GC/SampledObjectAllocation_\{System\.Int32\[\]\}'),
+        FilterEventsByRegex2(r'.*SuspendEE.*'),
+        FilterEventsByRegex2(r'.*RestartEE.*'),
+        TracesDiversityDiagram2(plot_legend=False),
+        FilterLogByVariants2(),
+        DiscoverActivitiesFromPatterns2(PatternsKind.PrimitiveTandemArrays,
+                                        activity_level=0),
+        DiscoverActivitiesInstances2(narrow_activities=True),
+        CreateLogFromActivitiesInstances2(),
+        ClearActivitiesRelatedStuff2(),
+        DiscoverActivitiesForSeveralLevels2(['.*'],
+                                            PatternsKind.MaximalRepeats,
+                                            strategy=PatternsDiscoveryStrategy.FromAllTraces),
+        CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.DontInsert),
+        ClearActivitiesRelatedStuff2(),
+        DiscoverActivitiesUntilNoMore2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
+    ), {
+        'path': StringContextValue('')
+    })

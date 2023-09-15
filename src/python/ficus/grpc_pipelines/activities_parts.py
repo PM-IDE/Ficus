@@ -4,7 +4,8 @@ from ficus.grpc_pipelines.constants import const_activity_level, const_discover_
     const_adjusting_mode, const_events_count, const_patterns_kind, const_patterns_discovery_strategy, \
     const_discover_activities_for_several_levels, const_pipeline, const_discover_activities_from_patterns, \
     const_event_class_regex, const_discover_activities_until_no_more, const_execute_with_each_activity_log, \
-    const_substitute_underlying_events, const_min_events_in_activity, const_undef_activity_handling_strategy
+    const_substitute_underlying_events, const_min_events_in_activity, const_undef_activity_handling_strategy, \
+    const_clear_activities_related_stuff
 from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, Pipeline2, \
     append_uint32_value, append_bool_value, append_strings_context_value, append_adjusting_mode, append_patterns_kind, \
@@ -197,3 +198,8 @@ class ExecuteWithEachActivityLog2(PipelinePart2):
 class SubstituteUnderlyingEvents2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_substitute_underlying_events))
+
+
+class ClearActivitiesRelatedStuff2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_clear_activities_related_stuff))

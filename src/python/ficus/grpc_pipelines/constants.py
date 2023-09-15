@@ -43,6 +43,7 @@ const_filter_events_by_regex = 'FilterEventsByRegex'
 const_filter_log_by_variants = 'FilterLogByVariants'
 const_execute_with_each_activity_log = 'ExecuteWithEachActivityLog'
 const_substitute_underlying_events = 'SubstituteUnderlyingEvents'
+const_clear_activities_related_stuff = 'ClearActivities'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'
