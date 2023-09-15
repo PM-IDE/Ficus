@@ -1,4 +1,5 @@
-use ficus_backend::{pipelines::pipelines::PipelineParts, vecs};
+use ficus_backend::pipelines::pipeline_parts::PipelineParts;
+use ficus_backend::vecs;
 
 fn get_test_parts_names() -> Vec<String> {
     vecs![

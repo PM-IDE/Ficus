@@ -5,6 +5,7 @@ use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::substitute_underlying_events;
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
         core::event_log::EventLog,
@@ -26,7 +27,7 @@ use super::{
     context::PipelineContext,
     errors::pipeline_errors::PipelinePartExecutionError,
     keys::context_keys::ContextKeys,
-    pipelines::{DefaultPipelinePart, PipelinePart, PipelinePartFactory, PipelineParts},
+    pipelines::{DefaultPipelinePart, PipelinePart, PipelinePartFactory},
 };
 
 impl PipelineParts {

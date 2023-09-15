@@ -1,3 +1,4 @@
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     features::analysis::patterns::{
         contexts::PatternsDiscoveryStrategy,
@@ -9,10 +10,8 @@ use crate::{
 use std::str::FromStr;
 
 use super::{
-    context::PipelineContext,
-    errors::pipeline_errors::PipelinePartExecutionError,
-    keys::context_keys::ContextKeys,
-    pipelines::{PipelinePartFactory, PipelineParts},
+    context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys,
+    pipelines::PipelinePartFactory,
 };
 
 #[derive(Clone, Copy)]

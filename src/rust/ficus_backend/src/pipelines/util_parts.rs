@@ -2,6 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use chrono::{DateTime, Duration, Utc};
 
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
         core::{
@@ -18,10 +19,7 @@ use crate::{
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
 
-use super::{
-    keys::context_keys::ContextKeys,
-    pipelines::{PipelinePartFactory, PipelineParts},
-};
+use super::{keys::context_keys::ContextKeys, pipelines::PipelinePartFactory};
 
 impl PipelineParts {
     pub(super) fn create_hashed_event_log(

@@ -1,5 +1,6 @@
 use regex::Regex;
 
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
         core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
@@ -13,10 +14,8 @@ use crate::{
 };
 
 use super::{
-    context::PipelineContext,
-    errors::pipeline_errors::PipelinePartExecutionError,
-    keys::context_keys::ContextKeys,
-    pipelines::{PipelinePartFactory, PipelineParts},
+    context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys,
+    pipelines::PipelinePartFactory,
 };
 
 impl PipelineParts {

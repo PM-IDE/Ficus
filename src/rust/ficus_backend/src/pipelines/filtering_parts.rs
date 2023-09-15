@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use regex::Regex;
 
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::core::{event_log::EventLog, trace::trace::Trace},
     features::mutations::{
@@ -12,7 +13,7 @@ use crate::{
 
 use super::{
     errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError},
-    pipelines::{PipelinePartFactory, PipelineParts},
+    pipelines::PipelinePartFactory,
 };
 
 impl PipelineParts {

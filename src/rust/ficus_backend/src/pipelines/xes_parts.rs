@@ -1,3 +1,4 @@
+use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
     utils::user_data::user_data::UserData,
@@ -5,7 +6,7 @@ use crate::{
 
 use super::{
     errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError},
-    pipelines::{PipelinePartFactory, PipelineParts},
+    pipelines::PipelinePartFactory,
 };
 
 impl PipelineParts {

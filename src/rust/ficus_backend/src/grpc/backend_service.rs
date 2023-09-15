@@ -28,7 +28,8 @@ use crate::{
         context::LogMessageHandler,
         errors::pipeline_errors::PipelinePartExecutionError,
         keys::{context_key::ContextKey, context_keys::ContextKeys},
-        pipelines::{DefaultPipelinePart, Pipeline, PipelinePart, PipelineParts},
+        pipeline_parts::PipelineParts,
+        pipelines::{DefaultPipelinePart, Pipeline, PipelinePart},
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };

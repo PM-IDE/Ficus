@@ -1,3 +1,4 @@
+use crate::pipelines::pipeline_parts::PipelineParts;
 use std::{any::Any, sync::Arc};
 
 use crate::utils::user_data::{
@@ -5,7 +6,7 @@ use crate::utils::user_data::{
     user_data::{UserData, UserDataImpl},
 };
 
-use super::{errors::pipeline_errors::PipelinePartExecutionError, pipelines::PipelineParts};
+use super::errors::pipeline_errors::PipelinePartExecutionError;
 
 pub trait LogMessageHandler: Send + Sync {
     fn handle(&self, message: String) -> Result<(), PipelinePartExecutionError>;

@@ -1,4 +1,4 @@
-use super::pipelines::PipelineParts;
+use crate::pipelines::pipeline_parts::PipelineParts;
 
 impl PipelineParts {
     pub const READ_LOG_FROM_XES: &'static str = "ReadLogFromXes";

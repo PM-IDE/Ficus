@@ -19,12 +19,7 @@ fn test_set_name() {
     let log = create_simple_event_log();
     let value = String::from_utf8("ASDASD".into()).ok().unwrap();
 
-    execute_test_set_test(
-        &log,
-        &value,
-        |event| event.name(),
-        |event, value| event.set_name(value),
-    )
+    execute_test_set_test(&log, &value, |event| event.name(), |event, value| event.set_name(value))
 }
 
 #[test]
