@@ -54,7 +54,7 @@ where
         }
     }
 
-    pub fn get_events(&self) -> &Vec<Rc<RefCell<TEvent>>> {
+    pub fn events(&self) -> &Vec<Rc<RefCell<TEvent>>> {
         &self.events
     }
 
@@ -131,13 +131,13 @@ impl EventSequenceInfo {
         TEvent: Event,
     {
         let mut events_counts = HashMap::new();
-        for event in events_holder.get_events() {
+        for event in events_holder.events() {
             increase_in_map(&mut events_counts, event.borrow().name());
         }
 
         EventSequenceInfo {
             events_counts,
-            events_count: events_holder.get_events().len(),
+            events_count: events_holder.events().len(),
         }
     }
 }
@@ -155,7 +155,7 @@ impl EventsPositions {
         let mut positions = HashMap::new();
         let mut index = 0;
 
-        for event in events.get_events() {
+        for event in events.events() {
             add_to_list_in_map(&mut positions, event.borrow().name(), index);
             index += 1;
         }

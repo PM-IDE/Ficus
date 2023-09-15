@@ -46,8 +46,8 @@ impl<'a> PipelineContext<'a> {
 }
 
 impl<'a> UserData for PipelineContext<'a> {
-    fn get_any(&self, key: &dyn Key) -> Option<&dyn Any> {
-        self.user_data.get_any(key)
+    fn any(&self, key: &dyn Key) -> Option<&dyn Any> {
+        self.user_data.any(key)
     }
 
     fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {

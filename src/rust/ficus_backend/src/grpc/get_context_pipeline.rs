@@ -51,7 +51,7 @@ impl GetContextValuePipelinePart {
                     before_part.execute(context, keys)?;
                 }
 
-                match context.get_any(key.key()) {
+                match context.any(key.key()) {
                     Some(context_value) => {
                         let grpc_value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
 

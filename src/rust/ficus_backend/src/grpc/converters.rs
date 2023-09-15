@@ -279,7 +279,7 @@ fn try_convert_to_grpc_event_log_info(value: &dyn Any) -> Option<GrpcContextValu
         let log_info = value.downcast_ref::<EventLogInfo>().unwrap();
         Some(GrpcContextValue {
             context_value: Some(ContextValue::EventLogInfo(GrpcEventLogInfo {
-                events_count: log_info.get_events_count() as u32,
+                events_count: log_info.events_count() as u32,
                 traces_count: log_info.traces_count() as u32,
                 event_classes_count: log_info.event_classes_count() as u32,
             })),

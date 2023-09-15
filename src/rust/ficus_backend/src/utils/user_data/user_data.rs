@@ -15,7 +15,7 @@ pub trait UserData {
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T);
     fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T);
     fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
-    fn get_any(&self, key: &dyn Key) -> Option<&dyn Any>;
+    fn any(&self, key: &dyn Key) -> Option<&dyn Any>;
     fn concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T>;
     fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>);
     fn remove_any<T: 'static>(&mut self, key: &dyn Key);
@@ -37,7 +37,7 @@ impl UserData for UserDataImpl {
         self.get(key)
     }
 
-    fn get_any(&self, key: &dyn Key) -> Option<&dyn Any> {
+    fn any(&self, key: &dyn Key) -> Option<&dyn Any> {
         if self.values_map.is_none() {
             return None;
         }
@@ -97,7 +97,7 @@ impl UserDataImpl {
     }
 
     pub fn get<T: 'static>(&self, key: &impl Key) -> Option<&T> {
-        match self.get_any(key) {
+        match self.any(key) {
             None => None,
             Some(any) => Some(any.downcast_ref::<T>().unwrap()),
         }

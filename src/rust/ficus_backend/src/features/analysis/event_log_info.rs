@@ -146,7 +146,7 @@ impl EventLogInfo {
         self.traces_count
     }
 
-    pub fn get_events_count(&self) -> usize {
+    pub fn events_count(&self) -> usize {
         self.events_count
     }
 

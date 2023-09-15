@@ -65,7 +65,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
     {
         let _log_cookie = StartEndElementCookie::new(&writer, LOG_TAG_NAME_STR);
 
-        for ext in log.get_extensions() {
+        for ext in log.extensions() {
             let attrs = vec![
                 (NAME_ATTR_NAME_STR, ext.name.as_str()),
                 (URI_ATTR_NAME_STR, ext.uri.as_str()),
@@ -75,7 +75,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
             write_empty(&writer, EXTENSION_TAG_NAME_STR, &attrs)?;
         }
 
-        for classifier in log.get_classifiers() {
+        for classifier in log.classifiers() {
             let keys = classifier.keys.join(" ");
             let attrs = vec![
                 (NAME_ATTR_NAME_STR, classifier.name.as_str()),
@@ -85,11 +85,11 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
             write_empty(&writer, CLASSIFIER_TAG_NAME_STR, &attrs)?;
         }
 
-        for (name, value) in log.get_ordered_properties() {
+        for (name, value) in log.ordered_properties() {
             write_payload_tag(&writer, name, value)?;
         }
 
-        for (scope, defaults) in log.get_ordered_globals() {
+        for (scope, defaults) in log.ordered_globals() {
             let mut attrs = vec![(SCOPE_ATTR_NAME_STR, scope.as_str())];
 
             let _global_cookie = StartEndElementCookie::new_with_attrs(&writer, GLOBAL_TAG_NAME_STR, &attrs);

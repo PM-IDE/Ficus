@@ -186,9 +186,9 @@ impl GrpcBackendService for FicusService {
                 let id = request.get_ref().execution_id.as_ref().unwrap();
                 match self.contexts.lock().as_mut().unwrap().get_mut(&id.guid) {
                     None => Self::create_get_context_value_error("Failed to get context for guid".to_string()),
-                    Some(value) => match value.get_any(key.key()) {
+                    Some(value) => match value.any(key.key()) {
                         None => {
-                            if let Some(created_value) = value.get_any(key.key()) {
+                            if let Some(created_value) = value.any(key.key()) {
                                 self.try_convert_context_value(key, created_value)
                             } else {
                                 Self::create_get_context_value_error("Failed to find context value for key".to_string())

@@ -22,25 +22,25 @@ pub struct XesEventLogImpl {
 }
 
 impl XesEventLogImpl {
-    pub fn get_globals_map(&self) -> &HashMap<String, HashMap<String, String>> {
+    pub fn globals_map(&self) -> &HashMap<String, HashMap<String, String>> {
         &self.globals
     }
 
-    pub fn get_extensions(&self) -> &Vec<XesEventLogExtension> {
+    pub fn extensions(&self) -> &Vec<XesEventLogExtension> {
         &self.extensions
     }
 
-    pub fn get_classifiers(&self) -> &Vec<XesClassifier> {
+    pub fn classifiers(&self) -> &Vec<XesClassifier> {
         &self.classifiers
     }
 
-    pub fn get_properties_map(&self) -> &HashMap<String, EventPayloadValue> {
+    pub fn properties_map(&self) -> &HashMap<String, EventPayloadValue> {
         &self.properties
     }
 
-    pub fn get_ordered_properties(&self) -> Vec<(&String, &EventPayloadValue)> {
+    pub fn ordered_properties(&self) -> Vec<(&String, &EventPayloadValue)> {
         let mut properties = Vec::new();
-        for (key, value) in self.get_properties_map() {
+        for (key, value) in self.properties_map() {
             properties.push((key, value));
         }
 
@@ -48,9 +48,9 @@ impl XesEventLogImpl {
         properties
     }
 
-    pub fn get_ordered_globals(&self) -> Vec<(&String, Vec<(&String, &String)>)> {
+    pub fn ordered_globals(&self) -> Vec<(&String, Vec<(&String, &String)>)> {
         let mut globals = Vec::new();
-        for (key, value) in self.get_globals_map() {
+        for (key, value) in self.globals_map() {
             let mut defaults = Vec::new();
             for (default_key, default_value) in value {
                 defaults.push((default_key, default_value));
