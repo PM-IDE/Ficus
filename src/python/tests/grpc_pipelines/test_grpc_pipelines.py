@@ -1,12 +1,13 @@
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
-    DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2, ClearActivitiesRelatedStuff2
+    DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2, ClearActivitiesRelatedStuff2, \
+    PrintNumberOfUnderlyingEvents2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
 from ficus.grpc_pipelines.data_models import PatternsKind
 from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
-    DrawPlacementOfEventsByRegex2
+    DrawPlacementOfEventsByRegex2, DrawFullActivitiesDiagram2
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
     FilterLogByVariants2
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
@@ -274,16 +275,14 @@ def test_console_app1_log():
     _execute_test_with_context(Pipeline2(
         ReadLogFromXes2(),
         FilterEventsByRegex2('Procfiler.*'),
-        TracesDiversityDiagram2(plot_legend=False),
         FilterEventsByRegex2(r'GC/SampledObjectAllocation_\{System\.Int32\[\]\}'),
         FilterEventsByRegex2(r'.*SuspendEE.*'),
         FilterEventsByRegex2(r'.*RestartEE.*'),
-        TracesDiversityDiagram2(plot_legend=False),
         FilterLogByVariants2(),
         DiscoverActivitiesFromPatterns2(PatternsKind.PrimitiveTandemArrays,
                                         activity_level=0),
-        DiscoverActivitiesInstances2(narrow_activities=True),
-        CreateLogFromActivitiesInstances2(),
+        DiscoverActivitiesInstances2(narrow_activities=True, min_events_in_activity=2),
+        CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         ClearActivitiesRelatedStuff2(),
         DiscoverActivitiesForSeveralLevels2(['.*'],
                                             PatternsKind.MaximalRepeats,
@@ -291,6 +290,8 @@ def test_console_app1_log():
         CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.DontInsert),
         ClearActivitiesRelatedStuff2(),
         DiscoverActivitiesUntilNoMore2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
+        TracesDiversityDiagram2(plot_legend=False, height_scale=50),
+        PrintNumberOfUnderlyingEvents2()
     ), {
         'path': StringContextValue('')
     })

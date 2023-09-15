@@ -1,16 +1,12 @@
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
-from ficus.grpc_pipelines.constants import const_activity_level, const_discover_activities, const_narrow_activities, \
-    const_discover_activities_instances, const_create_log_from_activities, const_event_classes_regexes, \
-    const_adjusting_mode, const_events_count, const_patterns_kind, const_patterns_discovery_strategy, \
-    const_discover_activities_for_several_levels, const_pipeline, const_discover_activities_from_patterns, \
-    const_event_class_regex, const_discover_activities_until_no_more, const_execute_with_each_activity_log, \
-    const_substitute_underlying_events, const_min_events_in_activity, const_undef_activity_handling_strategy, \
-    const_clear_activities_related_stuff
+from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, Pipeline2, \
     append_uint32_value, append_bool_value, append_strings_context_value, append_adjusting_mode, append_patterns_kind, \
-    append_patterns_discovery_strategy, append_pipeline_value, append_string_value, append_undef_activity_handling_strat
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
+    append_patterns_discovery_strategy, append_pipeline_value, append_string_value, \
+    append_undef_activity_handling_strat, PipelinePart2WithCallback, _create_complex_get_context_part
+from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
+    GrpcContextValue
 from ficus.grpc_pipelines.patterns_parts import FindMaximalRepeats2, \
     FindSuperMaximalRepeats2, FindNearSuperMaximalRepeats2, FindPrimitiveTandemArrays2, FindMaximalTandemArrays2
 from ficus.pipelines.analysis.patterns.models import AdjustingMode
@@ -203,3 +199,16 @@ class SubstituteUnderlyingEvents2(PipelinePart2):
 class ClearActivitiesRelatedStuff2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_clear_activities_related_stuff))
+
+
+class PrintNumberOfUnderlyingEvents2(PipelinePart2WithCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_complex_get_context_part(self.uuid,
+                                                const_underlying_events_count,
+                                                const_get_number_of_underlying_events,
+                                                GrpcPipelinePartConfiguration())
+
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        print(f'Underlying events count: {context_value.uint32}')
