@@ -285,7 +285,10 @@ impl PipelineParts {
     pub(super) fn get_number_of_underlying_events() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::GET_UNDERLYING_EVENTS_COUNT, &|context, keys, _| {
             let log = Self::get_context_value(context, keys.event_log())?;
-            context.put_concrete(keys.underlying_events_count().key(), count_underlying_events(log));
+            let count = count_underlying_events(log);
+            context.log(format!("Number of underlying events: {}", &count))?;
+
+            context.put_concrete(keys.underlying_events_count().key(), count);
             Ok(())
         })
     }

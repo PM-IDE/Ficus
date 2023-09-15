@@ -5,6 +5,7 @@ use std::{
     rc::Rc,
     str::FromStr,
 };
+use std::cmp::min;
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
@@ -128,7 +129,7 @@ pub fn extract_activities_instances(
                         length: index.unwrap() - last_activity_start_index.unwrap(),
                     };
 
-                    if activity_instance.node.borrow().len() > min_events_in_activity {
+                    if is_suitable_activity_instance(&activity_instance, min_events_in_activity) {
                         trace_activities.push(activity_instance);
                     }
 
@@ -154,7 +155,7 @@ pub fn extract_activities_instances(
                 length: index.unwrap() - last_activity_start_index.unwrap(),
             };
 
-            if activity_instance.node.borrow().len() > min_events_in_activity {
+            if is_suitable_activity_instance(&activity_instance, min_events_in_activity) {
                 trace_activities.push(activity_instance);
             }
         }
@@ -163,6 +164,14 @@ pub fn extract_activities_instances(
     }
 
     result
+}
+
+fn is_suitable_activity_instance(instance: &ActivityInTraceInfo, min_events_in_activity: usize) -> bool {
+    if instance.node.borrow().len() < min_events_in_activity {
+        false
+    } else {
+        instance.length > instance.node.borrow().len() / 2
+    }
 }
 
 fn split_activities_nodes_by_size(
