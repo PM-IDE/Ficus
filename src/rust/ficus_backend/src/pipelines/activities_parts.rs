@@ -30,6 +30,12 @@ use super::{
     pipelines::{DefaultPipelinePart, PipelinePart, PipelinePartFactory},
 };
 
+pub enum UndefActivityHandlingStrategyDto {
+    DontInsert,
+    InsertAsSingleEvent,
+    InsertAllEvents,
+}
+
 impl PipelineParts {
     pub(super) fn discover_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, keys, config| {

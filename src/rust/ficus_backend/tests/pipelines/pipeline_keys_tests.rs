@@ -1,5 +1,6 @@
 use std::{collections::HashSet, sync::Arc};
 
+use ficus_backend::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
@@ -66,6 +67,8 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<String>(keys, ContextKeys::EVENT_CLASS_REGEX, &mut used);
         assert_existence::<PatternsKindDto>(keys, ContextKeys::PATTERNS_KIND, &mut used);
         assert_existence::<Pipeline>(keys, ContextKeys::PIPELINE, &mut used);
+        assert_existence::<u32>(keys, ContextKeys::MIN_ACTIVITY_LENGTH, &mut used);
+        assert_existence::<UndefActivityHandlingStrategyDto>(keys, ContextKeys::UNDEF_ACTIVITY_HANDLING_STRATEGY, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -112,6 +115,8 @@ fn get_all_keys_names() -> Vec<String> {
         "event_class_regex",
         "patterns_kind",
         "pipeline",
+        "min_activity_length",
+        "undef_activity_handling_strategy",
 
         "event_log",
         "activities",
@@ -166,6 +171,8 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<String>(keys, ContextKeys::EVENT_CLASS_REGEX, &mut used);        
         assert_keys_equivalence::<PatternsKindDto>(keys, ContextKeys::PATTERNS_KIND, &mut used);
         assert_keys_equivalence::<Pipeline>(keys, ContextKeys::PIPELINE, &mut used);
+        assert_keys_equivalence::<u32>(keys, ContextKeys::MIN_ACTIVITY_LENGTH, &mut used);
+        assert_keys_equivalence::<UndefActivityHandlingStrategyDto>(keys, ContextKeys::UNDEF_ACTIVITY_HANDLING_STRATEGY, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);

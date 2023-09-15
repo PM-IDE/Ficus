@@ -1,5 +1,7 @@
 use std::{any::Any, borrow::Cow, collections::HashMap};
 
+use crate::features::analysis::patterns::activity_instances::UndefActivityHandlingStrategy;
+use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -72,6 +74,8 @@ impl ContextKeys {
     pub const EVENT_CLASS_REGEX: &'static str = "event_class_regex";
     pub const PATTERNS_KIND: &'static str = "patterns_kind";
     pub const PIPELINE: &'static str = "pipeline";
+    pub const MIN_ACTIVITY_LENGTH: &'static str = "min_activity_length";
+    pub const UNDEF_ACTIVITY_HANDLING_STRATEGY: &'static str = "undef_activity_handling_strategy";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -105,6 +109,8 @@ impl ContextKeys {
         Self::insert_event_class_regex(&mut context);
         Self::insert_patterns_kind(&mut context);
         Self::insert_pipeline(&mut context);
+        Self::insert_min_activity_length(&mut context);
+        Self::insert_undef_activity_handling_strategy(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -251,5 +257,13 @@ impl ContextKeys {
 
     fn insert_pipeline(context: &mut ContextKeysInitContext) {
         Self::insert_key::<Pipeline>(context, Self::PIPELINE)
+    }
+
+    fn insert_min_activity_length(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::MIN_ACTIVITY_LENGTH)
+    }
+
+    fn insert_undef_activity_handling_strategy(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<UndefActivityHandlingStrategyDto>(context, Self::UNDEF_ACTIVITY_HANDLING_STRATEGY)
     }
 }

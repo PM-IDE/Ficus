@@ -1,5 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -280,5 +281,22 @@ impl ContextKeys {
 
     pub fn is_pipeline(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.pipeline(), key)
+    }
+
+    pub fn min_activity_length(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::MIN_ACTIVITY_LENGTH).unwrap()
+    }
+
+    pub fn is_min_activity_length(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.min_activity_length(), key)
+    }
+
+    pub fn undef_activity_handling_strategy(&self) -> &DefaultContextKey<UndefActivityHandlingStrategyDto> {
+        self.find_concrete_key::<UndefActivityHandlingStrategyDto>(Self::UNDEF_ACTIVITY_HANDLING_STRATEGY)
+            .unwrap()
+    }
+
+    pub fn is_undef_activity_handling_strategy(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.undef_activity_handling_strategy(), key)
     }
 }
