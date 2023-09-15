@@ -285,7 +285,7 @@ where
 {
     let mut new_log = TLog::empty();
 
-    for (instances, trace) in instances.iter().zip(log.get_traces()) {
+    for (instances, trace) in instances.iter().zip(log.traces()) {
         let trace = trace.borrow();
         let new_trace_ptr = Rc::new(RefCell::new(TLog::TTrace::empty()));
 
@@ -296,7 +296,7 @@ where
             }
             UndefActivityHandlingStrategy::InsertAllEvents => {
                 for i in start_index..end_index {
-                    let event = trace.get_events()[i].borrow().clone();
+                    let event = trace.events()[i].borrow().clone();
                     new_trace_ptr.borrow_mut().push(Rc::new(RefCell::new(event)));
                 }
             }
@@ -309,15 +309,15 @@ where
 
             let mut underlying_events = vec![];
             for i in activity.start_pos..(activity.start_pos + activity.length) {
-                underlying_events.push(Rc::clone(&trace.get_events()[i]));
+                underlying_events.push(Rc::clone(&trace.events()[i]));
             }
 
             let mut event = ptr.borrow_mut();
-            let user_data = event.get_user_data();
+            let user_data = event.user_data();
             user_data.put_any(&underlying_events_key::<TLog::TEvent>(), underlying_events);
         };
 
-        process_activities_in_trace(trace.get_events().len(), &instances, undef_activity_func, activity_func);
+        process_activities_in_trace(trace.events().len(), &instances, undef_activity_func, activity_func);
 
         new_log.push(new_trace_ptr)
     }
@@ -377,7 +377,7 @@ where
     TLog: EventLog,
 {
     let mut activities_to_logs: HashMap<String, Rc<RefCell<TLog>>> = HashMap::new();
-    for (trace_activities, trace) in activities.iter().zip(log.get_traces()) {
+    for (trace_activities, trace) in activities.iter().zip(log.traces()) {
         let activity_handler = |activity_info: &ActivityInTraceInfo| {
             if activity_level != activity_info.node.borrow().level {
                 return;
@@ -390,7 +390,7 @@ where
             let end = start + activity_info.length;
 
             let trace = trace.borrow();
-            let events = trace.get_events();
+            let events = trace.events();
 
             for i in start..end {
                 new_trace.push(Rc::new(RefCell::new(events[i].borrow().clone())));
@@ -407,7 +407,7 @@ where
             }
         };
 
-        let length = trace.borrow().get_events().len();
+        let length = trace.borrow().events().len();
         process_activities_in_trace(length, trace_activities, |_, _| {}, activity_handler);
     }
 
@@ -422,11 +422,11 @@ where
 
     let left = sub_array.sub_array.start_index;
     let right = left + sub_array.sub_array.length;
-    let trace = log.get_traces().get(sub_array.trace_index).unwrap().borrow();
-    let events = trace.get_events();
+    let trace = log.traces().get(sub_array.trace_index).unwrap().borrow();
+    let events = trace.events();
     for index in left..right {
         name.push('(');
-        name.push_str(events[index].borrow().get_name());
+        name.push_str(events[index].borrow().name());
         name.push(')');
 
         if index != right - 1 {
@@ -442,9 +442,9 @@ where
     TLog: EventLog,
 {
     let mut count = 0usize;
-    for trace in log.get_traces() {
+    for trace in log.traces() {
         let mut trace_count = 0usize;
-        for event in trace.borrow().get_events() {
+        for event in trace.borrow().events() {
             trace_count += count_underlying_events_for_event(event.borrow_mut().deref_mut());
         }
 
@@ -460,7 +460,7 @@ where
 {
     let key = underlying_events_key::<TEvent>();
 
-    if let Some(underlying_events) = event.get_user_data().get_concrete_mut(&key) {
+    if let Some(underlying_events) = event.user_data().concrete_mut(&key) {
         let mut result = 0usize;
         for underlying_event in underlying_events {
             result += count_underlying_events_for_event(underlying_event.borrow_mut().deref_mut())
@@ -478,22 +478,17 @@ where
 {
     let mut new_log = TLog::empty();
 
-    for (trace, trace_activities) in log.get_traces().into_iter().zip(activities) {
+    for (trace, trace_activities) in log.traces().into_iter().zip(activities) {
         let trace = trace.borrow();
         let mut new_trace = TLog::TTrace::empty();
 
         let process_undef_activity = |start, end| {
-            for event in &trace.get_events()[start..end] {
+            for event in &trace.events()[start..end] {
                 new_trace.push(event.clone());
             }
         };
 
-        process_activities_in_trace(
-            trace.get_events().len(),
-            trace_activities,
-            process_undef_activity,
-            |_| {},
-        );
+        process_activities_in_trace(trace.events().len(), trace_activities, process_undef_activity, |_| {});
 
         new_log.push(Rc::new(RefCell::new(new_trace)));
     }
@@ -507,7 +502,7 @@ where
 {
     if let Some(underlying_events) = event
         .borrow_mut()
-        .get_user_data()
+        .user_data()
         .get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&underlying_events_key::<TLog::TEvent>())
     {
         for underlying_event in underlying_events {

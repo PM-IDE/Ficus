@@ -24,9 +24,9 @@ where
 {
     let mut max = 0;
 
-    for trace in log.get_traces() {
+    for trace in log.traces() {
         let mut trace = trace.borrow_mut();
-        let counts = trace.get_or_create_trace_info().get_events_counts();
+        let counts = trace.get_or_create_trace_info().events_counts();
         let mut num_of_ignored_events = 0;
         for ignored_event in ignored_events {
             if let Some(count) = counts.get(ignored_event) {
@@ -34,7 +34,7 @@ where
             }
         }
 
-        max = max.max(trace.get_events().len() - num_of_ignored_events);
+        max = max.max(trace.events().len() - num_of_ignored_events);
     }
 
     max
@@ -44,9 +44,9 @@ fn calculate_vector_length<TLog>(log: &TLog) -> usize
 where
     TLog: EventLog,
 {
-    log.get_traces()
+    log.traces()
         .into_iter()
-        .map(|trace| trace.borrow().get_events().len())
+        .map(|trace| trace.borrow().events().len())
         .max()
         .unwrap()
 }

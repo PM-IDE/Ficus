@@ -128,7 +128,7 @@ impl EventLog for XesEventLogImpl {
         }
     }
 
-    fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
+    fn traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces_holder.get_traces()
     }
 

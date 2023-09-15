@@ -76,15 +76,15 @@ impl EventLogInfo {
             increase_in_map(&mut dfg_pairs, &pair);
         };
 
-        for trace in log.get_traces() {
+        for trace in log.traces() {
             let trace = trace.borrow();
-            let events = trace.get_events();
+            let events = trace.events();
             events_count += events.len();
             let mut prev_event_name = None;
 
             for event in events {
                 let event = event.borrow();
-                let current_name = event.get_name().to_owned();
+                let current_name = event.name().to_owned();
 
                 if let Some(ignored_events) = ignored_events {
                     if ignored_events.contains(&current_name) {
@@ -105,7 +105,7 @@ impl EventLogInfo {
 
                 let prev_name = prev_event_name.unwrap();
                 update_pairs_count(&prev_name, &current_name);
-                prev_event_name = Some(event.get_name().to_owned());
+                prev_event_name = Some(event.name().to_owned());
             }
 
             if add_fake_start_end_events && prev_event_name.is_some() {
@@ -138,7 +138,7 @@ impl EventLogInfo {
                 followed_events,
                 events_with_single_follower,
             },
-            traces_count: log.get_traces().len(),
+            traces_count: log.traces().len(),
         }
     }
 
@@ -198,8 +198,5 @@ impl DfgInfo {
 }
 
 pub fn count_events(log: &impl EventLog) -> usize {
-    log.get_traces()
-        .iter()
-        .map(|trace| trace.borrow().get_events().len())
-        .sum()
+    log.traces().iter().map(|trace| trace.borrow().events().len()).sum()
 }

@@ -78,7 +78,7 @@ impl PipelineParts {
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
-        let array_length = *config.get_concrete(keys.tandem_array_length().key()).unwrap() as usize;
+        let array_length = *config.concrete(keys.tandem_array_length().key()).unwrap() as usize;
 
         let hashed_log = Self::create_hashed_event_log(config, keys, log);
 

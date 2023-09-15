@@ -12,7 +12,7 @@ impl PipelineParts {
     pub(super) fn write_log_to_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::WRITE_LOG_TO_XES, &|context, keys, _| {
             let path = Self::get_context_value(context, &keys.path())?;
-            match write_log(&context.get_concrete(&keys.event_log().key()).unwrap(), path) {
+            match write_log(&context.concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
                 Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
                     err.to_string(),

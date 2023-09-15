@@ -49,28 +49,28 @@ impl XesEventImpl {
 }
 
 impl Event for XesEventImpl {
-    fn get_name(&self) -> &String {
+    fn name(&self) -> &String {
         &self.event_base.name
     }
 
-    fn get_timestamp(&self) -> &DateTime<Utc> {
+    fn timestamp(&self) -> &DateTime<Utc> {
         &self.event_base.timestamp
     }
 
-    fn get_lifecycle(&self) -> Option<Lifecycle> {
+    fn lifecycle(&self) -> Option<Lifecycle> {
         match self.lifecycle.as_ref() {
             Some(value) => Some(*value),
             None => None,
         }
     }
 
-    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
+    fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
         self.payload.as_ref()
     }
 
-    fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
+    fn ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
         let mut payload = Vec::new();
-        if let Some(payload_map) = self.get_payload_map() {
+        if let Some(payload_map) = self.payload_map() {
             for (key, value) in payload_map {
                 payload.push((key, value));
             }
@@ -102,7 +102,7 @@ impl Event for XesEventImpl {
         *self.payload.as_mut().unwrap().get_mut(&key).unwrap() = value;
     }
 
-    fn get_user_data(&mut self) -> &mut UserDataImpl {
+    fn user_data(&mut self) -> &mut UserDataImpl {
         self.event_base.user_data_holder.get_mut()
     }
 }

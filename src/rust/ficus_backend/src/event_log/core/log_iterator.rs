@@ -35,7 +35,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let log = self.log.borrow();
-        let traces = log.get_traces();
+        let traces = log.traces();
 
         if self.trace_index >= traces.len() {
             None
@@ -72,7 +72,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let trace = self.trace.borrow();
-        let events = trace.get_events();
+        let events = trace.events();
         if self.event_index >= events.len() {
             None
         } else {

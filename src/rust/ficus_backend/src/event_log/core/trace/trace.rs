@@ -9,7 +9,7 @@ pub trait Trace: Clone {
 
     fn empty() -> Self;
 
-    fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>>;
+    fn events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>>;
     fn push(&mut self, event: Rc<RefCell<Self::TEvent>>);
 
     fn to_names_vec(&self) -> Vec<String>;
@@ -26,10 +26,10 @@ pub trait Trace: Clone {
 }
 
 pub trait TraceInfo {
-    fn get_events_counts(&self) -> &HashMap<String, usize>;
-    fn get_events_count(&self) -> usize;
+    fn events_counts(&self) -> &HashMap<String, usize>;
+    fn events_count(&self) -> usize;
 }
 
 pub trait TraceEventsPositions {
-    fn get_event_positions(&self, event_class: &String) -> Option<&Vec<usize>>;
+    fn event_positions(&self, event_class: &String) -> Option<&Vec<usize>>;
 }

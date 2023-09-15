@@ -77,7 +77,7 @@ where
     pub fn to_names_vec(&self) -> Vec<String> {
         let mut names = Vec::new();
         for event in &self.events {
-            names.push(event.borrow().get_name().to_owned());
+            names.push(event.borrow().name().to_owned());
         }
 
         names
@@ -116,11 +116,11 @@ pub struct EventSequenceInfo {
 }
 
 impl TraceInfo for EventSequenceInfo {
-    fn get_events_counts(&self) -> &HashMap<String, usize> {
+    fn events_counts(&self) -> &HashMap<String, usize> {
         &self.events_counts
     }
 
-    fn get_events_count(&self) -> usize {
+    fn events_count(&self) -> usize {
         self.events_count
     }
 }
@@ -132,7 +132,7 @@ impl EventSequenceInfo {
     {
         let mut events_counts = HashMap::new();
         for event in events_holder.get_events() {
-            increase_in_map(&mut events_counts, event.borrow().get_name());
+            increase_in_map(&mut events_counts, event.borrow().name());
         }
 
         EventSequenceInfo {
@@ -156,7 +156,7 @@ impl EventsPositions {
         let mut index = 0;
 
         for event in events.get_events() {
-            add_to_list_in_map(&mut positions, event.borrow().get_name(), index);
+            add_to_list_in_map(&mut positions, event.borrow().name(), index);
             index += 1;
         }
 
@@ -165,7 +165,7 @@ impl EventsPositions {
 }
 
 impl TraceEventsPositions for EventsPositions {
-    fn get_event_positions(&self, event_class: &String) -> Option<&Vec<usize>> {
+    fn event_positions(&self, event_class: &String) -> Option<&Vec<usize>> {
         self.positions.get(event_class)
     }
 }

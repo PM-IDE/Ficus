@@ -26,12 +26,12 @@ impl ToString for EventPayloadValue {
 }
 
 pub trait Event: Clone {
-    fn get_name(&self) -> &String;
-    fn get_timestamp(&self) -> &DateTime<Utc>;
-    fn get_lifecycle(&self) -> Option<Lifecycle>;
-    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>>;
-    fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
-    fn get_user_data(&mut self) -> &mut UserDataImpl;
+    fn name(&self) -> &String;
+    fn timestamp(&self) -> &DateTime<Utc>;
+    fn lifecycle(&self) -> Option<Lifecycle>;
+    fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>>;
+    fn ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
+    fn user_data(&mut self) -> &mut UserDataImpl;
 
     fn set_name(&mut self, new_name: &String);
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>);

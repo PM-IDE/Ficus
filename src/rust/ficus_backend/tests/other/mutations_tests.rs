@@ -15,7 +15,7 @@ use crate::test_core::simple_events_logs_provider::{
 #[test]
 fn test_removing_events() {
     let mut log = create_simple_event_log();
-    log.filter_events_by(|event| event.get_name() == "A");
+    log.filter_events_by(|event| event.name() == "A");
 
     assert_eq!(log.to_raw_vector(), vec![vec!["B", "C"], vec!["B", "C"]]);
 }
@@ -23,7 +23,7 @@ fn test_removing_events() {
 #[test]
 fn test_removing_events2() {
     let mut log = create_simple_event_log();
-    log.filter_events_by(|event| event.get_name() == "B" || event.get_name() == "C");
+    log.filter_events_by(|event| event.name() == "B" || event.name() == "C");
 
     assert_eq!(log.to_raw_vector(), vec![vec!["A"], vec!["A"]]);
 }
@@ -57,7 +57,7 @@ fn test_removing_events5() {
 #[test]
 fn test_renaming() {
     let mut log = create_simple_event_log();
-    rename_events(&mut log, "D", |event| event.get_name() == "A");
+    rename_events(&mut log, "D", |event| event.name() == "A");
 
     assert_eq!(log.to_raw_vector(), vec![vec!["D", "B", "C"], vec!["D", "B", "C"]])
 }
@@ -90,7 +90,7 @@ fn test_renaming2_no_change() {
 #[test]
 fn test_renaming3() {
     let mut log = create_simple_event_log3();
-    rename_events(&mut log, "D", |event| event.get_name() == "E");
+    rename_events(&mut log, "D", |event| event.name() == "E");
 
     assert_eq!(
         log.to_raw_vector(),

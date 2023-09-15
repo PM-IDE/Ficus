@@ -56,9 +56,9 @@ where
         class_extractor: TClassExtractor,
     ) -> Self {
         let mut processed_log = vec![];
-        for trace in log.borrow().get_traces() {
+        for trace in log.borrow().traces() {
             let mut processed_trace = vec![];
-            for event in trace.borrow().get_events() {
+            for event in trace.borrow().events() {
                 processed_trace.push((&class_extractor)(&event.borrow()));
             }
 

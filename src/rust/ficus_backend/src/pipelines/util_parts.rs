@@ -64,10 +64,10 @@ impl PipelineParts {
             let log = Self::get_context_value(context, keys.event_log())?;
 
             let mut result = vec![];
-            for trace in log.get_traces() {
+            for trace in log.traces() {
                 let mut vec = vec![];
-                for event in trace.borrow().get_events() {
-                    vec.push(event.borrow().get_name().to_string());
+                for event in trace.borrow().events() {
+                    vec.push(event.borrow().name().to_string());
                 }
 
                 result.push(vec);

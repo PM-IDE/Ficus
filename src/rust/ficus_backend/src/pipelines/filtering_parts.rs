@@ -63,7 +63,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::FILTER_TRACES_BY_EVENTS_COUNT, &|context, keys, config| {
             let log = Self::get_context_value_mut(context, keys.event_log())?;
             let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
-            log.filter_traces(&|trace, _| trace.get_events().len() < min_events_count);
+            log.filter_traces(&|trace, _| trace.events().len() < min_events_count);
 
             Ok(())
         })

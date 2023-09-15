@@ -355,12 +355,12 @@ fn dump_repeats_to_string(repeats: &Vec<Vec<SubArrayInTraceInfo>>, log: &SimpleE
 
     for trace_repeats in repeats {
         for repeat in trace_repeats {
-            let trace = log.get_traces().get(index).unwrap().borrow();
-            let events = trace.get_events();
+            let trace = log.traces().get(index).unwrap().borrow();
+            let events = trace.events();
             let mut string = String::new();
 
             for event in &events[repeat.start_index..(repeat.start_index + repeat.length)] {
-                string.push_str(event.borrow().get_name());
+                string.push_str(event.borrow().name());
             }
 
             result.push(string);

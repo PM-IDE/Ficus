@@ -53,7 +53,7 @@ where
         let traces = &mut self.traces;
         for index in (0..traces.len()).rev() {
             traces[index].borrow_mut().remove_events_by(&predicate);
-            if traces[index].borrow().get_events().is_empty() {
+            if traces[index].borrow().events().is_empty() {
                 traces.remove(index);
             }
         }
@@ -75,7 +75,7 @@ where
         let mut hashes = Vec::new();
         for trace in &self.traces {
             let mut trace_hashes = Vec::new();
-            for event in trace.borrow().get_events() {
+            for event in trace.borrow().events() {
                 trace_hashes.push(hasher.hash(&event.borrow()));
             }
 
@@ -104,8 +104,8 @@ where
         let mut raw_log = Vec::new();
         for trace in self.get_traces() {
             let mut events = Vec::new();
-            for event in trace.borrow().get_events() {
-                events.push(event.borrow().get_name().to_owned());
+            for event in trace.borrow().events() {
+                events.push(event.borrow().name().to_owned());
             }
 
             raw_log.push(events);

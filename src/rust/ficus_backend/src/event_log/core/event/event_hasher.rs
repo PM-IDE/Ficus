@@ -36,7 +36,7 @@ where
     TEvent: Event,
 {
     let mut hasher = DefaultHasher::new();
-    event.get_name().hash(&mut hasher);
+    event.name().hash(&mut hasher);
 
     hasher.finish()
 }
@@ -50,7 +50,7 @@ where
     TEvent: Event,
 {
     fn hash(&self, event: &TEvent) -> u64 {
-        let name = event.get_name();
+        let name = event.name();
         match self.regex.find(name) {
             Some(m) => {
                 if m.start() == 0 {

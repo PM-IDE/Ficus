@@ -12,10 +12,10 @@ fn test_user_data() {
     let b = 123;
     user_data.put_concrete(&key, b);
 
-    assert_eq!(*user_data.get_concrete(&key).unwrap(), 123);
+    assert_eq!(*user_data.concrete(&key).unwrap(), 123);
 
-    *user_data.get_concrete_mut(&key).unwrap() = 321;
-    assert_eq!(*user_data.get_concrete(&key).unwrap(), 321);
+    *user_data.concrete_mut(&key).unwrap() = 321;
+    assert_eq!(*user_data.concrete(&key).unwrap(), 321);
 }
 
 #[test]
@@ -33,8 +33,8 @@ fn test_user_data_two_keys() {
     user_data.put_any(&first_key, box1);
     user_data.put_any(&second_key, box2);
 
-    assert_eq!(user_data.get_concrete(&first_key).unwrap(), &first_value);
-    assert_eq!(user_data.get_concrete(&second_key).unwrap(), &second_value);
+    assert_eq!(user_data.concrete(&first_key).unwrap(), &first_value);
+    assert_eq!(user_data.concrete(&second_key).unwrap(), &second_value);
 
     assert!(Rc::ptr_eq(user_data.get(&first_key).unwrap(), &first_value));
     assert!(Rc::ptr_eq(user_data.get(&second_key).unwrap(), &second_value));
@@ -49,9 +49,9 @@ fn test_remove_from_user_data() {
 
     user_data.put_any(&key, value);
 
-    assert_eq!(*user_data.get_concrete(&key).unwrap(), 123);
+    assert_eq!(*user_data.concrete(&key).unwrap(), 123);
 
     user_data.remove(&key);
 
-    assert_eq!(user_data.get_concrete(&key), None);
+    assert_eq!(user_data.concrete(&key), None);
 }

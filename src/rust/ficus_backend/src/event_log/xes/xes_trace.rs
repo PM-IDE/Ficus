@@ -46,7 +46,7 @@ impl Trace for XesTraceImpl {
         }
     }
 
-    fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
+    fn events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
     }
 

@@ -23,12 +23,12 @@ where
     let mut prob_vector = vec![0f64; vector_length];
     let mut non_empty_traces_count = 0;
 
-    for trace in log.get_traces() {
+    for trace in log.traces() {
         let mut index = 0;
         let mut empty_trace = true;
-        for event in trace.borrow().get_events() {
+        for event in trace.borrow().events() {
             let event = event.borrow();
-            let name = event.get_name();
+            let name = event.name();
 
             if let Some(ignored_events_set) = ignored_events {
                 if ignored_events_set.contains(name) {

@@ -28,8 +28,8 @@ where
     let mut non_empty_traces_count = 0;
     let mut ordered_positions_of_ignored_events: Vec<usize> = Vec::new();
 
-    for trace in log.get_traces() {
-        let trace_length = trace.borrow().get_events().len();
+    for trace in log.traces() {
+        let trace_length = trace.borrow().events().len();
         let mut trace = trace.borrow_mut();
 
         let positions = trace.get_or_create_events_positions();
@@ -37,7 +37,7 @@ where
 
         if let Some(ignored_events_set) = ignored_events {
             for ignored_event in ignored_events_set {
-                let positions = positions.get_event_positions(ignored_event);
+                let positions = positions.event_positions(ignored_event);
                 if let Some(positions) = positions {
                     ordered_positions_of_ignored_events.extend(positions);
                 }
@@ -50,7 +50,7 @@ where
 
         non_empty_traces_count += 1;
 
-        let positions_of_our_event = positions.get_event_positions(name);
+        let positions_of_our_event = positions.event_positions(name);
         if positions_of_our_event.is_none() {
             continue;
         }

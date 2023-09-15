@@ -102,9 +102,9 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
             }
         }
 
-        for trace in log.get_traces() {
+        for trace in log.traces() {
             let trace = trace.borrow();
-            let events = trace.get_events();
+            let events = trace.events();
             if events.len() == 0 {
                 continue;
             }
@@ -117,12 +117,12 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
 
                 let attrs = vec![
                     (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
-                    (VALUE_ATTR_NAME_STR, event.get_name()),
+                    (VALUE_ATTR_NAME_STR, event.name()),
                 ];
 
                 write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
 
-                let date_string = event.get_timestamp().to_rfc3339();
+                let date_string = event.timestamp().to_rfc3339();
                 let attrs = vec![
                     (KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR),
                     (VALUE_ATTR_NAME_STR, date_string.as_str()),
@@ -130,7 +130,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
 
                 write_empty(&writer, DATE_TAG_NAME_STR, &attrs)?;
 
-                if let Some(lifecycle) = event.get_lifecycle() {
+                if let Some(lifecycle) = event.lifecycle() {
                     let lifecycle_string = lifecycle.to_string();
                     let attrs = vec![
                         (KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR),
@@ -140,7 +140,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                     write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
                 }
 
-                for (key, value) in event.get_ordered_payload() {
+                for (key, value) in event.ordered_payload() {
                     write_payload_tag(&writer, key, value)?;
                 }
             }

@@ -13,7 +13,7 @@ pub trait EventLog: Clone {
 
     fn empty() -> Self;
 
-    fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
+    fn traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>>;
     fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>);
 
     fn to_raw_vector(&self) -> Vec<Vec<String>>;

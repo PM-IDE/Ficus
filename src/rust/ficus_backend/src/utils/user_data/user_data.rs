@@ -14,9 +14,9 @@ pub trait UserData {
 
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T);
     fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T);
-    fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
+    fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T>;
     fn get_any(&self, key: &dyn Key) -> Option<&dyn Any>;
-    fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T>;
+    fn concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T>;
     fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>);
     fn remove_any<T: 'static>(&mut self, key: &dyn Key);
 }
@@ -33,7 +33,7 @@ impl UserData for UserDataImpl {
         values_map.insert(key.id(), Rc::new(RefCell::new(value)));
     }
 
-    fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
+    fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
         self.get(key)
     }
 
@@ -50,7 +50,7 @@ impl UserData for UserDataImpl {
         }
     }
 
-    fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
+    fn concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
         self.get_mut(key)
     }
 

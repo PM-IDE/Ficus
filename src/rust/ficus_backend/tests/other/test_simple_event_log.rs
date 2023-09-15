@@ -22,7 +22,7 @@ fn test_set_name() {
     execute_test_set_test(
         &log,
         &value,
-        |event| event.get_name(),
+        |event| event.name(),
         |event, value| event.set_name(value),
     )
 }
@@ -35,7 +35,7 @@ fn test_set_date() {
     execute_test_set_test(
         &log,
         &value,
-        |event| event.get_timestamp(),
+        |event| event.timestamp(),
         |event, value| event.set_timestamp(*value),
     )
 }
@@ -50,14 +50,14 @@ fn execute_test_set_test<TValue, TGet, TSet>(
     TSet: Fn(&mut SimpleEvent, &TValue) -> (),
     TValue: PartialEq + Debug,
 {
-    for trace in log.get_traces() {
-        for event in trace.borrow().get_events() {
+    for trace in log.traces() {
+        for event in trace.borrow().events() {
             set_property(&mut event.borrow_mut(), &value);
         }
     }
 
-    for trace in log.get_traces() {
-        for event in trace.borrow().get_events() {
+    for trace in log.traces() {
+        for event in trace.borrow().events() {
             let event = &event.borrow();
             assert_eq!(get_property(event), value);
         }

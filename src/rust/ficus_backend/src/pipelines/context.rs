@@ -49,8 +49,8 @@ impl<'a> UserData for PipelineContext<'a> {
         self.user_data.get_any(key)
     }
 
-    fn get_concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
-        self.user_data.get_concrete(key)
+    fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
+        self.user_data.concrete(key)
     }
 
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
@@ -61,8 +61,8 @@ impl<'a> UserData for PipelineContext<'a> {
         self.user_data.put_any(key, value)
     }
 
-    fn get_concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
-        self.user_data.get_concrete_mut(key)
+    fn concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
+        self.user_data.concrete_mut(key)
     }
 
     fn remove_concrete<T: 'static>(&mut self, key: &DefaultKey<T>) {

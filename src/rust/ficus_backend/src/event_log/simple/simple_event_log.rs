@@ -55,7 +55,7 @@ impl EventLog for SimpleEventLog {
         }
     }
 
-    fn get_traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
+    fn traces(&self) -> &Vec<Rc<RefCell<Self::TTrace>>> {
         &self.traces_holder.get_traces()
     }
 
@@ -117,7 +117,7 @@ impl Trace for SimpleTrace {
         }
     }
 
-    fn get_events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
+    fn events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>> {
         &self.events_holder.get_events()
     }
 
@@ -199,23 +199,23 @@ impl SimpleEvent {
 }
 
 impl Event for SimpleEvent {
-    fn get_name(&self) -> &String {
+    fn name(&self) -> &String {
         &self.event_base.name
     }
 
-    fn get_timestamp(&self) -> &DateTime<Utc> {
+    fn timestamp(&self) -> &DateTime<Utc> {
         &self.event_base.timestamp
     }
 
-    fn get_lifecycle(&self) -> Option<Lifecycle> {
+    fn lifecycle(&self) -> Option<Lifecycle> {
         panic!("Not supported")
     }
 
-    fn get_payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
+    fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
         panic!("Not supported")
     }
 
-    fn get_ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
+    fn ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)> {
         panic!("Not supported")
     }
 
@@ -235,7 +235,7 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
-    fn get_user_data(&mut self) -> &mut UserDataImpl {
+    fn user_data(&mut self) -> &mut UserDataImpl {
         self.event_base.user_data_holder.get_mut()
     }
 }

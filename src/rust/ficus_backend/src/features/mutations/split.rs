@@ -67,11 +67,11 @@ where
     TLog: EventLog,
 {
     let mut len_to_traces: HashMap<usize, Vec<TracePointer<TLog::TTrace>>> = HashMap::new();
-    let traces = log.get_traces();
+    let traces = log.traces();
 
     for index in 0..traces.len() {
         let trace = Rc::clone(&traces[index]);
-        let len = trace.borrow().get_events().len();
+        let len = trace.borrow().events().len();
         if len_to_traces.contains_key(&len) {
             (*len_to_traces.get_mut(&len).unwrap()).push(TracePointer::new(trace, index));
         } else {
@@ -95,7 +95,7 @@ where
     let mut index = 0;
 
     loop {
-        if index >= traces[0].trace.borrow().get_events().len() {
+        if index >= traces[0].trace.borrow().events().len() {
             break;
         }
 
@@ -143,8 +143,8 @@ where
         for trace in group {
             let mut hasher = DefaultHasher::new();
             let actual_trace = trace.trace.borrow();
-            let event = actual_trace.get_events()[index].borrow();
-            event.get_name().hash(&mut hasher);
+            let event = actual_trace.events()[index].borrow();
+            event.name().hash(&mut hasher);
 
             let hash_code = hasher.finish();
             if hashes_to_traces.contains_key(&hash_code) {

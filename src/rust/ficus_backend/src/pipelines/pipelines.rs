@@ -188,7 +188,7 @@ impl PipelineParts {
         context: &'a impl UserData,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a T, PipelinePartExecutionError> {
-        match context.get_concrete(key.key()) {
+        match context.concrete(key.key()) {
             Some(value) => Ok(value),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 key.key().name().to_owned(),
@@ -200,7 +200,7 @@ impl PipelineParts {
         context: &'a PipelineContext,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a mut T, PipelinePartExecutionError> {
-        match context.get_concrete_mut(key.key()) {
+        match context.concrete_mut(key.key()) {
             Some(value) => Ok(value),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 key.key().name().to_owned(),

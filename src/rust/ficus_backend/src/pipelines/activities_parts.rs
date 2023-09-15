@@ -227,7 +227,7 @@ impl PipelineParts {
 
     pub(super) fn create_empty_activities(log: &XesEventLogImpl) -> TracesActivities {
         let mut activities = vec![];
-        for _ in log.get_traces() {
+        for _ in log.traces() {
             activities.push(vec![]);
         }
 
@@ -328,9 +328,9 @@ impl PipelineParts {
             let log = Self::get_context_value_mut(context, keys.event_log())?;
             let mut new_log = XesEventLogImpl::empty();
 
-            for trace in log.get_traces() {
+            for trace in log.traces() {
                 let mut new_trace = XesTraceImpl::empty();
-                for event in trace.borrow().get_events() {
+                for event in trace.borrow().events() {
                     substitute_underlying_events::<XesEventLogImpl>(event, &mut new_trace);
                 }
 
