@@ -1,7 +1,10 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::event_log::core::trace::trace::Trace;
+use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
+use crate::features::analysis::patterns::activity_instances::substitute_underlying_events;
 use crate::{
     event_log::{
         core::event_log::EventLog,
@@ -316,6 +319,25 @@ impl PipelineParts {
                 pipeline.execute(&mut temp_context, keys)?;
             }
 
+            Ok(())
+        })
+    }
+
+    pub(super) fn substitute_underlying_events() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::SUBSTITUTE_UNDERLYING_EVENTS, &|context, keys, _| {
+            let log = Self::get_context_value_mut(context, keys.event_log())?;
+            let mut new_log = XesEventLogImpl::empty();
+
+            for trace in log.get_traces() {
+                let mut new_trace = XesTraceImpl::empty();
+                for event in trace.borrow().get_events() {
+                    substitute_underlying_events::<XesEventLogImpl>(event, &mut new_trace);
+                }
+
+                new_log.push(Rc::new(RefCell::new(new_trace)));
+            }
+
+            context.put_concrete(keys.event_log().key(), new_log);
             Ok(())
         })
     }

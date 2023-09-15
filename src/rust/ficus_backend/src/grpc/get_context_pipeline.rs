@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use uuid::Uuid;
 
+use crate::ficus_proto::GrpcUuid;
 use crate::{
     ficus_proto::{GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
     pipelines::{
@@ -11,25 +12,29 @@ use crate::{
     },
     utils::user_data::user_data::UserData,
 };
-use crate::ficus_proto::GrpcUuid;
 
 use super::{
     backend_service::{GrpcResult, GrpcSender},
     converters::convert_to_grpc_context_value,
 };
 
-type GetContextHandler =
-    Box<dyn Fn(Uuid, &mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
+type GetContextHandler = Box<
+    dyn Fn(Uuid, &mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>,
+>;
 
 pub struct GetContextValuePipelinePart {
     key_name: String,
     handler: GetContextHandler,
-    uuid: Uuid
+    uuid: Uuid,
 }
 
 impl GetContextValuePipelinePart {
     pub fn new(key_name: String, uuid: Uuid, handler: GetContextHandler) -> Self {
-        Self { key_name, handler, uuid }
+        Self {
+            key_name,
+            handler,
+            uuid,
+        }
     }
 
     pub fn create_context_pipeline_part(
@@ -53,9 +58,7 @@ impl GetContextValuePipelinePart {
                         sender
                             .blocking_send(Ok(GrpcPipelinePartExecutionResult {
                                 result: Some(GrpcResult::PipelinePartResult(GrpcPipelinePartResult {
-                                    uuid: Some(GrpcUuid {
-                                        uuid: uuid.to_string()
-                                    }),
+                                    uuid: Some(GrpcUuid { uuid: uuid.to_string() }),
                                     context_value: grpc_value,
                                 })),
                             }))

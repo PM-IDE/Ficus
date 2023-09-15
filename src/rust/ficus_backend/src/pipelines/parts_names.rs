@@ -31,4 +31,5 @@ impl PipelineParts {
     pub const DISCOVER_ACTIVITIES_FROM_PATTERNS: &'static str = "DiscoverActivitiesFromPatterns";
     pub const DISCOVER_ACTIVITIES_UNTIL_NO_MORE: &'static str = "DiscoverActivitiesUntilNoMore";
     pub const EXECUTE_WITH_EACH_ACTIVITY_LOG: &'static str = "ExecuteWithEachActivityLog";
+    pub const SUBSTITUTE_UNDERLYING_EVENTS: &'static str = "SubstituteUnderlyingEvents";
 }

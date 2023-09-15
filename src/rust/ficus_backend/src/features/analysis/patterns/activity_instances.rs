@@ -500,3 +500,20 @@ where
 
     new_log
 }
+
+pub fn substitute_underlying_events<TLog>(event: &Rc<RefCell<TLog::TEvent>>, trace: &mut TLog::TTrace)
+where
+    TLog: EventLog,
+{
+    if let Some(underlying_events) = event
+        .borrow_mut()
+        .get_user_data()
+        .get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&underlying_events_key::<TLog::TEvent>())
+    {
+        for underlying_event in underlying_events {
+            substitute_underlying_events::<TLog>(underlying_event, trace);
+        }
+    } else {
+        trace.push(event.clone());
+    }
+}

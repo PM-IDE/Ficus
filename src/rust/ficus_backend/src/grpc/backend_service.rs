@@ -1,10 +1,10 @@
+use std::str::FromStr;
 use std::{
     any::Any,
     collections::HashMap,
     pin::Pin,
     sync::{Arc, Mutex},
 };
-use std::str::FromStr;
 
 use futures::Stream;
 use tokio::sync::mpsc::{self, Sender};
@@ -233,13 +233,17 @@ impl FicusService {
                 Part::ParallelPart(_) => todo!(),
                 Part::SimpleContextRequestPart(part) => {
                     let key_name = part.key.as_ref().unwrap().name.clone();
-                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid)
+                        .ok()
+                        .unwrap();
 
                     pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), None));
                 }
                 Part::ComplexContextRequestPart(part) => {
                     let grpc_default_part = part.before_pipeline_part.as_ref().unwrap();
-                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid)
+                        .ok()
+                        .unwrap();
 
                     match Self::find_default_part(grpc_default_part, context) {
                         Some(found_part) => {
