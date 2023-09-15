@@ -2,6 +2,7 @@ import uuid
 from dataclasses import dataclass
 
 from ficus.analysis.event_log_analysis import draw_colors_event_log
+from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
@@ -217,6 +218,12 @@ def append_adjusting_mode(config: GrpcPipelinePartConfiguration, key: str, value
 
 def append_pipeline_value(config: GrpcPipelinePartConfiguration, key: str, value: Pipeline2):
     _append_context_value(config, key, PipelineContextValue(value))
+
+
+def append_undef_activity_handling_strat(config: GrpcPipelinePartConfiguration,
+                                         key: str,
+                                         strat: UndefinedActivityHandlingStrategy):
+    append_enum_value(config, key, const_undef_activity_handling_strat_name, strat.name)
 
 
 @dataclass
