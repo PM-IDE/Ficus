@@ -34,7 +34,7 @@ fn test_activity_instances() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -62,7 +62,7 @@ fn test_activity_instances1() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -104,7 +104,7 @@ fn execute_activities_discovery_test(
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -257,7 +257,7 @@ fn execute_activities_logs_creation_test(
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 

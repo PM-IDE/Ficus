@@ -84,6 +84,7 @@ where
     pub patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog>,
     pub activity_level: usize,
     pub name_creator: TNameCreator,
+    pub min_events_in_activity: usize,
 }
 
 impl<TClassExtractor, TLog, TNameCreator> ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
@@ -95,12 +96,14 @@ where
     pub fn new(
         patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog>,
         activity_level: usize,
+        min_events_in_activity: usize,
         name_creator: TNameCreator,
     ) -> Self {
         Self {
             patterns_context,
             activity_level,
             name_creator,
+            min_events_in_activity,
         }
     }
 }

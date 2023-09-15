@@ -1,10 +1,11 @@
+use std::str::FromStr;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
-use crate::features::analysis::patterns::activity_instances::substitute_underlying_events;
+use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, UNDEF_ACTIVITY_NAME};
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
@@ -34,6 +35,19 @@ pub enum UndefActivityHandlingStrategyDto {
     DontInsert,
     InsertAsSingleEvent,
     InsertAllEvents,
+}
+
+impl FromStr for UndefActivityHandlingStrategyDto {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "DontInsert" => Ok(UndefActivityHandlingStrategyDto::DontInsert),
+            "InsertAsSingleEvent" => Ok(UndefActivityHandlingStrategyDto::InsertAsSingleEvent),
+            "InsertAllEvents" => Ok(UndefActivityHandlingStrategyDto::InsertAllEvents),
+            _ => Err(()),
+        }
+    }
 }
 
 impl PipelineParts {
@@ -78,16 +92,17 @@ impl PipelineParts {
         let mut tree = Self::get_context_value_mut(context, keys.activities())?;
         let narrow = Self::get_context_value(config, keys.narrow_activities())?;
         let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
+        let min_events_in_activity = *Self::get_context_value(config, keys.min_activity_length())?;
 
-        let instances = extract_activities_instances(&hashed_log, &mut tree, *narrow);
+        let instances = extract_activities_instances(&hashed_log, &mut tree, *narrow, min_events_in_activity as usize);
 
         context.put_concrete(&keys.trace_activities().key(), instances);
         Ok(())
     }
 
     pub(super) fn create_log_from_activities() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, _| {
-            Self::do_create_log_from_activities(context, keys)?;
+        Self::create_pipeline_part(Self::CREATE_LOG_FROM_ACTIVITIES, &|context, keys, config| {
+            Self::do_create_log_from_activities(context, keys, config)?;
             Ok(())
         })
     }
@@ -95,19 +110,27 @@ impl PipelineParts {
     pub(super) fn do_create_log_from_activities(
         context: &mut PipelineContext,
         keys: &ContextKeys,
+        config: &UserDataImpl,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_context_value(context, keys.event_log())?;
         let instances = Self::get_context_value(context, keys.trace_activities())?;
-        let log = create_new_log_from_activities_instances(
-            log,
-            instances,
-            &UndefActivityHandlingStrategy::InsertAllEvents,
-            &|info| {
-                Rc::new(RefCell::new(XesEventImpl::new_min_date(
-                    info.node.borrow().name.clone(),
-                )))
-            },
-        );
+        let undef_activity_strat = Self::get_context_value(config, keys.undef_activity_handling_strategy())?;
+
+        let strategy = match undef_activity_strat {
+            UndefActivityHandlingStrategyDto::DontInsert => UndefActivityHandlingStrategy::DontInsert,
+            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => {
+                UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
+                    Rc::new(RefCell::new(XesEventImpl::new_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
+                }))
+            }
+            UndefActivityHandlingStrategyDto::InsertAllEvents => UndefActivityHandlingStrategy::InsertAllEvents,
+        };
+
+        let log = create_new_log_from_activities_instances(log, instances, &strategy, &|info| {
+            Rc::new(RefCell::new(XesEventImpl::new_min_date(
+                info.node.borrow().name.clone(),
+            )))
+        });
 
         context.put_concrete(keys.event_log().key(), log);
         Ok(())
@@ -122,6 +145,7 @@ impl PipelineParts {
             let patterns_discovery_strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
             let narrow_activities = Self::get_context_value(config, keys.narrow_activities())?;
             let events_count = Self::get_context_value(config, keys.events_count())?;
+            let min_events_in_activity = Self::get_context_value(config, keys.min_activity_length())?;
 
             let mut index = 0;
             for event_class_regex in event_classes.into_iter().rev() {
@@ -133,6 +157,7 @@ impl PipelineParts {
                 config.put_concrete(keys.patterns_discovery_strategy().key(), *patterns_discovery_strategy);
                 config.put_concrete(keys.narrow_activities().key(), *narrow_activities);
                 config.put_concrete(keys.events_count().key(), *events_count);
+                config.put_concrete(keys.min_activity_length().key(), *min_events_in_activity);
 
                 Self::adjust_with_activities_from_unattached_events(context, keys, &config)?;
 
@@ -202,6 +227,7 @@ impl PipelineParts {
                 let narrow_activities = *Self::get_context_value(config, keys.narrow_activities())?;
                 let hashed_log = Self::create_hashed_event_log(config, keys, log);
                 let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
+                let min_events_in_activity = *Self::get_context_value(config, keys.min_activity_length())? as usize;
 
                 let new_activities = add_unattached_activities(
                     &hashed_log,
@@ -209,6 +235,7 @@ impl PipelineParts {
                     existing_activities,
                     min_events_count,
                     narrow_activities,
+                    min_events_in_activity,
                 );
 
                 context.put_concrete(keys.trace_activities().key(), new_activities);
@@ -297,7 +324,7 @@ impl PipelineParts {
                 Self::find_patterns(context, keys, config)?;
                 Self::do_discover_activities(context, keys, activity_level)?;
                 Self::do_discover_activities_instances(context, keys, config)?;
-                Self::do_create_log_from_activities(context, keys)?;
+                Self::do_create_log_from_activities(context, keys, config)?;
 
                 let new_events_count = count_events(Self::get_context_value(context, keys.event_log())?);
                 if new_events_count == events_count {

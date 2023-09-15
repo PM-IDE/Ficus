@@ -38,6 +38,7 @@ pub fn extract_activities_instances(
     log: &Vec<Vec<u64>>,
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     should_narrow: bool,
+    min_events_in_activity: usize,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let activities_by_size = split_activities_nodes_by_size(activities);
     let mut result = vec![];
@@ -127,7 +128,9 @@ pub fn extract_activities_instances(
                         length: index.unwrap() - last_activity_start_index.unwrap(),
                     };
 
-                    trace_activities.push(activity_instance);
+                    if activity_instance.node.borrow().len() > min_events_in_activity {
+                        trace_activities.push(activity_instance);
+                    }
 
                     current_activity = None;
                     current_event_classes.clear();
@@ -151,7 +154,9 @@ pub fn extract_activities_instances(
                 length: index.unwrap() - last_activity_start_index.unwrap(),
             };
 
-            trace_activities.push(activity_instance);
+            if activity_instance.node.borrow().len() > min_events_in_activity {
+                trace_activities.push(activity_instance);
+            }
         }
 
         result.push(trace_activities);
@@ -331,6 +336,7 @@ pub fn add_unattached_activities(
     existing_instances: &Vec<Vec<ActivityInTraceInfo>>,
     min_numbers_of_events: usize,
     should_narrow: bool,
+    min_events_in_activity: usize,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let mut new_activities = vec![];
 
@@ -342,8 +348,13 @@ pub fn add_unattached_activities(
                 return;
             }
 
-            let activities =
-                extract_activities_instances(&vec![trace[start_index..end_index].to_vec()], activities, should_narrow);
+            let activities = extract_activities_instances(
+                &vec![trace[start_index..end_index].to_vec()],
+                activities,
+                should_narrow,
+                min_events_in_activity,
+            );
+
             new_trace_activities.extend(
                 activities[0]
                     .iter()

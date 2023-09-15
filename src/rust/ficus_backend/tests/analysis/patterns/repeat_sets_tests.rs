@@ -97,9 +97,10 @@ fn test_repeat_set_tree() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
+
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
@@ -129,7 +130,7 @@ fn test_repeat_set_tree2() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -156,7 +157,7 @@ fn test_repeat_set_tree3() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
     let repeats = build_repeat_set_tree(&context);
@@ -185,9 +186,10 @@ fn test_repeat_set_tree4() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
+
     let repeats = build_repeat_set_tree(&context);
 
     assert_eq!(
