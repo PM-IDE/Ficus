@@ -286,11 +286,12 @@ def test_console_app1_log():
         ClearActivitiesRelatedStuff2(),
         DiscoverActivitiesForSeveralLevels2(['.*'],
                                             PatternsKind.MaximalRepeats,
+                                            min_events_in_activity_count=2,
                                             strategy=PatternsDiscoveryStrategy.FromAllTraces),
         CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.DontInsert),
         ClearActivitiesRelatedStuff2(),
-        DiscoverActivitiesUntilNoMore2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
-        TracesDiversityDiagram2(plot_legend=False, height_scale=50),
+        DiscoverActivitiesUntilNoMore2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace,
+                                       undef_strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         PrintNumberOfUnderlyingEvents2()
     ), {
         'path': StringContextValue('')
