@@ -1,6 +1,3 @@
-use std::str::FromStr;
-use std::{cell::RefCell, rc::Rc};
-
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
@@ -22,6 +19,8 @@ use crate::{
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
+use std::str::FromStr;
+use std::{cell::RefCell, rc::Rc};
 
 use super::{
     aliases::TracesActivities,
@@ -338,6 +337,13 @@ impl PipelineParts {
                 Self::find_patterns(context, keys, config)?;
                 Self::do_discover_activities(context, keys, activity_level)?;
                 Self::do_discover_activities_instances(context, keys, config)?;
+
+                let activities_instances = Self::get_context_value(context, keys.trace_activities())?;
+                context.log(format!(
+                    "Discovered {} activities instances",
+                    activities_instances.iter().map(|t| t.len()).sum::<usize>()
+                ))?;
+
                 Self::do_create_log_from_activities(context, keys, config)?;
 
                 let new_events_count = count_events(Self::get_context_value(context, keys.event_log())?);
