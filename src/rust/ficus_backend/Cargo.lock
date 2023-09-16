@@ -228,6 +228,7 @@ dependencies = [
  "futures",
  "lazycell",
  "nameof",
+ "once_cell",
  "prost",
  "prost-types",
  "quick-xml",
