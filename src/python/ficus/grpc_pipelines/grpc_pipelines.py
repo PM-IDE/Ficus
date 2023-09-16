@@ -21,7 +21,10 @@ class Pipeline2:
         self.parts = parts
 
     def execute(self, initial_context: dict[str, ContextValue]) -> GrpcGuid:
-        with grpc.insecure_channel('localhost:8080') as channel:
+        options = [('grpc.max_send_message_length', 512 * 1024 * 1024),
+                   ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
+
+        with grpc.insecure_channel('localhost:8080', options=options) as channel:
             stub = GrpcBackendServiceStub(channel)
             parts = list(self.parts)
             request = GrpcPipelineExecutionRequest(
