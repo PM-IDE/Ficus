@@ -2,6 +2,7 @@ use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
 
+use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -31,8 +32,6 @@ use crate::{
         user_data::{keys::Key, user_data::UserData},
     },
 };
-
-use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 
 pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
     let mut pipeline_context = PipelineContext::new_with_logging(context.parts(), context.log_message_handler());
@@ -65,25 +64,15 @@ pub(super) fn put_into_user_data(
         ContextValue::Enum(grpc_enum) => {
             let enum_name = &grpc_enum.enum_type;
             if enum_name == name_of_type!(PatternsDiscoveryStrategy) {
-                if let Ok(strategy) = PatternsDiscoveryStrategy::from_str(&grpc_enum.value) {
-                    user_data.put_any::<PatternsDiscoveryStrategy>(key, strategy);
-                }
+                parse_grpc_enum::<PatternsDiscoveryStrategy>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(AdjustingMode) {
-                if let Ok(strategy) = AdjustingMode::from_str(&grpc_enum.value) {
-                    user_data.put_any::<AdjustingMode>(key, strategy);
-                }
+                parse_grpc_enum::<AdjustingMode>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(PatternsKindDto) {
-                if let Ok(kind) = PatternsKindDto::from_str(&grpc_enum.value) {
-                    user_data.put_any::<PatternsKindDto>(key, kind);
-                }
+                parse_grpc_enum::<PatternsKindDto>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(UndefActivityHandlingStrategyDto) {
-                if let Ok(kind) = UndefActivityHandlingStrategyDto::from_str(&grpc_enum.value) {
-                    user_data.put_any::<UndefActivityHandlingStrategyDto>(key, kind);
-                }
+                parse_grpc_enum::<UndefActivityHandlingStrategyDto>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(ActivityNarrowingKind) {
-                if let Ok(kind) = ActivityNarrowingKind::from_str(&grpc_enum.value) {
-                    user_data.put_any::<ActivityNarrowingKind>(key, kind);
-                }
+                parse_grpc_enum::<ActivityNarrowingKind>(user_data, key, &grpc_enum.value);
             }
         }
         ContextValue::EventLogInfo(_) => todo!(),
@@ -92,6 +81,12 @@ pub(super) fn put_into_user_data(
             let pipeline = FicusService::to_pipeline(&context.with_pipeline(pipeline));
             user_data.put_any::<Pipeline>(key, pipeline);
         }
+    }
+}
+
+fn parse_grpc_enum<TEnum: FromStr + 'static>(user_data: &mut impl UserData, key: &dyn Key, raw_enum: &str) {
+    if let Ok(parsed_value) = TEnum::from_str(raw_enum) {
+        user_data.put_any::<TEnum>(key, parsed_value);
     }
 }
 
