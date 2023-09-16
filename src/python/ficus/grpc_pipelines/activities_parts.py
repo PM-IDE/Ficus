@@ -128,7 +128,7 @@ class DiscoverActivitiesFromPatterns2(PipelinePart2):
         config = GrpcPipelinePartConfiguration()
         append_pipeline_value(config, const_pipeline, pipeline)
 
-        default_part = _create_default_pipeline_part(const_discover_activities_from_patterns, config)
+        default_part = _create_default_pipeline_part(const_execute_frontend_part, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
 
 

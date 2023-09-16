@@ -18,7 +18,7 @@ from ficus.pipelines.analysis.patterns.models import AdjustingMode
 
 class Pipeline2:
     def __init__(self, *parts):
-        self.parts = parts
+        self.parts: list['PipelinePart2'] = list(parts)
 
     def execute(self, initial_context: dict[str, ContextValue]) -> GrpcGuid:
         options = [('grpc.max_send_message_length', 512 * 1024 * 1024),
@@ -58,7 +58,7 @@ class Pipeline2:
             return last_result
 
     def to_grpc_pipeline(self):
-        return self._create_grpc_pipeline(list(self.parts))
+        return self._create_grpc_pipeline(self.parts)
 
     def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
         for part in list(self.parts):

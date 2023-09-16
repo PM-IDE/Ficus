@@ -295,7 +295,7 @@ def test_console_app1_log():
                                        undef_strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         PrintNumberOfUnderlyingEvents2()
     ), {
-        'path': StringContextValue('/Users/aero/Programming/pmide/PhdDocsAndExperiments/Experiments/exp5/fixed_data/data/inline_merge/ConsoleApp1/ConsoleApp1.Program.Method2[void...xes')
+        'path': StringContextValue('')
     })
 
 
