@@ -3,7 +3,7 @@ use std::{any::Any, str::FromStr};
 use nameof::name_of_type;
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
-use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
+use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -73,6 +73,8 @@ pub(super) fn put_into_user_data(
                 parse_grpc_enum::<UndefActivityHandlingStrategyDto>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(ActivityNarrowingKind) {
                 parse_grpc_enum::<ActivityNarrowingKind>(user_data, key, &grpc_enum.value);
+            } else if enum_name == name_of_type!(ActivityInTraceFilterKind) {
+                parse_grpc_enum::<ActivityInTraceFilterKind>(user_data, key, &grpc_enum.value);
             }
         }
         ContextValue::EventLogInfo(_) => todo!(),

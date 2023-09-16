@@ -18,9 +18,8 @@ use super::{
     converters::convert_to_grpc_context_value,
 };
 
-type GetContextHandler = Box<
-    dyn Fn(Uuid, &mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>,
->;
+#[rustfmt::skip]
+type GetContextHandler = Box<dyn Fn(Uuid, &mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct GetContextValuePipelinePart {
     key_name: String,

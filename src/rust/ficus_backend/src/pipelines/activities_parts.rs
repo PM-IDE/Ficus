@@ -93,8 +93,15 @@ impl PipelineParts {
         let narrow = Self::get_context_value(config, keys.narrow_activities())?;
         let hashed_log = Self::get_context_value(context, keys.hashes_event_log())?;
         let min_events_in_activity = *Self::get_context_value(config, keys.min_activity_length())?;
+        let activity_filter_kind = Self::get_context_value(config, keys.activity_filter_kind())?;
 
-        let instances = extract_activities_instances(&hashed_log, &mut tree, narrow, min_events_in_activity as usize);
+        let instances = extract_activities_instances(
+            &hashed_log,
+            &mut tree,
+            narrow,
+            min_events_in_activity as usize,
+            activity_filter_kind,
+        );
 
         context.put_concrete(&keys.trace_activities().key(), instances);
         Ok(())
@@ -146,6 +153,7 @@ impl PipelineParts {
             let narrow_activities = Self::get_context_value(config, keys.narrow_activities())?;
             let events_count = Self::get_context_value(config, keys.events_count())?;
             let min_events_in_activity = Self::get_context_value(config, keys.min_activity_length())?;
+            let activity_filter_kind = Self::get_context_value(config, keys.activity_filter_kind())?;
 
             let mut index = 0;
             for event_class_regex in event_classes.into_iter().rev() {
@@ -158,6 +166,7 @@ impl PipelineParts {
                 config.put_concrete(keys.narrow_activities().key(), *narrow_activities);
                 config.put_concrete(keys.events_count().key(), *events_count);
                 config.put_concrete(keys.min_activity_length().key(), *min_events_in_activity);
+                config.put_concrete(keys.activity_filter_kind().key(), *activity_filter_kind);
 
                 Self::adjust_with_activities_from_unattached_events(context, keys, &config)?;
 
@@ -228,6 +237,7 @@ impl PipelineParts {
                 let hashed_log = Self::create_hashed_event_log(config, keys, log);
                 let min_events_count = *Self::get_context_value(config, keys.events_count())? as usize;
                 let min_events_in_activity = *Self::get_context_value(config, keys.min_activity_length())? as usize;
+                let activity_filter_kind = Self::get_context_value(config, keys.activity_filter_kind())?;
 
                 let new_activities = add_unattached_activities(
                     &hashed_log,
@@ -236,6 +246,7 @@ impl PipelineParts {
                     min_events_count,
                     narrow_kind,
                     min_events_in_activity,
+                    activity_filter_kind,
                 );
 
                 context.put_concrete(keys.trace_activities().key(), new_activities);

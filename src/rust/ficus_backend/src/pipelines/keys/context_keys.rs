@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
+use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -300,5 +300,14 @@ impl ContextKeys {
 
     pub fn is_undef_activity_handling_strategy(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.undef_activity_handling_strategy(), key)
+    }
+
+    pub fn activity_filter_kind(&self) -> &DefaultContextKey<ActivityInTraceFilterKind> {
+        self.find_concrete_key::<ActivityInTraceFilterKind>(Self::ACTIVITY_IN_TRACE_FILTER_KIND)
+            .unwrap()
+    }
+
+    pub fn is_activity_filter_kind(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.activity_filter_kind(), key)
     }
 }

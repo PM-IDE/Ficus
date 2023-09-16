@@ -50,6 +50,24 @@ impl FromStr for ActivityNarrowingKind {
     }
 }
 
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
+pub enum ActivityInTraceFilterKind {
+    NoFilter,
+    DefaultFilter,
+}
+
+impl FromStr for ActivityInTraceFilterKind {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "NoFilter" => Ok(ActivityInTraceFilterKind::NoFilter),
+            "DefaultFilter" => Ok(ActivityInTraceFilterKind::DefaultFilter),
+            _ => Err(()),
+        }
+    }
+}
+
 impl ActivityInTraceInfo {
     pub fn dump(&self) -> (usize, usize) {
         (self.start_pos, self.start_pos + self.length)
@@ -61,6 +79,7 @@ pub fn extract_activities_instances(
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     narrow_kind: &ActivityNarrowingKind,
     min_events_in_activity: usize,
+    filtering_kind: &ActivityInTraceFilterKind,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let activities_by_size = split_activities_nodes_by_size(activities);
     let mut result = vec![];
@@ -141,6 +160,7 @@ pub fn extract_activities_instances(
                 if !found_new_set {
                     let activity =
                         narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes, narrow_kind);
+
                     current_activity = Some(activity);
 
                     let activity_instance = ActivityInTraceInfo {
@@ -149,7 +169,7 @@ pub fn extract_activities_instances(
                         length: index.unwrap() - last_activity_start_index.unwrap(),
                     };
 
-                    if is_suitable_activity_instance(&activity_instance, min_events_in_activity) {
+                    if is_suitable_activity_instance(&activity_instance, min_events_in_activity, filtering_kind) {
                         trace_activities.push(activity_instance);
                     }
 
@@ -173,7 +193,7 @@ pub fn extract_activities_instances(
                 length: index.unwrap() - last_activity_start_index.unwrap(),
             };
 
-            if is_suitable_activity_instance(&activity_instance, min_events_in_activity) {
+            if is_suitable_activity_instance(&activity_instance, min_events_in_activity, filtering_kind) {
                 trace_activities.push(activity_instance);
             }
         }
@@ -184,11 +204,19 @@ pub fn extract_activities_instances(
     result
 }
 
-fn is_suitable_activity_instance(instance: &ActivityInTraceInfo, min_events_in_activity: usize) -> bool {
-    if instance.node.borrow().len() < min_events_in_activity {
-        false
+fn is_suitable_activity_instance(
+    instance: &ActivityInTraceInfo,
+    min_events_in_activity: usize,
+    filtering_kind: &ActivityInTraceFilterKind,
+) -> bool {
+    if filtering_kind == &ActivityInTraceFilterKind::NoFilter {
+        true
     } else {
-        instance.length > instance.node.borrow().len() / 2
+        if instance.node.borrow().len() < min_events_in_activity {
+            false
+        } else {
+            instance.length > instance.node.borrow().len() / 2
+        }
     }
 }
 
@@ -379,6 +407,7 @@ pub fn add_unattached_activities(
     min_numbers_of_events: usize,
     should_narrow: &ActivityNarrowingKind,
     min_events_in_activity: usize,
+    activity_filter_kind: &ActivityInTraceFilterKind,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let mut new_activities = vec![];
 
@@ -395,6 +424,7 @@ pub fn add_unattached_activities(
                 activities,
                 should_narrow,
                 min_events_in_activity,
+                activity_filter_kind,
             );
 
             new_trace_activities.extend(
