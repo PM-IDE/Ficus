@@ -145,7 +145,19 @@ def _draw_traces_diversity_like_diagram_internal(log: Union[MyEventLog, list[lis
     ax.set_yticklabels(y_ticks)
     ax.set_yticks(range(y_ticks_count))
 
-    x_ticks_count = max([len(t) for t in log]) * width_scale + 1
+    if isinstance(log, MyEventLog):
+        x_ticks_count = max([len(t) for t in log]) * width_scale + 1
+    elif isinstance(log, list):
+        x_ticks_count = 0
+        for trace in log:
+            trace_len = width_scale
+            for colored_rect in trace:
+                trace_len += colored_rect.length * width_scale
+
+            x_ticks_count = max(x_ticks_count, trace_len)
+    else:
+        x_ticks_count = 0
+
     x_ticks = ['' for _ in range(x_ticks_count)]
     x_ticks[0] = '0'
     x_ticks[-1] = f'{int((len(x_ticks) - 1) / width_scale)}'
