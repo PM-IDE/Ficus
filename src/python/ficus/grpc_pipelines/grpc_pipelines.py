@@ -7,7 +7,7 @@ from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
     StringsContextValue
-from ficus.grpc_pipelines.data_models import PatternsDiscoveryStrategy, PatternsKind
+from ficus.grpc_pipelines.data_models import PatternsDiscoveryStrategy, PatternsKind, NarrowActivityKind
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
@@ -218,6 +218,10 @@ def append_adjusting_mode(config: GrpcPipelinePartConfiguration, key: str, value
 
 def append_pipeline_value(config: GrpcPipelinePartConfiguration, key: str, value: Pipeline2):
     _append_context_value(config, key, PipelineContextValue(value))
+
+
+def append_narrow_kind(config: GrpcPipelinePartConfiguration, key: str, value: NarrowActivityKind):
+    append_enum_value(config, key, const_narrow_activities_kind_enum_name, value.name)
 
 
 def append_undef_activity_handling_strat(config: GrpcPipelinePartConfiguration,

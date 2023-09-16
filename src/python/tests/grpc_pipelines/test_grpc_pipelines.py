@@ -5,9 +5,9 @@ from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverA
     PrintNumberOfUnderlyingEvents2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
-from ficus.grpc_pipelines.data_models import PatternsKind
+from ficus.grpc_pipelines.data_models import PatternsKind, NarrowActivityKind
 from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
-    DrawPlacementOfEventsByRegex2, DrawFullActivitiesDiagram2
+    DrawPlacementOfEventsByRegex2
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
     FilterLogByVariants2
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
@@ -86,7 +86,7 @@ def test_draw_short_activities_diagram():
         ReadLogFromXes2(),
         FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
         DiscoverActivities2(activity_level=0),
-        DiscoverActivitiesInstances2(narrow_activities=True),
+        DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
         CreateLogFromActivitiesInstances2(),
         AssertNamesLogTestPart([
             ['(a)::(b)', '(c)::(d)', 'f'],
@@ -104,7 +104,7 @@ def test_draw_full_activities_diagram_2():
         ReadLogFromXes2(),
         FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces),
         DiscoverActivities2(activity_level=0),
-        DiscoverActivitiesInstances2(narrow_activities=True),
+        DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
         CreateLogFromActivitiesInstances2(),
         AssertNamesLogTestPart([
             ['a', 'b', 'd', 'c', 'f'],
@@ -147,7 +147,7 @@ def test_class_extractors():
             UseNamesEventLog2(),
             FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces, class_extractor='^(.*?)\\.'),
             DiscoverActivities2(activity_level=0),
-            DiscoverActivitiesInstances2(narrow_activities=True),
+            DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
             CreateLogFromActivitiesInstances2(),
             AssertNamesLogTestPart([
                 ['(A.A)::(B.B)', 'C', '(A.A)::(B.B)'],
@@ -194,7 +194,7 @@ def test_discover_activities_from_patterns():
         Pipeline2(
             UseNamesEventLog2(),
             DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats),
-            DiscoverActivitiesInstances2(narrow_activities=True),
+            DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
             CreateLogFromActivitiesInstances2(),
             AssertNamesLogTestPart([['(A)::(B)', 'C', '(A)::(B)'], ['(A)::(B)', 'C', '(A)::(B)']])
         )
@@ -263,8 +263,9 @@ def test_filter_log_by_variants():
 def test_execute_with_each_activity_log():
     _execute_test_with_exercise_log('exercise4', Pipeline2(
         ReadLogFromXes2(),
-        DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats, strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
-        DiscoverActivitiesInstances2(narrow_activities=True),
+        DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats,
+                                        strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
+        DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
         ExecuteWithEachActivityLog2(0, Pipeline2(
             TracesDiversityDiagram2(plot_legend=True)
         ))
@@ -281,7 +282,7 @@ def test_console_app1_log():
         FilterLogByVariants2(),
         DiscoverActivitiesFromPatterns2(PatternsKind.PrimitiveTandemArrays,
                                         activity_level=0),
-        DiscoverActivitiesInstances2(narrow_activities=True, min_events_in_activity=2),
+        DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown, min_events_in_activity=2),
         CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         ClearActivitiesRelatedStuff2(),
         DiscoverActivitiesForSeveralLevels2(['.*'],
@@ -294,5 +295,5 @@ def test_console_app1_log():
                                        undef_strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         PrintNumberOfUnderlyingEvents2()
     ), {
-        'path': StringContextValue('')
+        'path': StringContextValue('/Users/aero/Programming/pmide/PhdDocsAndExperiments/Experiments/exp5/fixed_data/data/inline_merge/ConsoleApp1/ConsoleApp1.Program.Method2[void...xes')
     })

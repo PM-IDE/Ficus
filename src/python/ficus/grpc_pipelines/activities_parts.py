@@ -1,10 +1,8 @@
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.constants import *
-from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, Pipeline2, \
-    append_uint32_value, append_bool_value, append_strings_context_value, append_adjusting_mode, append_patterns_kind, \
-    append_patterns_discovery_strategy, append_pipeline_value, append_string_value, \
-    append_undef_activity_handling_strat, PipelinePart2WithCallback, _create_complex_get_context_part
+from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind
+from ficus.grpc_pipelines.grpc_pipelines import *
+from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextValue
 from ficus.grpc_pipelines.patterns_parts import FindMaximalRepeats2, \
@@ -24,14 +22,14 @@ class DiscoverActivities2(PipelinePart2):
 
 
 class DiscoverActivitiesInstances2(PipelinePart2):
-    def __init__(self, narrow_activities: bool, min_events_in_activity: int = 0):
+    def __init__(self, narrow_activities: NarrowActivityKind, min_events_in_activity: int = 0):
         super().__init__()
         self.narrow_activities = narrow_activities
         self.min_events_in_activity = min_events_in_activity
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        append_narrow_kind(config, const_narrow_activities, self.narrow_activities)
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity)
 
         return GrpcPipelinePartBase(
@@ -55,7 +53,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
     def __init__(self,
                  event_classes: list[str],
                  patterns_kind: PatternsKind,
-                 narrow_activities: bool = True,
+                 narrow_activities: NarrowActivityKind = NarrowActivityKind.NarrowDown,
                  activity_level: int = 0,
                  strategy: PatternsDiscoveryStrategy = PatternsDiscoveryStrategy.FromAllTraces,
                  max_array_length: int = 20,
@@ -76,7 +74,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
 
-        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        append_narrow_kind(config, const_narrow_activities, self.narrow_activities)
         append_strings_context_value(config, const_event_classes_regexes, self.event_classes)
         append_adjusting_mode(config, const_adjusting_mode, self.adjusting_mode)
         append_uint32_value(config, const_activity_level, self.activity_level)
@@ -133,7 +131,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
     def __init__(self,
                  event_class: str = None,
                  patterns_kind: PatternsKind = PatternsKind.MaximalRepeats,
-                 narrow_activities: bool = True,
+                 narrow_activities: NarrowActivityKind = NarrowActivityKind.NarrowDown,
                  activity_level: int = 0,
                  strategy: PatternsDiscoveryStrategy = PatternsDiscoveryStrategy.FromAllTraces,
                  undef_strategy: UndefinedActivityHandlingStrategy = UndefinedActivityHandlingStrategy.DontInsert,
@@ -156,7 +154,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
 
-        append_bool_value(config, const_narrow_activities, self.narrow_activities)
+        append_narrow_kind(config, const_narrow_activities, self.narrow_activities)
         append_adjusting_mode(config, const_adjusting_mode, self.adjusting_mode)
         append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_events_count, self.min_events_count)

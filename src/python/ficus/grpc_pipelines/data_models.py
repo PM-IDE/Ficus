@@ -12,3 +12,10 @@ class PatternsKind(Enum):
     MaximalRepeats = 2,
     SuperMaximalRepeats = 3,
     NearSuperMaximalRepeats = 4,
+
+
+class NarrowActivityKind(Enum):
+    DontNarrow = 0,
+    StayTheSame = 1,
+    NarrowUp = 2,
+    NarrowDown = 3,
