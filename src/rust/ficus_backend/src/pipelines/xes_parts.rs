@@ -12,7 +12,7 @@ use super::{
 impl PipelineParts {
     pub(super) fn write_log_to_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::WRITE_LOG_TO_XES, &|context, keys, _| {
-            let path = Self::get_context_value(context, &keys.path())?;
+            let path = Self::get_user_data(context, &keys.path())?;
             match write_log(&context.concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
                 Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
@@ -24,7 +24,7 @@ impl PipelineParts {
 
     pub(super) fn read_log_from_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::READ_LOG_FROM_XES, &|context, keys, _| {
-            let path = Self::get_context_value(context, keys.path())?;
+            let path = Self::get_user_data(context, keys.path())?;
             context.log(format!("Reading event log from {}", &path))?;
 
             let log = read_event_log(path);

@@ -76,7 +76,7 @@ impl PipelineParts {
         config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, usize) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let log = Self::get_context_value(context, keys.event_log())?;
+        let log = Self::get_user_data(context, keys.event_log())?;
         let array_length = *config.concrete(keys.tandem_array_length().key()).unwrap() as usize;
 
         let hashed_log = Self::create_hashed_event_log(config, keys, log);
@@ -95,8 +95,8 @@ impl PipelineParts {
         config: &UserDataImpl,
         patterns_finder: impl Fn(&Vec<Vec<u64>>, &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>>,
     ) -> Result<(), PipelinePartExecutionError> {
-        let log = Self::get_context_value(context, keys.event_log())?;
-        let strategy = Self::get_context_value(config, keys.patterns_discovery_strategy())?;
+        let log = Self::get_user_data(context, keys.event_log())?;
+        let strategy = Self::get_user_data(config, keys.patterns_discovery_strategy())?;
 
         let hashed_log = Self::create_hashed_event_log(config, keys, log);
 
@@ -113,7 +113,7 @@ impl PipelineParts {
         keys: &ContextKeys,
         config: &UserDataImpl,
     ) -> Result<(), PipelinePartExecutionError> {
-        let patterns_kind = Self::get_context_value(config, keys.patterns_kind())?;
+        let patterns_kind = Self::get_user_data(config, keys.patterns_kind())?;
         match patterns_kind {
             PatternsKindDto::PrimitiveTandemArrays => {
                 Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_primitive_tandem_arrays)?
@@ -132,7 +132,7 @@ impl PipelineParts {
             }
         };
 
-        let activity_level = Self::get_context_value(config, keys.activity_level())?;
+        let activity_level = Self::get_user_data(config, keys.activity_level())?;
         Self::do_discover_activities(context, keys, *activity_level)?;
 
         Ok(())

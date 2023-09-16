@@ -89,7 +89,7 @@ impl PipelineParts {
         )
     }
 
-    pub(super) fn get_context_value<'a, T>(
+    pub(super) fn get_user_data<'a, T>(
         context: &'a impl UserData,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a T, PipelinePartExecutionError> {
@@ -101,7 +101,7 @@ impl PipelineParts {
         }
     }
 
-    pub(super) fn get_context_value_mut<'a, T>(
+    pub(super) fn get_user_data_mut<'a, T>(
         context: &'a PipelineContext,
         key: &DefaultContextKey<T>,
     ) -> Result<&'a mut T, PipelinePartExecutionError> {

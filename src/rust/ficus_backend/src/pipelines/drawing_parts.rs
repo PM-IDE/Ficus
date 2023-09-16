@@ -21,7 +21,7 @@ use super::{
 impl PipelineParts {
     pub(super) fn traces_diversity_diagram() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::TRACES_DIVERSITY_DIAGRAM, &|context, keys, _| {
-            let log = Self::get_context_value(context, keys.event_log())?;
+            let log = Self::get_user_data(context, keys.event_log())?;
             let colors_holder = context
                 .concrete_mut(keys.colors_holder().key())
                 .expect("Should be initialized");
@@ -50,7 +50,7 @@ impl PipelineParts {
 
     pub(super) fn draw_placements_of_event_by_name() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_NAME, &|context, keys, config| {
-            let event_name = Self::get_context_value(config, keys.event_name())?;
+            let event_name = Self::get_user_data(config, keys.event_name())?;
             Self::draw_events_placement(context, keys, &|event| event.name() == event_name)
         })
     }
@@ -60,9 +60,9 @@ impl PipelineParts {
         keys: &ContextKeys,
         selector: &impl Fn(&XesEventImpl) -> bool,
     ) -> Result<(), PipelinePartExecutionError> {
-        let log = Self::get_context_value(context, keys.event_log())?;
+        let log = Self::get_user_data(context, keys.event_log())?;
         let colors_holder =
-            Self::get_context_value_mut(context, keys.colors_holder()).expect("Default value should be initialized");
+            Self::get_user_data_mut(context, keys.colors_holder()).expect("Default value should be initialized");
 
         let mut colors_log = vec![];
         for trace in log.traces() {
@@ -94,7 +94,7 @@ impl PipelineParts {
 
     pub(super) fn draw_events_placements_by_regex() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_REGEX, &|context, keys, config| {
-            let regex = Self::get_context_value(config, keys.regex())?;
+            let regex = Self::get_user_data(config, keys.regex())?;
             let regex = Regex::new(regex).ok().unwrap();
             Self::draw_events_placement(context, keys, &|event| regex.is_match(event.name()))
         })
@@ -102,9 +102,9 @@ impl PipelineParts {
 
     pub(super) fn draw_full_activities_diagram() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_FULL_ACTIVITIES_DIAGRAM, &|context, keys, _| {
-            let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
-            let log = Self::get_context_value(context, keys.event_log())?;
-            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())?;
+            let traces_activities = Self::get_user_data(context, keys.trace_activities())?;
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let colors_holder = Self::get_user_data_mut(context, keys.colors_holder())?;
 
             let mut colors_log = vec![];
             for (activities, trace) in traces_activities.into_iter().zip(log.traces().into_iter()) {
@@ -139,9 +139,9 @@ impl PipelineParts {
 
     pub(super) fn draw_short_activities_diagram() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DRAW_SHORT_ACTIVITIES_DIAGRAM, &|context, keys, _| {
-            let traces_activities = Self::get_context_value(context, keys.trace_activities())?;
-            let log = Self::get_context_value(context, keys.event_log())?;
-            let colors_holder = Self::get_context_value_mut(context, keys.colors_holder())?;
+            let traces_activities = Self::get_user_data(context, keys.trace_activities())?;
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let colors_holder = Self::get_user_data_mut(context, keys.colors_holder())?;
 
             let mut colors_log = vec![];
             for (activities, trace) in traces_activities.into_iter().zip(log.traces().into_iter()) {
