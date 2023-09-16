@@ -5,7 +5,6 @@ use std::{
     rc::Rc,
     str::FromStr,
 };
-use std::cmp::min;
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
@@ -224,7 +223,7 @@ fn narrow_activity(node_ptr: &Rc<RefCell<ActivityNode>>, activities_set: &HashSe
 
     let result = result
         .iter()
-        .max_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
+        .min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
 
     Rc::clone(result.unwrap())
 }
