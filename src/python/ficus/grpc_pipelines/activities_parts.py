@@ -1,6 +1,3 @@
-from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
-from ficus.grpc_pipelines.constants import *
-from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -22,15 +19,20 @@ class DiscoverActivities2(PipelinePart2):
 
 
 class DiscoverActivitiesInstances2(PipelinePart2):
-    def __init__(self, narrow_activities: NarrowActivityKind, min_events_in_activity: int = 0):
+    def __init__(self,
+                 narrow_activities: NarrowActivityKind = NarrowActivityKind.NarrowDown,
+                 min_events_in_activity: int = 0,
+                 activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter):
         super().__init__()
         self.narrow_activities = narrow_activities
         self.min_events_in_activity = min_events_in_activity
+        self.activity_filter_kind = activity_filter_kind
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_narrow_kind(config, const_narrow_activities, self.narrow_activities)
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity)
+        append_activity_filter_kind(config, const_activity_filter_kind, self.activity_filter_kind)
 
         return GrpcPipelinePartBase(
             defaultPart=_create_default_pipeline_part(const_discover_activities_instances, config))
@@ -59,7 +61,8 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
                  max_array_length: int = 20,
                  adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
                  min_events_in_unattached_subtrace_count: int = 0,
-                 min_events_in_activity_count: int = 0):
+                 min_events_in_activity_count: int = 0,
+                 activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter):
         super().__init__()
         self.event_classes = event_classes
         self.narrow_activities = narrow_activities
@@ -70,6 +73,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
         self.adjusting_mode = adjusting_mode
         self.min_events_in_unattached_subtrace_count = min_events_in_unattached_subtrace_count
         self.min_events_in_activity_count = min_events_in_activity_count
+        self.activity_filter_kind = activity_filter_kind
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -82,6 +86,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
         append_patterns_kind(config, const_patterns_kind, self.patterns_kind)
         append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity_count)
+        append_activity_filter_kind(config, const_activity_filter_kind, self.activity_filter_kind)
 
         default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
@@ -138,7 +143,8 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
                  max_array_length: int = 20,
                  adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
                  min_events_in_unattached_subtrace_count: int = 0,
-                 min_events_in_activity_count: int = 0):
+                 min_events_in_activity_count: int = 0,
+                 activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter):
         super().__init__()
         self.event_class = event_class
         self.narrow_activities = narrow_activities
@@ -150,6 +156,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         self.adjusting_mode = adjusting_mode
         self.min_events_count = min_events_in_unattached_subtrace_count
         self.min_events_in_activity_count = min_events_in_activity_count
+        self.activity_filter_kind = activity_filter_kind
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -162,6 +169,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity_count)
         append_undef_activity_handling_strat(config, const_undef_activity_handling_strategy, self.undef_strategy)
+        append_activity_filter_kind(config, const_activity_filter_kind, self.activity_filter_kind)
 
         if self.event_class is not None:
             append_string_value(config, const_event_class_regex, self.event_class)

@@ -19,3 +19,8 @@ class NarrowActivityKind(Enum):
     StayTheSame = 1,
     NarrowUp = 2,
     NarrowDown = 3,
+
+
+class ActivityFilterKind(Enum):
+    NoFilter = 0,
+    DefaultFilter = 1,
