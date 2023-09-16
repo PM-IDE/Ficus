@@ -226,7 +226,7 @@ def draw_colors_event_log(log: list[list[ColoredRectangle]],
             for colored_rect in trace:
                 width = ctx.rect_width * colored_rect.length
                 rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=colored_rect.color.to_hex())
-                ctx.names_to_rects[colored_rect.name] = rect
+                ctx.names_to_rects[colored_rect.name[:50] if len(colored_rect.name) > 50 else colored_rect.name] = rect
                 ctx.drawer.add_patch(rect)
                 current_x += width
 
