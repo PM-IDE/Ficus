@@ -80,7 +80,7 @@ where
     extract_activities_instances(
         activities_context.patterns_context.get_processed_log(),
         &mut repeat_set_tree,
-        true,
+        &activities_context.narrow_kind,
         activities_context.min_events_in_activity,
     )
 }

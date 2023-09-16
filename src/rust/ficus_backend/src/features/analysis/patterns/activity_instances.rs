@@ -28,6 +28,28 @@ pub enum SubTraceKind<'a> {
     Unattached(usize, usize),
 }
 
+#[derive(PartialOrd, PartialEq, Copy, Clone)]
+pub enum ActivityNarrowingKind {
+    DontNarrow,
+    StayTheSame,
+    NarrowUp,
+    NarrowDown,
+}
+
+impl FromStr for ActivityNarrowingKind {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "DontNarrow" => Ok(ActivityNarrowingKind::DontNarrow),
+            "StayTheSame" => Ok(ActivityNarrowingKind::StayTheSame),
+            "NarrowUp" => Ok(ActivityNarrowingKind::NarrowUp),
+            "NarrowDown" => Ok(ActivityNarrowingKind::NarrowDown),
+            _ => Err(()),
+        }
+    }
+}
+
 impl ActivityInTraceInfo {
     pub fn dump(&self) -> (usize, usize) {
         (self.start_pos, self.start_pos + self.length)
@@ -37,7 +59,7 @@ impl ActivityInTraceInfo {
 pub fn extract_activities_instances(
     log: &Vec<Vec<u64>>,
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
-    should_narrow: bool,
+    narrow_kind: &ActivityNarrowingKind,
     min_events_in_activity: usize,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let activities_by_size = split_activities_nodes_by_size(activities);
@@ -117,10 +139,9 @@ pub fn extract_activities_instances(
                 }
 
                 if !found_new_set {
-                    if should_narrow {
-                        let activity = narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes);
-                        current_activity = Some(activity);
-                    }
+                    let activity =
+                        narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes, narrow_kind);
+                    current_activity = Some(activity);
 
                     let activity_instance = ActivityInTraceInfo {
                         node: Rc::clone(current_activity.as_ref().unwrap()),
@@ -143,10 +164,8 @@ pub fn extract_activities_instances(
         }
 
         if last_activity_start_index.is_some() {
-            if should_narrow {
-                let activity = narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes);
-                current_activity = Some(activity);
-            }
+            let activity = narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes, narrow_kind);
+            current_activity = Some(activity);
 
             let activity_instance = ActivityInTraceInfo {
                 node: Rc::clone(current_activity.as_ref().unwrap()),
@@ -197,7 +216,15 @@ fn split_activities_nodes_by_size(
     Rc::clone(&result_ptr)
 }
 
-fn narrow_activity(node_ptr: &Rc<RefCell<ActivityNode>>, activities_set: &HashSet<u64>) -> Rc<RefCell<ActivityNode>> {
+fn narrow_activity(
+    node_ptr: &Rc<RefCell<ActivityNode>>,
+    activities_set: &HashSet<u64>,
+    narrow_kind: &ActivityNarrowingKind,
+) -> Rc<RefCell<ActivityNode>> {
+    if narrow_kind == &ActivityNarrowingKind::DontNarrow || narrow_kind == &ActivityNarrowingKind::StayTheSame {
+        return node_ptr.clone();
+    }
+
     let mut q = VecDeque::new();
     let node = node_ptr.borrow();
     for child in &node.children {
@@ -221,9 +248,16 @@ fn narrow_activity(node_ptr: &Rc<RefCell<ActivityNode>>, activities_set: &HashSe
         return Rc::clone(&node_ptr);
     }
 
-    let result = result
-        .iter()
-        .min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
+    let result = result.iter();
+    let result = match narrow_kind {
+        ActivityNarrowingKind::NarrowUp => {
+            result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()))
+        }
+        ActivityNarrowingKind::NarrowDown => {
+            result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()))
+        }
+        _ => panic!("Should not be reached"),
+    };
 
     Rc::clone(result.unwrap())
 }
@@ -343,7 +377,7 @@ pub fn add_unattached_activities(
     activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
     existing_instances: &Vec<Vec<ActivityInTraceInfo>>,
     min_numbers_of_events: usize,
-    should_narrow: bool,
+    should_narrow: &ActivityNarrowingKind,
     min_events_in_activity: usize,
 ) -> Vec<Vec<ActivityInTraceInfo>> {
     let mut new_activities = vec![];

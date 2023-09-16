@@ -1,5 +1,6 @@
 use std::{cell::RefCell, ops::Deref, rc::Rc};
 
+use ficus_backend::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 use ficus_backend::{
     event_log::core::event::event_hasher::default_class_extractor,
     features::analysis::patterns::{
@@ -97,7 +98,7 @@ fn test_repeat_set_tree() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -130,7 +131,7 @@ fn test_repeat_set_tree2() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 
@@ -157,7 +158,7 @@ fn test_repeat_set_tree3() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
     let repeats = build_repeat_set_tree(&context);
@@ -186,7 +187,7 @@ fn test_repeat_set_tree4() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(context, 0, 0, |sub_array| {
+    let context = ActivitiesDiscoveryContext::new(context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
         create_activity_name(log.borrow().deref(), sub_array)
     });
 

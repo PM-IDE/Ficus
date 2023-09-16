@@ -1,6 +1,6 @@
 use std::{any::Any, borrow::Cow, collections::HashMap};
 
-use crate::features::analysis::patterns::activity_instances::UndefActivityHandlingStrategy;
+use crate::features::analysis::patterns::activity_instances::{ActivityNarrowingKind, UndefActivityHandlingStrategy};
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -160,7 +160,7 @@ impl ContextKeys {
     }
 
     fn insert_narrow_activities(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<bool>(context, Self::NARROW_ACTIVITIES);
+        Self::insert_key::<ActivityNarrowingKind>(context, Self::NARROW_ACTIVITIES);
     }
 
     fn insert_event_name(context: &mut ContextKeysInitContext) {

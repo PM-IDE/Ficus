@@ -2,6 +2,7 @@ use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
 
+use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -73,11 +74,15 @@ pub(super) fn put_into_user_data(
                 }
             } else if enum_name == name_of_type!(PatternsKindDto) {
                 if let Ok(kind) = PatternsKindDto::from_str(&grpc_enum.value) {
-                    user_data.put_any::<PatternsKindDto>(key, kind)
+                    user_data.put_any::<PatternsKindDto>(key, kind);
                 }
             } else if enum_name == name_of_type!(UndefActivityHandlingStrategyDto) {
                 if let Ok(kind) = UndefActivityHandlingStrategyDto::from_str(&grpc_enum.value) {
-                    user_data.put_any::<UndefActivityHandlingStrategyDto>(key, kind)
+                    user_data.put_any::<UndefActivityHandlingStrategyDto>(key, kind);
+                }
+            } else if enum_name == name_of_type!(ActivityNarrowingKind) {
+                if let Ok(kind) = ActivityNarrowingKind::from_str(&grpc_enum.value) {
+                    user_data.put_any::<ActivityNarrowingKind>(key, kind);
                 }
             }
         }

@@ -1,5 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -160,8 +161,9 @@ impl ContextKeys {
         Self::are_keys_equal(key, self.activity_level())
     }
 
-    pub fn narrow_activities(&self) -> &DefaultContextKey<bool> {
-        self.find_concrete_key::<bool>(Self::NARROW_ACTIVITIES).unwrap()
+    pub fn narrow_activities(&self) -> &DefaultContextKey<ActivityNarrowingKind> {
+        self.find_concrete_key::<ActivityNarrowingKind>(Self::NARROW_ACTIVITIES)
+            .unwrap()
     }
 
     pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {

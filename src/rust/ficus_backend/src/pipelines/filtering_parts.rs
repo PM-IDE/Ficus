@@ -37,9 +37,9 @@ impl PipelineParts {
                     filter_log_by_regex(log, &regex);
                     Ok(())
                 }
-                Err(err) => {
-                    Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(err.to_string())))
-                }
+                Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                    err.to_string(),
+                ))),
             }
         })
     }

@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::{cell::RefCell, str::FromStr};
 
 use crate::event_log::core::{event_log::EventLog, trace::trace::Trace};
+use crate::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 
 use super::{
     activity_instances::{ActivityInTraceInfo, UndefActivityHandlingStrategy},
@@ -85,6 +86,7 @@ where
     pub activity_level: usize,
     pub name_creator: TNameCreator,
     pub min_events_in_activity: usize,
+    pub narrow_kind: ActivityNarrowingKind,
 }
 
 impl<TClassExtractor, TLog, TNameCreator> ActivitiesDiscoveryContext<TClassExtractor, TLog, TNameCreator>
@@ -97,6 +99,7 @@ where
         patterns_context: PatternsDiscoveryContext<TClassExtractor, TLog>,
         activity_level: usize,
         min_events_in_activity: usize,
+        narrow_kind: ActivityNarrowingKind,
         name_creator: TNameCreator,
     ) -> Self {
         Self {
@@ -104,6 +107,7 @@ where
             activity_level,
             name_creator,
             min_events_in_activity,
+            narrow_kind,
         }
     }
 }

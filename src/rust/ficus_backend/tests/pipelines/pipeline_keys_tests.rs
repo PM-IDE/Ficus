@@ -1,5 +1,6 @@
 use std::{collections::HashSet, sync::Arc};
 
+use ficus_backend::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
 use ficus_backend::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::{
@@ -54,7 +55,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<String>(keys, ContextKeys::PATH, &mut used);
         assert_existence::<u32>(keys, ContextKeys::TANDEM_ARRAY_LENGTH, &mut used);
         assert_existence::<u32>(keys, ContextKeys::ACTIVITY_LEVEL, &mut used);
-        assert_existence::<bool>(keys, ContextKeys::NARROW_ACTIVITIES, &mut used);
+        assert_existence::<ActivityNarrowingKind>(keys, ContextKeys::NARROW_ACTIVITIES, &mut used);
         assert_existence::<String>(keys, ContextKeys::EVENT_NAME, &mut used);
         assert_existence::<String>(keys, ContextKeys::REGEX, &mut used);
         assert_existence::<PatternsDiscoveryStrategy>(keys, ContextKeys::PATTERNS_DISCOVERY_STRATEGY, &mut used);
@@ -156,7 +157,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<String>(keys, ContextKeys::PATH, &mut used);        
         assert_keys_equivalence::<u32>(keys, ContextKeys::TANDEM_ARRAY_LENGTH, &mut used);        
         assert_keys_equivalence::<u32>(keys, ContextKeys::ACTIVITY_LEVEL, &mut used);        
-        assert_keys_equivalence::<bool>(keys, ContextKeys::NARROW_ACTIVITIES, &mut used);        
+        assert_keys_equivalence::<ActivityNarrowingKind>(keys, ContextKeys::NARROW_ACTIVITIES, &mut used);
         assert_keys_equivalence::<String>(keys, ContextKeys::EVENT_NAME, &mut used);        
         assert_keys_equivalence::<String>(keys, ContextKeys::REGEX, &mut used);        
         assert_keys_equivalence::<ColorsEventLog>(keys, ContextKeys::COLORS_EVENT_LOG, &mut used);        

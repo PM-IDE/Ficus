@@ -1,5 +1,7 @@
 use std::{cell::RefCell, ops::Deref, rc::Rc};
 
+use ficus_backend::features::analysis::patterns::activity_instances::ActivityNarrowingKind;
+use ficus_backend::features::analysis::patterns::activity_instances::SubTraceKind::Attached;
 use ficus_backend::{
     event_log::{
         core::{event::event_hasher::default_class_extractor, event_log::EventLog},
@@ -34,9 +36,10 @@ fn test_activity_instances() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
-        create_activity_name(log.borrow().deref(), sub_array)
-    });
+    let context =
+        ActivitiesDiscoveryContext::new(patterns_context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
+            create_activity_name(log.borrow().deref(), sub_array)
+        });
 
     let activities = discover_activities_instances(&context);
     let activities = dump_activities(&activities);
@@ -62,9 +65,10 @@ fn test_activity_instances1() {
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
-        create_activity_name(log.borrow().deref(), sub_array)
-    });
+    let context =
+        ActivitiesDiscoveryContext::new(patterns_context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
+            create_activity_name(log.borrow().deref(), sub_array)
+        });
 
     let activities = discover_activities_instances(&context);
 
@@ -104,9 +108,10 @@ fn execute_activities_discovery_test(
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
-        create_activity_name(log.borrow().deref(), sub_array)
-    });
+    let context =
+        ActivitiesDiscoveryContext::new(patterns_context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
+            create_activity_name(log.borrow().deref(), sub_array)
+        });
 
     let context = ActivitiesInstancesDiscoveryContext::new(context, strategy, |info| {
         Rc::new(RefCell::new(SimpleEvent::new_with_min_date(&info.node.borrow().name)))
@@ -257,9 +262,10 @@ fn execute_activities_logs_creation_test(
         default_class_extractor,
     );
 
-    let context = ActivitiesDiscoveryContext::new(patterns_context, 0, 0, |sub_array| {
-        create_activity_name(log.borrow().deref(), sub_array)
-    });
+    let context =
+        ActivitiesDiscoveryContext::new(patterns_context, 0, 0, ActivityNarrowingKind::NarrowDown, |sub_array| {
+            create_activity_name(log.borrow().deref(), sub_array)
+        });
 
     let activities_logs = create_logs_for_activities(&context, 0);
     let mut activities_logs = activities_logs
