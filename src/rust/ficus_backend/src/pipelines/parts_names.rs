@@ -28,8 +28,8 @@ impl PipelineParts {
     pub const USE_NAMES_EVENT_LOG: &'static str = "UseNamesEventLog";
     pub const DISCOVER_ACTIVITIES_FOR_SEVERAL_LEVEL: &'static str = "DiscoverActivitiesForSeveralLevels";
     pub const DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES: &'static str = "DiscoverActivitiesInUnattachedSubTraces";
-    pub const DISCOVER_ACTIVITIES_FROM_PATTERNS: &'static str = "DiscoverActivitiesFromPatterns";
     pub const DISCOVER_ACTIVITIES_UNTIL_NO_MORE: &'static str = "DiscoverActivitiesUntilNoMore";
     pub const EXECUTE_WITH_EACH_ACTIVITY_LOG: &'static str = "ExecuteWithEachActivityLog";
     pub const SUBSTITUTE_UNDERLYING_EVENTS: &'static str = "SubstituteUnderlyingEvents";
+    pub const EXECUTE_FRONTEND_PIPELINE: &'static str = "ExecuteFrontendPipeline";
 }

@@ -255,13 +255,6 @@ impl PipelineParts {
         )
     }
 
-    pub(super) fn discover_activities_from_pattern_source() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_FROM_PATTERNS, &|context, keys, config| {
-            let pipeline = Self::get_user_data(config, keys.pipeline())?;
-            pipeline.execute(context, keys)
-        })
-    }
-
     pub(super) fn create_add_unattached_events_part(&self, config: UserDataImpl) -> DefaultPipelinePart {
         let name = Self::DISCOVER_ACTIVITIES_IN_UNATTACHED_SUBTRACES;
         let add_unattached_events_factory = self.find_part(name).unwrap();

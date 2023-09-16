@@ -1,3 +1,6 @@
+use once_cell::unsync::Lazy;
+use std::any::{Any, TypeId};
+use std::sync::Mutex;
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet, VecDeque},
@@ -5,16 +8,13 @@ use std::{
     rc::Rc,
     str::FromStr,
 };
-use std::any::{Any, TypeId};
-use std::sync::Mutex;
-use once_cell::unsync::Lazy;
 
+use super::repeat_sets::{ActivityNode, SubArrayWithTraceIndex};
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     pipelines::aliases::TracesActivities,
     utils::user_data::{keys::DefaultKey, user_data::UserData},
 };
-use super::repeat_sets::{ActivityNode, SubArrayWithTraceIndex};
 
 #[derive(Debug, Clone)]
 pub struct ActivityInTraceInfo {
@@ -343,13 +343,13 @@ impl FromStr for AdjustingMode {
 pub const UNDEF_ACTIVITY_NAME: &str = "UNDEFINED_ACTIVITY";
 
 pub struct ActivityInstancesKeys {
-    underlying_events_keys: Mutex<HashMap<TypeId, Box<dyn Any>>>
+    underlying_events_keys: Mutex<HashMap<TypeId, Box<dyn Any>>>,
 }
 
 impl ActivityInstancesKeys {
     pub fn new() -> Self {
         Self {
-            underlying_events_keys: Mutex::new(HashMap::new())
+            underlying_events_keys: Mutex::new(HashMap::new()),
         }
     }
 
@@ -359,16 +359,22 @@ impl ActivityInstancesKeys {
         let map = map.as_mut().ok().unwrap();
 
         if let Some(key) = map.get(&type_id) {
-            key.downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>().unwrap().clone()
+            key.downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>()
+                .unwrap()
+                .clone()
         } else {
             let key = DefaultKey::<Vec<Rc<RefCell<TEvent>>>>::new("UNDERLYING_EVENTS".to_owned());
             map.insert(type_id, Box::new(key) as Box<dyn Any>);
-            map.get(&type_id).unwrap().downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>().unwrap().clone()
+            map.get(&type_id)
+                .unwrap()
+                .downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>()
+                .unwrap()
+                .clone()
         }
     }
 }
 
-static mut KEYS: Lazy<ActivityInstancesKeys> = Lazy::new(|| { ActivityInstancesKeys::new() });
+static mut KEYS: Lazy<ActivityInstancesKeys> = Lazy::new(|| ActivityInstancesKeys::new());
 
 pub fn create_new_log_from_activities_instances<TLog, TEventFactory>(
     log: &TLog,

@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use chrono::{DateTime, Duration, Utc};
 
 use crate::pipelines::pipeline_parts::PipelineParts;
+use crate::pipelines::pipelines::PipelinePart;
 use crate::{
     event_log::{
         core::{
@@ -95,6 +96,15 @@ impl PipelineParts {
             }
 
             context.put_concrete::<XesEventLogImpl>(keys.event_log().key(), log);
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn execute_frontend_pipeline() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::EXECUTE_FRONTEND_PIPELINE, &|context, keys, config| {
+            let pipeline = Self::get_user_data(config, keys.pipeline())?;
+            pipeline.execute(context, keys)?;
 
             Ok(())
         })

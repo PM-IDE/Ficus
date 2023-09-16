@@ -30,10 +30,10 @@ fn get_test_parts_names() -> Vec<String> {
         "UseNamesEventLog",
         "DiscoverActivitiesForSeveralLevels",
         "DiscoverActivitiesInUnattachedSubTraces",
-        "DiscoverActivitiesFromPatterns",
         "DiscoverActivitiesUntilNoMore",
         "ExecuteWithEachActivityLog",
-        "SubstituteUnderlyingEvents"
+        "SubstituteUnderlyingEvents",
+        "ExecuteFrontendPipeline"
     ]
 }
 
