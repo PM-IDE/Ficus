@@ -5,7 +5,7 @@ from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverA
     PrintNumberOfUnderlyingEvents2, SubstituteUnderlyingEvents2, ApplyClassExtractor2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
-from ficus.grpc_pipelines.data_models import PatternsKind, NarrowActivityKind, ActivityFilterKind
+from ficus.grpc_pipelines.data_models import PatternsKind, NarrowActivityKind, ActivityFilterKind, ActivitiesLogsSource
 from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
     DrawPlacementOfEventsByRegex2
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
@@ -259,7 +259,7 @@ def test_execute_with_each_activity_log():
         DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats,
                                         strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
         DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
-        ExecuteWithEachActivityLog2(0, Pipeline2(
+        ExecuteWithEachActivityLog2(ActivitiesLogsSource.TracesActivities, 0, Pipeline2(
             TracesDiversityDiagram2(plot_legend=True)
         ))
     ))
@@ -313,7 +313,7 @@ def test_console_app1_two_levels_of_abstraction():
         DiscoverActivitiesUntilNoMore2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace,
                                        activity_filter_kind=ActivityFilterKind.NoFilter,
                                        undef_strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
-        ExecuteWithEachActivityLog2(activity_level=2, activity_log_pipeline=Pipeline2(
+        ExecuteWithEachActivityLog2(ActivitiesLogsSource.Log, activity_level=2, activity_log_pipeline=Pipeline2(
             SubstituteUnderlyingEvents2(),
         ))
     ), {

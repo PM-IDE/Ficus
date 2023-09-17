@@ -24,3 +24,8 @@ class NarrowActivityKind(Enum):
 class ActivityFilterKind(Enum):
     NoFilter = 0,
     DefaultFilter = 1,
+
+
+class ActivitiesLogsSource(Enum):
+    Log = 0,
+    TracesActivities = 1,

@@ -1,3 +1,4 @@
+from ficus.grpc_pipelines.data_models import ActivitiesLogsSource
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -179,15 +180,17 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
 
 
 class ExecuteWithEachActivityLog2(PipelinePart2):
-    def __init__(self, activity_level: int, activity_log_pipeline: Pipeline2):
+    def __init__(self, activities_logs_source: ActivitiesLogsSource, activity_level: int, activity_log_pipeline: Pipeline2):
         super().__init__()
         self.activity_level = activity_level
         self.activity_log_pipeline = activity_log_pipeline
+        self.activities_logs_source = activities_logs_source
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_pipeline_value(config, const_pipeline, self.activity_log_pipeline)
         append_uint32_value(config, const_activity_level, self.activity_level)
+        append_activities_logs_source(config, const_activities_logs_source, self.activities_logs_source)
 
         default_part = _create_default_pipeline_part(const_execute_with_each_activity_log, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
