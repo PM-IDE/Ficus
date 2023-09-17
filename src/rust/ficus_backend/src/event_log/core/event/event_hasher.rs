@@ -61,8 +61,7 @@ where
                 } else {
                     default_class_extractor(event)
                 }
-            },
-            Err(_) => default_class_extractor(event),
+            }
             _ => default_class_extractor(event),
         }
     }

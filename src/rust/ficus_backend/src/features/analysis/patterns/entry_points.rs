@@ -1,6 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::event_log::core::event_log::EventLog;
+use crate::features::analysis::patterns::activity_instances::ActivitiesLogSource;
 
 use super::{
     activity_instances::{
@@ -118,9 +119,9 @@ where
 {
     let activity_instances = discover_activities_instances(&context);
 
-    activity_instances::create_logs_for_activities(
+    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
         &context.patterns_context.log.borrow(),
         &activity_instances,
         activity_level,
-    )
+    ))
 }

@@ -3,7 +3,9 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
-use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, UNDEF_ACTIVITY_NAME};
+use crate::features::analysis::patterns::activity_instances::{
+    substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME,
+};
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
@@ -42,9 +44,26 @@ impl FromStr for UndefActivityHandlingStrategyDto {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "DontInsert" => Ok(UndefActivityHandlingStrategyDto::DontInsert),
-            "InsertAsSingleEvent" => Ok(UndefActivityHandlingStrategyDto::InsertAsSingleEvent),
-            "InsertAllEvents" => Ok(UndefActivityHandlingStrategyDto::InsertAllEvents),
+            "DontInsert" => Ok(Self::DontInsert),
+            "InsertAsSingleEvent" => Ok(Self::InsertAsSingleEvent),
+            "InsertAllEvents" => Ok(Self::InsertAllEvents),
+            _ => Err(()),
+        }
+    }
+}
+
+pub enum ActivitiesLogsSourceDto {
+    Log,
+    TracesActivities,
+}
+
+impl FromStr for ActivitiesLogsSourceDto {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Log" => Ok(Self::Log),
+            "TracesActivities" => Ok(Self::TracesActivities),
             _ => Err(()),
         }
     }
@@ -340,7 +359,7 @@ impl PipelineParts {
 
                 if activities_instances.iter().map(|t| t.len()).sum::<usize>() == 0 {
                     Self::do_clear_activities_related_stuff(context, keys);
-                    return Ok(())
+                    return Ok(());
                 }
 
                 Self::do_create_log_from_activities(context, keys, config)?;
@@ -358,13 +377,25 @@ impl PipelineParts {
 
     pub(super) fn execute_with_each_activity_log() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::EXECUTE_WITH_EACH_ACTIVITY_LOG, &|context, keys, config| {
-            let activity_level = *Self::get_user_data(config, keys.activity_level())?;
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let activities = Self::get_user_data(context, keys.trace_activities())?;
             let pipeline = Self::get_user_data(config, keys.pipeline())?;
 
-            let activities_to_logs =
-                activity_instances::create_logs_for_activities(log, activities, activity_level as usize);
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let dto = Self::get_user_data(config, keys.activities_logs_source())?;
+
+            let activities_to_logs = match dto {
+                ActivitiesLogsSourceDto::Log => {
+                    activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log))
+                }
+                ActivitiesLogsSourceDto::TracesActivities => {
+                    let activity_level = *Self::get_user_data(config, keys.activity_level())?;
+                    let activities = Self::get_user_data(context, keys.trace_activities())?;
+                    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
+                        log,
+                        activities,
+                        activity_level as usize,
+                    ))
+                }
+            };
 
             for (_, activity_log) in activities_to_logs {
                 let mut temp_context = PipelineContext::empty_from(context);

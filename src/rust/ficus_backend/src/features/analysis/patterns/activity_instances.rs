@@ -483,14 +483,63 @@ pub fn add_unattached_activities(
     new_activities
 }
 
+pub enum ActivitiesLogSource<'a, TLog>
+where
+    TLog: EventLog,
+{
+    Log(&'a TLog),
+    TracesActivities(&'a TLog, &'a Vec<Vec<ActivityInTraceInfo>>, usize),
+}
+
 pub fn create_logs_for_activities<TLog>(
-    log: &TLog,
-    activities: &Vec<Vec<ActivityInTraceInfo>>,
-    activity_level: usize,
+    activities_source: &ActivitiesLogSource<TLog>,
 ) -> HashMap<String, Rc<RefCell<TLog>>>
 where
     TLog: EventLog,
 {
+    match activities_source {
+        ActivitiesLogSource::Log(log) => create_activities_logs_from_log(log),
+        ActivitiesLogSource::TracesActivities(log, activities, level) => {
+            create_log_from_traces_activities(log, activities, *level)
+        }
+    }
+}
+
+fn create_activities_logs_from_log<TLog: EventLog>(log: &TLog) -> HashMap<String, Rc<RefCell<TLog>>> {
+    let mut activities_to_logs: HashMap<String, Rc<RefCell<TLog>>> = HashMap::new();
+    let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };
+
+    for trace in log.traces() {
+        for event in trace.borrow().events() {
+            if event
+                .borrow_mut()
+                .user_data()
+                .get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key)
+                .is_some()
+            {
+                let name = event.borrow().name().to_owned();
+                let mut new_trace = TLog::TTrace::empty();
+                substitute_underlying_events::<TLog>(event, &mut new_trace);
+
+                if let Some(existing_log) = activities_to_logs.get_mut(&name) {
+                    existing_log.borrow_mut().push(Rc::new(RefCell::new(new_trace)));
+                } else {
+                    let mut new_log = TLog::empty();
+                    new_log.push(Rc::new(RefCell::new(new_trace)));
+                    activities_to_logs.insert(name, Rc::new(RefCell::new(new_log)));
+                }
+            }
+        }
+    }
+
+    activities_to_logs
+}
+
+fn create_log_from_traces_activities<TLog: EventLog>(
+    log: &TLog,
+    activities: &Vec<Vec<ActivityInTraceInfo>>,
+    activity_level: usize,
+) -> HashMap<String, Rc<RefCell<TLog>>> {
     let mut activities_to_logs: HashMap<String, Rc<RefCell<TLog>>> = HashMap::new();
     for (trace_activities, trace) in activities.iter().zip(log.traces()) {
         let activity_handler = |activity_info: &ActivityInTraceInfo| {

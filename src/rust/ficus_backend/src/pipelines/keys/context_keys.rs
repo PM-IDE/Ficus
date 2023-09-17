@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
+use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -309,5 +309,14 @@ impl ContextKeys {
 
     pub fn is_activity_filter_kind(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.activity_filter_kind(), key)
+    }
+
+    pub fn activities_logs_source(&self) -> &DefaultContextKey<ActivitiesLogsSourceDto> {
+        self.find_concrete_key::<ActivitiesLogsSourceDto>(Self::ACTIVITIES_LOGS_SOURCE)
+            .unwrap()
+    }
+
+    pub fn is_activities_logs_source(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.activities_logs_source(), key)
     }
 }

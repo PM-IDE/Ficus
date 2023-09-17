@@ -3,7 +3,7 @@ use std::{any::Any, borrow::Cow, collections::HashMap};
 use crate::features::analysis::patterns::activity_instances::{
     ActivityInTraceFilterKind, ActivityNarrowingKind, UndefActivityHandlingStrategy,
 };
-use crate::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
+use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -79,6 +79,7 @@ impl ContextKeys {
     pub const MIN_ACTIVITY_LENGTH: &'static str = "min_activity_length";
     pub const UNDEF_ACTIVITY_HANDLING_STRATEGY: &'static str = "undef_activity_handling_strategy";
     pub const ACTIVITY_IN_TRACE_FILTER_KIND: &'static str = "activity_in_trace_filter_kind";
+    pub const ACTIVITIES_LOGS_SOURCE: &'static str = "activities_logs_source";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -115,6 +116,7 @@ impl ContextKeys {
         Self::insert_min_activity_length(&mut context);
         Self::insert_undef_activity_handling_strategy(&mut context);
         Self::insert_activity_in_filter_kind(&mut context);
+        Self::insert_activities_logs_source(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -273,5 +275,9 @@ impl ContextKeys {
 
     fn insert_activity_in_filter_kind(context: &mut ContextKeysInitContext) {
         Self::insert_key::<ActivityInTraceFilterKind>(context, Self::ACTIVITY_IN_TRACE_FILTER_KIND)
+    }
+
+    fn insert_activities_logs_source(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<ActivitiesLogsSourceDto>(context, Self::ACTIVITIES_LOGS_SOURCE);
     }
 }
