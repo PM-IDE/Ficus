@@ -4,7 +4,6 @@ use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, UNDEF_ACTIVITY_NAME};
-use crate::pipelines::errors::pipeline_errors::RawPartExecutionError;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
@@ -21,7 +20,6 @@ use crate::{
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
-use regex::Regex;
 use std::str::FromStr;
 use std::{cell::RefCell, rc::Rc};
 
@@ -397,24 +395,10 @@ impl PipelineParts {
             let log = Self::get_user_data_mut(context, keys.event_log())?;
 
             let event_class_regex = Self::get_user_data(config, keys.event_class_regex())?;
-            let event_class_regex = match Regex::new(event_class_regex) {
-                Ok(regex) => regex,
-                Err(err) => {
-                    return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                        err.to_string(),
-                    )))
-                }
-            };
+            let event_class_regex = Self::try_parse_regex(event_class_regex)?;
 
             let filter_regex = Self::get_user_data(config, keys.regex())?;
-            let filter_regex = match Regex::new(filter_regex) {
-                Ok(regex) => regex,
-                Err(err) => {
-                    return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                        err.to_string(),
-                    )))
-                }
-            };
+            let filter_regex = Self::try_parse_regex(filter_regex)?;
 
             for trace in log.traces() {
                 for event in trace.borrow().events() {
@@ -422,15 +406,21 @@ impl PipelineParts {
                         continue;
                     }
 
-                    match event_class_regex.find(event.borrow().name()) {
-                        Some(found_match) => {
-                            if found_match.start() == 0 {
-                                event
-                                    .borrow_mut()
-                                    .set_name(event.borrow().name()[0..found_match.end()].to_owned())
-                            }
-                        }
-                        None => continue,
+                    let borrowed_event = event.borrow();
+                    let found_match = event_class_regex.find(borrowed_event.name());
+                    if found_match.is_none() {
+                        continue;
+                    }
+
+                    let found_match = found_match.unwrap();
+                    let start = found_match.start();
+                    let end = found_match.end();
+                    drop(found_match);
+                    drop(borrowed_event);
+
+                    if start == 0 {
+                        let new_name = event.borrow().name()[start..end].to_owned();
+                        event.borrow_mut().set_name(new_name);
                     }
                 }
             }

@@ -1,10 +1,13 @@
 use crate::pipelines::context::PipelineContext;
-use crate::pipelines::errors::pipeline_errors::{MissingContextError, PipelinePartExecutionError};
+use crate::pipelines::errors::pipeline_errors::{
+    MissingContextError, PipelinePartExecutionError, RawPartExecutionError,
+};
 use crate::pipelines::keys::context_key::DefaultContextKey;
 use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipelines::{DefaultPipelinePart, PipelinePartFactory};
 use crate::utils::user_data::keys::Key;
 use crate::utils::user_data::user_data::{UserData, UserDataImpl};
+use regex::Regex;
 use std::collections::HashMap;
 
 pub struct PipelineParts {
@@ -110,6 +113,15 @@ impl PipelineParts {
             Some(value) => Ok(value),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 key.key().name().to_owned(),
+            ))),
+        }
+    }
+
+    pub(super) fn try_parse_regex(raw_regex: &str) -> Result<Regex, PipelinePartExecutionError> {
+        match Regex::new(raw_regex) {
+            Ok(regex) => Ok(regex),
+            Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                err.to_string(),
             ))),
         }
     }
