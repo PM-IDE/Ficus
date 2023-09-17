@@ -3,7 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use ficus_backend::features::analysis::patterns::activity_instances::{
     ActivityInTraceFilterKind, ActivityNarrowingKind,
 };
-use ficus_backend::pipelines::activities_parts::UndefActivityHandlingStrategyDto;
+use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
@@ -73,6 +73,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<u32>(keys, ContextKeys::MIN_ACTIVITY_LENGTH, &mut used);
         assert_existence::<UndefActivityHandlingStrategyDto>(keys, ContextKeys::UNDEF_ACTIVITY_HANDLING_STRATEGY, &mut used);
         assert_existence::<ActivityInTraceFilterKind>(keys, ContextKeys::ACTIVITY_IN_TRACE_FILTER_KIND, &mut used);
+        assert_existence::<ActivitiesLogsSourceDto>(keys, ContextKeys::ACTIVITIES_LOGS_SOURCE, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -122,6 +123,7 @@ fn get_all_keys_names() -> Vec<String> {
         "min_activity_length",
         "undef_activity_handling_strategy",
         "activity_in_trace_filter_kind",
+        "activities_logs_source",
 
         "event_log",
         "activities",
@@ -179,6 +181,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<u32>(keys, ContextKeys::MIN_ACTIVITY_LENGTH, &mut used);
         assert_keys_equivalence::<UndefActivityHandlingStrategyDto>(keys, ContextKeys::UNDEF_ACTIVITY_HANDLING_STRATEGY, &mut used);
         assert_keys_equivalence::<ActivityInTraceFilterKind>(keys, ContextKeys::ACTIVITY_IN_TRACE_FILTER_KIND, &mut used);
+        assert_keys_equivalence::<ActivitiesLogsSourceDto>(keys, ContextKeys::ACTIVITIES_LOGS_SOURCE, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
