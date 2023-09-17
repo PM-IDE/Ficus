@@ -15,7 +15,7 @@ from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, Patter
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 from tests.grpc_pipelines.pipeline_parts_for_tests import AssertNamesLogTestPart
-from tests.test_data_provider import get_example_log_path
+from tests.test_data_provider import get_example_log_path, console_app_method2_log_path
 
 
 def test_simple_pipeline():
@@ -288,7 +288,7 @@ def test_console_app1_log():
                                        undef_strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         PrintNumberOfUnderlyingEvents2()
     ), {
-        'path': StringContextValue('')
+        'path': StringContextValue(console_app_method2_log_path())
     })
 
 
@@ -317,7 +317,7 @@ def test_console_app1_two_levels_of_abstraction():
             SubstituteUnderlyingEvents2(),
         ))
     ), {
-        'path': StringContextValue('')
+        'path': StringContextValue(console_app_method2_log_path())
     })
 
 
