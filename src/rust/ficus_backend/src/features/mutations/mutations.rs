@@ -7,7 +7,7 @@ where
 {
     log.mutate_events(|event| {
         if filter(event) {
-            event.set_name(&new_name.to_owned())
+            event.set_name(new_name.to_owned())
         }
     })
 }

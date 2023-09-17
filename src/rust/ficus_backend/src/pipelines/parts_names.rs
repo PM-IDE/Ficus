@@ -32,4 +32,5 @@ impl PipelineParts {
     pub const EXECUTE_WITH_EACH_ACTIVITY_LOG: &'static str = "ExecuteWithEachActivityLog";
     pub const SUBSTITUTE_UNDERLYING_EVENTS: &'static str = "SubstituteUnderlyingEvents";
     pub const EXECUTE_FRONTEND_PIPELINE: &'static str = "ExecuteFrontendPipeline";
+    pub const APPLY_CLASS_EXTRACTOR: &'static str = "ApplyClassExtractor";
 }

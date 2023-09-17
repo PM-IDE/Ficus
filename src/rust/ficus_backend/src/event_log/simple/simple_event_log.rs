@@ -223,8 +223,8 @@ impl Event for SimpleEvent {
         self.event_base.user_data_holder.get_mut()
     }
 
-    fn set_name(&mut self, new_name: &String) {
-        self.event_base.name = new_name.to_owned();
+    fn set_name(&mut self, new_name: String) {
+        self.event_base.name = new_name;
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {

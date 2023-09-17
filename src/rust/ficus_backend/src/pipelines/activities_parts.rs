@@ -1,8 +1,10 @@
+use crate::event_log::core::event::event::Event;
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, UNDEF_ACTIVITY_NAME};
+use crate::pipelines::errors::pipeline_errors::RawPartExecutionError;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::{
@@ -19,6 +21,7 @@ use crate::{
     },
     utils::user_data::user_data::{UserData, UserDataImpl},
 };
+use regex::Regex;
 use std::str::FromStr;
 use std::{cell::RefCell, rc::Rc};
 
@@ -385,6 +388,53 @@ impl PipelineParts {
             }
 
             context.put_concrete(keys.event_log().key(), new_log);
+            Ok(())
+        })
+    }
+
+    pub(super) fn apply_class_extractor() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::APPLY_CLASS_EXTRACTOR, &|context, keys, config| {
+            let log = Self::get_user_data_mut(context, keys.event_log())?;
+
+            let event_class_regex = Self::get_user_data(config, keys.event_class_regex())?;
+            let event_class_regex = match Regex::new(event_class_regex) {
+                Ok(regex) => regex,
+                Err(err) => {
+                    return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                        err.to_string(),
+                    )))
+                }
+            };
+
+            let filter_regex = Self::get_user_data(config, keys.regex())?;
+            let filter_regex = match Regex::new(filter_regex) {
+                Ok(regex) => regex,
+                Err(err) => {
+                    return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                        err.to_string(),
+                    )))
+                }
+            };
+
+            for trace in log.traces() {
+                for event in trace.borrow().events() {
+                    if !filter_regex.is_match(event.borrow().name()) {
+                        continue;
+                    }
+
+                    match event_class_regex.find(event.borrow().name()) {
+                        Some(found_match) => {
+                            if found_match.start() == 0 {
+                                event
+                                    .borrow_mut()
+                                    .set_name(event.borrow().name()[0..found_match.end()].to_owned())
+                            }
+                        }
+                        None => continue,
+                    }
+                }
+            }
+
             Ok(())
         })
     }

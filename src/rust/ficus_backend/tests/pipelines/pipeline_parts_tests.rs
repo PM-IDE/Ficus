@@ -33,7 +33,8 @@ fn get_test_parts_names() -> Vec<String> {
         "DiscoverActivitiesUntilNoMore",
         "ExecuteWithEachActivityLog",
         "SubstituteUnderlyingEvents",
-        "ExecuteFrontendPipeline"
+        "ExecuteFrontendPipeline",
+        "ApplyClassExtractor"
     ]
 }
 
