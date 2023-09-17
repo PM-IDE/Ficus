@@ -87,14 +87,14 @@ def test_draw_short_activities_diagram():
         FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
-        CreateLogFromActivitiesInstances2(),
+        CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
         AssertNamesLogTestPart([
             ['(a)::(b)', '(c)::(d)', 'f'],
             ['(a)::(c)', '(b)::(d)', 'f'],
             ['(a)::(c)', '(b)::(d)', 'f'],
-            ['(a)::(b)', '(b)::(d)', '(e)', 'f'],
+            ['a', 'd', '(e)', 'f'],
             ['(a)::(b)', '(c)::(d)', 'f'],
-            ['(a)::(b)', '(e)', '(b)::(d)', 'f']
+            ['a', '(e)', 'd', 'f']
         ])
     ))
 
@@ -106,14 +106,7 @@ def test_draw_full_activities_diagram_2():
         DiscoverActivities2(activity_level=0),
         DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
         CreateLogFromActivitiesInstances2(),
-        AssertNamesLogTestPart([
-            ['a', 'b', 'd', 'c', 'f'],
-            ['a', 'c', 'b', 'd', 'f'],
-            ['a', 'c', 'd', 'b', 'f'],
-            ['a', 'd', 'e', 'f'],
-            ['a', 'b', 'c', 'd', 'f'],
-            ['a', 'e', 'd', 'f']
-        ])
+        AssertNamesLogTestPart([[], [], [], [], [], []])
     ))
 
 
@@ -148,7 +141,7 @@ def test_class_extractors():
             FindSuperMaximalRepeats2(strategy=PatternsDiscoveryStrategy.FromAllTraces, class_extractor='^(.*?)\\.'),
             DiscoverActivities2(activity_level=0),
             DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
-            CreateLogFromActivitiesInstances2(),
+            CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
             AssertNamesLogTestPart([
                 ['(A.A)::(B.B)', 'C', '(A.A)::(B.B)'],
                 ['(A.A)::(B.B)', 'C', '(A.A)::(B.B)']
@@ -195,7 +188,7 @@ def test_discover_activities_from_patterns():
             UseNamesEventLog2(),
             DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats),
             DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
-            CreateLogFromActivitiesInstances2(),
+            CreateLogFromActivitiesInstances2(strategy=UndefinedActivityHandlingStrategy.InsertAllEvents),
             AssertNamesLogTestPart([['(A)::(B)', 'C', '(A)::(B)'], ['(A)::(B)', 'C', '(A)::(B)']])
         )
     )
@@ -209,7 +202,7 @@ def test_discover_activities_until_no_more():
         ],
         Pipeline2(
             UseNamesEventLog2(),
-            DiscoverActivitiesUntilNoMore2(event_class='^(.*?)\\.'),
+            DiscoverActivitiesUntilNoMore2(event_class=r'^(.*?)(?=\.)'),
             AssertNamesLogTestPart([['(A.A)::(B.B)::(C)::(D)'], ['(A.A)::(B.B)::(C)::(D)']])
         )
     )
@@ -336,11 +329,11 @@ def test_apply_class_extractor():
         ],
         Pipeline2(
             UseNamesEventLog2(),
-            ApplyClassExtractor2(class_extractor_regex=r'^(.*?)\.', filter_regex=r'A\..*'),
+            ApplyClassExtractor2(class_extractor_regex=r'^(.*?)(?=\.)', filter_regex=r'A\..*'),
             AssertNamesLogTestPart(
                 [
-                    ['A.', 'B.B', 'C', 'D', 'A.', 'B.D', 'C', 'D'],
-                    ['A.', 'B.C', 'C', 'D', 'A.', 'B.B'],
+                    ['A', 'B.B', 'C', 'D', 'A', 'B.D', 'C', 'D'],
+                    ['A', 'B.C', 'C', 'D', 'A', 'B.B'],
                 ]
             )
         )
