@@ -7,7 +7,7 @@ use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipelines::{DefaultPipelinePart, PipelinePartFactory};
 use crate::utils::user_data::keys::Key;
 use crate::utils::user_data::user_data::{UserData, UserDataImpl};
-use regex::Regex;
+use fancy_regex::Regex;
 use std::collections::HashMap;
 
 pub struct PipelineParts {

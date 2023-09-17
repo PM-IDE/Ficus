@@ -1,4 +1,4 @@
-use regex::Regex;
+use fancy_regex::Regex;
 
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
@@ -96,7 +96,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DRAW_PLACEMENT_OF_EVENT_BY_REGEX, &|context, keys, config| {
             let regex = Self::get_user_data(config, keys.regex())?;
             let regex = Regex::new(regex).ok().unwrap();
-            Self::draw_events_placement(context, keys, &|event| regex.is_match(event.name()))
+            Self::draw_events_placement(context, keys, &|event| regex.is_match(event.name()).ok().unwrap())
         })
     }
 

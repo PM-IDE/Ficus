@@ -338,10 +338,16 @@ impl PipelineParts {
                     activities_instances.iter().map(|t| t.len()).sum::<usize>()
                 ))?;
 
+                if activities_instances.iter().map(|t| t.len()).sum::<usize>() == 0 {
+                    Self::do_clear_activities_related_stuff(context, keys);
+                    return Ok(())
+                }
+
                 Self::do_create_log_from_activities(context, keys, config)?;
 
                 let new_events_count = count_events(Self::get_user_data(context, keys.event_log())?);
                 if new_events_count == events_count {
+                    Self::do_clear_activities_related_stuff(context, keys);
                     return Ok(());
                 }
 
@@ -402,17 +408,17 @@ impl PipelineParts {
 
             for trace in log.traces() {
                 for event in trace.borrow().events() {
-                    if !filter_regex.is_match(event.borrow().name()) {
+                    if !filter_regex.is_match(event.borrow().name()).ok().unwrap() {
                         continue;
                     }
 
                     let borrowed_event = event.borrow();
                     let found_match = event_class_regex.find(borrowed_event.name());
-                    if found_match.is_none() {
+                    if found_match.is_err() {
                         continue;
                     }
 
-                    let found_match = found_match.unwrap();
+                    let found_match = found_match.ok().unwrap().unwrap();
                     let start = found_match.start();
                     let end = found_match.end();
                     drop(found_match);

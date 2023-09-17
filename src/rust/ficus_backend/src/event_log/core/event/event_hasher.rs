@@ -3,7 +3,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use regex::{Error, Regex};
+use fancy_regex::{Error, Regex};
 
 use super::event::Event;
 
@@ -52,7 +52,7 @@ where
     fn hash(&self, event: &TEvent) -> u64 {
         let name = event.name();
         match self.regex.find(name) {
-            Some(m) => {
+            Ok(Some(m)) => {
                 if m.start() == 0 {
                     let mut hasher = DefaultHasher::new();
                     name[0..m.end()].hash(&mut hasher);
@@ -61,8 +61,9 @@ where
                 } else {
                     default_class_extractor(event)
                 }
-            }
-            None => default_class_extractor(event),
+            },
+            Err(_) => default_class_extractor(event),
+            _ => default_class_extractor(event),
         }
     }
 }

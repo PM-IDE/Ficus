@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use regex::Regex;
+use fancy_regex::Regex;
 
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
