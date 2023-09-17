@@ -54,22 +54,8 @@ impl Trace for XesTraceImpl {
         self.events_holder.push(event);
     }
 
-    fn remove_events_by<TPred>(&mut self, predicate: TPred)
-    where
-        TPred: Fn(&Self::TEvent) -> bool,
-    {
-        self.events_holder.remove_events_by(predicate);
-    }
-
     fn to_names_vec(&self) -> Vec<String> {
         self.events_holder.to_names_vec()
-    }
-
-    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
-    where
-        TMutator: Fn(&mut Self::TEvent),
-    {
-        self.events_holder.mutate_events(mutator);
     }
 
     fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo {
@@ -78,5 +64,19 @@ impl Trace for XesTraceImpl {
 
     fn get_or_create_events_positions(&mut self) -> &Self::TTracePositions {
         self.events_holder.get_or_create_events_positions()
+    }
+
+    fn remove_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.events_holder.remove_events_by(predicate);
+    }
+
+    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut Self::TEvent),
+    {
+        self.events_holder.mutate_events(mutator);
     }
 }

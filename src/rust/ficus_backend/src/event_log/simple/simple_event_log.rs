@@ -46,8 +46,8 @@ impl Clone for SimpleEventLog {
 
 impl EventLog for SimpleEventLog {
     type TEvent = SimpleEvent;
-    type TTrace = SimpleTrace;
     type TTraceInfo = EventSequenceInfo;
+    type TTrace = SimpleTrace;
 
     fn empty() -> Self {
         Self {
@@ -61,6 +61,17 @@ impl EventLog for SimpleEventLog {
 
     fn push(&mut self, trace: Rc<RefCell<Self::TTrace>>) {
         self.traces_holder.push(trace);
+    }
+
+    fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        self.traces_holder.to_raw_vector()
+    }
+
+    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
+    where
+        THasher: EventHasher<Self::TEvent>,
+    {
+        self.traces_holder.to_hashes_vectors(hasher)
     }
 
     fn filter_events_by<TPred>(&mut self, predicate: TPred)
@@ -77,19 +88,8 @@ impl EventLog for SimpleEventLog {
         self.traces_holder.mutate_events(mutator);
     }
 
-    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
-    where
-        THasher: EventHasher<Self::TEvent>,
-    {
-        self.traces_holder.to_hashes_vectors(hasher)
-    }
-
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
         self.traces_holder.filter_traces(predicate);
-    }
-
-    fn to_raw_vector(&self) -> Vec<Vec<String>> {
-        self.traces_holder.to_raw_vector()
     }
 }
 
@@ -125,22 +125,8 @@ impl Trace for SimpleTrace {
         self.events_holder.push(event);
     }
 
-    fn remove_events_by<TPred>(&mut self, predicate: TPred)
-    where
-        TPred: Fn(&Self::TEvent) -> bool,
-    {
-        self.events_holder.remove_events_by(predicate);
-    }
-
     fn to_names_vec(&self) -> Vec<String> {
         self.events_holder.to_names_vec()
-    }
-
-    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
-    where
-        TMutator: Fn(&mut Self::TEvent),
-    {
-        self.events_holder.mutate_events(mutator);
     }
 
     fn get_or_create_trace_info(&mut self) -> &Self::TTraceInfo {
@@ -149,6 +135,20 @@ impl Trace for SimpleTrace {
 
     fn get_or_create_events_positions(&mut self) -> &Self::TTracePositions {
         self.events_holder.get_or_create_events_positions()
+    }
+
+    fn remove_events_by<TPred>(&mut self, predicate: TPred)
+    where
+        TPred: Fn(&Self::TEvent) -> bool,
+    {
+        self.events_holder.remove_events_by(predicate);
+    }
+
+    fn mutate_events<TMutator>(&mut self, mutator: TMutator)
+    where
+        TMutator: Fn(&mut Self::TEvent),
+    {
+        self.events_holder.mutate_events(mutator);
     }
 }
 
@@ -219,6 +219,10 @@ impl Event for SimpleEvent {
         panic!("Not supported")
     }
 
+    fn user_data(&mut self) -> &mut UserDataImpl {
+        self.event_base.user_data_holder.get_mut()
+    }
+
     fn set_name(&mut self, new_name: &String) {
         self.event_base.name = new_name.to_owned();
     }
@@ -233,10 +237,6 @@ impl Event for SimpleEvent {
 
     fn add_or_update_payload(&mut self, _: String, _: EventPayloadValue) {
         panic!("Not supported")
-    }
-
-    fn user_data(&mut self) -> &mut UserDataImpl {
-        self.event_base.user_data_holder.get_mut()
     }
 }
 

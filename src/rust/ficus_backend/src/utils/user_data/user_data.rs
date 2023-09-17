@@ -22,6 +22,14 @@ pub trait UserData {
 }
 
 impl UserData for UserDataImpl {
+    fn len(&self) -> usize {
+        if let Some(map) = self.values_map.as_ref() {
+            map.len()
+        } else {
+            0
+        }
+    }
+
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
         self.put_any(key, value)
     }
@@ -63,14 +71,6 @@ impl UserData for UserDataImpl {
     fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
         if let Some(values_map) = self.values_map.as_mut() {
             values_map.remove(&key.id());
-        }
-    }
-
-    fn len(&self) -> usize {
-        if let Some(map) = self.values_map.as_ref() {
-            map.len()
-        } else {
-            0
         }
     }
 }

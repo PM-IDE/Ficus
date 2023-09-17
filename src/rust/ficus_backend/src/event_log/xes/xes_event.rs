@@ -82,6 +82,10 @@ impl Event for XesEventImpl {
         }
     }
 
+    fn user_data(&mut self) -> &mut UserDataImpl {
+        self.event_base.user_data_holder.get_mut()
+    }
+
     fn set_name(&mut self, new_name: &String) {
         self.event_base.name = new_name.to_owned();
     }
@@ -100,10 +104,6 @@ impl Event for XesEventImpl {
         }
 
         *self.payload.as_mut().unwrap().get_mut(&key).unwrap() = value;
-    }
-
-    fn user_data(&mut self) -> &mut UserDataImpl {
-        self.event_base.user_data_holder.get_mut()
     }
 }
 

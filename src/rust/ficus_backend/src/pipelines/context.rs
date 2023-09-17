@@ -46,12 +46,8 @@ impl<'a> PipelineContext<'a> {
 }
 
 impl<'a> UserData for PipelineContext<'a> {
-    fn any(&self, key: &dyn Key) -> Option<&dyn Any> {
-        self.user_data.any(key)
-    }
-
-    fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
-        self.user_data.concrete(key)
+    fn len(&self) -> usize {
+        self.user_data.len()
     }
 
     fn put_concrete<T: 'static>(&mut self, key: &DefaultKey<T>, value: T) {
@@ -60,6 +56,14 @@ impl<'a> UserData for PipelineContext<'a> {
 
     fn put_any<T: 'static>(&mut self, key: &dyn Key, value: T) {
         self.user_data.put_any(key, value)
+    }
+
+    fn concrete<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&T> {
+        self.user_data.concrete(key)
+    }
+
+    fn any(&self, key: &dyn Key) -> Option<&dyn Any> {
+        self.user_data.any(key)
     }
 
     fn concrete_mut<T: 'static>(&self, key: &DefaultKey<T>) -> Option<&mut T> {
@@ -72,10 +76,6 @@ impl<'a> UserData for PipelineContext<'a> {
 
     fn remove_any<T: 'static>(&mut self, key: &dyn Key) {
         self.user_data.remove_any::<T>(key)
-    }
-
-    fn len(&self) -> usize {
-        self.user_data.len()
     }
 }
 

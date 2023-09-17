@@ -77,14 +77,6 @@ where
         self.get(first) == self.get(second)
     }
 
-    fn get(&self, index: usize) -> Option<TElement> {
-        if let Some((slice_index, Some(index_in_slice))) = self.get_slice_info_for(index) {
-            Some(self.words[slice_index][index_in_slice])
-        } else {
-            None
-        }
-    }
-
     fn len(&self) -> usize {
         let mut len = 0;
         for slice in &self.words {
@@ -95,11 +87,19 @@ where
         len
     }
 
+    fn get(&self, index: usize) -> Option<TElement> {
+        if let Some((slice_index, Some(index_in_slice))) = self.get_slice_info_for(index) {
+            Some(self.words[slice_index][index_in_slice])
+        } else {
+            None
+        }
+    }
+
     fn sub_slice(&self, start: usize, end: usize) -> Option<&[TElement]> {
         if let Some((start_slice_index, Some(start_index_in_slice))) = self.get_slice_info_for(start) {
             if let Some((end_slice_index, end_index_in_slice)) = self.get_slice_info_for(end) {
                 if start_slice_index != end_slice_index {
-                    return None;
+                    None
                 } else {
                     let patched_end_index = if let Some(end_index_in_slice) = end_index_in_slice {
                         end_index_in_slice
@@ -107,12 +107,14 @@ where
                         self.words[start_slice_index].len()
                     };
 
-                    return Some(&self.words[start_slice_index][start_index_in_slice..patched_end_index]);
+                    Some(&self.words[start_slice_index][start_index_in_slice..patched_end_index])
                 }
+            } else {
+                None
             }
+        } else {
+            None
         }
-
-        None
     }
 }
 

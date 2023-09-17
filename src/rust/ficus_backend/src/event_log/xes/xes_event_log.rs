@@ -115,8 +115,8 @@ impl Clone for XesEventLogImpl {
 
 impl EventLog for XesEventLogImpl {
     type TEvent = XesEventImpl;
-    type TTrace = XesTraceImpl;
     type TTraceInfo = EventSequenceInfo;
+    type TTrace = XesTraceImpl;
 
     fn empty() -> Self {
         Self {
@@ -136,6 +136,17 @@ impl EventLog for XesEventLogImpl {
         self.traces_holder.push(trace);
     }
 
+    fn to_raw_vector(&self) -> Vec<Vec<String>> {
+        self.traces_holder.to_raw_vector()
+    }
+
+    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
+    where
+        THasher: EventHasher<Self::TEvent>,
+    {
+        self.traces_holder.to_hashes_vectors(hasher)
+    }
+
     fn filter_events_by<TPred>(&mut self, predicate: TPred)
     where
         TPred: Fn(&Self::TEvent) -> bool,
@@ -150,18 +161,7 @@ impl EventLog for XesEventLogImpl {
         self.traces_holder.mutate_events(mutator);
     }
 
-    fn to_hashes_event_log<THasher>(&self, hasher: &THasher) -> Vec<Vec<u64>>
-    where
-        THasher: EventHasher<Self::TEvent>,
-    {
-        self.traces_holder.to_hashes_vectors(hasher)
-    }
-
     fn filter_traces(&mut self, predicate: &impl Fn(&Self::TTrace, &usize) -> bool) {
         self.traces_holder.filter_traces(predicate);
-    }
-
-    fn to_raw_vector(&self) -> Vec<Vec<String>> {
-        self.traces_holder.to_raw_vector()
     }
 }
