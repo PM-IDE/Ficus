@@ -2,7 +2,7 @@ from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStr
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
     DiscoverActivitiesFromPatterns2, ExecuteWithEachActivityLog2, ClearActivitiesRelatedStuff2, \
-    PrintNumberOfUnderlyingEvents2, SubstituteUnderlyingEvents2
+    PrintNumberOfUnderlyingEvents2, SubstituteUnderlyingEvents2, ApplyClassExtractor2
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
 from ficus.grpc_pipelines.data_models import PatternsKind, NarrowActivityKind, ActivityFilterKind
@@ -326,3 +326,22 @@ def test_console_app1_two_levels_of_abstraction():
     ), {
         'path': StringContextValue('')
     })
+
+
+def test_apply_class_extractor():
+    _execute_test_with_names_log(
+        [
+            ['A.A', 'B.B', 'C', 'D', 'A.C', 'B.D', 'C', 'D'],
+            ['A.D', 'B.C', 'C', 'D', 'A.A', 'B.B'],
+        ],
+        Pipeline2(
+            UseNamesEventLog2(),
+            ApplyClassExtractor2(class_extractor_regex=r'^(.*?)\.', filter_regex=r'A\..*'),
+            AssertNamesLogTestPart(
+                [
+                    ['A.', 'B.B', 'C', 'D', 'A.', 'B.D', 'C', 'D'],
+                    ['A.', 'B.C', 'C', 'D', 'A.', 'B.B'],
+                ]
+            )
+        )
+    )

@@ -47,6 +47,7 @@ const_substitute_underlying_events = 'SubstituteUnderlyingEvents'
 const_clear_activities_related_stuff = 'ClearActivities'
 const_get_number_of_underlying_events = 'GetUnderlyingEventsCount'
 const_execute_frontend_part = 'ExecuteFrontendPipeline'
+const_apply_class_extractor = 'ApplyClassExtractor'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

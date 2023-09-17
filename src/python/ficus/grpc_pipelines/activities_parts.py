@@ -218,3 +218,18 @@ class PrintNumberOfUnderlyingEvents2(PipelinePart2WithCallback):
 
     def execute_callback(self, context_value: GrpcContextValue):
         print(f'Underlying events count: {context_value.uint32}')
+
+
+class ApplyClassExtractor2(PipelinePart2):
+    def __init__(self, class_extractor_regex: str, filter_regex: str = ".*"):
+        super().__init__()
+        self.class_extractor_regex = class_extractor_regex
+        self.filter_regex = filter_regex
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_string_value(config, const_event_class_regex, self.class_extractor_regex)
+        append_string_value(config, const_regex, self.filter_regex)
+
+        part = _create_default_pipeline_part(const_apply_class_extractor, config)
+        return GrpcPipelinePartBase(defaultPart=part)
