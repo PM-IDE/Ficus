@@ -4,6 +4,7 @@ import graphviz
 from IPython.core.display import Image
 from IPython.core.display_functions import display
 from matplotlib import pyplot as plt
+from matplotlib.collections import PatchCollection
 
 from .constants import undefined_activity, activity_name_sep
 from ..common.common_models import GraphNode
@@ -86,6 +87,8 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
         else:
             current_x = 0
             last_drew_index = 0
+            patches = []
+
             for index, activity in enumerate(trace_activities):
                 if last_drew_index < activity.start_pos:
                     width = ctx.rect_width
@@ -95,7 +98,7 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
                     rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height,
                                          fc=colors_provider(undefined_activity))
                     ctx.names_to_rects[undefined_activity] = rect
-                    ctx.drawer.add_patch(rect)
+                    patches.append(rect)
                     current_x += width
 
                 events = activity.node.set_of_events
@@ -111,7 +114,7 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
                 color = activities_colors[activity_hash]
                 rect = plt.Rectangle((current_x, current_y), activity_x_width, ctx.rect_height, fc=color)
                 ctx.names_to_rects[activity_name] = rect
-                ctx.drawer.add_patch(rect)
+                patches.append(rect)
                 current_x += activity_x_width
                 last_drew_index = activity.start_pos + activity.length
 
@@ -122,7 +125,9 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
 
                 rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height,
                                      fc=colors_provider(undefined_activity))
-                ctx.drawer.add_patch(rect)
+                patches.append(rect)
+
+            ctx.drawer.add_collection(PatchCollection(patches, match_original=True))
 
         current_y += ctx.rect_height + ctx.y_delta_between_traces
 
@@ -224,20 +229,22 @@ def draw_activity_placement_diagram(log: MyEventLog,
         for trace_activities, trace in zip(traces_activities, log):
             last_draw_index = 0
             current_x = 0
+            patches = []
+
             for activity in trace_activities:
                 if activity.node.name == activity_node.name:
                     if last_draw_index < activity.start_pos:
                         width = (activity.start_pos - last_draw_index) * ctx.rect_width
                         rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=undefined_color)
                         ctx.names_to_rects[undefined_activity_name] = rect
-                        ctx.drawer.add_patch(rect)
+                        patches.append(rect)
                         last_draw_index = activity.start_pos
                         current_x += width
 
                     width = activity.length * ctx.rect_width
                     rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=color_provider.next())
                     ctx.names_to_rects[activity.node.name] = rect
-                    ctx.drawer.add_patch(rect)
+                    patches.append(rect)
                     last_draw_index += activity.length
                     current_x += width
 
@@ -245,8 +252,9 @@ def draw_activity_placement_diagram(log: MyEventLog,
                 width = len(trace) - last_draw_index
                 rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=undefined_color)
                 ctx.names_to_rects[undefined_activity_name] = rect
-                ctx.drawer.add_patch(rect)
+                patches.append(rect)
 
+            ctx.drawer.add_collection(PatchCollection(patches, match_original=True))
             current_y += ctx.rect_height
             color_provider.reset()
 

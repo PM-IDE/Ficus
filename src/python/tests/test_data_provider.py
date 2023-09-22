@@ -4,7 +4,7 @@ from typing import Iterable
 
 
 def data_dir() -> str:
-    return os.path.join(dirname(dirname(abspath(os.path.curdir))), 'test_data')
+    return os.path.join(dirname(dirname(abspath(os.path.curdir))), 'tests', 'test_data')
 
 
 def sources_dir() -> str:

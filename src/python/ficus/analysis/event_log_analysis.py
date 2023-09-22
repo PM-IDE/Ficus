@@ -3,6 +3,7 @@ import os
 from typing import List, Union, Callable
 from dataclasses import dataclass
 from matplotlib import pyplot as plt, axes
+from matplotlib.collections import PatchCollection
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
@@ -200,6 +201,8 @@ def _draw_traces_diversity_like_diagram(log: MyEventLog,
         names_to_colors = dict()
         for trace in log:
             current_x = 0
+            patches = []
+
             for event in trace:
                 name = event[concept_name]
                 if name in names_to_colors:
@@ -211,8 +214,10 @@ def _draw_traces_diversity_like_diagram(log: MyEventLog,
 
                 rect = plt.Rectangle((current_x, current_y), ctx.rect_width, ctx.rect_height, fc=color)
                 ctx.names_to_rects[name] = rect
-                ctx.drawer.add_patch(rect)
+                patches.append(rect)
                 current_x += ctx.rect_width
+
+            ctx.drawer.add_collection(PatchCollection(patches, match_original=True))
 
             current_y += ctx.rect_height + ctx.y_delta_between_traces
 
@@ -235,12 +240,15 @@ def draw_colors_event_log(log: list[list[ColoredRectangle]],
         current_y = 0
         for trace in log:
             current_x = 0
+            patch_collection = []
             for colored_rect in trace:
                 width = ctx.rect_width * colored_rect.length
                 rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height, fc=colored_rect.color.to_hex())
                 ctx.names_to_rects[colored_rect.name[:50] if len(colored_rect.name) > 50 else colored_rect.name] = rect
-                ctx.drawer.add_patch(rect)
+                patch_collection.append(rect)
                 current_x += width
+
+            ctx.drawer.add_collection(PatchCollection(patch_collection, match_original=True))
 
             current_y += ctx.rect_height + ctx.y_delta_between_traces
 
@@ -324,12 +332,15 @@ def draw_events_entropy_histogram(log: MyEventLog,
 
     current_figure, ax = plt.subplots(1, 1, figsize=(20, 20))
 
+    patches = []
     for (event_name, event_entropy) in entropies.items():
         color = colors_provider.next()
         rect = plt.Rectangle((current_x, 0), rect_length, event_entropy, fc=color)
         current_x += rect_length
         names_to_rects[event_name] = rect
-        ax.add_patch(rect)
+        patches.append(rect)
+
+    ax.add_collection(PatchCollection(patches, match_original=True))
 
     keys = names_to_rects.keys()
     lst = [(key, rect, entropies[key]) for key, rect in zip(keys, names_to_rects.values())]
