@@ -14,6 +14,7 @@ from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import *
 from ficus.pipelines.analysis.patterns.models import AdjustingMode
+from ficus.util import performance_cookie
 
 
 class Pipeline2:
@@ -50,7 +51,12 @@ class Pipeline2:
                     issued_part_uuid = uuid.UUID(part_result.pipelinePartResult.uuid.uuid)
                     if issued_part_uuid in uuid_to_pipeline_with_callback:
                         context_value = part_result.pipelinePartResult.contextValue
-                        uuid_to_pipeline_with_callback[issued_part_uuid].execute_callback(context_value)
+                        part = uuid_to_pipeline_with_callback[issued_part_uuid]
+
+                        def action():
+                            part.execute_callback(context_value)
+
+                        performance_cookie(f'{type(part).__name__}Callback', action)
 
                 if last_result.HasField('logMessage'):
                     print(part_result.logMessage.message)

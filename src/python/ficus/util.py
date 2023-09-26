@@ -1,7 +1,8 @@
 import copy
 import random
+import time
 from dataclasses import dataclass
-from typing import Any, Hashable
+from typing import Any, Hashable, Callable
 
 mod = 10 ** 9 + 7
 p = 31
@@ -135,3 +136,16 @@ def deep_copy_dict(map: dict[Any, Any]) -> dict[Any, Any]:
         new_dict[copy.deepcopy(key)] = copy.deepcopy(value)
 
     return new_dict
+
+
+def performance_cookie(activity_name: str, action: Callable):
+    print(f'Started activity {activity_name}')
+
+    start = time.time()
+
+    action()
+
+    end = time.time()
+
+    elapsed = end - start
+    print(f'Activity {activity_name} has finished in {elapsed}s')
