@@ -10,8 +10,23 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
                                  width_scale: int = 1,
                                  height_scale: int = 1,
                                  save_path: Optional[str] = None):
+    axes_margin = 15
+    axes_width = 1
+    axes_padding = 5
+
+    overall_delta = axes_margin + axes_width + axes_padding
+
     max_width = max(map(len, log))
-    canvas = Canvas(width=max_width * width_scale, height=len(log) * height_scale)
+    canvas = Canvas(width=max_width * width_scale + overall_delta, height=len(log) * height_scale + overall_delta)
+
+    canvas.stroke_style = "#000000"
+    canvas.stroke_line(axes_margin, 0, axes_margin, canvas.height - axes_margin)
+    canvas.stroke_line(axes_margin, canvas.height - axes_margin, canvas.width, canvas.height - axes_margin)
+
+    canvas.font = "10px"
+    canvas.fill_text(str(len(log)), 0, 10)
+    canvas.fill_text(str(max_width), canvas.width - 2 * axes_margin, canvas.height)
+
     if save_path is not None:
         canvas.sync_image_data = True
 
@@ -26,7 +41,7 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
         current_y = 0
 
         for trace in log:
-            current_x = 0
+            current_x = overall_delta
             for rect in trace:
                 canvas.fill_style = rect.color.to_hex()
 
