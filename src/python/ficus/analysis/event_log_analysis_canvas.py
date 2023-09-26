@@ -7,8 +7,8 @@ from ficus.analysis.event_log_analysis import ColoredRectangle
 
 
 def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
-                                 width_scale: int = 1,
-                                 height_scale: int = 1,
+                                 width_scale: float = 1,
+                                 height_scale: float = 1,
                                  save_path: Optional[str] = None):
     axes_margin = 15
     axes_width = 1

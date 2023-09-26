@@ -38,8 +38,8 @@ def _create_traces_diversity_grpc_part(uuid: uuid.UUID):
 class TracesDiversityDiagram2Canvas(PipelinePart2WithCanvasCallback):
     def __init__(self,
                  save_path: Optional[str] = None,
-                 height_scale: int = 1,
-                 width_scale: int = 1):
+                 height_scale: float = 1,
+                 width_scale: float = 1):
         super().__init__(save_path=save_path,
                          width_scale=width_scale,
                          height_scale=height_scale)
@@ -84,8 +84,8 @@ class DrawPlacementsOfEventByName2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  event_name: str,
                  save_path: str = None,
-                 height_scale: int = 1,
-                 width_scale: int = 1):
+                 height_scale: float = 1,
+                 width_scale: float = 1):
         super().__init__(save_path=save_path,
                          height_scale=height_scale,
                          width_scale=width_scale)
@@ -116,7 +116,6 @@ class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
         return _create_draw_placements_of_events_by_regex_grpc_part(self.uuid, self.regex)
 
 
-
 def _create_draw_placements_of_events_by_regex_grpc_part(uuid: uuid.UUID, regex: str):
     config = GrpcPipelinePartConfiguration()
     append_string_value(config, const_regex, regex)
@@ -130,8 +129,8 @@ class DrawPlacementOfEventsByRegex2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  regex: str,
                  save_path: str = None,
-                 height_scale: int = 1,
-                 width_scale: int = 1):
+                 height_scale: float = 1,
+                 width_scale: float = 1):
         super().__init__(save_path=save_path,
                          height_scale=height_scale,
                          width_scale=width_scale)
@@ -172,8 +171,8 @@ class DrawActivitiesDiagramBase2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  diagram_kind: str,
                  save_path: str = None,
-                 height_scale: int = 1,
-                 width_scale: int = 1):
+                 height_scale: float = 1,
+                 width_scale: float = 1):
         super().__init__(save_path=save_path,
                          height_scale=height_scale,
                          width_scale=width_scale)

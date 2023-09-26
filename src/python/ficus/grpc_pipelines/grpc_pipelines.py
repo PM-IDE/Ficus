@@ -151,8 +151,8 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
 class PipelinePart2WithCanvasCallback(PipelinePart2WithCallback):
     def __init__(self,
                  save_path: Optional[str] = None,
-                 height_scale: int = 1,
-                 width_scale: int = 1):
+                 height_scale: float = 1,
+                 width_scale: float = 1):
         super().__init__()
         self.save_path = save_path
         self.width_scale = width_scale
