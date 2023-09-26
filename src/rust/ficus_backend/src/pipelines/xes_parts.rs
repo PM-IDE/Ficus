@@ -25,18 +25,16 @@ impl PipelineParts {
 
     pub(super) fn read_log_from_xes() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::READ_LOG_FROM_XES, &|context, infra, keys, _| {
-            performance_cookie(Self::READ_LOG_FROM_XES, infra, &mut || {
-                let path = Self::get_user_data(context, keys.path())?;
+            let path = Self::get_user_data(context, keys.path())?;
 
-                let log = read_event_log(path);
-                if log.is_none() {
-                    let message = format!("Failed to read event log from {}", path.as_str());
-                    return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
-                }
+            let log = read_event_log(path);
+            if log.is_none() {
+                let message = format!("Failed to read event log from {}", path.as_str());
+                return Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)));
+            }
 
-                context.put_concrete(keys.event_log().key(), log.unwrap());
-                Ok(())
-            })
+            context.put_concrete(keys.event_log().key(), log.unwrap());
+            Ok(())
         })
     }
 }

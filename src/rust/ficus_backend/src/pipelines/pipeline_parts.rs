@@ -5,6 +5,7 @@ use crate::pipelines::errors::pipeline_errors::{
 use crate::pipelines::keys::context_key::DefaultContextKey;
 use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipelines::{DefaultPipelinePart, PipelinePartFactory};
+use crate::utils::performance::performance_cookie::performance_cookie;
 use crate::utils::user_data::keys::Key;
 use crate::utils::user_data::user_data::{UserData, UserDataImpl};
 use fancy_regex::Regex;
@@ -88,7 +89,9 @@ impl PipelineParts {
                 DefaultPipelinePart::new(
                     name.to_string(),
                     config,
-                    Box::new(|context, infrastruccture, keys, config| executor(context, infrastruccture, keys, config)),
+                    Box::new(|context, infra, keys, config| {
+                        performance_cookie(name, infra, &mut || executor(context, infra, keys, config))
+                    }),
                 )
             }),
         )

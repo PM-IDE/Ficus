@@ -5,7 +5,7 @@ pub trait PerformanceLogger<TErr> {
 }
 
 pub fn performance_cookie<TErr>(
-    activity_name: &'static str,
+    activity_name: &str,
     logger: &impl PerformanceLogger<TErr>,
     action: &mut impl FnMut() -> Result<(), TErr>,
 ) -> Result<(), TErr> {
