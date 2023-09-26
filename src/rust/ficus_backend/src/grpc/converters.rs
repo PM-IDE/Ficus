@@ -34,7 +34,7 @@ use crate::{
 };
 
 pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
-    let mut pipeline_context = PipelineContext::new_with_logging(context.parts(), context.log_message_handler());
+    let mut pipeline_context = PipelineContext::new_with_logging(context.parts());
 
     for value in context.context_values() {
         let key = context.keys().find_key(&value.key.as_ref().unwrap().name).unwrap();

@@ -17,6 +17,7 @@ use super::{
     get_context_pipeline::GetContextValuePipelinePart,
     logs_handler::LogMessageHandlerImpl,
 };
+use crate::pipelines::context::PipelineInfrastructure;
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
@@ -211,8 +212,9 @@ impl FicusService {
         let id = Uuid::new_v4();
         let pipeline = Self::to_pipeline(context);
         let mut pipeline_context = create_initial_context(context);
+        let infra = PipelineInfrastructure::new(Some(context.log_message_handler()));
 
-        match pipeline.execute(&mut pipeline_context, context.keys()) {
+        match pipeline.execute(&mut pipeline_context, &infra, context.keys()) {
             Ok(()) => Ok((
                 GrpcGuid { guid: id.to_string() },
                 pipeline_context.devastate_user_data(),

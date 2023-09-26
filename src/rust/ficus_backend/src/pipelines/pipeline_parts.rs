@@ -1,4 +1,4 @@
-use crate::pipelines::context::PipelineContext;
+use crate::pipelines::context::{PipelineContext, PipelineInfrastructure};
 use crate::pipelines::errors::pipeline_errors::{
     MissingContextError, PipelinePartExecutionError, RawPartExecutionError,
 };
@@ -77,6 +77,7 @@ impl PipelineParts {
         name: &'static str,
         executor: &'static impl Fn(
             &mut PipelineContext,
+            &PipelineInfrastructure,
             &ContextKeys,
             &UserDataImpl,
         ) -> Result<(), PipelinePartExecutionError>,
@@ -87,7 +88,7 @@ impl PipelineParts {
                 DefaultPipelinePart::new(
                     name.to_string(),
                     config,
-                    Box::new(|context, keys, config| executor(context, keys, config)),
+                    Box::new(|context, infrastruccture, keys, config| executor(context, infrastruccture, keys, config)),
                 )
             }),
         )

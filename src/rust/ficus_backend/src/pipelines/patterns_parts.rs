@@ -41,31 +41,31 @@ impl FromStr for PatternsKindDto {
 
 impl PipelineParts {
     pub(super) fn find_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_MAXIMAL_REPEATS, &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_MAXIMAL_REPEATS, &|context, _, keys, config| {
             Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)
         })
     }
 
     pub(super) fn find_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_SUPER_MAXIMAL_REPEATS, &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_SUPER_MAXIMAL_REPEATS, &|context, _, keys, config| {
             Self::find_repeats_and_put_to_context(context, keys, config, find_super_maximal_repeats)
         })
     }
 
     pub(super) fn find_near_super_maximal_repeats() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_NEAR_SUPER_MAXIMAL_REPEATS, &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_NEAR_SUPER_MAXIMAL_REPEATS, &|context, _, keys, config| {
             Self::find_repeats_and_put_to_context(context, keys, config, find_near_super_maximal_repeats)
         })
     }
 
     pub(super) fn find_primitive_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_PRIMITIVE_TANDEM_ARRAYS, &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_PRIMITIVE_TANDEM_ARRAYS, &|context, _, keys, config| {
             Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_primitive_tandem_arrays)
         })
     }
 
     pub(super) fn find_maximal_tandem_arrays() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::FIND_MAXIMAL_TANDEM_ARRAYS, &|context, keys, config| {
+        Self::create_pipeline_part(Self::FIND_MAXIMAL_TANDEM_ARRAYS, &|context, _, keys, config| {
             Self::find_tandem_arrays_and_put_to_context(context, keys, &config, find_maximal_tandem_arrays)
         })
     }

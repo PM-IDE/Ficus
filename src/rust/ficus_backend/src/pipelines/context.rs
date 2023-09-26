@@ -1,4 +1,5 @@
 use crate::pipelines::pipeline_parts::PipelineParts;
+use crate::utils::performance::performance_cookie::PerformanceLogger;
 use std::{any::Any, sync::Arc};
 
 use crate::utils::user_data::{
@@ -12,18 +13,41 @@ pub trait LogMessageHandler: Send + Sync {
     fn handle(&self, message: String) -> Result<(), PipelinePartExecutionError>;
 }
 
+pub struct PipelineInfrastructure {
+    log_message_handler: Option<Arc<Box<dyn LogMessageHandler>>>,
+}
+
+impl PerformanceLogger<PipelinePartExecutionError> for PipelineInfrastructure {
+    fn log(&self, message: String) -> Result<(), PipelinePartExecutionError> {
+        self.log(message)?;
+        Ok(())
+    }
+}
+
+impl PipelineInfrastructure {
+    pub fn new(log_message_handler: Option<Arc<Box<dyn LogMessageHandler>>>) -> Self {
+        Self { log_message_handler }
+    }
+
+    pub fn log(&self, message: String) -> Result<(), PipelinePartExecutionError> {
+        if let Some(handler) = self.log_message_handler.as_ref() {
+            handler.handle(message)
+        } else {
+            Ok(())
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct PipelineContext<'a> {
     user_data: UserDataImpl,
-    log_message_handler: Option<Arc<Box<dyn LogMessageHandler>>>,
     pipeline_parts: Option<&'a PipelineParts>,
 }
 
 impl<'a> PipelineContext<'a> {
-    pub fn new_with_logging(parts: &'a PipelineParts, message_handler: Arc<Box<dyn LogMessageHandler>>) -> Self {
+    pub fn new_with_logging(parts: &'a PipelineParts) -> Self {
         Self {
             user_data: UserDataImpl::new(),
-            log_message_handler: Some(message_handler),
             pipeline_parts: Some(parts),
         }
     }
@@ -31,7 +55,6 @@ impl<'a> PipelineContext<'a> {
     pub fn empty() -> Self {
         Self {
             user_data: UserDataImpl::new(),
-            log_message_handler: None,
             pipeline_parts: None,
         }
     }
@@ -39,7 +62,6 @@ impl<'a> PipelineContext<'a> {
     pub fn empty_from(other: &'a PipelineContext) -> Self {
         Self {
             user_data: UserDataImpl::new(),
-            log_message_handler: other.log_message_handler.clone(),
             pipeline_parts: other.pipeline_parts.clone(),
         }
     }
@@ -80,14 +102,6 @@ impl<'a> UserData for PipelineContext<'a> {
 }
 
 impl<'a> PipelineContext<'a> {
-    pub fn log(&self, message: String) -> Result<(), PipelinePartExecutionError> {
-        if let Some(handler) = self.log_message_handler.as_ref() {
-            handler.handle(message)
-        } else {
-            Ok(())
-        }
-    }
-
     pub fn pipeline_parts(&self) -> Option<&PipelineParts> {
         self.pipeline_parts
     }

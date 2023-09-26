@@ -38,7 +38,7 @@ impl PipelineParts {
     }
 
     pub(super) fn get_event_log_info() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::GET_EVENT_LOG_INFO, &|context, keys, _| {
+        Self::create_pipeline_part(Self::GET_EVENT_LOG_INFO, &|context, _, keys, _| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
             context.put_concrete(keys.event_log_info().key(), log_info);
@@ -48,7 +48,7 @@ impl PipelineParts {
     }
 
     pub(super) fn get_hashes_event_log() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, keys, config| {
+        Self::create_pipeline_part(Self::GET_HASHES_EVENT_LOG, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let hashes_event_log = Self::create_hashed_event_log(config, keys, log);
 
@@ -59,7 +59,7 @@ impl PipelineParts {
     }
 
     pub(super) fn get_names_event_log() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::GET_NAMES_EVENT_LOG, &|context, keys, _| {
+        Self::create_pipeline_part(Self::GET_NAMES_EVENT_LOG, &|context, _, keys, _| {
             let log = Self::get_user_data(context, keys.event_log())?;
 
             let mut result = vec![];
@@ -79,7 +79,7 @@ impl PipelineParts {
     }
 
     pub(super) fn use_names_event_log() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::USE_NAMES_EVENT_LOG, &|context, keys, _| {
+        Self::create_pipeline_part(Self::USE_NAMES_EVENT_LOG, &|context, _, keys, _| {
             let names_log = Self::get_user_data(context, keys.names_event_log())?;
             let mut log = XesEventLogImpl::empty();
             for names_trace in names_log {
@@ -102,9 +102,9 @@ impl PipelineParts {
     }
 
     pub(super) fn execute_frontend_pipeline() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::EXECUTE_FRONTEND_PIPELINE, &|context, keys, config| {
+        Self::create_pipeline_part(Self::EXECUTE_FRONTEND_PIPELINE, &|context, infra, keys, config| {
             let pipeline = Self::get_user_data(config, keys.pipeline())?;
-            pipeline.execute(context, keys)?;
+            pipeline.execute(context, infra, keys)?;
 
             Ok(())
         })

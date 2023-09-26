@@ -2,6 +2,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::ficus_proto::GrpcUuid;
+use crate::pipelines::context::PipelineInfrastructure;
 use crate::{
     ficus_proto::{GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
     pipelines::{
@@ -19,7 +20,7 @@ use super::{
 };
 
 #[rustfmt::skip]
-type GetContextHandler = Box<dyn Fn(Uuid, &mut PipelineContext, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
+type GetContextHandler = Box<dyn Fn(Uuid, &mut PipelineContext, &PipelineInfrastructure, &ContextKeys, &Box<dyn ContextKey>) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct GetContextValuePipelinePart {
     key_name: String,
@@ -45,9 +46,9 @@ impl GetContextValuePipelinePart {
         Box::new(GetContextValuePipelinePart::new(
             key_name,
             uuid,
-            Box::new(move |uuid, context, keys, key| {
+            Box::new(move |uuid, context, infra, keys, key| {
                 if let Some(before_part) = before_part.as_ref() {
-                    before_part.execute(context, keys)?;
+                    before_part.execute(context, infra, keys)?;
                 }
 
                 match context.any(key.key()) {
@@ -75,9 +76,14 @@ impl GetContextValuePipelinePart {
 }
 
 impl PipelinePart for GetContextValuePipelinePart {
-    fn execute(&self, context: &mut PipelineContext, keys: &ContextKeys) -> Result<(), PipelinePartExecutionError> {
+    fn execute(
+        &self,
+        context: &mut PipelineContext,
+        infra: &PipelineInfrastructure,
+        keys: &ContextKeys,
+    ) -> Result<(), PipelinePartExecutionError> {
         match keys.find_key(&self.key_name) {
-            Some(key) => (self.handler)(self.uuid.clone(), context, keys, key),
+            Some(key) => (self.handler)(self.uuid.clone(), context, infra, keys, key),
             None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
                 self.key_name.clone(),
             ))),
