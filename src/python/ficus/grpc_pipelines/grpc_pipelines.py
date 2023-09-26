@@ -1,7 +1,9 @@
 import uuid
 from dataclasses import dataclass
+from typing import Optional
 
 from ficus.analysis.event_log_analysis import draw_colors_event_log
+from ficus.analysis.event_log_analysis_canvas import draw_colors_event_log_canvas
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
@@ -124,7 +126,7 @@ class PipelinePart2WithCallback(PipelinePart2):
 
 class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
     def __init__(self,
-                 title: str = None,
+                 title: Optional[str] = None,
                  save_path: str = None,
                  plot_legend: bool = True,
                  height_scale: int = 1,
@@ -144,6 +146,24 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
                               plot_legend=self.plot_legend,
                               height_scale=self.height_scale,
                               width_scale=self.width_scale)
+
+
+class PipelinePart2WithCanvasCallback(PipelinePart2WithCallback):
+    def __init__(self,
+                 save_path: Optional[str] = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__()
+        self.save_path = save_path
+        self.width_scale = width_scale
+        self.height_scale = height_scale
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        colors_log = from_grpc_colors_log(context_value.colors_log)
+        draw_colors_event_log_canvas(colors_log,
+                                     save_path=self.save_path,
+                                     height_scale=self.height_scale,
+                                     width_scale=self.width_scale)
 
 
 class PrintEventLogInfo2(PipelinePart2WithCallback):

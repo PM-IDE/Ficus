@@ -1,16 +1,19 @@
+import uuid
+from typing import Optional
+
 from ficus.grpc_pipelines.constants import const_colors_event_log, const_traces_diversity_diagram, const_event_name, \
     const_draw_placement_of_event_by_name, const_regex, const_draw_placement_of_event_by_regex, \
     const_draw_full_activities_diagram, const_draw_short_activities_diagram
 from ficus.grpc_pipelines.context_values import StringContextValue
 from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2WithDrawColorsLogCallback, \
-    _create_complex_get_context_part, append_string_value
+    _create_complex_get_context_part, append_string_value, PipelinePart2WithCanvasCallback
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextKeyValue, GrpcContextKey
 
 
 class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
     def __init__(self,
-                 title: str = None,
+                 title: Optional[str] = None,
                  save_path: str = None,
                  plot_legend: bool = True,
                  height_scale: int = 1,
@@ -22,9 +25,27 @@ class TracesDiversityDiagram2(PipelinePart2WithDrawColorsLogCallback):
                          width_scale=width_scale)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_traces_diversity_diagram, config)
-        return GrpcPipelinePartBase(complexContextRequestPart=part)
+        return _create_traces_diversity_grpc_part(self.uuid)
+
+
+def _create_traces_diversity_grpc_part(uuid: uuid.UUID):
+    config = GrpcPipelinePartConfiguration()
+    part = _create_complex_get_context_part(uuid, const_colors_event_log, const_traces_diversity_diagram,
+                                            config)
+    return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class TracesDiversityDiagram2Canvas(PipelinePart2WithCanvasCallback):
+    def __init__(self,
+                 save_path: Optional[str] = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(save_path=save_path,
+                         width_scale=width_scale,
+                         height_scale=height_scale)
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_traces_diversity_grpc_part(self.uuid)
 
 
 class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
@@ -44,14 +65,35 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
         self.event_name = event_name
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        config.configurationParameters.append(GrpcContextKeyValue(
-            key=GrpcContextKey(name=const_event_name),
-            value=StringContextValue(self.event_name).to_grpc_context_value()
-        ))
+        return _create_draw_placements_of_events_by_name_grpc_part(self.uuid, self.event_name)
 
-        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_draw_placement_of_event_by_name, config)
-        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+def _create_draw_placements_of_events_by_name_grpc_part(uuid: uuid.UUID, event_name: str):
+    config = GrpcPipelinePartConfiguration()
+    config.configurationParameters.append(GrpcContextKeyValue(
+        key=GrpcContextKey(name=const_event_name),
+        value=StringContextValue(event_name).to_grpc_context_value()
+    ))
+
+    part = _create_complex_get_context_part(uuid, const_colors_event_log,
+                                            const_draw_placement_of_event_by_name, config)
+    return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class DrawPlacementsOfEventByName2Canvas(TracesDiversityDiagram2Canvas):
+    def __init__(self,
+                 event_name: str,
+                 save_path: str = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(save_path=save_path,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
+        self.event_name = event_name
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_draw_placements_of_events_by_name_grpc_part(self.uuid, self.event_name)
 
 
 class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
@@ -71,11 +113,33 @@ class DrawPlacementOfEventsByRegex2(PipelinePart2WithDrawColorsLogCallback):
         self.regex = regex
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        append_string_value(config, const_regex, self.regex)
+        return _create_draw_placements_of_events_by_regex_grpc_part(self.uuid, self.regex)
 
-        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, const_draw_placement_of_event_by_regex, config)
-        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+def _create_draw_placements_of_events_by_regex_grpc_part(uuid: uuid.UUID, regex: str):
+    config = GrpcPipelinePartConfiguration()
+    append_string_value(config, const_regex, regex)
+
+    part = _create_complex_get_context_part(uuid, const_colors_event_log,
+                                            const_draw_placement_of_event_by_regex, config)
+    return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class DrawPlacementOfEventsByRegex2Canvas(TracesDiversityDiagram2Canvas):
+    def __init__(self,
+                 regex: str,
+                 save_path: str = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(save_path=save_path,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
+        self.regex = regex
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_draw_placements_of_events_by_regex_grpc_part(self.uuid, self.regex)
 
 
 class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
@@ -95,9 +159,29 @@ class DrawActivitiesDiagramBase2(PipelinePart2WithDrawColorsLogCallback):
         self.diagram_kind = diagram_kind
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(self.uuid, const_colors_event_log, self.diagram_kind, config)
-        return GrpcPipelinePartBase(complexContextRequestPart=part)
+        return _create_draw_activities_diagram_grpc_part(self.uuid, self.diagram_kind)
+
+
+def _create_draw_activities_diagram_grpc_part(uuid: uuid.UUID, diagram_kind: str):
+    config = GrpcPipelinePartConfiguration()
+    part = _create_complex_get_context_part(uuid, const_colors_event_log, diagram_kind, config)
+    return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class DrawActivitiesDiagramBase2Canvas(TracesDiversityDiagram2Canvas):
+    def __init__(self,
+                 diagram_kind: str,
+                 save_path: str = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(save_path=save_path,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
+        self.diagram_kind = diagram_kind
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_draw_activities_diagram_grpc_part(self.uuid, self.diagram_kind)
 
 
 class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
@@ -115,6 +199,17 @@ class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
                          width_scale=width_scale)
 
 
+class DrawFullActivitiesDiagram2Canvas(DrawActivitiesDiagramBase2Canvas):
+    def __init__(self,
+                 save_path: str = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(const_draw_full_activities_diagram,
+                         save_path=save_path,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
+
 class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
     def __init__(self,
                  title: str = None,
@@ -126,5 +221,16 @@ class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
                          title=title,
                          save_path=save_path,
                          plot_legend=plot_legend,
+                         height_scale=height_scale,
+                         width_scale=width_scale)
+
+
+class DrawShortActivitiesDiagram2Canvas(DrawActivitiesDiagramBase2Canvas):
+    def __init__(self,
+                 save_path: str = None,
+                 height_scale: int = 1,
+                 width_scale: int = 1):
+        super().__init__(const_draw_short_activities_diagram,
+                         save_path=save_path,
                          height_scale=height_scale,
                          width_scale=width_scale)
