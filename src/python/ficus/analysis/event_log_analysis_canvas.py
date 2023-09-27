@@ -23,7 +23,7 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
                                  save_path: Optional[str] = None):
     max_width = _calculate_canvas_width(log)
 
-    title_height = 20 if title is not None else 0
+    title_height = 20 if title is not None else 10
     canvas_height = len(log) * height_scale + overall_delta + title_height
 
     before_height = canvas_height
@@ -37,17 +37,16 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
 
         canvas_height += len(names_to_colors) * legend_rect_height
 
-    canvas = Canvas(width=max_width * width_scale + overall_delta, height=canvas_height)
+    canvas = Canvas(width=max_width * width_scale + overall_delta,
+                    height=canvas_height,
+                    sync_image_data=save_path is not None)
 
-    if save_path is not None:
-        canvas.sync_image_data = True
-
-    def save_to_file():
+    def save_to_file(change):
         if save_path is not None:
             canvas.to_file(save_path)
 
     if save_path is not None:
-        canvas.observe(save_to_file, 'image_data')
+        canvas.observe(save_to_file, "image_data")
 
     _draw_actual_traces_diversity_diagram(log, canvas, title, title_height, before_height,
                                           max_width, width_scale, height_scale)
@@ -72,6 +71,11 @@ def _draw_actual_traces_diversity_diagram(log: list[list[ColoredRectangle]],
                                           width_scale: float,
                                           height_scale: float):
     with hold_canvas():
+        canvas.fill_style = 'white'
+        canvas.fill_rect(0, 0, canvas.width, canvas.height)
+
+        canvas.fill_style = 'black'
+
         if title is not None:
             canvas.font = f'{text_size_px}px'
             canvas.fill_text(title, canvas.width / 2, title_height / 2)
@@ -102,17 +106,18 @@ def _draw_actual_traces_diversity_diagram(log: list[list[ColoredRectangle]],
 
 
 def _draw_legend(canvas: Canvas, names_to_colors: dict[str, str], before_height: float):
-    index = 0
-    current_x = canvas.width / 3
+    with hold_canvas():
+        index = 0
+        current_x = canvas.width / 3
 
-    for name, color in names_to_colors.items():
-        canvas.fill_style = color
-        canvas.fill_rect(current_x, before_height + legend_rect_height * index, legend_rect_width,
-                         legend_rect_height)
+        for name, color in names_to_colors.items():
+            canvas.fill_style = color
+            canvas.fill_rect(current_x, before_height + legend_rect_height * index, legend_rect_width,
+                             legend_rect_height)
 
-        canvas.fill_style = 'black'
-        canvas.fill_text(name,
-                         current_x + legend_rect_width + x_delta,
-                         before_height + legend_rect_height * index + legend_rect_height / 1.4)
+            canvas.fill_style = 'black'
+            canvas.fill_text(name,
+                             current_x + legend_rect_width + x_delta,
+                             before_height + legend_rect_height * index + legend_rect_height / 1.4)
 
-        index += 1
+            index += 1
