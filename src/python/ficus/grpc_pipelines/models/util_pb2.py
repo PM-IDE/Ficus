@@ -10,11 +10,9 @@ from google.protobuf import descriptor as _descriptor
 
 from google.protobuf import descriptor_pool as _descriptor_pool
 
-from google.protobuf import message as _message
-
-from google.protobuf import reflection as _reflection
-
 from google.protobuf import symbol_database as _symbol_database
+
+from google.protobuf.internal import builder as _builder
 
 # @@protoc_insertion_point(imports)
 
@@ -34,57 +32,11 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nutil.proto\x12\x
 
 
 
+_globals = globals()
 
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 
-
-
-_GRPCGUID = DESCRIPTOR.message_types_by_name['GrpcGuid']
-
-_GRPCCOLOR = DESCRIPTOR.message_types_by_name['GrpcColor']
-
-_GRPCUUID = DESCRIPTOR.message_types_by_name['GrpcUuid']
-
-GrpcGuid = _reflection.GeneratedProtocolMessageType('GrpcGuid', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCGUID,
-
-  '__module__' : 'util_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcGuid)
-
-  })
-
-_sym_db.RegisterMessage(GrpcGuid)
-
-
-
-GrpcColor = _reflection.GeneratedProtocolMessageType('GrpcColor', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCOLOR,
-
-  '__module__' : 'util_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcColor)
-
-  })
-
-_sym_db.RegisterMessage(GrpcColor)
-
-
-
-GrpcUuid = _reflection.GeneratedProtocolMessageType('GrpcUuid', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCUUID,
-
-  '__module__' : 'util_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcUuid)
-
-  })
-
-_sym_db.RegisterMessage(GrpcUuid)
-
-
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'util_pb2', _globals)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -92,16 +44,16 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
 
-  _GRPCGUID._serialized_start=21
+  _globals['_GRPCGUID']._serialized_start=21
 
-  _GRPCGUID._serialized_end=45
+  _globals['_GRPCGUID']._serialized_end=45
 
-  _GRPCCOLOR._serialized_start=47
+  _globals['_GRPCCOLOR']._serialized_start=47
 
-  _GRPCCOLOR._serialized_end=100
+  _globals['_GRPCCOLOR']._serialized_end=100
 
-  _GRPCUUID._serialized_start=102
+  _globals['_GRPCUUID']._serialized_start=102
 
-  _GRPCUUID._serialized_end=126
+  _globals['_GRPCUUID']._serialized_end=126
 
 # @@protoc_insertion_point(module_scope)

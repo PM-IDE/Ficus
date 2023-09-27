@@ -8,6 +8,10 @@ import grpc
 
 import ficus.grpc_pipelines.models.backend_service_pb2 as backend__service__pb2
 
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+
+import ficus.grpc_pipelines.models.util_pb2 as util__pb2
+
 
 
 
@@ -50,6 +54,16 @@ class GrpcBackendServiceStub(object):
 
                 )
 
+        self.DropExecutionResult = channel.unary_unary(
+
+                '/ficus.GrpcBackendService/DropExecutionResult',
+
+                request_serializer=util__pb2.GrpcGuid.SerializeToString,
+
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+
+                )
+
 
 
 
@@ -84,6 +98,18 @@ class GrpcBackendServiceServicer(object):
 
 
 
+    def DropExecutionResult(self, request, context):
+
+        """Missing associated documentation comment in .proto file."""
+
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+
+        context.set_details('Method not implemented!')
+
+        raise NotImplementedError('Method not implemented!')
+
+
+
 
 
 def add_GrpcBackendServiceServicer_to_server(servicer, server):
@@ -107,6 +133,16 @@ def add_GrpcBackendServiceServicer_to_server(servicer, server):
                     request_deserializer=backend__service__pb2.GrpcGetContextValueRequest.FromString,
 
                     response_serializer=backend__service__pb2.GrpcGetContextValueResult.SerializeToString,
+
+            ),
+
+            'DropExecutionResult': grpc.unary_unary_rpc_method_handler(
+
+                    servicer.DropExecutionResult,
+
+                    request_deserializer=util__pb2.GrpcGuid.FromString,
+
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
 
             ),
 
@@ -191,6 +227,40 @@ class GrpcBackendService(object):
             backend__service__pb2.GrpcGetContextValueRequest.SerializeToString,
 
             backend__service__pb2.GrpcGetContextValueResult.FromString,
+
+            options, channel_credentials,
+
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+
+    @staticmethod
+
+    def DropExecutionResult(request,
+
+            target,
+
+            options=(),
+
+            channel_credentials=None,
+
+            call_credentials=None,
+
+            insecure=False,
+
+            compression=None,
+
+            wait_for_ready=None,
+
+            timeout=None,
+
+            metadata=None):
+
+        return grpc.experimental.unary_unary(request, target, '/ficus.GrpcBackendService/DropExecutionResult',
+
+            util__pb2.GrpcGuid.SerializeToString,
+
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
 
             options, channel_credentials,
 

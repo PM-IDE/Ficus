@@ -15,18 +15,18 @@ def generate_models():
 
     os.mkdir(models_dir)
 
-    os.popen('python -m pip install grpcio-tools').read()
+    python = 'python'
+    os.popen(f'{python} -m pip install grpcio-tools').read()
     packages = []
-
 
     for package in packages:
         os.popen(
-            f"python -m grpc_tools.protoc -I {protos_dir} --python_out={models_dir}"
-            f" --grpc_python_out={models_dir} {protos_dir}/{package}/*.proto").read()
+            f'{python} -m grpc_tools.protoc -I {protos_dir} --python_out={models_dir}'
+            f' --grpc_python_out={models_dir} {protos_dir}/{package}/*.proto').read()
 
     os.popen(
-        f"python -m grpc_tools.protoc -I {protos_dir} --python_out={models_dir}"
-        f" --grpc_python_out={models_dir} {protos_dir}/*.proto").read()
+        f'{python} -m grpc_tools.protoc -I {protos_dir} --python_out={models_dir}'
+        f' --grpc_python_out={models_dir} {protos_dir}/*.proto').read()
 
     common_proto_files = [f for f in listdir(protos_dir) if isfile(join(protos_dir, f))]
     common_files = []

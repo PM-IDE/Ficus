@@ -63,6 +63,10 @@ class Pipeline2:
                 if last_result.HasField('logMessage'):
                     print(part_result.logMessage.message)
 
+            if last_result.finalResult.HasField('success'):
+                guid = last_result.finalResult.success
+                stub.DropExecutionResult(guid)
+
             return last_result
 
     def to_grpc_pipeline(self):

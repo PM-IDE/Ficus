@@ -10,11 +10,9 @@ from google.protobuf import descriptor as _descriptor
 
 from google.protobuf import descriptor_pool as _descriptor_pool
 
-from google.protobuf import message as _message
-
-from google.protobuf import reflection as _reflection
-
 from google.protobuf import symbol_database as _symbol_database
+
+from google.protobuf.internal import builder as _builder
 
 # @@protoc_insertion_point(imports)
 
@@ -38,393 +36,11 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bpipelines_and_
 
 
 
+_globals = globals()
 
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 
-
-
-_GRPCCONTEXTKEY = DESCRIPTOR.message_types_by_name['GrpcContextKey']
-
-_GRPCCONTEXTVALUE = DESCRIPTOR.message_types_by_name['GrpcContextValue']
-
-_GRPCCONTEXTKEYVALUE = DESCRIPTOR.message_types_by_name['GrpcContextKeyValue']
-
-_GRPCHASHESEVENTLOGCONTEXTVALUE = DESCRIPTOR.message_types_by_name['GrpcHashesEventLogContextValue']
-
-_GRPCNAMESEVENTLOGCONTEXTVALUE = DESCRIPTOR.message_types_by_name['GrpcNamesEventLogContextValue']
-
-_GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE = DESCRIPTOR.message_types_by_name['GrpcEventLogTraceSubArraysContextValue']
-
-_GRPCTRACESUBARRAY = DESCRIPTOR.message_types_by_name['GrpcTraceSubArray']
-
-_GRPCTRACESUBARRAYS = DESCRIPTOR.message_types_by_name['GrpcTraceSubArrays']
-
-_GRPCSUBARRAYWITHTRACEINDEX = DESCRIPTOR.message_types_by_name['GrpcSubArrayWithTraceIndex']
-
-_GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE = DESCRIPTOR.message_types_by_name['GrpcSubArraysWithTraceIndexContextValue']
-
-_GRPCCOLORSEVENTLOG = DESCRIPTOR.message_types_by_name['GrpcColorsEventLog']
-
-_GRPCCOLORSTRACE = DESCRIPTOR.message_types_by_name['GrpcColorsTrace']
-
-_GRPCCOLOREDRECTANGLE = DESCRIPTOR.message_types_by_name['GrpcColoredRectangle']
-
-_GRPCENUM = DESCRIPTOR.message_types_by_name['GrpcEnum']
-
-_GRPCEVENTLOGINFO = DESCRIPTOR.message_types_by_name['GrpcEventLogInfo']
-
-_GRPCSTRINGS = DESCRIPTOR.message_types_by_name['GrpcStrings']
-
-_GRPCPIPELINE = DESCRIPTOR.message_types_by_name['GrpcPipeline']
-
-_GRPCPIPELINEPARTBASE = DESCRIPTOR.message_types_by_name['GrpcPipelinePartBase']
-
-_GRPCPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcPipelinePart']
-
-_GRPCPIPELINEPARTCONFIGURATION = DESCRIPTOR.message_types_by_name['GrpcPipelinePartConfiguration']
-
-_GRPCPARALLELPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcParallelPipelinePart']
-
-_GRPCPARALLELPIPELINEPARTS = DESCRIPTOR.message_types_by_name['GrpcParallelPipelineParts']
-
-_GRPCSIMPLECONTEXTREQUESTPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcSimpleContextRequestPipelinePart']
-
-_GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART = DESCRIPTOR.message_types_by_name['GrpcComplexContextRequestPipelinePart']
-
-GrpcContextKey = _reflection.GeneratedProtocolMessageType('GrpcContextKey', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCONTEXTKEY,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcContextKey)
-
-  })
-
-_sym_db.RegisterMessage(GrpcContextKey)
-
-
-
-GrpcContextValue = _reflection.GeneratedProtocolMessageType('GrpcContextValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCONTEXTVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcContextValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcContextValue)
-
-
-
-GrpcContextKeyValue = _reflection.GeneratedProtocolMessageType('GrpcContextKeyValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCONTEXTKEYVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcContextKeyValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcContextKeyValue)
-
-
-
-GrpcHashesEventLogContextValue = _reflection.GeneratedProtocolMessageType('GrpcHashesEventLogContextValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCHASHESEVENTLOGCONTEXTVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcHashesEventLogContextValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcHashesEventLogContextValue)
-
-
-
-GrpcNamesEventLogContextValue = _reflection.GeneratedProtocolMessageType('GrpcNamesEventLogContextValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCNAMESEVENTLOGCONTEXTVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcNamesEventLogContextValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcNamesEventLogContextValue)
-
-
-
-GrpcEventLogTraceSubArraysContextValue = _reflection.GeneratedProtocolMessageType('GrpcEventLogTraceSubArraysContextValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcEventLogTraceSubArraysContextValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcEventLogTraceSubArraysContextValue)
-
-
-
-GrpcTraceSubArray = _reflection.GeneratedProtocolMessageType('GrpcTraceSubArray', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCTRACESUBARRAY,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcTraceSubArray)
-
-  })
-
-_sym_db.RegisterMessage(GrpcTraceSubArray)
-
-
-
-GrpcTraceSubArrays = _reflection.GeneratedProtocolMessageType('GrpcTraceSubArrays', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCTRACESUBARRAYS,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcTraceSubArrays)
-
-  })
-
-_sym_db.RegisterMessage(GrpcTraceSubArrays)
-
-
-
-GrpcSubArrayWithTraceIndex = _reflection.GeneratedProtocolMessageType('GrpcSubArrayWithTraceIndex', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSUBARRAYWITHTRACEINDEX,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcSubArrayWithTraceIndex)
-
-  })
-
-_sym_db.RegisterMessage(GrpcSubArrayWithTraceIndex)
-
-
-
-GrpcSubArraysWithTraceIndexContextValue = _reflection.GeneratedProtocolMessageType('GrpcSubArraysWithTraceIndexContextValue', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcSubArraysWithTraceIndexContextValue)
-
-  })
-
-_sym_db.RegisterMessage(GrpcSubArraysWithTraceIndexContextValue)
-
-
-
-GrpcColorsEventLog = _reflection.GeneratedProtocolMessageType('GrpcColorsEventLog', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCOLORSEVENTLOG,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcColorsEventLog)
-
-  })
-
-_sym_db.RegisterMessage(GrpcColorsEventLog)
-
-
-
-GrpcColorsTrace = _reflection.GeneratedProtocolMessageType('GrpcColorsTrace', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCOLORSTRACE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcColorsTrace)
-
-  })
-
-_sym_db.RegisterMessage(GrpcColorsTrace)
-
-
-
-GrpcColoredRectangle = _reflection.GeneratedProtocolMessageType('GrpcColoredRectangle', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCOLOREDRECTANGLE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcColoredRectangle)
-
-  })
-
-_sym_db.RegisterMessage(GrpcColoredRectangle)
-
-
-
-GrpcEnum = _reflection.GeneratedProtocolMessageType('GrpcEnum', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCENUM,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcEnum)
-
-  })
-
-_sym_db.RegisterMessage(GrpcEnum)
-
-
-
-GrpcEventLogInfo = _reflection.GeneratedProtocolMessageType('GrpcEventLogInfo', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCEVENTLOGINFO,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcEventLogInfo)
-
-  })
-
-_sym_db.RegisterMessage(GrpcEventLogInfo)
-
-
-
-GrpcStrings = _reflection.GeneratedProtocolMessageType('GrpcStrings', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSTRINGS,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcStrings)
-
-  })
-
-_sym_db.RegisterMessage(GrpcStrings)
-
-
-
-GrpcPipeline = _reflection.GeneratedProtocolMessageType('GrpcPipeline', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPIPELINE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcPipeline)
-
-  })
-
-_sym_db.RegisterMessage(GrpcPipeline)
-
-
-
-GrpcPipelinePartBase = _reflection.GeneratedProtocolMessageType('GrpcPipelinePartBase', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPIPELINEPARTBASE,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcPipelinePartBase)
-
-  })
-
-_sym_db.RegisterMessage(GrpcPipelinePartBase)
-
-
-
-GrpcPipelinePart = _reflection.GeneratedProtocolMessageType('GrpcPipelinePart', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPIPELINEPART,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcPipelinePart)
-
-  })
-
-_sym_db.RegisterMessage(GrpcPipelinePart)
-
-
-
-GrpcPipelinePartConfiguration = _reflection.GeneratedProtocolMessageType('GrpcPipelinePartConfiguration', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPIPELINEPARTCONFIGURATION,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcPipelinePartConfiguration)
-
-  })
-
-_sym_db.RegisterMessage(GrpcPipelinePartConfiguration)
-
-
-
-GrpcParallelPipelinePart = _reflection.GeneratedProtocolMessageType('GrpcParallelPipelinePart', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPARALLELPIPELINEPART,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcParallelPipelinePart)
-
-  })
-
-_sym_db.RegisterMessage(GrpcParallelPipelinePart)
-
-
-
-GrpcParallelPipelineParts = _reflection.GeneratedProtocolMessageType('GrpcParallelPipelineParts', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCPARALLELPIPELINEPARTS,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcParallelPipelineParts)
-
-  })
-
-_sym_db.RegisterMessage(GrpcParallelPipelineParts)
-
-
-
-GrpcSimpleContextRequestPipelinePart = _reflection.GeneratedProtocolMessageType('GrpcSimpleContextRequestPipelinePart', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSIMPLECONTEXTREQUESTPIPELINEPART,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcSimpleContextRequestPipelinePart)
-
-  })
-
-_sym_db.RegisterMessage(GrpcSimpleContextRequestPipelinePart)
-
-
-
-GrpcComplexContextRequestPipelinePart = _reflection.GeneratedProtocolMessageType('GrpcComplexContextRequestPipelinePart', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART,
-
-  '__module__' : 'pipelines_and_context_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcComplexContextRequestPipelinePart)
-
-  })
-
-_sym_db.RegisterMessage(GrpcComplexContextRequestPipelinePart)
-
-
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pipelines_and_context_pb2', _globals)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -432,100 +48,100 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
 
-  _GRPCCONTEXTKEY._serialized_start=67
+  _globals['_GRPCCONTEXTKEY']._serialized_start=67
 
-  _GRPCCONTEXTKEY._serialized_end=97
+  _globals['_GRPCCONTEXTKEY']._serialized_end=97
 
-  _GRPCCONTEXTVALUE._serialized_start=100
+  _globals['_GRPCCONTEXTVALUE']._serialized_start=100
 
-  _GRPCCONTEXTVALUE._serialized_end=740
+  _globals['_GRPCCONTEXTVALUE']._serialized_end=740
 
-  _GRPCCONTEXTKEYVALUE._serialized_start=742
+  _globals['_GRPCCONTEXTKEYVALUE']._serialized_start=742
 
-  _GRPCCONTEXTKEYVALUE._serialized_end=839
+  _globals['_GRPCCONTEXTKEYVALUE']._serialized_end=839
 
-  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_start=841
+  _globals['_GRPCHASHESEVENTLOGCONTEXTVALUE']._serialized_start=841
 
-  _GRPCHASHESEVENTLOGCONTEXTVALUE._serialized_end=913
+  _globals['_GRPCHASHESEVENTLOGCONTEXTVALUE']._serialized_end=913
 
-  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_start=915
+  _globals['_GRPCNAMESEVENTLOGCONTEXTVALUE']._serialized_start=915
 
-  _GRPCNAMESEVENTLOGCONTEXTVALUE._serialized_end=985
+  _globals['_GRPCNAMESEVENTLOGCONTEXTVALUE']._serialized_end=985
 
-  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_start=987
+  _globals['_GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE']._serialized_start=987
 
-  _GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE._serialized_end=1081
+  _globals['_GRPCEVENTLOGTRACESUBARRAYSCONTEXTVALUE']._serialized_end=1081
 
-  _GRPCTRACESUBARRAY._serialized_start=1083
+  _globals['_GRPCTRACESUBARRAY']._serialized_start=1083
 
-  _GRPCTRACESUBARRAY._serialized_end=1130
+  _globals['_GRPCTRACESUBARRAY']._serialized_end=1130
 
-  _GRPCTRACESUBARRAYS._serialized_start=1132
+  _globals['_GRPCTRACESUBARRAYS']._serialized_start=1132
 
-  _GRPCTRACESUBARRAYS._serialized_end=1198
+  _globals['_GRPCTRACESUBARRAYS']._serialized_end=1198
 
-  _GRPCSUBARRAYWITHTRACEINDEX._serialized_start=1200
+  _globals['_GRPCSUBARRAYWITHTRACEINDEX']._serialized_start=1200
 
-  _GRPCSUBARRAYWITHTRACEINDEX._serialized_end=1294
+  _globals['_GRPCSUBARRAYWITHTRACEINDEX']._serialized_end=1294
 
-  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_start=1296
+  _globals['_GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE']._serialized_start=1296
 
-  _GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE._serialized_end=1392
+  _globals['_GRPCSUBARRAYSWITHTRACEINDEXCONTEXTVALUE']._serialized_end=1392
 
-  _GRPCCOLORSEVENTLOG._serialized_start=1394
+  _globals['_GRPCCOLORSEVENTLOG']._serialized_start=1394
 
-  _GRPCCOLORSEVENTLOG._serialized_end=1454
+  _globals['_GRPCCOLORSEVENTLOG']._serialized_end=1454
 
-  _GRPCCOLORSTRACE._serialized_start=1456
+  _globals['_GRPCCOLORSTRACE']._serialized_start=1456
 
-  _GRPCCOLORSTRACE._serialized_end=1524
+  _globals['_GRPCCOLORSTRACE']._serialized_end=1524
 
-  _GRPCCOLOREDRECTANGLE._serialized_start=1526
+  _globals['_GRPCCOLOREDRECTANGLE']._serialized_start=1526
 
-  _GRPCCOLOREDRECTANGLE._serialized_end=1632
+  _globals['_GRPCCOLOREDRECTANGLE']._serialized_end=1632
 
-  _GRPCENUM._serialized_start=1634
+  _globals['_GRPCENUM']._serialized_start=1634
 
-  _GRPCENUM._serialized_end=1677
+  _globals['_GRPCENUM']._serialized_end=1677
 
-  _GRPCEVENTLOGINFO._serialized_start=1679
+  _globals['_GRPCEVENTLOGINFO']._serialized_start=1679
 
-  _GRPCEVENTLOGINFO._serialized_end=1770
+  _globals['_GRPCEVENTLOGINFO']._serialized_end=1770
 
-  _GRPCSTRINGS._serialized_start=1772
+  _globals['_GRPCSTRINGS']._serialized_start=1772
 
-  _GRPCSTRINGS._serialized_end=1802
+  _globals['_GRPCSTRINGS']._serialized_end=1802
 
-  _GRPCPIPELINE._serialized_start=1804
+  _globals['_GRPCPIPELINE']._serialized_start=1804
 
-  _GRPCPIPELINE._serialized_end=1862
+  _globals['_GRPCPIPELINE']._serialized_end=1862
 
-  _GRPCPIPELINEPARTBASE._serialized_start=1865
+  _globals['_GRPCPIPELINEPARTBASE']._serialized_start=1865
 
-  _GRPCPIPELINEPARTBASE._serialized_end=2164
+  _globals['_GRPCPIPELINEPARTBASE']._serialized_end=2164
 
-  _GRPCPIPELINEPART._serialized_start=2166
+  _globals['_GRPCPIPELINEPART']._serialized_start=2166
 
-  _GRPCPIPELINEPART._serialized_end=2259
+  _globals['_GRPCPIPELINEPART']._serialized_end=2259
 
-  _GRPCPIPELINEPARTCONFIGURATION._serialized_start=2261
+  _globals['_GRPCPIPELINEPARTCONFIGURATION']._serialized_start=2261
 
-  _GRPCPIPELINEPARTCONFIGURATION._serialized_end=2353
+  _globals['_GRPCPIPELINEPARTCONFIGURATION']._serialized_end=2353
 
-  _GRPCPARALLELPIPELINEPART._serialized_start=2355
+  _globals['_GRPCPARALLELPIPELINEPART']._serialized_start=2355
 
-  _GRPCPARALLELPIPELINEPART._serialized_end=2433
+  _globals['_GRPCPARALLELPIPELINEPART']._serialized_end=2433
 
-  _GRPCPARALLELPIPELINEPARTS._serialized_start=2435
+  _globals['_GRPCPARALLELPIPELINEPARTS']._serialized_start=2435
 
-  _GRPCPARALLELPIPELINEPARTS._serialized_end=2513
+  _globals['_GRPCPARALLELPIPELINEPARTS']._serialized_end=2513
 
-  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_start=2515
+  _globals['_GRPCSIMPLECONTEXTREQUESTPIPELINEPART']._serialized_start=2515
 
-  _GRPCSIMPLECONTEXTREQUESTPIPELINEPART._serialized_end=2632
+  _globals['_GRPCSIMPLECONTEXTREQUESTPIPELINEPART']._serialized_end=2632
 
-  _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART._serialized_start=2635
+  _globals['_GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART']._serialized_start=2635
 
-  _GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART._serialized_end=2806
+  _globals['_GRPCCOMPLEXCONTEXTREQUESTPIPELINEPART']._serialized_end=2806
 
 # @@protoc_insertion_point(module_scope)

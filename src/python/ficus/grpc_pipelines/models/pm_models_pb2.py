@@ -10,11 +10,9 @@ from google.protobuf import descriptor as _descriptor
 
 from google.protobuf import descriptor_pool as _descriptor_pool
 
-from google.protobuf import message as _message
-
-from google.protobuf import reflection as _reflection
-
 from google.protobuf import symbol_database as _symbol_database
+
+from google.protobuf.internal import builder as _builder
 
 # @@protoc_insertion_point(imports)
 
@@ -36,137 +34,11 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpm_models.prot
 
 
 
+_globals = globals()
 
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 
-
-
-_GRPCSIMPLEEVENTLOG = DESCRIPTOR.message_types_by_name['GrpcSimpleEventLog']
-
-_GRPCSIMPLETRACE = DESCRIPTOR.message_types_by_name['GrpcSimpleTrace']
-
-_GRPCEVENT = DESCRIPTOR.message_types_by_name['GrpcEvent']
-
-_GRPCEVENTSTAMP = DESCRIPTOR.message_types_by_name['GrpcEventStamp']
-
-_GRPCHASHESEVENTLOG = DESCRIPTOR.message_types_by_name['GrpcHashesEventLog']
-
-_GRPCHASHESLOGTRACE = DESCRIPTOR.message_types_by_name['GrpcHashesLogTrace']
-
-_GRPCNAMESEVENTLOG = DESCRIPTOR.message_types_by_name['GrpcNamesEventLog']
-
-_GRPCNAMESTRACE = DESCRIPTOR.message_types_by_name['GrpcNamesTrace']
-
-GrpcSimpleEventLog = _reflection.GeneratedProtocolMessageType('GrpcSimpleEventLog', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSIMPLEEVENTLOG,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcSimpleEventLog)
-
-  })
-
-_sym_db.RegisterMessage(GrpcSimpleEventLog)
-
-
-
-GrpcSimpleTrace = _reflection.GeneratedProtocolMessageType('GrpcSimpleTrace', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCSIMPLETRACE,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcSimpleTrace)
-
-  })
-
-_sym_db.RegisterMessage(GrpcSimpleTrace)
-
-
-
-GrpcEvent = _reflection.GeneratedProtocolMessageType('GrpcEvent', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCEVENT,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcEvent)
-
-  })
-
-_sym_db.RegisterMessage(GrpcEvent)
-
-
-
-GrpcEventStamp = _reflection.GeneratedProtocolMessageType('GrpcEventStamp', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCEVENTSTAMP,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcEventStamp)
-
-  })
-
-_sym_db.RegisterMessage(GrpcEventStamp)
-
-
-
-GrpcHashesEventLog = _reflection.GeneratedProtocolMessageType('GrpcHashesEventLog', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCHASHESEVENTLOG,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcHashesEventLog)
-
-  })
-
-_sym_db.RegisterMessage(GrpcHashesEventLog)
-
-
-
-GrpcHashesLogTrace = _reflection.GeneratedProtocolMessageType('GrpcHashesLogTrace', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCHASHESLOGTRACE,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcHashesLogTrace)
-
-  })
-
-_sym_db.RegisterMessage(GrpcHashesLogTrace)
-
-
-
-GrpcNamesEventLog = _reflection.GeneratedProtocolMessageType('GrpcNamesEventLog', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCNAMESEVENTLOG,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcNamesEventLog)
-
-  })
-
-_sym_db.RegisterMessage(GrpcNamesEventLog)
-
-
-
-GrpcNamesTrace = _reflection.GeneratedProtocolMessageType('GrpcNamesTrace', (_message.Message,), {
-
-  'DESCRIPTOR' : _GRPCNAMESTRACE,
-
-  '__module__' : 'pm_models_pb2'
-
-  # @@protoc_insertion_point(class_scope:ficus.GrpcNamesTrace)
-
-  })
-
-_sym_db.RegisterMessage(GrpcNamesTrace)
-
-
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pm_models_pb2', _globals)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -174,36 +46,36 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
 
-  _GRPCSIMPLEEVENTLOG._serialized_start=59
+  _globals['_GRPCSIMPLEEVENTLOG']._serialized_start=59
 
-  _GRPCSIMPLEEVENTLOG._serialized_end=119
+  _globals['_GRPCSIMPLEEVENTLOG']._serialized_end=119
 
-  _GRPCSIMPLETRACE._serialized_start=121
+  _globals['_GRPCSIMPLETRACE']._serialized_start=121
 
-  _GRPCSIMPLETRACE._serialized_end=172
+  _globals['_GRPCSIMPLETRACE']._serialized_end=172
 
-  _GRPCEVENT._serialized_start=174
+  _globals['_GRPCEVENT']._serialized_start=174
 
-  _GRPCEVENT._serialized_end=237
+  _globals['_GRPCEVENT']._serialized_end=237
 
-  _GRPCEVENTSTAMP._serialized_start=239
+  _globals['_GRPCEVENTSTAMP']._serialized_start=239
 
-  _GRPCEVENTSTAMP._serialized_end=325
+  _globals['_GRPCEVENTSTAMP']._serialized_end=325
 
-  _GRPCHASHESEVENTLOG._serialized_start=327
+  _globals['_GRPCHASHESEVENTLOG']._serialized_start=327
 
-  _GRPCHASHESEVENTLOG._serialized_end=390
+  _globals['_GRPCHASHESEVENTLOG']._serialized_end=390
 
-  _GRPCHASHESLOGTRACE._serialized_start=392
+  _globals['_GRPCHASHESLOGTRACE']._serialized_start=392
 
-  _GRPCHASHESLOGTRACE._serialized_end=428
+  _globals['_GRPCHASHESLOGTRACE']._serialized_end=428
 
-  _GRPCNAMESEVENTLOG._serialized_start=430
+  _globals['_GRPCNAMESEVENTLOG']._serialized_start=430
 
-  _GRPCNAMESEVENTLOG._serialized_end=488
+  _globals['_GRPCNAMESEVENTLOG']._serialized_end=488
 
-  _GRPCNAMESTRACE._serialized_start=490
+  _globals['_GRPCNAMESTRACE']._serialized_start=490
 
-  _GRPCNAMESTRACE._serialized_end=522
+  _globals['_GRPCNAMESTRACE']._serialized_end=522
 
 # @@protoc_insertion_point(module_scope)

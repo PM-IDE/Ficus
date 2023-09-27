@@ -203,6 +203,17 @@ impl GrpcBackendService for FicusService {
 
         Ok(Response::new(result))
     }
+
+    async fn drop_execution_result(&self, request: Request<GrpcGuid>) -> Result<Response<()>, Status> {
+        let mut contexts = self.contexts.lock();
+        let mut contexts = contexts.as_mut().ok().unwrap();
+        let guid_str = &request.get_ref().guid;
+
+        match contexts.remove(guid_str) {
+            None => Err(Status::not_found(format!("The session for {} does not exist", guid_str))),
+            Some(_) => Ok(Response::new(()))
+        }
+    }
 }
 
 impl FicusService {
