@@ -38,9 +38,13 @@ def _create_traces_diversity_grpc_part(uuid: uuid.UUID):
 class TracesDiversityDiagram2Canvas(PipelinePart2WithCanvasCallback):
     def __init__(self,
                  save_path: Optional[str] = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: float = 1,
                  width_scale: float = 1):
         super().__init__(save_path=save_path,
+                         plot_legend=plot_legend,
+                         title=title,
                          width_scale=width_scale,
                          height_scale=height_scale)
 
@@ -52,7 +56,7 @@ class DrawPlacementsOfEventByName2(PipelinePart2WithDrawColorsLogCallback):
     def __init__(self,
                  event_name: str,
                  title: str = None,
-                 save_path: str = None,
+                 save_path: Optional[str] = None,
                  plot_legend: bool = True,
                  height_scale: int = 1,
                  width_scale: int = 1):
@@ -84,11 +88,15 @@ class DrawPlacementsOfEventByName2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  event_name: str,
                  save_path: str = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: float = 1,
                  width_scale: float = 1):
         super().__init__(save_path=save_path,
-                         height_scale=height_scale,
-                         width_scale=width_scale)
+                         plot_legend=plot_legend,
+                         title=title,
+                         width_scale=width_scale,
+                         height_scale=height_scale)
 
         self.event_name = event_name
 
@@ -129,11 +137,15 @@ class DrawPlacementOfEventsByRegex2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  regex: str,
                  save_path: str = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: float = 1,
                  width_scale: float = 1):
         super().__init__(save_path=save_path,
-                         height_scale=height_scale,
-                         width_scale=width_scale)
+                         plot_legend=plot_legend,
+                         title=title,
+                         width_scale=width_scale,
+                         height_scale=height_scale)
 
         self.regex = regex
 
@@ -171,11 +183,15 @@ class DrawActivitiesDiagramBase2Canvas(TracesDiversityDiagram2Canvas):
     def __init__(self,
                  diagram_kind: str,
                  save_path: str = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: float = 1,
                  width_scale: float = 1):
         super().__init__(save_path=save_path,
-                         height_scale=height_scale,
-                         width_scale=width_scale)
+                         plot_legend=plot_legend,
+                         title=title,
+                         width_scale=width_scale,
+                         height_scale=height_scale)
 
         self.diagram_kind = diagram_kind
 
@@ -201,12 +217,16 @@ class DrawFullActivitiesDiagram2(DrawActivitiesDiagramBase2):
 class DrawFullActivitiesDiagram2Canvas(DrawActivitiesDiagramBase2Canvas):
     def __init__(self,
                  save_path: str = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: int = 1,
                  width_scale: int = 1):
         super().__init__(const_draw_full_activities_diagram,
                          save_path=save_path,
-                         height_scale=height_scale,
-                         width_scale=width_scale)
+                         plot_legend=plot_legend,
+                         title=title,
+                         width_scale=width_scale,
+                         height_scale=height_scale)
 
 
 class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
@@ -227,9 +247,13 @@ class DrawShortActivitiesDiagram2(DrawActivitiesDiagramBase2):
 class DrawShortActivitiesDiagram2Canvas(DrawActivitiesDiagramBase2Canvas):
     def __init__(self,
                  save_path: str = None,
+                 plot_legend: bool = False,
+                 title: Optional[str] = None,
                  height_scale: int = 1,
                  width_scale: int = 1):
         super().__init__(const_draw_short_activities_diagram,
                          save_path=save_path,
-                         height_scale=height_scale,
-                         width_scale=width_scale)
+                         plot_legend=plot_legend,
+                         title=title,
+                         width_scale=width_scale,
+                         height_scale=height_scale)

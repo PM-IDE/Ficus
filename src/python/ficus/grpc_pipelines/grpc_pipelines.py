@@ -151,16 +151,22 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
 class PipelinePart2WithCanvasCallback(PipelinePart2WithCallback):
     def __init__(self,
                  save_path: Optional[str] = None,
+                 title: Optional[str] = None,
+                 plot_legend: bool = False,
                  height_scale: float = 1,
                  width_scale: float = 1):
         super().__init__()
         self.save_path = save_path
         self.width_scale = width_scale
         self.height_scale = height_scale
+        self.title = title
+        self.plot_legend = plot_legend
 
     def execute_callback(self, context_value: GrpcContextValue):
         colors_log = from_grpc_colors_log(context_value.colors_log)
         draw_colors_event_log_canvas(colors_log,
+                                     title=self.title,
+                                     plot_legend=self.plot_legend,
                                      save_path=self.save_path,
                                      height_scale=self.height_scale,
                                      width_scale=self.width_scale)

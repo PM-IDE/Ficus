@@ -7,6 +7,8 @@ from ficus.analysis.event_log_analysis import ColoredRectangle
 
 
 def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
+                                 title: Optional[str] = None,
+                                 plot_legend: bool = False,
                                  width_scale: float = 1,
                                  height_scale: float = 1,
                                  save_path: Optional[str] = None):
@@ -17,14 +19,21 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
     overall_delta = axes_margin + axes_width + axes_padding
 
     max_width = max(map(len, log))
-    canvas = Canvas(width=max_width * width_scale + overall_delta, height=len(log) * height_scale + overall_delta)
+
+    title_height = 20 if title is not None else 0
+    canvas_height = len(log) * height_scale + overall_delta + title_height
+    canvas = Canvas(width=max_width * width_scale + overall_delta, height=canvas_height)
+
+    if title_height is not None:
+        canvas.font = '10px'
+        canvas.fill_text(title, canvas.width / 2, title_height / 2)
 
     canvas.stroke_style = "#000000"
-    canvas.stroke_line(axes_margin, 0, axes_margin, canvas.height - axes_margin)
+    canvas.stroke_line(axes_margin, title_height, axes_margin, canvas.height - axes_margin)
     canvas.stroke_line(axes_margin, canvas.height - axes_margin, canvas.width, canvas.height - axes_margin)
 
-    canvas.font = "10px"
-    canvas.fill_text(str(len(log)), 0, 10)
+    canvas.font = '10px'
+    canvas.fill_text(str(len(log)), 0, 10 + title_height)
     canvas.fill_text(str(max_width), canvas.width - 2 * axes_margin, canvas.height)
 
     if save_path is not None:
@@ -38,7 +47,7 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
         canvas.observe(save_to_file, 'image_data')
 
     with hold_canvas():
-        current_y = 0
+        current_y = title_height
 
         for trace in log:
             current_x = overall_delta
