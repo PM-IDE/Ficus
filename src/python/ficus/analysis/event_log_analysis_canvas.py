@@ -12,6 +12,7 @@ axes_margin = 15
 axes_width = 1
 axes_padding = 5
 overall_delta = axes_margin + axes_width + axes_padding
+text_size_px = 10
 
 
 def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
@@ -72,16 +73,17 @@ def _draw_actual_traces_diversity_diagram(log: list[list[ColoredRectangle]],
                                           height_scale: float):
     with hold_canvas():
         if title is not None:
-            canvas.font = '10px'
+            canvas.font = f'{text_size_px}px'
             canvas.fill_text(title, canvas.width / 2, title_height / 2)
 
         canvas.stroke_style = 'black'
         canvas.stroke_line(axes_margin, title_height, axes_margin, before_height - axes_margin)
         canvas.stroke_line(axes_margin, before_height - axes_margin, canvas.width, before_height - axes_margin)
 
-        canvas.font = '10px'
+        canvas.font = f'f{text_size_px}px'
         canvas.fill_text(str(len(log)), 0, 10 + title_height)
-        canvas.fill_text(str(max_width), canvas.width - 2 * axes_margin, before_height)
+        x_axis_text = str(max_width)
+        canvas.fill_text(x_axis_text, canvas.width - ((text_size_px + 1) / 2) * len(x_axis_text), before_height)
 
         current_y = title_height
 
