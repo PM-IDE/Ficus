@@ -20,7 +20,7 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
                                  width_scale: float = 1,
                                  height_scale: float = 1,
                                  save_path: Optional[str] = None):
-    max_width = max(map(len, log))
+    max_width = _calculate_canvas_width(log)
 
     title_height = 20 if title is not None else 0
     canvas_height = len(log) * height_scale + overall_delta + title_height
@@ -56,6 +56,10 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
 
     if save_path is None:
         display(canvas)
+
+
+def _calculate_canvas_width(log: list[list[ColoredRectangle]]):
+    return max(map(lambda t: sum(map(lambda r: r.length, t)), log))
 
 
 def _draw_actual_traces_diversity_diagram(log: list[list[ColoredRectangle]],
