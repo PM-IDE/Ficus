@@ -37,7 +37,7 @@ def draw_colors_event_log_canvas(log: list[list[ColoredRectangle]],
 
         canvas_height += len(names_to_colors) * legend_rect_height
 
-    canvas = Canvas(width=max_width * width_scale + overall_delta,
+    canvas = Canvas(width=max_width * width_scale + overall_delta + axes_margin,
                     height=canvas_height,
                     sync_image_data=save_path is not None)
 
