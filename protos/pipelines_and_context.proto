@@ -24,6 +24,7 @@ message GrpcContextValue {
         GrpcEventLogInfo event_log_info = 11;
         GrpcStrings strings = 12;
         GrpcPipeline pipeline = 13;
+        GrpcPetriNet petriNet = 14;
     }
 }
 

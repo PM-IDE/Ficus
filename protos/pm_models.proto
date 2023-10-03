@@ -41,3 +41,33 @@ message GrpcNamesEventLog {
 message GrpcNamesTrace {
     repeated string events = 1;
 }
+
+
+message GrpcPetriNet {
+    repeated GrpcPetriNetPlace places = 1;
+    repeated GrpcPetriNetTransition transitions = 2;
+    GrpcPetriNetMarking marking = 3;
+}
+
+message GrpcPetriNetPlace {
+    bool deleted = 1;
+}
+
+message GrpcPetriNetTransition {
+    repeated GrpcPetriNetArc incomingArcs = 1;
+    repeated GrpcPetriNetArc outgoingArcs = 2;
+    string data = 3;
+}
+
+message GrpcPetriNetArc {
+    int64 placeIndex = 1;
+}
+
+message GrpcPetriNetMarking {
+    repeated GrpcPetriNetSinglePlaceMarking Markings = 1;
+}
+
+message GrpcPetriNetSinglePlaceMarking {
+    int64 placeIndex = 1;
+    int64 tokensCount = 2;
+}

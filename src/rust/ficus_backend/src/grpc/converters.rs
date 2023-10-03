@@ -84,7 +84,8 @@ pub(super) fn put_into_user_data(
         ContextValue::Pipeline(pipeline) => {
             let pipeline = FicusService::to_pipeline(&context.with_pipeline(pipeline));
             user_data.put_any::<Pipeline>(key, pipeline);
-        }
+        },
+        ContextValue::PetriNet(_) => todo!()
     }
 }
 
