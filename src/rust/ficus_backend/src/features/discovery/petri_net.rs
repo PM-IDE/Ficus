@@ -6,26 +6,31 @@ use tonic::metadata::VacantEntry;
 pub struct PetriNet<TData, TArcData> {
     places: Vec<Place>,
     transitions: Vec<Transition<TData, TArcData>>,
-    marking: Option<Marking>
+    marking: Option<Marking>,
 }
 
 #[derive(Debug)]
 pub struct Place {
     id: u64,
-    deleted: bool
+    deleted: bool,
 }
 
 impl Place {
     pub fn new() -> Self {
         static NEXT_ID: AtomicU64 = AtomicU64::new(0);
-        Self { id: NEXT_ID.fetch_add(1, Ordering::SeqCst), deleted: false }
+        Self {
+            id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
+            deleted: false,
+        }
     }
 
     pub fn deleted(&self) -> bool {
         self.deleted.clone()
     }
 
-    pub fn id(&self) -> u64 { self.id }
+    pub fn id(&self) -> u64 {
+        self.id
+    }
 }
 
 #[derive(Debug)]
@@ -33,7 +38,7 @@ pub struct Transition<TData, TArcData> {
     id: u64,
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
-    data: Option<TData>
+    data: Option<TData>,
 }
 
 impl<TData, TArcData> Transition<TData, TArcData> {
@@ -44,7 +49,7 @@ impl<TData, TArcData> Transition<TData, TArcData> {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
             incoming_arcs: Vec::new(),
             outgoing_arcs: Vec::new(),
-            data
+            data,
         }
     }
 
@@ -64,7 +69,9 @@ impl<TData, TArcData> Transition<TData, TArcData> {
         self.outgoing_arcs.remove(arc_index)
     }
 
-    pub fn id(&self) -> u64 { self.id }
+    pub fn id(&self) -> u64 {
+        self.id
+    }
 
     pub fn incoming_arcs(&self) -> &Vec<Arc<TArcData>> {
         &self.incoming_arcs
@@ -79,7 +86,7 @@ impl<TData, TArcData> Transition<TData, TArcData> {
 pub struct Arc<TArcData> {
     id: u64,
     place_index: usize,
-    data: Option<TArcData>
+    data: Option<TArcData>,
 }
 
 impl<TArcData> Arc<TArcData> {
@@ -89,11 +96,13 @@ impl<TArcData> Arc<TArcData> {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
             place_index,
-            data
+            data,
         }
     }
 
-    pub fn id(&self) -> u64 { self.id }
+    pub fn id(&self) -> u64 {
+        self.id
+    }
 
     pub fn place_index(&self) -> usize {
         self.place_index
@@ -102,13 +111,13 @@ impl<TArcData> Arc<TArcData> {
 
 #[derive(Debug)]
 pub struct Marking {
-    active_places: Vec<SingleMarking>
+    active_places: Vec<SingleMarking>,
 }
 
 #[derive(Debug)]
 pub struct SingleMarking {
     place_index: usize,
-    tokens_count: usize
+    tokens_count: usize,
 }
 
 impl<TData, TArcData> PetriNet<TData, TArcData> {
@@ -116,7 +125,7 @@ impl<TData, TArcData> PetriNet<TData, TArcData> {
         Self {
             places: Vec::new(),
             transitions: Vec::new(),
-            marking: None
+            marking: None,
         }
     }
 
@@ -146,11 +155,21 @@ impl<TData, TArcData> PetriNet<TData, TArcData> {
         self.transitions.len() - 1
     }
 
-    pub fn connect_place_to_transition(&mut self, from_place_index: usize, to_transition_index: usize, arc_data: Option<TArcData>) {
+    pub fn connect_place_to_transition(
+        &mut self,
+        from_place_index: usize,
+        to_transition_index: usize,
+        arc_data: Option<TArcData>,
+    ) {
         self.transitions[to_transition_index].add_incoming_arc(from_place_index, arc_data);
     }
 
-    pub fn connect_transition_to_place(&mut self, from_transition_index: usize, to_place_index: usize, arc_data: Option<TArcData>) {
+    pub fn connect_transition_to_place(
+        &mut self,
+        from_transition_index: usize,
+        to_place_index: usize,
+        arc_data: Option<TArcData>,
+    ) {
         self.transitions[from_transition_index].add_outgoing_arc(to_place_index, arc_data);
     }
 

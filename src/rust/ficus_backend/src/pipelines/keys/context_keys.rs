@@ -104,7 +104,8 @@ impl ContextKeys {
     }
 
     pub fn petri_net<TData, TArcData>(&self) -> &DefaultContextKey<PetriNet<TData, TArcData>> {
-        self.find_concrete_key::<PetriNet<TData, TArcData>>(Self::PETRI_NET).unwrap()
+        self.find_concrete_key::<PetriNet<TData, TArcData>>(Self::PETRI_NET)
+            .unwrap()
     }
 
     pub fn is_petri_net<TData: 'static, TArcData: 'static>(&self, key: &dyn ContextKey) -> bool {

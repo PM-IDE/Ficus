@@ -172,7 +172,8 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String
             let second_set = set_pairs.get(j);
             let second_set = second_set.unwrap();
 
-            let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set)) && first_set.can_extend(second_set, &provider);
+            let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
+                && first_set.can_extend(second_set, &provider);
 
             if should_extend {
                 let new_set = first_set.extend(&second_set);
@@ -195,7 +196,10 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String
     let mut petri_net = PetriNet::empty();
     let mut event_classes_to_transitions = HashMap::new();
     for class in event_classes {
-        event_classes_to_transitions.insert(class, petri_net.add_transition(Transition::empty(Some(class.to_owned()))));
+        event_classes_to_transitions.insert(
+            class,
+            petri_net.add_transition(Transition::empty(Some(class.to_owned()))),
+        );
     }
 
     for alpha_set in alpha_sets {

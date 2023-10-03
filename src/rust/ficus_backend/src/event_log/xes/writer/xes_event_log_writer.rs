@@ -15,8 +15,7 @@ use crate::event_log::{
     },
     xes::{constants::*, xes_event_log::XesEventLogImpl},
 };
-use crate::utils::xml_utils::{StartEndElementCookie, write_empty, XmlWriteError};
-
+use crate::utils::xml_utils::{write_empty, StartEndElementCookie, XmlWriteError};
 
 pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), XmlWriteError> {
     match serialize_event_log(log) {

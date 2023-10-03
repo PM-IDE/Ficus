@@ -11,7 +11,7 @@ pub struct EventLogInfo {
     dfg_info: DfgInfo,
     traces_count: usize,
     start_event_classes: HashSet<String>,
-    end_event_classes: HashSet<String>
+    end_event_classes: HashSet<String>,
 }
 
 pub struct EventLogInfoCreationDto<'a, TLog>
@@ -149,7 +149,7 @@ impl EventLogInfo {
             },
             traces_count: log.traces().len(),
             start_event_classes,
-            end_event_classes
+            end_event_classes,
         }
     }
 

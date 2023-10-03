@@ -1,7 +1,7 @@
+use crate::test_core::simple_events_logs_provider::create_simple_event_log3;
 use ficus_backend::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use ficus_backend::features::discovery::alpha::discover_petri_net_alpha;
 use ficus_backend::features::discovery::petri_net_serialization::serialize_to_pnml;
-use crate::test_core::simple_events_logs_provider::create_simple_event_log3;
 
 #[test]
 pub fn test_serialization_1() {

@@ -1,12 +1,11 @@
+use quick_xml::events::{BytesEnd, BytesStart};
+use quick_xml::Writer;
 use std::cell::RefCell;
 use std::error::Error;
 use std::fmt::{Debug, Display};
 use std::io;
 use std::io::Cursor;
 use std::string::FromUtf8Error;
-use quick_xml::events::{BytesEnd, BytesStart};
-use quick_xml::Writer;
-
 
 pub enum XmlWriteError {
     FromUt8Error(FromUtf8Error),
