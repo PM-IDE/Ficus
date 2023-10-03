@@ -6,3 +6,4 @@ pub mod suffix_tree;
 pub mod test_core;
 pub mod utils;
 pub mod discovery;
+pub mod petri_nets;
