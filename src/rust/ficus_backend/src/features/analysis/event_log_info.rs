@@ -51,7 +51,7 @@ where
 }
 
 impl EventLogInfo {
-    pub fn create_from<'a, TLog>(creation_dto: EventLogInfoCreationDto<'a, TLog>) -> EventLogInfo
+    pub fn create_from<TLog>(creation_dto: EventLogInfoCreationDto<TLog>) -> EventLogInfo
     where
         TLog: EventLog,
     {
@@ -183,6 +183,11 @@ impl DfgInfo {
             Some(count) => count.to_owned(),
             None => 0,
         }
+    }
+
+    pub fn is_in_directly_follows_relation(&self, left: &str, right: &str) -> bool {
+        //todo: xDdDDDDDDD====))))
+        return self.dfg_pairs.get(&(left.to_owned(), right.to_owned())).is_some();
     }
 
     pub fn get_followed_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {

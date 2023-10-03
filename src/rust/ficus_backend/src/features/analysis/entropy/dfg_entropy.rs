@@ -71,7 +71,7 @@ where
     TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
 {
     let mut entropy = HashMap::new();
-    let events_names: Vec<&String> = log_info.get_all_event_classes();
+    let events_names = &log_info.get_all_event_classes();
 
     let mut dfr_events_names = events_names.clone();
     let fake_end = FAKE_EVENT_END_NAME.to_string();

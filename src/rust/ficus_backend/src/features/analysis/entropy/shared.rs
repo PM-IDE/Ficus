@@ -88,12 +88,12 @@ where
     let mut entropies = HashMap::new();
     for event_name in log_info.get_all_event_classes() {
         if let Some(ignored_events) = ignored_events {
-            if ignored_events.contains(event_name) {
+            if ignored_events.contains(event_name.as_str()) {
                 continue;
             }
         }
 
-        let entropy = entropy_calculator(log, event_name, ignored_events);
+        let entropy = entropy_calculator(log, &event_name, ignored_events);
         entropies.insert(event_name.to_owned(), entropy);
     }
 

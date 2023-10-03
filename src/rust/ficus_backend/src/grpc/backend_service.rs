@@ -210,8 +210,11 @@ impl GrpcBackendService for FicusService {
         let guid_str = &request.get_ref().guid;
 
         match contexts.remove(guid_str) {
-            None => Err(Status::not_found(format!("The session for {} does not exist", guid_str))),
-            Some(_) => Ok(Response::new(()))
+            None => Err(Status::not_found(format!(
+                "The session for {} does not exist",
+                guid_str
+            ))),
+            Some(_) => Ok(Response::new(())),
         }
     }
 }

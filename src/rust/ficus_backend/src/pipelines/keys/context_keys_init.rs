@@ -210,7 +210,7 @@ impl ContextKeys {
     }
 
     fn insert_petri_net(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<PetriNet>(context, Self::PETRI_NET);
+        Self::insert_key::<PetriNet<String, ()>>(context, Self::PETRI_NET);
     }
 
     fn insert_activities_to_logs(context: &mut ContextKeysInitContext) {
