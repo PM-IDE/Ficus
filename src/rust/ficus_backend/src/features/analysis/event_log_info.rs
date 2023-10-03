@@ -10,6 +10,8 @@ pub struct EventLogInfo {
     event_classes_counts: HashMap<String, usize>,
     dfg_info: DfgInfo,
     traces_count: usize,
+    start_event_classes: HashSet<String>,
+    end_event_classes: HashSet<String>
 }
 
 pub struct EventLogInfoCreationDto<'a, TLog>
@@ -66,6 +68,8 @@ impl EventLogInfo {
         let mut events_with_single_follower = HashSet::new();
         let mut events_count = 0;
         let mut events_counts = HashMap::new();
+        let mut start_event_classes = HashSet::new();
+        let mut end_event_classes = HashSet::new();
 
         let mut update_events_counts = |event_name: &String| {
             increase_in_map(&mut events_counts, event_name);
@@ -81,6 +85,11 @@ impl EventLogInfo {
             let events = trace.events();
             events_count += events.len();
             let mut prev_event_name = None;
+
+            if events.len() > 0 {
+                start_event_classes.insert(events.first().unwrap().borrow().name().to_owned());
+                end_event_classes.insert(events.last().unwrap().borrow().name().to_owned());
+            }
 
             for event in events {
                 let event = event.borrow();
@@ -139,6 +148,8 @@ impl EventLogInfo {
                 events_with_single_follower,
             },
             traces_count: log.traces().len(),
+            start_event_classes,
+            end_event_classes
         }
     }
 
@@ -167,6 +178,14 @@ impl EventLogInfo {
 
     pub fn get_all_event_classes(&self) -> Vec<&String> {
         self.event_classes_counts.keys().into_iter().collect()
+    }
+
+    pub fn start_event_classes(&self) -> &HashSet<String> {
+        &self.start_event_classes
+    }
+
+    pub fn end_event_classes(&self) -> &HashSet<String> {
+        &self.end_event_classes
     }
 }
 
