@@ -30,6 +30,7 @@ impl<'a> DefaultAlphaRelationsProvider<'a> {
     }
 }
 
+#[derive(Debug)]
 struct AlphaSet<'a> {
     left_classes: BTreeSet<&'a String>,
     right_classes: BTreeSet<&'a String>,
@@ -180,14 +181,15 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String
         }
     }
 
-    let alpha_sets: Vec<&AlphaSet> = set_pairs
+    let alpha_sets: Vec<&AlphaSet> = set_pairs.iter().chain(extended_pairs.iter()).collect();
+    let alpha_sets: Vec<&AlphaSet> = alpha_sets
         .iter()
-        .chain(extended_pairs.iter())
         .filter(|pair| {
-            !set_pairs
+            !alpha_sets
                 .iter()
                 .any(|candidate| *pair != candidate && pair.is_full_subset(candidate))
         })
+        .map(|s| *s)
         .collect();
 
     let mut petri_net = PetriNet::empty();
