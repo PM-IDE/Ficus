@@ -1,16 +1,11 @@
 use std::{
     cell::RefCell,
-    error::Error,
     fmt::{Debug, Display},
     fs,
-    io::{self, Cursor},
-    string::FromUtf8Error,
+    io::Cursor,
 };
 
-use quick_xml::{
-    events::{BytesEnd, BytesStart},
-    Writer,
-};
+use quick_xml::Writer;
 
 use crate::event_log::{
     core::{
@@ -20,46 +15,20 @@ use crate::event_log::{
     },
     xes::{constants::*, xes_event_log::XesEventLogImpl},
 };
+use crate::utils::xml_utils::{StartEndElementCookie, write_empty, XmlWriteError};
 
-pub enum WriteLogError {
-    FromUt8Error(FromUtf8Error),
-    IOError(io::Error),
-    WriterError(quick_xml::Error),
-}
 
-impl Display for WriteLogError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::FromUt8Error(err) => Display::fmt(&err, f),
-            Self::IOError(err) => Display::fmt(&err, f),
-            Self::WriterError(err) => Display::fmt(&err, f),
-        }
-    }
-}
-
-impl Debug for WriteLogError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::FromUt8Error(arg0) => f.debug_tuple("FromUt8Error").field(arg0).finish(),
-            Self::IOError(arg0) => f.debug_tuple("IOError").field(arg0).finish(),
-            Self::WriterError(arg0) => f.debug_tuple("WriterError").field(arg0).finish(),
-        }
-    }
-}
-
-impl Error for WriteLogError {}
-
-pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), WriteLogError> {
+pub fn write_log(log: &XesEventLogImpl, save_path: &str) -> Result<(), XmlWriteError> {
     match serialize_event_log(log) {
         Ok(content) => match fs::write(save_path, content) {
             Ok(_) => Ok(()),
-            Err(error) => Err(WriteLogError::IOError(error)),
+            Err(error) => Err(XmlWriteError::IOError(error)),
         },
         Err(error) => Err(error),
     }
 }
 
-pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogError> {
+pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteError> {
     let writer = RefCell::new(Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2));
 
     {
@@ -72,7 +41,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                 (PREFIX_ATTR_NAME_STR, ext.prefix.as_str()),
             ];
 
-            write_empty(&writer, EXTENSION_TAG_NAME_STR, &attrs)?;
+            write_empty(&mut writer.borrow_mut(), EXTENSION_TAG_NAME_STR, &attrs)?;
         }
 
         for classifier in log.classifiers() {
@@ -82,7 +51,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                 (KEYS_ATTR_NAME_STR, keys.as_str()),
             ];
 
-            write_empty(&writer, CLASSIFIER_TAG_NAME_STR, &attrs)?;
+            write_empty(&mut writer.borrow_mut(), CLASSIFIER_TAG_NAME_STR, &attrs)?;
         }
 
         for (name, value) in log.ordered_properties() {
@@ -98,7 +67,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                 attrs.clear();
                 attrs.push((KEY_ATTR_NAME_STR, key.as_str()));
                 attrs.push((VALUE_ATTR_NAME_STR, value.as_str()));
-                write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
+                write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
             }
         }
 
@@ -120,7 +89,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                     (VALUE_ATTR_NAME_STR, event.name()),
                 ];
 
-                write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
+                write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
 
                 let date_string = event.timestamp().to_rfc3339();
                 let attrs = vec![
@@ -128,7 +97,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                     (VALUE_ATTR_NAME_STR, date_string.as_str()),
                 ];
 
-                write_empty(&writer, DATE_TAG_NAME_STR, &attrs)?;
+                write_empty(&mut writer.borrow_mut(), DATE_TAG_NAME_STR, &attrs)?;
 
                 if let Some(lifecycle) = event.lifecycle() {
                     let lifecycle_string = lifecycle.to_string();
@@ -137,7 +106,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
                         (VALUE_ATTR_NAME_STR, lifecycle_string.as_str()),
                     ];
 
-                    write_empty(&writer, STRING_TAG_NAME_STR, &attrs)?;
+                    write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
                 }
 
                 for (key, value) in event.ordered_payload() {
@@ -150,7 +119,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, WriteLogErro
     let content = writer.borrow().get_ref().get_ref().clone();
     match String::from_utf8(content) {
         Ok(string) => Ok(string),
-        Err(error) => Err(WriteLogError::FromUt8Error(error)),
+        Err(error) => Err(XmlWriteError::FromUt8Error(error)),
     }
 }
 
@@ -158,7 +127,7 @@ fn write_payload_tag(
     writer: &RefCell<Writer<Cursor<Vec<u8>>>>,
     key: &str,
     value: &EventPayloadValue,
-) -> Result<(), WriteLogError> {
+) -> Result<(), XmlWriteError> {
     let tag_name = match value {
         EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
         EventPayloadValue::String(_) => STRING_TAG_NAME_STR,
@@ -170,66 +139,5 @@ fn write_payload_tag(
     let string_value = value.to_string();
     let attrs = vec![(KEY_ATTR_NAME_STR, key), (VALUE_ATTR_NAME_STR, string_value.as_str())];
 
-    write_empty(&writer, tag_name, &attrs)
-}
-
-fn write_empty(
-    writer: &RefCell<Writer<Cursor<Vec<u8>>>>,
-    tag_name: &str,
-    attrs: &Vec<(&str, &str)>,
-) -> Result<(), WriteLogError> {
-    let mut empty_tag = BytesStart::new(tag_name);
-    for (name, value) in attrs {
-        empty_tag.push_attribute((*name, *value));
-    }
-
-    let empty = quick_xml::events::Event::Empty(empty_tag);
-
-    match writer.borrow_mut().write_event(empty) {
-        Ok(_) => Ok(()),
-        Err(error) => Err(WriteLogError::WriterError(error)),
-    }
-}
-
-struct StartEndElementCookie<'a> {
-    tag_name: &'a str,
-    writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>,
-}
-
-impl<'a> Drop for StartEndElementCookie<'a> {
-    fn drop(&mut self) {
-        let end = quick_xml::events::Event::End(BytesEnd::new(self.tag_name));
-        assert!(self.writer.borrow_mut().write_event(end).is_ok());
-    }
-}
-
-impl<'a> StartEndElementCookie<'a> {
-    fn new(
-        writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>,
-        tag_name: &'a str,
-    ) -> Result<StartEndElementCookie<'a>, WriteLogError> {
-        let start = quick_xml::events::Event::Start(BytesStart::new(tag_name));
-
-        match writer.borrow_mut().write_event(start) {
-            Err(error) => Err(WriteLogError::WriterError(error)),
-            Ok(_) => Ok(StartEndElementCookie { tag_name, writer }),
-        }
-    }
-
-    fn new_with_attrs(
-        writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>,
-        tag_name: &'a str,
-        attrs: &Vec<(&str, &str)>,
-    ) -> Result<StartEndElementCookie<'a>, WriteLogError> {
-        let mut start_tag = BytesStart::new(tag_name);
-        for (name, value) in attrs {
-            start_tag.push_attribute((*name, *value));
-        }
-
-        let start_event = quick_xml::events::Event::Start(start_tag);
-        match writer.borrow_mut().write_event(start_event) {
-            Err(error) => Err(WriteLogError::WriterError(error)),
-            Ok(_) => Ok(StartEndElementCookie { tag_name, writer }),
-        }
-    }
+    write_empty(&mut writer.borrow_mut(), tag_name, &attrs)
 }
