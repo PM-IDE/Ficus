@@ -82,7 +82,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<Patterns>(keys, ContextKeys::PATTERNS, &mut used);
         assert_existence::<Vec<Vec<u64>>>(keys, ContextKeys::HASHES_EVENT_LOG, &mut used);
         assert_existence::<Vec<Vec<String>>>(keys, ContextKeys::NAMES_EVENT_LOG, &mut used);
-        assert_existence::<PetriNet>(keys, ContextKeys::PETRI_NET, &mut used);
+        assert_existence::<PetriNet<String, ()>>(keys, ContextKeys::PETRI_NET, &mut used);
         assert_existence::<RepeatSets>(keys, ContextKeys::REPEAT_SETS, &mut used);
         assert_existence::<TracesActivities>(keys, ContextKeys::TRACE_ACTIVITIES, &mut used);
         assert_existence::<ColorsEventLog>(keys, ContextKeys::COLORS_EVENT_LOG, &mut used);
@@ -190,7 +190,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<Patterns>(keys, ContextKeys::PATTERNS, &mut used);        
         assert_keys_equivalence::<Vec<Vec<u64>>>(keys, ContextKeys::HASHES_EVENT_LOG, &mut used);        
         assert_keys_equivalence::<Vec<Vec<String>>>(keys, ContextKeys::NAMES_EVENT_LOG, &mut used);        
-        assert_keys_equivalence::<PetriNet>(keys, ContextKeys::PETRI_NET, &mut used);        
+        assert_keys_equivalence::<PetriNet<String, ()>>(keys, ContextKeys::PETRI_NET, &mut used);
         assert_keys_equivalence::<RepeatSets>(keys, ContextKeys::REPEAT_SETS, &mut used);        
         assert_keys_equivalence::<TracesActivities>(keys, ContextKeys::TRACE_ACTIVITIES, &mut used);        
 
