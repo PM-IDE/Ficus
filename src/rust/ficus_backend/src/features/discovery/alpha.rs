@@ -207,5 +207,15 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String
         }
     }
 
+    let start_place_index = petri_net.add_place(Place::new());
+    for start_activity in event_log_info.start_event_classes() {
+        petri_net.connect_place_to_transition(start_place_index, event_classes_to_transitions[start_activity], None);
+    }
+
+    let end_place_index = petri_net.add_place(Place::new());
+    for end_activity in event_log_info.end_event_classes() {
+        petri_net.connect_transition_to_place(event_classes_to_transitions[end_activity], end_place_index, None);
+    }
+
     return petri_net;
 }
