@@ -37,7 +37,9 @@ fn get_test_parts_names() -> Vec<String> {
         "ApplyClassExtractor",
         "DiscoverPetriNetAlpha",
         "SerializePetriNet",
-        "AddArtificialStartEndEvents"
+        "AddArtificialStartEndEvents",
+        "AddArtificialStartEvents",
+        "AddArtificialEndEvents"
     ]
 }
 

@@ -62,6 +62,8 @@ impl PipelineParts {
             Self::discover_petri_net_alpha(),
             Self::serialize_petri_net(),
             Self::add_artificial_start_end_events(),
+            Self::add_artificial_start_events(),
+            Self::add_artificial_end_events(),
         ];
 
         let mut names_to_parts = HashMap::new();
