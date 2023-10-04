@@ -12,6 +12,8 @@ from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlac
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
     FilterLogByVariants2
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
+from ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2, AddStartArtificialEvents2, \
+    AddEndArtificialEvents2
 from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
@@ -349,6 +351,51 @@ def test_discover_petri_net_alpha():
         ],
         Pipeline2(
             UseNamesEventLog2(),
+            DiscoverPetriNetAlpha2(),
+            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
+        )
+    )
+
+
+def test_discover_petri_net_alpha_start_end_events():
+    _execute_test_with_names_log(
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'B', 'E', 'D']
+        ],
+        Pipeline2(
+            UseNamesEventLog2(),
+            AddStartEndArtificialEvents2(),
+            DiscoverPetriNetAlpha2(),
+            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
+        )
+    )
+
+
+def test_discover_petri_net_alpha_start_events():
+    _execute_test_with_names_log(
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'B', 'E', 'D']
+        ],
+        Pipeline2(
+            UseNamesEventLog2(),
+            AddStartArtificialEvents2(),
+            DiscoverPetriNetAlpha2(),
+            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
+        )
+    )
+
+
+def test_discover_petri_net_alpha_end_events():
+    _execute_test_with_names_log(
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'B', 'E', 'D']
+        ],
+        Pipeline2(
+            UseNamesEventLog2(),
+            AddEndArtificialEvents2(),
             DiscoverPetriNetAlpha2(),
             SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
         )
