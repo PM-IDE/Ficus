@@ -3,9 +3,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use tonic::metadata::VacantEntry;
 
 #[derive(Debug)]
-pub struct PetriNet<TData, TArcData> {
+pub struct PetriNet<TTransitionData, TArcData> where TTransitionData: ToString {
     places: Vec<Place>,
-    transitions: Vec<Transition<TData, TArcData>>,
+    transitions: Vec<Transition<TTransitionData, TArcData>>,
     marking: Option<Marking>,
 }
 
@@ -34,15 +34,15 @@ impl Place {
 }
 
 #[derive(Debug)]
-pub struct Transition<TData, TArcData> {
+pub struct Transition<TTransitionData, TArcData> where TTransitionData: ToString {
     id: u64,
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
-    data: Option<TData>,
+    data: Option<TTransitionData>,
 }
 
-impl<TData, TArcData> Transition<TData, TArcData> {
-    pub fn empty(data: Option<TData>) -> Self {
+impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData> where TTransitionData: ToString {
+    pub fn empty(data: Option<TTransitionData>) -> Self {
         static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
         Self {
@@ -79,6 +79,10 @@ impl<TData, TArcData> Transition<TData, TArcData> {
 
     pub fn outgoing_args(&self) -> &Vec<Arc<TArcData>> {
         &self.outgoing_arcs
+    }
+
+    pub fn data(&self) -> Option<&TTransitionData> {
+        self.data.as_ref()
     }
 }
 
@@ -120,7 +124,7 @@ pub struct SingleMarking {
     tokens_count: usize,
 }
 
-impl<TData, TArcData> PetriNet<TData, TArcData> {
+impl<TTransitionData, TArcData> PetriNet<TTransitionData, TArcData> where TTransitionData: ToString {
     pub fn empty() -> Self {
         Self {
             places: Vec::new(),
@@ -142,15 +146,15 @@ impl<TData, TArcData> PetriNet<TData, TArcData> {
         self.places.iter().filter(|place| !place.deleted()).collect()
     }
 
-    pub fn all_transitions(&self) -> &Vec<Transition<TData, TArcData>> {
+    pub fn all_transitions(&self) -> &Vec<Transition<TTransitionData, TArcData>> {
         &self.transitions
     }
 
-    pub fn delete_transition(&mut self, index: usize) -> Transition<TData, TArcData> {
+    pub fn delete_transition(&mut self, index: usize) -> Transition<TTransitionData, TArcData> {
         self.transitions.remove(index)
     }
 
-    pub fn add_transition(&mut self, transition: Transition<TData, TArcData>) -> usize {
+    pub fn add_transition(&mut self, transition: Transition<TTransitionData, TArcData>) -> usize {
         self.transitions.push(transition);
         self.transitions.len() - 1
     }
