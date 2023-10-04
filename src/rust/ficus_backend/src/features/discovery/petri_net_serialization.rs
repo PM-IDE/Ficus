@@ -33,8 +33,8 @@ pub fn serialize_to_pnml<TTransitionData, TArcData>(
 ) -> Result<String, XmlWriteError> {
     let writer = RefCell::new(Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2));
 
-    let _ = StartEndElementCookie::new(&writer, PNML_TAG_NAME)?;
-    let _ = StartEndElementCookie::new(&writer, NET_TAG_NAME)?;
+    let pnml_cookie = StartEndElementCookie::new(&writer, PNML_TAG_NAME)?;
+    let net_cookie = StartEndElementCookie::new(&writer, NET_TAG_NAME)?;
 
     for place in net.non_deleted_places() {
         let _ = StartEndElementCookie::new_with_attrs(
@@ -57,6 +57,9 @@ pub fn serialize_to_pnml<TTransitionData, TArcData>(
             write_arc_tag(&writer, net, transition, arc)?;
         }
     }
+
+    drop(net_cookie);
+    drop(pnml_cookie);
 
     let content = writer.borrow().get_ref().get_ref().clone();
     match String::from_utf8(content) {
