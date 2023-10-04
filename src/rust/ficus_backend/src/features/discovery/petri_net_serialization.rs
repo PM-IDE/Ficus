@@ -2,8 +2,8 @@ use crate::features::discovery::petri_net::{Arc, PetriNet, Transition};
 use crate::utils::xml_utils::{write_empty, StartEndElementCookie, XmlWriteError};
 use quick_xml::Writer;
 use std::cell::RefCell;
+use std::fs;
 use std::io::Cursor;
-use std::io::ErrorKind::InvalidData;
 
 const PNML_TAG_NAME: &'static str = "pmnl";
 const TRANSITION_TAG_NAME: &'static str = "transition";
@@ -14,6 +14,19 @@ const NET_TAG_NAME: &'static str = "net";
 const ID_ATTR_NAME: &'static str = "id";
 const SOURCE_ATTR_NAME: &'static str = "source";
 const TARGET_ATTR_NAME: &'static str = "target";
+
+pub fn serialize_to_pnml_file<TTransitionData, TArcData>(
+    net: &PetriNet<TTransitionData, TArcData>,
+    save_path: &str,
+) -> Result<(), XmlWriteError> {
+    match serialize_to_pnml(net) {
+        Ok(content) => match fs::write(save_path, content) {
+            Ok(_) => Ok(()),
+            Err(error) => Err(XmlWriteError::IOError(error)),
+        },
+        Err(error) => Err(error),
+    }
+}
 
 pub fn serialize_to_pnml<TTransitionData, TArcData>(
     net: &PetriNet<TTransitionData, TArcData>,
