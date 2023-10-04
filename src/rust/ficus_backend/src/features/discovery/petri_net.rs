@@ -15,9 +15,10 @@ pub struct Place {
     deleted: bool,
 }
 
+static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
 impl Place {
     pub fn new() -> Self {
-        static NEXT_ID: AtomicU64 = AtomicU64::new(0);
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
             deleted: false,
@@ -43,8 +44,6 @@ pub struct Transition<TTransitionData, TArcData> where TTransitionData: ToString
 
 impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData> where TTransitionData: ToString {
     pub fn empty(data: Option<TTransitionData>) -> Self {
-        static NEXT_ID: AtomicU64 = AtomicU64::new(0);
-
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
             incoming_arcs: Vec::new(),
@@ -95,8 +94,6 @@ pub struct Arc<TArcData> {
 
 impl<TArcData> Arc<TArcData> {
     pub fn new(place_index: usize, data: Option<TArcData>) -> Self {
-        static NEXT_ID: AtomicU64 = AtomicU64::new(0);
-
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
             place_index,

@@ -72,7 +72,27 @@ pub fn serialize_to_pnml<TTransitionData, TArcData>(
 
     for transition in net.all_transitions() {
         for arc in transition.incoming_arcs() {
-            write_arc_tag(&writer, net, transition, arc)?;
+            StartEndElementCookie::new_with_attrs(
+                &writer,
+                ARC_TAG_NAME,
+                &vec![
+                    (ID_ATTR_NAME, arc.id().to_string().as_str()),
+                    (SOURCE_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
+                    (TARGET_ATTR_NAME, transition.id().to_string().as_str()),
+                ],
+            )?;
+        }
+
+        for arc in transition.outgoing_args() {
+            StartEndElementCookie::new_with_attrs(
+                &writer,
+                ARC_TAG_NAME,
+                &vec![
+                    (ID_ATTR_NAME, arc.id().to_string().as_str()),
+                    (TARGET_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
+                    (SOURCE_ATTR_NAME, transition.id().to_string().as_str()),
+                ],
+            )?;
         }
     }
 
@@ -84,33 +104,4 @@ pub fn serialize_to_pnml<TTransitionData, TArcData>(
         Ok(string) => Ok(string),
         Err(error) => Err(XmlWriteError::FromUt8Error(error)),
     }
-}
-
-fn write_arc_tag<TTransitionData, TArcData>(
-    writer: &RefCell<Writer<Cursor<Vec<u8>>>>,
-    net: &PetriNet<TTransitionData, TArcData>,
-    transition: &Transition<TTransitionData, TArcData>,
-    arc: &Arc<TArcData>,
-) -> Result<(), XmlWriteError> where TTransitionData: ToString {
-    let _ = StartEndElementCookie::new_with_attrs(
-        &writer,
-        ARC_TAG_NAME,
-        &vec![
-            (ID_ATTR_NAME, arc.id().to_string().as_str()),
-            (TARGET_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
-            (SOURCE_ATTR_NAME, transition.id().to_string().as_str()),
-        ],
-    )?;
-
-    let _ = StartEndElementCookie::new_with_attrs(
-        &writer,
-        ARC_TAG_NAME,
-        &vec![
-            (ID_ATTR_NAME, arc.id().to_string().as_str()),
-            (TARGET_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
-            (SOURCE_ATTR_NAME, transition.id().to_string().as_str()),
-        ],
-    )?;
-
-    Ok(())
 }
