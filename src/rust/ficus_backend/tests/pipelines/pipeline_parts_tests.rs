@@ -34,7 +34,9 @@ fn get_test_parts_names() -> Vec<String> {
         "ExecuteWithEachActivityLog",
         "SubstituteUnderlyingEvents",
         "ExecuteFrontendPipeline",
-        "ApplyClassExtractor"
+        "ApplyClassExtractor",
+        "DiscoverPetriNetAlpha",
+        "SerializePetriNet"
     ]
 }
 

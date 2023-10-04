@@ -59,6 +59,8 @@ impl PipelineParts {
             Self::substitute_underlying_events(),
             Self::execute_frontend_pipeline(),
             Self::apply_class_extractor(),
+            Self::discover_petri_net_alpha(),
+            Self::serialize_petri_net()
         ];
 
         let mut names_to_parts = HashMap::new();

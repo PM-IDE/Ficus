@@ -103,13 +103,12 @@ impl ContextKeys {
         Self::are_keys_equal(key, self.patterns())
     }
 
-    pub fn petri_net<TData, TArcData>(&self) -> &DefaultContextKey<PetriNet<TData, TArcData>> {
-        self.find_concrete_key::<PetriNet<TData, TArcData>>(Self::PETRI_NET)
-            .unwrap()
+    pub fn petri_net(&self) -> &DefaultContextKey<PetriNet<String, ()>> {
+        self.find_concrete_key::<PetriNet<String, ()>>(Self::PETRI_NET).unwrap()
     }
 
-    pub fn is_petri_net<TData: 'static, TArcData: 'static>(&self, key: &dyn ContextKey) -> bool {
-        Self::are_keys_equal(key, self.petri_net::<TData, TArcData>())
+    pub fn is_petri_net(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(key, self.petri_net())
     }
 
     pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
