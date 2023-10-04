@@ -1,5 +1,6 @@
 use chrono::{DateTime, Duration, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use uuid::fmt::Simple;
 
 use crate::{
     event_log::core::{
@@ -121,6 +122,10 @@ impl Trace for SimpleTrace {
         &self.events_holder.events()
     }
 
+    fn events_mut(&mut self) -> &mut Vec<Rc<RefCell<Self::TEvent>>> {
+        self.events_holder.events_mut()
+    }
+
     fn push(&mut self, event: Rc<RefCell<Self::TEvent>>) {
         self.events_holder.push(event);
     }
@@ -165,7 +170,10 @@ impl SimpleTrace {
         let mut events = Vec::new();
         let mut current_date = TRACE_EVENT_START_DATE;
         for raw_event in raw_trace {
-            events.push(Rc::new(RefCell::new(SimpleEvent::new(raw_event, current_date))));
+            events.push(Rc::new(RefCell::new(SimpleEvent::new(
+                raw_event.to_string(),
+                current_date,
+            ))));
             current_date = current_date + Duration::seconds(1);
         }
 
@@ -184,19 +192,7 @@ pub struct SimpleEvent {
     event_base: EventBase,
 }
 
-impl SimpleEvent {
-    pub fn new(name: &str, timestamp: DateTime<Utc>) -> Self {
-        Self {
-            event_base: EventBase::new(name.to_owned(), timestamp),
-        }
-    }
-
-    pub fn new_with_min_date(name: &str) -> Self {
-        Self {
-            event_base: EventBase::new(name.to_owned(), DateTime::<Utc>::MIN_UTC),
-        }
-    }
-}
+impl SimpleEvent {}
 
 impl Event for SimpleEvent {
     fn name(&self) -> &String {
@@ -237,6 +233,20 @@ impl Event for SimpleEvent {
 
     fn add_or_update_payload(&mut self, _: String, _: EventPayloadValue) {
         panic!("Not supported")
+    }
+
+    fn new(name: String, timestamp: DateTime<Utc>) -> Self {
+        Self {
+            event_base: EventBase::new(name, timestamp),
+        }
+    }
+
+    fn new_with_min_date(name: String) -> Self {
+        Self::new(name, DateTime::<Utc>::MIN_UTC)
+    }
+
+    fn new_with_max_date(name: String) -> Self {
+        Self::new(name, DateTime::<Utc>::MAX_UTC)
     }
 }
 

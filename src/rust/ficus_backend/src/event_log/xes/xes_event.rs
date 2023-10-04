@@ -18,7 +18,7 @@ pub struct XesEventImpl {
 }
 
 impl XesEventImpl {
-    pub fn new(
+    pub fn new_all_fields(
         name: String,
         timestamp: DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
@@ -28,22 +28,6 @@ impl XesEventImpl {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
             payload: Some(payload),
-        }
-    }
-
-    pub fn new_min_date(name: String) -> Self {
-        Self {
-            event_base: EventBase::new(name, DateTime::<Utc>::MIN_UTC),
-            lifecycle: None,
-            payload: None,
-        }
-    }
-
-    pub fn new_with_date(name: String, stamp: DateTime<Utc>) -> Self {
-        Self {
-            event_base: EventBase::new(name, stamp),
-            lifecycle: None,
-            payload: None,
         }
     }
 }
@@ -104,6 +88,22 @@ impl Event for XesEventImpl {
         }
 
         *self.payload.as_mut().unwrap().get_mut(&key).unwrap() = value;
+    }
+
+    fn new(name: String, timestamp: DateTime<Utc>) -> Self {
+        Self {
+            event_base: EventBase::new(name.to_owned(), timestamp),
+            lifecycle: None,
+            payload: None,
+        }
+    }
+
+    fn new_with_min_date(name: String) -> Self {
+        Self::new(name, DateTime::<Utc>::MIN_UTC)
+    }
+
+    fn new_with_max_date(name: String) -> Self {
+        Self::new(name, DateTime::<Utc>::MAX_UTC)
     }
 }
 

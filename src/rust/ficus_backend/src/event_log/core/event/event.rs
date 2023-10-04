@@ -26,6 +26,10 @@ impl ToString for EventPayloadValue {
 }
 
 pub trait Event: Clone {
+    fn new(name: String, stamp: DateTime<Utc>) -> Self;
+    fn new_with_min_date(name: String) -> Self;
+    fn new_with_max_date(name: String) -> Self;
+
     fn name(&self) -> &String;
     fn timestamp(&self) -> &DateTime<Utc>;
     fn lifecycle(&self) -> Option<Lifecycle>;

@@ -1,5 +1,4 @@
-use std::{cell::RefCell, ops::Deref, rc::Rc};
-
+use ficus_backend::event_log::core::event::event::Event;
 use ficus_backend::features::analysis::patterns::activity_instances::SubTraceKind::Attached;
 use ficus_backend::features::analysis::patterns::activity_instances::{
     ActivityInTraceFilterKind, ActivityNarrowingKind,
@@ -24,6 +23,7 @@ use ficus_backend::{
     },
     vecs,
 };
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 use crate::test_core::simple_events_logs_provider::{create_log_from_taxonomy_of_patterns, create_maximal_repeats_log};
 
@@ -128,7 +128,9 @@ fn execute_activities_discovery_test(
     );
 
     let context = ActivitiesInstancesDiscoveryContext::new(context, strategy, |info| {
-        Rc::new(RefCell::new(SimpleEvent::new_with_min_date(&info.node.borrow().name)))
+        Rc::new(RefCell::new(SimpleEvent::new_with_min_date(
+            info.node.borrow().name.to_string(),
+        )))
     });
 
     let new_log = discover_activities_and_create_new_log(&context);
@@ -141,7 +143,9 @@ fn test_creating_new_log_from_activity_instances_insert_as_single_event() {
     execute_activities_discovery_test(
         create_log_from_taxonomy_of_patterns(),
         UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
-            Rc::new(RefCell::new(SimpleEvent::new_with_min_date(UNDEF_ACTIVITY_NAME)))
+            Rc::new(RefCell::new(SimpleEvent::new_with_min_date(
+                UNDEF_ACTIVITY_NAME.to_string(),
+            )))
         })),
         &vec![vec![
             UNDEF_ACTIVITY_NAME,

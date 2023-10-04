@@ -35,4 +35,5 @@ impl PipelineParts {
     pub const APPLY_CLASS_EXTRACTOR: &'static str = "ApplyClassExtractor";
     pub const SERIALIZE_PETRI_NET: &'static str = "SerializePetriNet";
     pub const DISCOVER_PETRI_NET_ALPHA: &'static str = "DiscoverPetriNetAlpha";
+    pub const ADD_ARTIFICIAL_START_END_EVENTS: &'static str = "AddArtificialStartEndEvents";
 }

@@ -76,7 +76,7 @@ impl TraceXesEventLogIterator {
                             return None;
                         }
 
-                        let event = XesEventImpl::new(name.unwrap(), date.unwrap(), lifecycle, payload);
+                        let event = XesEventImpl::new_all_fields(name.unwrap(), date.unwrap(), lifecycle, payload);
                         return Some(event);
                     }
                     _ => continue,

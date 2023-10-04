@@ -3,7 +3,10 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use tonic::metadata::VacantEntry;
 
 #[derive(Debug)]
-pub struct PetriNet<TTransitionData, TArcData> where TTransitionData: ToString {
+pub struct PetriNet<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
     places: Vec<Place>,
     transitions: Vec<Transition<TTransitionData, TArcData>>,
     marking: Option<Marking>,
@@ -35,14 +38,20 @@ impl Place {
 }
 
 #[derive(Debug)]
-pub struct Transition<TTransitionData, TArcData> where TTransitionData: ToString {
+pub struct Transition<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
     id: u64,
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
     data: Option<TTransitionData>,
 }
 
-impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData> where TTransitionData: ToString {
+impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
     pub fn empty(data: Option<TTransitionData>) -> Self {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
@@ -121,7 +130,10 @@ pub struct SingleMarking {
     tokens_count: usize,
 }
 
-impl<TTransitionData, TArcData> PetriNet<TTransitionData, TArcData> where TTransitionData: ToString {
+impl<TTransitionData, TArcData> PetriNet<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
     pub fn empty() -> Self {
         Self {
             places: Vec::new(),

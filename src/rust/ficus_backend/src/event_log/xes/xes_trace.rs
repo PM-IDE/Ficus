@@ -50,6 +50,10 @@ impl Trace for XesTraceImpl {
         &self.events_holder.events()
     }
 
+    fn events_mut(&mut self) -> &mut Vec<Rc<RefCell<Self::TEvent>>> {
+        self.events_holder.events_mut()
+    }
+
     fn push(&mut self, event: Rc<RefCell<Self::TEvent>>) {
         self.events_holder.push(event);
     }

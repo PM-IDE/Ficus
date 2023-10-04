@@ -26,7 +26,9 @@ impl PipelineParts {
 
             match serialize_to_pnml_file(petri_net, save_path) {
                 Ok(_) => Ok(()),
-                Err(error) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(error.to_string())))
+                Err(error) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
+                    error.to_string(),
+                ))),
             }
         })
     }

@@ -1,10 +1,10 @@
 use crate::features::discovery::petri_net::{Arc, PetriNet, Transition};
 use crate::utils::xml_utils::{write_empty, StartEndElementCookie, XmlWriteError};
+use quick_xml::events::{BytesText, Event};
 use quick_xml::Writer;
 use std::cell::RefCell;
 use std::fs;
 use std::io::Cursor;
-use quick_xml::events::{BytesText, Event};
 
 const PNML_TAG_NAME: &'static str = "pmnl";
 const TRANSITION_TAG_NAME: &'static str = "transition";
@@ -21,7 +21,10 @@ const TARGET_ATTR_NAME: &'static str = "target";
 pub fn serialize_to_pnml_file<TTransitionData, TArcData>(
     net: &PetriNet<TTransitionData, TArcData>,
     save_path: &str,
-) -> Result<(), XmlWriteError> where TTransitionData: ToString {
+) -> Result<(), XmlWriteError>
+where
+    TTransitionData: ToString,
+{
     match serialize_to_pnml(net) {
         Ok(content) => match fs::write(save_path, content) {
             Ok(_) => Ok(()),
@@ -33,7 +36,10 @@ pub fn serialize_to_pnml_file<TTransitionData, TArcData>(
 
 pub fn serialize_to_pnml<TTransitionData, TArcData>(
     net: &PetriNet<TTransitionData, TArcData>,
-) -> Result<String, XmlWriteError> where TTransitionData: ToString {
+) -> Result<String, XmlWriteError>
+where
+    TTransitionData: ToString,
+{
     let writer = RefCell::new(Writer::new_with_indent(Cursor::new(Vec::new()), b' ', 2));
 
     let pnml_cookie = StartEndElementCookie::new(&writer, PNML_TAG_NAME)?;
@@ -58,9 +64,12 @@ pub fn serialize_to_pnml<TTransitionData, TArcData>(
             let name = StartEndElementCookie::new(&writer, NAME_TAG_NAME);
             let text = StartEndElementCookie::new(&writer, TEXT_TAG_NAME);
 
-            match writer.borrow_mut().write_event(Event::Text(BytesText::new(data.to_string().as_str()))) {
-                Ok(()) => {},
-                Err(error) => return Err(XmlWriteError::WriterError(error))
+            match writer
+                .borrow_mut()
+                .write_event(Event::Text(BytesText::new(data.to_string().as_str())))
+            {
+                Ok(()) => {}
+                Err(error) => return Err(XmlWriteError::WriterError(error)),
             };
 
             drop(text);

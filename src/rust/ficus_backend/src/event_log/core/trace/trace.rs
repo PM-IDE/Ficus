@@ -10,6 +10,8 @@ pub trait Trace: Clone {
     fn empty() -> Self;
 
     fn events(&self) -> &Vec<Rc<RefCell<Self::TEvent>>>;
+    fn events_mut(&mut self) -> &mut Vec<Rc<RefCell<Self::TEvent>>>;
+
     fn push(&mut self, event: Rc<RefCell<Self::TEvent>>);
 
     fn to_names_vec(&self) -> Vec<String>;

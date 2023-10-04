@@ -107,6 +107,10 @@ where
 
         self.events_positions.borrow().unwrap()
     }
+
+    pub fn events_mut(&mut self) -> &mut Vec<Rc<RefCell<TEvent>>> {
+        &mut self.events
+    }
 }
 
 #[derive(Debug)]

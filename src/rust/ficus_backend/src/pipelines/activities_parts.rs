@@ -147,14 +147,16 @@ impl PipelineParts {
             UndefActivityHandlingStrategyDto::DontInsert => UndefActivityHandlingStrategy::DontInsert,
             UndefActivityHandlingStrategyDto::InsertAsSingleEvent => {
                 UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
-                    Rc::new(RefCell::new(XesEventImpl::new_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
+                    Rc::new(RefCell::new(XesEventImpl::new_with_min_date(
+                        UNDEF_ACTIVITY_NAME.to_owned(),
+                    )))
                 }))
             }
             UndefActivityHandlingStrategyDto::InsertAllEvents => UndefActivityHandlingStrategy::InsertAllEvents,
         };
 
         let log = create_new_log_from_activities_instances(log, instances, &strategy, &|info| {
-            Rc::new(RefCell::new(XesEventImpl::new_min_date(
+            Rc::new(RefCell::new(XesEventImpl::new_with_min_date(
                 info.node.borrow().name.clone(),
             )))
         });

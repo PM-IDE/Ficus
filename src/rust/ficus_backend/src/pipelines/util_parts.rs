@@ -87,7 +87,7 @@ impl PipelineParts {
                 let mut date = DateTime::<Utc>::MIN_UTC;
 
                 for name in names_trace {
-                    let event = XesEventImpl::new_with_date(name.clone(), date.clone());
+                    let event = XesEventImpl::new(name.clone(), date.clone());
                     trace.push(Rc::new(RefCell::new(event)));
                     date = date + Duration::seconds(1);
                 }
