@@ -1,5 +1,5 @@
 from ficus.grpc_pipelines.grpc_pipelines import *
-from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part
+from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
@@ -21,3 +21,13 @@ class SerializePetriNetToPNML2(PipelinePart2):
         config = GrpcPipelinePartConfiguration()
         append_string_value(config, const_path, self.save_path)
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_serialize_petri_net_to_pnml, config))
+
+
+class ViewPetriNet2(PipelinePart2WithCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_simple_get_context_value_part(self.uuid, const_petri_net)
+        return GrpcPipelinePartBase(simpleContextRequestPart=part)
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        petri_net = context_value.petriNet
+        print(petri_net)
