@@ -50,7 +50,7 @@ message GrpcPetriNet {
 }
 
 message GrpcPetriNetPlace {
-    bool deleted = 1;
+    int64 id = 1;
 }
 
 message GrpcPetriNetTransition {
@@ -60,7 +60,7 @@ message GrpcPetriNetTransition {
 }
 
 message GrpcPetriNetArc {
-    int64 placeIndex = 1;
+    int64 placeId = 1;
 }
 
 message GrpcPetriNetMarking {
@@ -68,6 +68,6 @@ message GrpcPetriNetMarking {
 }
 
 message GrpcPetriNetSinglePlaceMarking {
-    int64 placeIndex = 1;
+    int64 placeId = 1;
     int64 tokensCount = 2;
 }
