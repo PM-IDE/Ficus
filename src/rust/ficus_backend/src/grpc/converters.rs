@@ -131,6 +131,8 @@ pub fn convert_to_grpc_context_value(
         try_convert_to_grpc_colors_event_log(value)
     } else if keys.is_event_log_info(key) {
         try_convert_to_grpc_event_log_info(value)
+    } else if keys.is_petri_net(key) {
+        try_convert_to_grpc_petri_net(value)
     } else {
         None
     }
@@ -309,6 +311,7 @@ fn try_convert_to_grpc_petri_net(value: &dyn Any) -> Option<GrpcContextValue> {
             .iter()
             .map(|place| convert_to_grpc_place(place))
             .collect();
+
         let grpc_transitions: Vec<GrpcPetriNetTransition> = petri_net
             .all_transitions()
             .iter()
