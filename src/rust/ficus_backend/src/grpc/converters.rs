@@ -4,6 +4,8 @@ use nameof::name_of_type;
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use crate::features::discovery::petri_net::{Arc, DefaultPetriNet, Place, Transition};
+use crate::ficus_proto::{GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetPlace, GrpcPetriNetTransition};
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -294,5 +296,69 @@ fn try_convert_to_grpc_event_log_info(value: &dyn Any) -> Option<GrpcContextValu
                 event_classes_count: log_info.event_classes_count() as u32,
             })),
         })
+    }
+}
+
+fn try_convert_to_grpc_petri_net(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<DefaultPetriNet>() {
+        None
+    } else {
+        let petri_net = value.downcast_ref::<DefaultPetriNet>().unwrap();
+        let grpc_places: Vec<GrpcPetriNetPlace> = petri_net
+            .all_places()
+            .iter()
+            .map(|place| convert_to_grpc_place(place))
+            .collect();
+        let grpc_transitions: Vec<GrpcPetriNetTransition> = petri_net
+            .all_transitions()
+            .iter()
+            .map(|transition| convert_to_grpc_transition(transition))
+            .collect();
+
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::PetriNet(GrpcPetriNet {
+                places: grpc_places,
+                transitions: grpc_transitions,
+                marking: None,
+            })),
+        })
+    }
+}
+
+fn convert_to_grpc_place(place: &Place) -> GrpcPetriNetPlace {
+    GrpcPetriNetPlace { id: place.id() as i64 }
+}
+
+fn convert_to_grpc_transition<TTransitionData, TArcData>(
+    transition: &Transition<TTransitionData, TArcData>,
+) -> GrpcPetriNetTransition
+where
+    TTransitionData: ToString,
+{
+    let incoming_arcs = transition
+        .incoming_arcs()
+        .iter()
+        .map(|arc| convert_to_grpc_arc(arc))
+        .collect::<Vec<GrpcPetriNetArc>>();
+
+    let outgoing_arcs = transition
+        .outgoing_arcs()
+        .iter()
+        .map(|arc| convert_to_grpc_arc(arc))
+        .collect::<Vec<GrpcPetriNetArc>>();
+
+    GrpcPetriNetTransition {
+        incoming_arcs,
+        outgoing_arcs,
+        data: match transition.data() {
+            None => "".to_string(),
+            Some(data) => data.to_string(),
+        },
+    }
+}
+
+fn convert_to_grpc_arc<TArcData>(arc: &Arc<TArcData>) -> GrpcPetriNetArc {
+    GrpcPetriNetArc {
+        place_id: arc.place_id() as i64,
     }
 }

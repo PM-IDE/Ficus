@@ -1,5 +1,5 @@
 use crate::features::analysis::event_log_info::{DfgInfo, EventLogInfo};
-use crate::features::discovery::petri_net::{PetriNet, Place, Transition};
+use crate::features::discovery::petri_net::{DefaultPetriNet, PetriNet, Place, Transition};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
@@ -140,7 +140,7 @@ impl<'a> PartialEq for AlphaSet<'a> {
 
 impl<'a> Eq for AlphaSet<'a> {}
 
-pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String, ()> {
+pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet {
     let event_classes = event_log_info.get_all_event_classes();
     let dfg_info = event_log_info.get_dfg_info();
 
@@ -194,33 +194,33 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> PetriNet<String
         .collect();
 
     let mut petri_net = PetriNet::empty();
-    let mut event_classes_to_transitions = HashMap::new();
+    let mut event_classes_to_transition_ids = HashMap::new();
     for class in event_classes {
-        event_classes_to_transitions.insert(
-            class,
-            petri_net.add_transition(Transition::empty(Some(class.to_owned()))),
-        );
+        let id = petri_net.add_transition(Transition::empty(Some(class.to_owned())));
+        event_classes_to_transition_ids.insert(class, id);
     }
 
     for alpha_set in alpha_sets {
-        let place_index = petri_net.add_place(Place::new());
+        let place_id = petri_net.add_place(Place::new());
+
         for class in alpha_set.left_classes() {
-            petri_net.connect_transition_to_place(event_classes_to_transitions[class], place_index, None);
+            petri_net.connect_transition_to_place(event_classes_to_transition_ids[class], place_id, None);
         }
 
         for class in alpha_set.right_classes() {
-            petri_net.connect_place_to_transition(place_index, event_classes_to_transitions[class], None);
+            petri_net.connect_place_to_transition(place_id, event_classes_to_transition_ids[class], None);
         }
     }
 
-    let start_place_index = petri_net.add_place(Place::new());
+    let start_place_id = petri_net.add_place(Place::new());
     for start_activity in event_log_info.start_event_classes() {
-        petri_net.connect_place_to_transition(start_place_index, event_classes_to_transitions[start_activity], None);
+        petri_net.connect_place_to_transition(start_place_id, event_classes_to_transition_ids[start_activity], None);
     }
 
-    let end_place_index = petri_net.add_place(Place::new());
+
+    let end_place_id = petri_net.add_place(Place::new());
     for end_activity in event_log_info.end_event_classes() {
-        petri_net.connect_transition_to_place(event_classes_to_transitions[end_activity], end_place_index, None);
+        petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
     }
 
     return petri_net;

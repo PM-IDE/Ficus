@@ -45,7 +45,7 @@ where
     let pnml_cookie = StartEndElementCookie::new(&writer, PNML_TAG_NAME)?;
     let net_cookie = StartEndElementCookie::new(&writer, NET_TAG_NAME)?;
 
-    for place in net.non_deleted_places() {
+    for place in net.all_places() {
         let _ = StartEndElementCookie::new_with_attrs(
             &writer,
             PLACE_TAG_NAME,
@@ -86,19 +86,19 @@ where
                 ARC_TAG_NAME,
                 &vec![
                     (ID_ATTR_NAME, arc.id().to_string().as_str()),
-                    (SOURCE_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
+                    (SOURCE_ATTR_NAME, net.place(&arc.place_id()).id().to_string().as_str()),
                     (TARGET_ATTR_NAME, transition.id().to_string().as_str()),
                 ],
             )?;
         }
 
-        for arc in transition.outgoing_args() {
+        for arc in transition.outgoing_arcs() {
             StartEndElementCookie::new_with_attrs(
                 &writer,
                 ARC_TAG_NAME,
                 &vec![
                     (ID_ATTR_NAME, arc.id().to_string().as_str()),
-                    (TARGET_ATTR_NAME, net.place(arc.place_index()).id().to_string().as_str()),
+                    (TARGET_ATTR_NAME, net.place(&arc.place_id()).id().to_string().as_str()),
                     (SOURCE_ATTR_NAME, transition.id().to_string().as_str()),
                 ],
             )?;

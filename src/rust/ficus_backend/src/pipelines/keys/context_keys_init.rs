@@ -3,6 +3,7 @@ use std::{any::Any, borrow::Cow, collections::HashMap};
 use crate::features::analysis::patterns::activity_instances::{
     ActivityInTraceFilterKind, ActivityNarrowingKind, UndefActivityHandlingStrategy,
 };
+use crate::features::discovery::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -210,7 +211,7 @@ impl ContextKeys {
     }
 
     fn insert_petri_net(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<PetriNet<String, ()>>(context, Self::PETRI_NET);
+        Self::insert_key::<DefaultPetriNet>(context, Self::PETRI_NET);
     }
 
     fn insert_activities_to_logs(context: &mut ContextKeysInitContext) {

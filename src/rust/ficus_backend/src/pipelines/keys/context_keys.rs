@@ -1,6 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use crate::features::discovery::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -103,8 +104,8 @@ impl ContextKeys {
         Self::are_keys_equal(key, self.patterns())
     }
 
-    pub fn petri_net(&self) -> &DefaultContextKey<PetriNet<String, ()>> {
-        self.find_concrete_key::<PetriNet<String, ()>>(Self::PETRI_NET).unwrap()
+    pub fn petri_net(&self) -> &DefaultContextKey<DefaultPetriNet> {
+        self.find_concrete_key::<DefaultPetriNet>(Self::PETRI_NET).unwrap()
     }
 
     pub fn is_petri_net(&self, key: &dyn ContextKey) -> bool {

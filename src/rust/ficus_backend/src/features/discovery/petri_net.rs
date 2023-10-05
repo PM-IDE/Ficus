@@ -1,21 +1,21 @@
-use std::sync::atomic;
+use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
-use tonic::metadata::VacantEntry;
+
+pub type DefaultPetriNet = PetriNet<String, ()>;
 
 #[derive(Debug)]
 pub struct PetriNet<TTransitionData, TArcData>
 where
     TTransitionData: ToString,
 {
-    places: Vec<Place>,
-    transitions: Vec<Transition<TTransitionData, TArcData>>,
+    places: HashMap<u64, Place>,
+    transitions: HashMap<u64, Transition<TTransitionData, TArcData>>,
     marking: Option<Marking>,
 }
 
 #[derive(Debug)]
 pub struct Place {
     id: u64,
-    deleted: bool,
 }
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
@@ -24,12 +24,7 @@ impl Place {
     pub fn new() -> Self {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
-            deleted: false,
         }
-    }
-
-    pub fn deleted(&self) -> bool {
-        self.deleted.clone()
     }
 
     pub fn id(&self) -> u64 {
@@ -61,12 +56,12 @@ where
         }
     }
 
-    pub fn add_incoming_arc(&mut self, place_index: usize, data: Option<TArcData>) {
-        self.incoming_arcs.push(Arc::new(place_index, data))
+    pub fn add_incoming_arc(&mut self, place_id: u64, data: Option<TArcData>) {
+        self.incoming_arcs.push(Arc::new(place_id, data))
     }
 
-    pub fn add_outgoing_arc(&mut self, place_index: usize, data: Option<TArcData>) {
-        self.outgoing_arcs.push(Arc::new(place_index, data))
+    pub fn add_outgoing_arc(&mut self, place_id: u64, data: Option<TArcData>) {
+        self.outgoing_arcs.push(Arc::new(place_id, data))
     }
 
     pub fn remove_incoming_arc(&mut self, arc_index: usize) -> Arc<TArcData> {
@@ -85,7 +80,7 @@ where
         &self.incoming_arcs
     }
 
-    pub fn outgoing_args(&self) -> &Vec<Arc<TArcData>> {
+    pub fn outgoing_arcs(&self) -> &Vec<Arc<TArcData>> {
         &self.outgoing_arcs
     }
 
@@ -97,15 +92,15 @@ where
 #[derive(Debug)]
 pub struct Arc<TArcData> {
     id: u64,
-    place_index: usize,
+    place_id: u64,
     data: Option<TArcData>,
 }
 
 impl<TArcData> Arc<TArcData> {
-    pub fn new(place_index: usize, data: Option<TArcData>) -> Self {
+    pub fn new(place_id: u64, data: Option<TArcData>) -> Self {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
-            place_index,
+            place_id,
             data,
         }
     }
@@ -114,8 +109,8 @@ impl<TArcData> Arc<TArcData> {
         self.id
     }
 
-    pub fn place_index(&self) -> usize {
-        self.place_index
+    pub fn place_id(&self) -> u64 {
+        self.place_id
     }
 }
 
@@ -136,57 +131,61 @@ where
 {
     pub fn empty() -> Self {
         Self {
-            places: Vec::new(),
-            transitions: Vec::new(),
+            places: HashMap::new(),
+            transitions: HashMap::new(),
             marking: None,
         }
     }
 
-    pub fn add_place(&mut self, place: Place) -> usize {
-        self.places.push(place);
-        self.places.len() - 1
+    pub fn add_place(&mut self, place: Place) -> u64 {
+        let id = place.id();
+        self.places.insert(place.id(), place);
+        id
     }
 
-    pub fn all_places(&self) -> &Vec<Place> {
-        &self.places
+    pub fn all_places(&self) -> Vec<&Place> {
+        self.places.values().into_iter().collect()
     }
 
-    pub fn non_deleted_places(&self) -> Vec<&Place> {
-        self.places.iter().filter(|place| !place.deleted()).collect()
+    pub fn all_transitions(&self) -> Vec<&Transition<TTransitionData, TArcData>> {
+        self.transitions.values().into_iter().collect()
     }
 
-    pub fn all_transitions(&self) -> &Vec<Transition<TTransitionData, TArcData>> {
-        &self.transitions
+    pub fn delete_transition(&mut self, id: &u64) -> Option<Transition<TTransitionData, TArcData>> {
+        self.transitions.remove(id)
     }
 
-    pub fn delete_transition(&mut self, index: usize) -> Transition<TTransitionData, TArcData> {
-        self.transitions.remove(index)
-    }
-
-    pub fn add_transition(&mut self, transition: Transition<TTransitionData, TArcData>) -> usize {
-        self.transitions.push(transition);
-        self.transitions.len() - 1
+    pub fn add_transition(&mut self, transition: Transition<TTransitionData, TArcData>) -> u64 {
+        let id = transition.id();
+        self.transitions.insert(transition.id(), transition);
+        id
     }
 
     pub fn connect_place_to_transition(
         &mut self,
-        from_place_index: usize,
-        to_transition_index: usize,
+        from_place_id: u64,
+        to_transition_index: u64,
         arc_data: Option<TArcData>,
     ) {
-        self.transitions[to_transition_index].add_incoming_arc(from_place_index, arc_data);
+        self.transitions
+            .get_mut(&to_transition_index)
+            .unwrap()
+            .add_incoming_arc(from_place_id, arc_data);
     }
 
     pub fn connect_transition_to_place(
         &mut self,
-        from_transition_index: usize,
-        to_place_index: usize,
+        from_transition_id: u64,
+        to_place_index: u64,
         arc_data: Option<TArcData>,
     ) {
-        self.transitions[from_transition_index].add_outgoing_arc(to_place_index, arc_data);
+        self.transitions
+            .get_mut(&from_transition_id)
+            .unwrap()
+            .add_outgoing_arc(to_place_index, arc_data);
     }
 
-    pub fn place(&self, index: usize) -> &Place {
-        self.places.get(index).as_ref().unwrap()
+    pub fn place(&self, id: &u64) -> &Place {
+        self.places.get(id).as_ref().unwrap()
     }
 }
