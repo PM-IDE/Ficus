@@ -136,3 +136,26 @@ def from_grpc_event_log_info(grpc_event_log_info: GrpcEventLogInfo) -> EventLogI
     return EventLogInfo(events_count=grpc_event_log_info.events_count,
                         traces_count=grpc_event_log_info.traces_count,
                         event_classes_count=grpc_event_log_info.event_classes_count)
+
+
+class PetriNet:
+    def __init__(self):
+        self.places: dict[int, Place] = dict()
+        self.transitions: dict[int, Transition] = dict()
+
+
+class Place:
+    def __init__(self, id: int):
+        self.id = id
+
+
+class Transition:
+    def __init__(self, id: int):
+        self.id: int = id
+        self.incoming_arcs: list[Arc] = []
+        self.outgoing_arcs: list[Arc] = []
+
+
+class Arc:
+    def __init__(self, id: int):
+        self.id = id
