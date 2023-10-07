@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from ficus.analysis.event_log_analysis import ColoredRectangle, Color
+from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
@@ -170,27 +170,3 @@ def from_grpc_transition(grpc_petri_net_transition: GrpcPetriNetTransition) -> '
 
 def from_grpc_arc(grpc_arc: GrpcPetriNetArc) -> 'Arc':
     return Arc(grpc_arc.placeId)
-
-
-class PetriNet:
-    def __init__(self):
-        self.places: dict[int, Place] = dict()
-        self.transitions: dict[int, Transition] = dict()
-
-
-class Place:
-    def __init__(self, id: int):
-        self.id = id
-
-
-class Transition:
-    def __init__(self, id: int):
-        self.id = id
-        self.incoming_arcs: list[Arc] = []
-        self.outgoing_arcs: list[Arc] = []
-        self.data: Optional[str] = None
-
-
-class Arc:
-    def __init__(self, place_id: int):
-        self.place_id = place_id
