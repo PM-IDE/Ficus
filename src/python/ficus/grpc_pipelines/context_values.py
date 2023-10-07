@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from ficus.analysis.event_log_analysis import ColoredRectangle, Color
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
@@ -138,6 +139,39 @@ def from_grpc_event_log_info(grpc_event_log_info: GrpcEventLogInfo) -> EventLogI
                         event_classes_count=grpc_event_log_info.event_classes_count)
 
 
+def from_grpc_petri_net(grpc_petri_net: GrpcPetriNet) -> 'PetriNet':
+    petri_net = PetriNet()
+    for grpc_place in grpc_petri_net.places:
+        place = from_grpc_petri_net_place(grpc_place)
+        petri_net.places[place.id] = place
+
+    for grpc_transition in grpc_petri_net.transitions:
+        transition = from_grpc_transition(grpc_transition)
+        petri_net.transitions[transition.id] = transition
+
+    return petri_net
+
+
+def from_grpc_petri_net_place(grpc_petri_net_place: GrpcPetriNetPlace) -> 'Place':
+    return Place(grpc_petri_net_place.id)
+
+
+def from_grpc_transition(grpc_petri_net_transition: GrpcPetriNetTransition) -> 'Transition':
+    transition = Transition(grpc_petri_net_transition.id)
+    for grpc_incoming_arc in grpc_petri_net_transition.incomingArcs:
+        transition.incoming_arcs.append(from_grpc_arc(grpc_incoming_arc))
+
+    for grpc_outgoing_arc in grpc_petri_net_transition.outgoingArcs:
+        transition.outgoing_arcs.append(from_grpc_arc(grpc_outgoing_arc))
+
+    transition.data = grpc_petri_net_transition.data
+    return transition
+
+
+def from_grpc_arc(grpc_arc: GrpcPetriNetArc) -> 'Arc':
+    return Arc(grpc_arc.placeId)
+
+
 class PetriNet:
     def __init__(self):
         self.places: dict[int, Place] = dict()
@@ -151,11 +185,12 @@ class Place:
 
 class Transition:
     def __init__(self, id: int):
-        self.id: int = id
+        self.id = id
         self.incoming_arcs: list[Arc] = []
         self.outgoing_arcs: list[Arc] = []
+        self.data: Optional[str] = None
 
 
 class Arc:
-    def __init__(self, id: int):
-        self.id = id
+    def __init__(self, place_id: int):
+        self.place_id = place_id

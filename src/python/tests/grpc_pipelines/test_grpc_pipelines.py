@@ -397,6 +397,7 @@ def test_discover_petri_net_alpha_end_events():
             UseNamesEventLog2(),
             AddEndArtificialEvents2(),
             DiscoverPetriNetAlpha2(),
-            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
+            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml'),
+            ViewPetriNet2()
         )
     )

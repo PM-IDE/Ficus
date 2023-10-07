@@ -1,3 +1,4 @@
+from ficus.grpc_pipelines.context_values import from_grpc_petri_net
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
@@ -29,5 +30,5 @@ class ViewPetriNet2(PipelinePart2WithCallback):
         return GrpcPipelinePartBase(simpleContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):
-        petri_net = context_value.petriNet
+        petri_net = from_grpc_petri_net(context_value.petriNet)
         print(petri_net)
