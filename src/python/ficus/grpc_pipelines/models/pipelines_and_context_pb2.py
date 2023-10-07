@@ -44,8 +44,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pipelines_and_context_pb2',
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-
-
   DESCRIPTOR._options = None
 
   _globals['_GRPCCONTEXTKEY']._serialized_start=67

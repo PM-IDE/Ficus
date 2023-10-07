@@ -42,8 +42,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'pm_models_pb2', _globals)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-
-
   DESCRIPTOR._options = None
 
   _globals['_GRPCSIMPLEEVENTLOG']._serialized_start=59

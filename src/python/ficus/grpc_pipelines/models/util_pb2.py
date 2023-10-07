@@ -40,8 +40,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'util_pb2', _globals)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-
-
   DESCRIPTOR._options = None
 
   _globals['_GRPCGUID']._serialized_start=21

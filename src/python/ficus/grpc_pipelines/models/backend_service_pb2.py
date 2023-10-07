@@ -46,8 +46,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'backend_service_pb2', _glob
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-
-
   DESCRIPTOR._options = None
 
   _globals['_GRPCGETCONTEXTVALUEREQUEST']._serialized_start=102
