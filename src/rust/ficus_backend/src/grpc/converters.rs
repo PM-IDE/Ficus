@@ -351,6 +351,7 @@ where
         .collect::<Vec<GrpcPetriNetArc>>();
 
     GrpcPetriNetTransition {
+        id: transition.id() as i64,
         incoming_arcs,
         outgoing_arcs,
         data: match transition.data() {

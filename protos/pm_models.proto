@@ -54,9 +54,10 @@ message GrpcPetriNetPlace {
 }
 
 message GrpcPetriNetTransition {
-    repeated GrpcPetriNetArc incomingArcs = 1;
-    repeated GrpcPetriNetArc outgoingArcs = 2;
-    string data = 3;
+    int64 id = 1;
+    repeated GrpcPetriNetArc incomingArcs = 2;
+    repeated GrpcPetriNetArc outgoingArcs = 3;
+    string data = 4;
 }
 
 message GrpcPetriNetArc {

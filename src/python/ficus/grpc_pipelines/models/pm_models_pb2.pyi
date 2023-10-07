@@ -75,14 +75,16 @@ class GrpcPetriNetPlace(_message.Message):
     def __init__(self, id: _Optional[int] = ...) -> None: ...
 
 class GrpcPetriNetTransition(_message.Message):
-    __slots__ = ["incomingArcs", "outgoingArcs", "data"]
+    __slots__ = ["id", "incomingArcs", "outgoingArcs", "data"]
+    ID_FIELD_NUMBER: _ClassVar[int]
     INCOMINGARCS_FIELD_NUMBER: _ClassVar[int]
     OUTGOINGARCS_FIELD_NUMBER: _ClassVar[int]
     DATA_FIELD_NUMBER: _ClassVar[int]
+    id: int
     incomingArcs: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArc]
     outgoingArcs: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArc]
     data: str
-    def __init__(self, incomingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., outgoingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., data: _Optional[str] = ...) -> None: ...
+    def __init__(self, id: _Optional[int] = ..., incomingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., outgoingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., data: _Optional[str] = ...) -> None: ...
 
 class GrpcPetriNetArc(_message.Message):
     __slots__ = ["placeId"]
