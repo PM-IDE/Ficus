@@ -23,7 +23,7 @@ class Pipeline2:
     def __init__(self, *parts):
         self.parts: list['PipelinePart2'] = list(parts)
 
-    def execute(self, initial_context: dict[str, ContextValue]) -> GrpcGuid:
+    def execute(self, initial_context: dict[str, ContextValue]) -> GrpcPipelinePartExecutionResult:
         options = [('grpc.max_send_message_length', 512 * 1024 * 1024),
                    ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
 
