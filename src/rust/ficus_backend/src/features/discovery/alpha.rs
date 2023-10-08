@@ -217,7 +217,6 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
         petri_net.connect_place_to_transition(start_place_id, event_classes_to_transition_ids[start_activity], None);
     }
 
-
     let end_place_id = petri_net.add_place(Place::new());
     for end_activity in event_log_info.end_event_classes() {
         petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
