@@ -59,14 +59,16 @@ class GrpcNamesTrace(_message.Message):
     def __init__(self, events: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class GrpcPetriNet(_message.Message):
-    __slots__ = ["places", "transitions", "marking"]
+    __slots__ = ["places", "transitions", "initial_marking", "final_marking"]
     PLACES_FIELD_NUMBER: _ClassVar[int]
     TRANSITIONS_FIELD_NUMBER: _ClassVar[int]
-    MARKING_FIELD_NUMBER: _ClassVar[int]
+    INITIAL_MARKING_FIELD_NUMBER: _ClassVar[int]
+    FINAL_MARKING_FIELD_NUMBER: _ClassVar[int]
     places: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetPlace]
     transitions: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetTransition]
-    marking: GrpcPetriNetMarking
-    def __init__(self, places: _Optional[_Iterable[_Union[GrpcPetriNetPlace, _Mapping]]] = ..., transitions: _Optional[_Iterable[_Union[GrpcPetriNetTransition, _Mapping]]] = ..., marking: _Optional[_Union[GrpcPetriNetMarking, _Mapping]] = ...) -> None: ...
+    initial_marking: GrpcPetriNetMarking
+    final_marking: GrpcPetriNetMarking
+    def __init__(self, places: _Optional[_Iterable[_Union[GrpcPetriNetPlace, _Mapping]]] = ..., transitions: _Optional[_Iterable[_Union[GrpcPetriNetTransition, _Mapping]]] = ..., initial_marking: _Optional[_Union[GrpcPetriNetMarking, _Mapping]] = ..., final_marking: _Optional[_Union[GrpcPetriNetMarking, _Mapping]] = ...) -> None: ...
 
 class GrpcPetriNetPlace(_message.Message):
     __slots__ = ["id"]
@@ -93,10 +95,10 @@ class GrpcPetriNetArc(_message.Message):
     def __init__(self, placeId: _Optional[int] = ...) -> None: ...
 
 class GrpcPetriNetMarking(_message.Message):
-    __slots__ = ["Markings"]
+    __slots__ = ["markings"]
     MARKINGS_FIELD_NUMBER: _ClassVar[int]
-    Markings: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetSinglePlaceMarking]
-    def __init__(self, Markings: _Optional[_Iterable[_Union[GrpcPetriNetSinglePlaceMarking, _Mapping]]] = ...) -> None: ...
+    markings: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetSinglePlaceMarking]
+    def __init__(self, markings: _Optional[_Iterable[_Union[GrpcPetriNetSinglePlaceMarking, _Mapping]]] = ...) -> None: ...
 
 class GrpcPetriNetSinglePlaceMarking(_message.Message):
     __slots__ = ["placeId", "tokensCount"]

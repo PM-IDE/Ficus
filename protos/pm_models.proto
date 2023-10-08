@@ -46,7 +46,8 @@ message GrpcNamesTrace {
 message GrpcPetriNet {
     repeated GrpcPetriNetPlace places = 1;
     repeated GrpcPetriNetTransition transitions = 2;
-    GrpcPetriNetMarking marking = 3;
+    GrpcPetriNetMarking initial_marking = 3;
+    GrpcPetriNetMarking final_marking = 4;
 }
 
 message GrpcPetriNetPlace {
@@ -65,7 +66,7 @@ message GrpcPetriNetArc {
 }
 
 message GrpcPetriNetMarking {
-    repeated GrpcPetriNetSinglePlaceMarking Markings = 1;
+    repeated GrpcPetriNetSinglePlaceMarking markings = 1;
 }
 
 message GrpcPetriNetSinglePlaceMarking {
