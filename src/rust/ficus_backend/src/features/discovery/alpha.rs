@@ -148,10 +148,11 @@ impl<'a> ToString for AlphaSet<'a> {
             repr.push(',');
         }
 
-        repr.push_str("} ");
         if self.left_classes.len() > 0 {
             repr.remove(repr.len() - 1);
         }
+
+        repr.push_str("} {");
 
         for right_class in &self.right_classes {
             repr.push_str(right_class.as_str());
