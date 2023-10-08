@@ -26,10 +26,13 @@ class SerializePetriNetToPNML2(PipelinePart2):
 
 
 class ViewPetriNet2(PipelinePart2WithCallback):
+    def __init__(self, export_path: Optional[str] = None):
+        super().__init__()
+        self.export_path = export_path
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_simple_get_context_value_part(self.uuid, const_petri_net)
         return GrpcPipelinePartBase(simpleContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):
-        petri_net = from_grpc_petri_net(context_value.petriNet)
-        draw_petri_net(petri_net)
+        draw_petri_net(from_grpc_petri_net(context_value.petriNet), export_path=self.export_path)

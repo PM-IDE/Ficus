@@ -1,3 +1,6 @@
+import os
+import shutil
+import tempfile
 from typing import Optional
 
 import graphviz
@@ -41,9 +44,18 @@ class SinglePlaceMarking:
         self.tokens_count = tokens_count
 
 
-def draw_petri_net(net: PetriNet, name: str = 'petri_net'):
-    g = graphviz.Digraph(name, engine='dot')
-    g.graph_attr['rankdir'] = 'LR'
+def draw_petri_net(net: PetriNet,
+                   name: str = 'petri_net',
+                   background_color: str = 'white',
+                   engine='dot',
+                   export_path: Optional[str] = None,
+                   rankdir: str = 'LR'):
+    tmp_save_file = tempfile.NamedTemporaryFile(suffix='.gv')
+
+    g = graphviz.Digraph(name, engine=engine, graph_attr={
+        'bgcolor': background_color,
+        'rankdir': rankdir
+    })
 
     initial_marking_places = set()
     if net.initial_marking is not None:
@@ -55,13 +67,11 @@ def draw_petri_net(net: PetriNet, name: str = 'petri_net'):
         for single_marking in net.final_marking.markings:
             final_marking_places.add(single_marking.place_id)
 
-    print(initial_marking_places, final_marking_places)
-
     for place in net.places.values():
         if place.id in initial_marking_places:
             g.node(str(place.id), '<&#9679;>', style='filled', border='1', shape='circle')
         elif place.id in final_marking_places:
-            g.node(str(place.id), '<&#9632;>', style='filled', border='1', shape='doublecircle')
+            g.node(str(place.id), '<&#9679;>', style='filled', border='1', shape='doublecircle')
         else:
             g.node(str(place.id), '', style='filled', border='1', shape='circle')
 
@@ -76,5 +86,12 @@ def draw_petri_net(net: PetriNet, name: str = 'petri_net'):
             g.edge(str(transition.id), str(arc.place_id))
 
     g.attr(overlap='false')
+    g.save(tmp_save_file.name)
 
-    display(g)
+    if export_path is None:
+        display(g)
+    else:
+        _, extension = os.path.splitext(export_path)
+        graphviz.render(engine, extension[1::], tmp_save_file.name)
+        shutil.copy(tmp_save_file.name + extension, export_path)
+
