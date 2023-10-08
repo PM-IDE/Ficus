@@ -26,13 +26,30 @@ class SerializePetriNetToPNML2(PipelinePart2):
 
 
 class ViewPetriNet2(PipelinePart2WithCallback):
-    def __init__(self, export_path: Optional[str] = None):
+    def __init__(self,
+                 show_places_names: bool = False,
+                 name: str = 'petri_net',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
         super().__init__()
         self.export_path = export_path
+        self.show_places_names = show_places_names
+        self.name = name
+        self.background_color = background_color
+        self.engine = engine
+        self.rankdir = rankdir
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_simple_get_context_value_part(self.uuid, const_petri_net)
         return GrpcPipelinePartBase(simpleContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):
-        draw_petri_net(from_grpc_petri_net(context_value.petriNet), export_path=self.export_path)
+        draw_petri_net(from_grpc_petri_net(context_value.petriNet),
+                       show_places_names=self.show_places_names,
+                       name=self.name,
+                       background_color=self.background_color,
+                       engine=self.engine,
+                       rankdir=self.rankdir,
+                       export_path=self.export_path)
