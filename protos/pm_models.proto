@@ -52,6 +52,7 @@ message GrpcPetriNet {
 
 message GrpcPetriNetPlace {
     int64 id = 1;
+    string name = 2;
 }
 
 message GrpcPetriNetTransition {

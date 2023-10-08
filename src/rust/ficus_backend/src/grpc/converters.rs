@@ -3,6 +3,7 @@ use std::{any::Any, str::FromStr};
 use nameof::name_of_type;
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
+use crate::features::analysis::patterns::activity_instances::ActivityInTraceFilterKind::NoFilter;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::discovery::petri_net::{Arc, DefaultPetriNet, Marking, Place, SingleMarking, Transition};
 use crate::ficus_proto::{
@@ -333,7 +334,10 @@ fn try_convert_to_grpc_petri_net(value: &dyn Any) -> Option<GrpcContextValue> {
 }
 
 fn convert_to_grpc_place(place: &Place) -> GrpcPetriNetPlace {
-    GrpcPetriNetPlace { id: place.id() as i64 }
+    GrpcPetriNetPlace {
+        id: place.id() as i64,
+        name: place.name().to_owned(),
+    }
 }
 
 fn convert_to_grpc_transition<TTransitionData, TArcData>(

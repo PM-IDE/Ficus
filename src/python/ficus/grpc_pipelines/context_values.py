@@ -157,7 +157,7 @@ def from_grpc_petri_net(grpc_petri_net: GrpcPetriNet) -> 'PetriNet':
 
 
 def from_grpc_petri_net_place(grpc_petri_net_place: GrpcPetriNetPlace) -> 'Place':
-    return Place(grpc_petri_net_place.id)
+    return Place(grpc_petri_net_place.id, grpc_petri_net_place.name)
 
 
 def from_grpc_transition(grpc_petri_net_transition: GrpcPetriNetTransition) -> 'Transition':

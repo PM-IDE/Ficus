@@ -16,8 +16,9 @@ class PetriNet:
 
 
 class Place:
-    def __init__(self, id: int):
+    def __init__(self, id: int, name: str):
         self.id = id
+        self.name = name
 
 
 class Transition:
@@ -45,6 +46,7 @@ class SinglePlaceMarking:
 
 
 def draw_petri_net(net: PetriNet,
+                   show_places_names: bool = False,
                    name: str = 'petri_net',
                    background_color: str = 'white',
                    engine='dot',
@@ -73,7 +75,8 @@ def draw_petri_net(net: PetriNet,
         elif place.id in final_marking_places:
             g.node(str(place.id), '<&#9679;>', style='filled', border='1', shape='doublecircle')
         else:
-            g.node(str(place.id), '', style='filled', border='1', shape='circle')
+            label = place.name if show_places_names else ''
+            g.node(str(place.id), label=label, style='filled', border='1', shape='circle')
 
     for transition in net.transitions.values():
         g.node(str(transition.id), label=transition.data, shape='box')

@@ -71,10 +71,12 @@ class GrpcPetriNet(_message.Message):
     def __init__(self, places: _Optional[_Iterable[_Union[GrpcPetriNetPlace, _Mapping]]] = ..., transitions: _Optional[_Iterable[_Union[GrpcPetriNetTransition, _Mapping]]] = ..., initial_marking: _Optional[_Union[GrpcPetriNetMarking, _Mapping]] = ..., final_marking: _Optional[_Union[GrpcPetriNetMarking, _Mapping]] = ...) -> None: ...
 
 class GrpcPetriNetPlace(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ["id", "name"]
     ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
     id: int
-    def __init__(self, id: _Optional[int] = ...) -> None: ...
+    name: str
+    def __init__(self, id: _Optional[int] = ..., name: _Optional[str] = ...) -> None: ...
 
 class GrpcPetriNetTransition(_message.Message):
     __slots__ = ["id", "incomingArcs", "outgoingArcs", "data"]

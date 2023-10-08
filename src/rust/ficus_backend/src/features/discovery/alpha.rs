@@ -140,6 +140,34 @@ impl<'a> PartialEq for AlphaSet<'a> {
 
 impl<'a> Eq for AlphaSet<'a> {}
 
+impl<'a> ToString for AlphaSet<'a> {
+    fn to_string(&self) -> String {
+        let mut repr = "[{".to_string();
+        for left_class in &self.left_classes {
+            repr.push_str(left_class.as_str());
+            repr.push(',');
+        }
+
+        repr.push_str("} ");
+        if self.left_classes.len() > 0 {
+            repr.remove(repr.len() - 1);
+        }
+
+        for right_class in &self.right_classes {
+            repr.push_str(right_class.as_str());
+            repr.push(',');
+        }
+
+        if self.right_classes.len() > 0 {
+            repr.remove(repr.len() - 1);
+        }
+
+        repr.push_str("}]");
+
+        repr
+    }
+}
+
 pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet {
     let event_classes = event_log_info.get_all_event_classes();
     let dfg_info = event_log_info.get_dfg_info();
@@ -201,7 +229,7 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
     }
 
     for alpha_set in alpha_sets {
-        let place_id = petri_net.add_place(Place::new());
+        let place_id = petri_net.add_place(Place::with_name(alpha_set.to_string()));
 
         for class in alpha_set.left_classes() {
             petri_net.connect_transition_to_place(event_classes_to_transition_ids[class], place_id, None);
@@ -212,12 +240,12 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
         }
     }
 
-    let start_place_id = petri_net.add_place(Place::new());
+    let start_place_id = petri_net.add_place(Place::empty());
     for start_activity in event_log_info.start_event_classes() {
         petri_net.connect_place_to_transition(start_place_id, event_classes_to_transition_ids[start_activity], None);
     }
 
-    let end_place_id = petri_net.add_place(Place::new());
+    let end_place_id = petri_net.add_place(Place::empty());
     for end_activity in event_log_info.end_event_classes() {
         petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
     }

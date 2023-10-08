@@ -1,8 +1,13 @@
-use crate::features::analysis::patterns::entry_points::find_patterns;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 pub type DefaultPetriNet = PetriNet<String, ()>;
+
+static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
+fn next_id() -> u64 {
+    NEXT_ID.fetch_add(1, Ordering::SeqCst)
+}
 
 #[derive(Debug)]
 pub struct PetriNet<TTransitionData, TArcData>
@@ -15,22 +20,32 @@ where
     final_marking: Option<Marking>,
 }
 
+const EMPTY_PLACE_NAME: &'static str = "EmptyPlace";
+
 #[derive(Debug)]
 pub struct Place {
     id: u64,
+    name: String,
 }
 
-static NEXT_ID: AtomicU64 = AtomicU64::new(0);
-
 impl Place {
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
-            id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
+            id: next_id(),
+            name: EMPTY_PLACE_NAME.to_owned(),
         }
+    }
+
+    pub fn with_name(name: String) -> Self {
+        Self { id: next_id(), name }
     }
 
     pub fn id(&self) -> u64 {
         self.id
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
 
@@ -51,7 +66,7 @@ where
 {
     pub fn empty(data: Option<TTransitionData>) -> Self {
         Self {
-            id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
+            id: next_id(),
             incoming_arcs: Vec::new(),
             outgoing_arcs: Vec::new(),
             data,
@@ -101,7 +116,7 @@ pub struct Arc<TArcData> {
 impl<TArcData> Arc<TArcData> {
     pub fn new(place_id: u64, data: Option<TArcData>) -> Self {
         Self {
-            id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
+            id: next_id(),
             place_id,
             data,
         }
