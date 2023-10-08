@@ -4,8 +4,8 @@ use nameof::name_of_type;
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::features::discovery::petri_net::{Arc, DefaultPetriNet, Place, Transition};
-use crate::ficus_proto::{GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetPlace, GrpcPetriNetTransition};
+use crate::features::discovery::petri_net::{Arc, DefaultPetriNet, Marking, Place, SingleMarking, Transition};
+use crate::ficus_proto::{GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition};
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -322,7 +322,8 @@ fn try_convert_to_grpc_petri_net(value: &dyn Any) -> Option<GrpcContextValue> {
             context_value: Some(ContextValue::PetriNet(GrpcPetriNet {
                 places: grpc_places,
                 transitions: grpc_transitions,
-                marking: None,
+                initial_marking: try_convert_to_grpc_marking(petri_net.initial_marking()),
+                final_marking: try_convert_to_grpc_marking(petri_net.final_marking())
             })),
         })
     }
@@ -364,5 +365,21 @@ where
 fn convert_to_grpc_arc<TArcData>(arc: &Arc<TArcData>) -> GrpcPetriNetArc {
     GrpcPetriNetArc {
         place_id: arc.place_id() as i64,
+    }
+}
+
+fn try_convert_to_grpc_marking(marking: Option<&Marking>) -> Option<GrpcPetriNetMarking> {
+    match marking {
+        None => None,
+        Some(marking) => Some(GrpcPetriNetMarking {
+            markings: marking.active_places().iter().map(|single_marking| convert_to_grpc_single_marking(single_marking)).collect()
+        })
+    }
+}
+
+fn convert_to_grpc_single_marking(marking: &SingleMarking) -> GrpcPetriNetSinglePlaceMarking {
+    GrpcPetriNetSinglePlaceMarking {
+        place_id: marking.place_id() as i64,
+        tokens_count: marking.tokens_count() as i64
     }
 }

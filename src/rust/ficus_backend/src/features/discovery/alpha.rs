@@ -1,5 +1,5 @@
 use crate::features::analysis::event_log_info::{DfgInfo, EventLogInfo};
-use crate::features::discovery::petri_net::{DefaultPetriNet, PetriNet, Place, Transition};
+use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
@@ -222,6 +222,9 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
     for end_activity in event_log_info.end_event_classes() {
         petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
     }
+
+    petri_net.set_initial_marking(Marking::new(vec![SingleMarking::new(start_place_id, 1)]));
+    petri_net.set_final_marking(Marking::new(vec![SingleMarking::new(end_place_id, 1)]));
 
     return petri_net;
 }

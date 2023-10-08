@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
+use crate::features::analysis::patterns::entry_points::find_patterns;
 
 pub type DefaultPetriNet = PetriNet<String, ()>;
 
@@ -10,7 +11,8 @@ where
 {
     places: HashMap<u64, Place>,
     transitions: HashMap<u64, Transition<TTransitionData, TArcData>>,
-    marking: Option<Marking>,
+    initial_marking: Option<Marking>,
+    final_marking: Option<Marking>
 }
 
 #[derive(Debug)]
@@ -119,10 +121,31 @@ pub struct Marking {
     active_places: Vec<SingleMarking>,
 }
 
+impl Marking {
+    pub fn new(single_markings: Vec<SingleMarking>) -> Self {
+        Self { active_places: single_markings }
+    }
+
+    pub fn active_places(&self) -> &Vec<SingleMarking> {
+        &self.active_places
+    }
+}
+
 #[derive(Debug)]
 pub struct SingleMarking {
-    place_index: usize,
+    place_id: u64,
     tokens_count: usize,
+}
+
+impl SingleMarking {
+    pub fn new(place_id: u64, tokens_count: usize) -> Self {
+        Self {
+            place_id, tokens_count
+        }
+    }
+
+    pub fn place_id(&self) -> u64 { self.place_id }
+    pub fn tokens_count(&self) -> usize { self.tokens_count }
 }
 
 impl<TTransitionData, TArcData> PetriNet<TTransitionData, TArcData>
@@ -133,7 +156,8 @@ where
         Self {
             places: HashMap::new(),
             transitions: HashMap::new(),
-            marking: None,
+            initial_marking: None,
+            final_marking: None,
         }
     }
 
@@ -187,5 +211,21 @@ where
 
     pub fn place(&self, id: &u64) -> &Place {
         self.places.get(id).as_ref().unwrap()
+    }
+
+    pub fn set_initial_marking(&mut self, marking: Marking) {
+        self.initial_marking = Some(marking)
+    }
+
+    pub fn set_final_marking(&mut self, marking: Marking) {
+        self.final_marking = Some(marking)
+    }
+
+    pub fn initial_marking(&self) -> Option<&Marking> {
+        self.initial_marking.as_ref()
+    }
+
+    pub fn final_marking(&self) -> Option<&Marking> {
+        self.final_marking.as_ref()
     }
 }

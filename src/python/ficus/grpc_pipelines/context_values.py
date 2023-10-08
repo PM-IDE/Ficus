@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from ficus.analysis.event_log_analysis import ColoredRectangle, Color
-from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet
+from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
@@ -149,6 +150,9 @@ def from_grpc_petri_net(grpc_petri_net: GrpcPetriNet) -> 'PetriNet':
         transition = from_grpc_transition(grpc_transition)
         petri_net.transitions[transition.id] = transition
 
+    petri_net.initial_marking = try_from_grpc_marking(grpc_petri_net.initial_marking)
+    petri_net.final_marking = try_from_grpc_marking(grpc_petri_net.final_marking)
+
     return petri_net
 
 
@@ -170,3 +174,14 @@ def from_grpc_transition(grpc_petri_net_transition: GrpcPetriNetTransition) -> '
 
 def from_grpc_arc(grpc_arc: GrpcPetriNetArc) -> 'Arc':
     return Arc(grpc_arc.placeId)
+
+
+def try_from_grpc_marking(grpc_marking: Optional[GrpcPetriNetMarking]) -> Optional[Marking]:
+    if grpc_marking is None:
+        return None
+
+    return Marking(list(map(from_grpc_single_marking, grpc_marking.markings)))
+
+
+def from_grpc_single_marking(grpc_marking: GrpcPetriNetSinglePlaceMarking) -> SinglePlaceMarking:
+    return SinglePlaceMarking(grpc_marking.placeId, grpc_marking.tokensCount)
