@@ -1,4 +1,4 @@
-use crate::features::discovery::petri_net::{Arc, PetriNet, Transition};
+use crate::features::discovery::petri_net::{Arc, PetriNet, Place, Transition};
 use crate::utils::xml_utils::{write_empty, StartEndElementCookie, XmlWriteError};
 use quick_xml::events::{BytesText, Event};
 use quick_xml::Writer;
@@ -21,11 +21,12 @@ const TARGET_ATTR_NAME: &'static str = "target";
 pub fn serialize_to_pnml_file<TTransitionData, TArcData>(
     net: &PetriNet<TTransitionData, TArcData>,
     save_path: &str,
+    use_names_as_ids: bool,
 ) -> Result<(), XmlWriteError>
 where
     TTransitionData: ToString,
 {
-    match serialize_to_pnml(net) {
+    match serialize_to_pnml(net, use_names_as_ids) {
         Ok(content) => match fs::write(save_path, content) {
             Ok(_) => Ok(()),
             Err(error) => Err(XmlWriteError::IOError(error)),
@@ -36,6 +37,7 @@ where
 
 pub fn serialize_to_pnml<TTransitionData, TArcData>(
     net: &PetriNet<TTransitionData, TArcData>,
+    use_names_as_ids: bool,
 ) -> Result<String, XmlWriteError>
 where
     TTransitionData: ToString,
@@ -45,11 +47,25 @@ where
     let pnml_cookie = StartEndElementCookie::new(&writer, PNML_TAG_NAME)?;
     let net_cookie = StartEndElementCookie::new(&writer, NET_TAG_NAME)?;
 
+    let get_place_id = |place: &Place| -> String {
+        match use_names_as_ids {
+            true => place.name().to_owned(),
+            false => place.id().to_string(),
+        }
+    };
+
+    let get_transition_id = |transition: &Transition<TTransitionData, TArcData>| match use_names_as_ids {
+        true => transition.data().unwrap().to_string(),
+        false => transition.id().to_string(),
+    };
+
+    let create_arc_name = |from_name: String, to_name: String| format!("[{{{}}}--{{{}}}]", from_name, to_name);
+
     for place in net.all_places() {
         let _ = StartEndElementCookie::new_with_attrs(
             &writer,
             PLACE_TAG_NAME,
-            &vec![(ID_ATTR_NAME, place.id().to_string().as_str())],
+            &vec![(ID_ATTR_NAME, get_place_id(place).as_str())],
         )?;
     }
 
@@ -57,7 +73,7 @@ where
         let cookie = StartEndElementCookie::new_with_attrs(
             &writer,
             TRANSITION_TAG_NAME,
-            &vec![(ID_ATTR_NAME, transition.id().to_string().as_str())],
+            &vec![(ID_ATTR_NAME, get_transition_id(transition).as_str())],
         );
 
         if let Some(data) = transition.data() {
@@ -81,25 +97,35 @@ where
 
     for transition in net.all_transitions() {
         for arc in transition.incoming_arcs() {
+            let arc_id = match use_names_as_ids {
+                true => create_arc_name(get_place_id(net.place(&arc.place_id())), get_transition_id(transition)),
+                false => arc.id().to_string(),
+            };
+
             StartEndElementCookie::new_with_attrs(
                 &writer,
                 ARC_TAG_NAME,
                 &vec![
-                    (ID_ATTR_NAME, arc.id().to_string().as_str()),
-                    (SOURCE_ATTR_NAME, net.place(&arc.place_id()).id().to_string().as_str()),
-                    (TARGET_ATTR_NAME, transition.id().to_string().as_str()),
+                    (ID_ATTR_NAME, arc_id.as_str()),
+                    (SOURCE_ATTR_NAME, get_place_id(net.place(&arc.place_id())).as_str()),
+                    (TARGET_ATTR_NAME, get_transition_id(transition).as_str()),
                 ],
             )?;
         }
 
         for arc in transition.outgoing_arcs() {
+            let arc_id = match use_names_as_ids {
+                true => create_arc_name(get_transition_id(transition), get_place_id(net.place(&arc.place_id()))),
+                false => arc.id().to_string(),
+            };
+
             StartEndElementCookie::new_with_attrs(
                 &writer,
                 ARC_TAG_NAME,
                 &vec![
-                    (ID_ATTR_NAME, arc.id().to_string().as_str()),
-                    (TARGET_ATTR_NAME, net.place(&arc.place_id()).id().to_string().as_str()),
-                    (SOURCE_ATTR_NAME, transition.id().to_string().as_str()),
+                    (ID_ATTR_NAME, arc_id.as_str()),
+                    (TARGET_ATTR_NAME, get_place_id(net.place(&arc.place_id())).as_str()),
+                    (SOURCE_ATTR_NAME, get_transition_id(transition).as_str()),
                 ],
             )?;
         }

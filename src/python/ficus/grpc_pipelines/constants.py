@@ -21,6 +21,7 @@ const_activity_filter_kind = 'activity_in_trace_filter_kind'
 const_activities_logs_source = 'activities_logs_source'
 const_path = 'path'
 const_petri_net = 'petri_net'
+const_pnml_use_names_as_ids = 'pnml_use_names_as_ids'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

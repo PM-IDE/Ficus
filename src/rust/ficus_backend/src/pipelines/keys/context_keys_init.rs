@@ -81,6 +81,7 @@ impl ContextKeys {
     pub const UNDEF_ACTIVITY_HANDLING_STRATEGY: &'static str = "undef_activity_handling_strategy";
     pub const ACTIVITY_IN_TRACE_FILTER_KIND: &'static str = "activity_in_trace_filter_kind";
     pub const ACTIVITIES_LOGS_SOURCE: &'static str = "activities_logs_source";
+    pub const PNML_USE_NAMES_AS_IDS: &'static str = "pnml_use_names_as_ids";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -118,6 +119,7 @@ impl ContextKeys {
         Self::insert_undef_activity_handling_strategy(&mut context);
         Self::insert_activity_in_filter_kind(&mut context);
         Self::insert_activities_logs_source(&mut context);
+        Self::insert_pnml_use_names_as_ids(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -280,5 +282,9 @@ impl ContextKeys {
 
     fn insert_activities_logs_source(context: &mut ContextKeysInitContext) {
         Self::insert_key::<ActivitiesLogsSourceDto>(context, Self::ACTIVITIES_LOGS_SOURCE);
+    }
+
+    fn insert_pnml_use_names_as_ids(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<bool>(context, Self::PNML_USE_NAMES_AS_IDS);
     }
 }

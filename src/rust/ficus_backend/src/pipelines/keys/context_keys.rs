@@ -320,4 +320,12 @@ impl ContextKeys {
     pub fn is_activities_logs_source(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.activities_logs_source(), key)
     }
+
+    pub fn pnml_use_names_as_ids(&self) -> &DefaultContextKey<bool> {
+        self.find_concrete_key::<bool>(Self::PNML_USE_NAMES_AS_IDS).unwrap()
+    }
+
+    pub fn is_pnml_use_names_as_ids(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.pnml_use_names_as_ids(), key)
+    }
 }

@@ -12,13 +12,16 @@ class DiscoverPetriNetAlpha2(PipelinePart2):
 
 
 class SerializePetriNetToPNML2(PipelinePart2):
-    def __init__(self, save_path):
+    def __init__(self, save_path, use_names_as_ids: bool = False):
         super().__init__()
         self.save_path = save_path
+        self.use_names_as_ids = use_names_as_ids
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_string_value(config, const_path, self.save_path)
+        append_bool_value(config, const_pnml_use_names_as_ids, self.use_names_as_ids)
+
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_serialize_petri_net_to_pnml, config))
 
 
