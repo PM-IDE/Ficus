@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::fs;
 use std::io::Cursor;
 
-const PNML_TAG_NAME: &'static str = "pmnl";
+const PNML_TAG_NAME: &'static str = "pnml";
 const TRANSITION_TAG_NAME: &'static str = "transition";
 const ARC_TAG_NAME: &'static str = "arc";
 const PLACE_TAG_NAME: &'static str = "place";
