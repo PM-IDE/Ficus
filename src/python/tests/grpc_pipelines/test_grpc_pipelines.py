@@ -368,12 +368,12 @@ def _execute_discovery_test(test_name: str, names_log: list[list[str]], discover
         UseNamesEventLog2(),
         AddStartEndArtificialEvents2(),
         discovery_part,
-        SerializePetriNetToPNML2(save_path=temp_file.name),
+        SerializePetriNetToPNML2(save_path=temp_file.name, use_names_as_ids=True),
         ViewPetriNet2(show_places_names=True, export_path=os.path.join(gold_folder, '.nets', 'petri_net.png'))
     ))
 
     with open(temp_file.name) as fin:
-        execute_test_with_gold(os.path.join(gold_folder, 'petri_net.pnml'), fin.read())
+        execute_test_with_gold(os.path.join(gold_folder, 'petri_net.gold'), fin.read())
 
 
 def test_discover_petri_net_alpha2():
