@@ -94,7 +94,11 @@ def draw_petri_net(net: PetriNet,
     if export_path is None:
         display(g)
     else:
+        dir_name = os.path.dirname(export_path)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name, exist_ok=True)
+
         _, extension = os.path.splitext(export_path)
         graphviz.render(engine, extension[1::], tmp_save_file.name)
-        shutil.copy(tmp_save_file.name + extension, export_path)
+        shutil.move(tmp_save_file.name + extension, export_path)
 

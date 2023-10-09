@@ -2,10 +2,7 @@ from ficus.discovery.petri_net import draw_petri_net
 from ficus.grpc_pipelines.context_values import from_grpc_petri_net
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part
-from ficus.grpc_pipelines.models.backend_service_pb2 import *
-from ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
-from ficus.grpc_pipelines.models.util_pb2 import *
 
 
 class DiscoverPetriNetAlpha2(PipelinePart2):

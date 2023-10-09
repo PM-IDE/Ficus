@@ -15,6 +15,14 @@ def gold_dir() -> str:
     return os.path.join(data_dir(), 'gold', 'python')
 
 
+def petri_nets_gold_dir() -> str:
+    return os.path.join(gold_dir(), 'petri_nets')
+
+
+def petri_net_test_gold_dir(test_name: str) -> str:
+    return os.path.join(petri_nets_gold_dir(), test_name)
+
+
 def example_logs_dir() -> str:
     return os.path.join(sources_dir(), 'example_logs')
 

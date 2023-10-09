@@ -1,3 +1,6 @@
+import os.path
+import tempfile
+
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesUntilNoMore2, \
@@ -17,8 +20,9 @@ from ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2, Ad
 from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, PatternsDiscoveryStrategy
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
+from tests.core.gold_based_test import execute_test_with_gold
 from tests.grpc_pipelines.pipeline_parts_for_tests import AssertNamesLogTestPart
-from tests.test_data_provider import get_example_log_path, console_app_method2_log_path
+from tests.test_data_provider import get_example_log_path, console_app_method2_log_path, petri_net_test_gold_dir
 
 
 def test_simple_pipeline():
@@ -344,60 +348,55 @@ def test_apply_class_extractor():
 
 
 def test_discover_petri_net_alpha():
-    _execute_test_with_names_log(
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha',
         [
             ['A', 'B', 'C', 'D'],
             ['A', 'B', 'E', 'D']
         ],
-        Pipeline2(
-            UseNamesEventLog2(),
-            DiscoverPetriNetAlpha2(),
-            ViewPetriNet2()
-        )
+        DiscoverPetriNetAlpha2(),
     )
 
 
-def test_discover_petri_net_alpha_start_end_events():
-    _execute_test_with_names_log(
+def _execute_discovery_test(test_name: str, names_log: list[list[str]], discovery_part):
+    temp_file = tempfile.NamedTemporaryFile()
+    gold_folder = petri_net_test_gold_dir(test_name)
+    if not os.path.exists(gold_folder):
+        os.makedirs(gold_folder, exist_ok=True)
+
+    _execute_test_with_names_log(names_log, Pipeline2(
+        UseNamesEventLog2(),
+        AddStartEndArtificialEvents2(),
+        discovery_part,
+        SerializePetriNetToPNML2(save_path=temp_file.name),
+        ViewPetriNet2(show_places_names=True, export_path=os.path.join(gold_folder, '.nets', 'petri_net.png'))
+    ))
+
+    with open(temp_file.name) as fin:
+        execute_test_with_gold(os.path.join(gold_folder, 'petri_net.pnml'), fin.read())
+
+
+def test_discover_petri_net_alpha2():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha2',
         [
-            ['A', 'B', 'C', 'D'],
-            ['A', 'B', 'E', 'D']
+            ['A', 'C'],
+            ['A', 'B', 'C'],
+            ['A', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'B', 'C'],
         ],
-        Pipeline2(
-            UseNamesEventLog2(),
-            AddStartEndArtificialEvents2(),
-            DiscoverPetriNetAlpha2(),
-            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
-        )
+        DiscoverPetriNetAlpha2(),
     )
 
 
-def test_discover_petri_net_alpha_start_events():
-    _execute_test_with_names_log(
+def test_discover_petri_net_alpha3():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha3',
         [
-            ['A', 'B', 'C', 'D'],
-            ['A', 'B', 'E', 'D']
+            ['A', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'D', 'B', 'C'],
         ],
-        Pipeline2(
-            UseNamesEventLog2(),
-            AddStartArtificialEvents2(),
-            DiscoverPetriNetAlpha2(),
-            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml')
-        )
-    )
-
-
-def test_discover_petri_net_alpha_end_events():
-    _execute_test_with_names_log(
-        [
-            ['A', 'B', 'C', 'D'],
-            ['A', 'B', 'E', 'D']
-        ],
-        Pipeline2(
-            UseNamesEventLog2(),
-            AddEndArtificialEvents2(),
-            DiscoverPetriNetAlpha2(),
-            SerializePetriNetToPNML2(save_path='/Users/aero/net.xml'),
-            ViewPetriNet2()
-        )
+        DiscoverPetriNetAlpha2(),
     )
