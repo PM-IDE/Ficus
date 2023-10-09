@@ -227,7 +227,7 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
     let mut petri_net = PetriNet::empty();
     let mut event_classes_to_transition_ids = HashMap::new();
     for class in event_classes {
-        let id = petri_net.add_transition(Transition::empty(Some(class.to_owned())));
+        let id = petri_net.add_transition(Transition::empty(class.to_owned(), Some(class.to_owned())));
         event_classes_to_transition_ids.insert(class, id);
     }
 

@@ -55,6 +55,7 @@ where
     TTransitionData: ToString,
 {
     id: u64,
+    name: String,
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
     data: Option<TTransitionData>,
@@ -64,9 +65,10 @@ impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData>
 where
     TTransitionData: ToString,
 {
-    pub fn empty(data: Option<TTransitionData>) -> Self {
+    pub fn empty(name: String, data: Option<TTransitionData>) -> Self {
         Self {
             id: next_id(),
+            name,
             incoming_arcs: Vec::new(),
             outgoing_arcs: Vec::new(),
             data,
@@ -103,6 +105,10 @@ where
 
     pub fn data(&self) -> Option<&TTransitionData> {
         self.data.as_ref()
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
 

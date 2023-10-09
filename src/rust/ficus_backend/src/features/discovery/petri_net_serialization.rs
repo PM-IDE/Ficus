@@ -55,13 +55,16 @@ where
     };
 
     let get_transition_id = |transition: &Transition<TTransitionData, TArcData>| match use_names_as_ids {
-        true => transition.data().unwrap().to_string(),
+        true => transition.name().to_string(),
         false => transition.id().to_string(),
     };
 
     let create_arc_name = |from_name: String, to_name: String| format!("[{{{}}}--{{{}}}]", from_name, to_name);
 
-    for place in net.all_places() {
+    let mut places = net.all_places();
+    places.sort_by(|left, right| left.name().cmp(right.name()));
+
+    for place in places {
         let _ = StartEndElementCookie::new_with_attrs(
             &writer,
             PLACE_TAG_NAME,
@@ -69,7 +72,10 @@ where
         )?;
     }
 
-    for transition in net.all_transitions() {
+    let mut transitions = net.all_transitions();
+    transitions.sort_by(|left, right| left.name().cmp(right.name()));
+
+    for transition in &transitions {
         let cookie = StartEndElementCookie::new_with_attrs(
             &writer,
             TRANSITION_TAG_NAME,
@@ -95,7 +101,7 @@ where
         drop(cookie)
     }
 
-    for transition in net.all_transitions() {
+    for transition in &transitions {
         for arc in transition.incoming_arcs() {
             let arc_id = match use_names_as_ids {
                 true => create_arc_name(get_place_id(net.place(&arc.place_id())), get_transition_id(transition)),
