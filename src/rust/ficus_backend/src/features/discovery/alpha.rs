@@ -79,20 +79,16 @@ impl<'a> AlphaSet<'a> {
 
         for first_left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
             for second_left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
-                if first_left_class != second_left_class {
-                    if !provider.is_in_unrelated_relation(first_left_class, second_left_class) {
-                        return false;
-                    }
+                if !provider.is_in_unrelated_relation(first_left_class, second_left_class) {
+                    return false;
                 }
             }
         }
 
         for first_right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
             for second_right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
-                if first_right_class != second_right_class {
-                    if !provider.is_in_unrelated_relation(first_right_class, second_right_class) {
-                        return false;
-                    }
+                if !provider.is_in_unrelated_relation(first_right_class, second_right_class) {
+                    return false;
                 }
             }
         }
@@ -177,7 +173,9 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
 
     let mut set_pairs: Vec<AlphaSet> = event_classes
         .iter()
-        .filter(|class| dfg_info.get_followed_events(class).is_some())
+        .filter(|class| {
+            dfg_info.get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
+        })
         .map(|class| {
             AlphaSet::new(
                 class,
@@ -186,10 +184,14 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
                         .get_followed_events(class)
                         .unwrap()
                         .keys()
-                        .filter(|second_class| provider.is_in_casual_relation(class, second_class)),
+                        .filter(|second_class| {
+                            provider.is_in_casual_relation(class, second_class)
+                                && provider.is_in_unrelated_relation(second_class, second_class)
+                        }),
                 ),
             )
         })
+        .filter(|set| set.left_classes().len() > 0 && set.right_classes().len() > 0)
         .collect();
 
     let mut extended_pairs = vec![];
