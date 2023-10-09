@@ -1,5 +1,5 @@
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::discover_petri_net_alpha;
+use crate::features::discovery::alpha::alpha::discover_petri_net_alpha;
 use crate::features::discovery::petri_net_serialization::serialize_to_pnml_file;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};
 use crate::pipelines::pipeline_parts::PipelineParts;

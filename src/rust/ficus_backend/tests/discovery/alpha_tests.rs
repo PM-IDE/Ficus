@@ -1,6 +1,6 @@
 use crate::test_core::simple_events_logs_provider::{create_raw_event_log3, create_simple_event_log3};
 use ficus_backend::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use ficus_backend::features::discovery::alpha::discover_petri_net_alpha;
+use ficus_backend::features::discovery::alpha_::discover_petri_net_alpha;
 
 #[test]
 pub fn alpha_simple_test_1() {
