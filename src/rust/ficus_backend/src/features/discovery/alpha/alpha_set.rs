@@ -22,11 +22,11 @@ impl<'a> AlphaSet<'a> {
     }
 
     pub fn is_left_subset(&self, other: &Self) -> bool {
-        self.left_classes.is_subset(&other.right_classes)
+        self.left_classes.is_subset(&other.left_classes)
     }
 
     pub fn is_right_subset(&self, other: &Self) -> bool {
-        self.right_classes.is_subset(&other.left_classes)
+        self.right_classes.is_subset(&other.right_classes)
     }
 
     pub fn is_full_subset(&self, other: &Self) -> bool {

@@ -75,7 +75,9 @@ impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProvider<'a> {
     }
 
     fn is_in_parallel_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second) && self.is_in_direct_relation(second, first)
+        self.is_in_direct_relation(first, second)
+            && self.is_in_direct_relation(second, first)
+            && !self.is_in_romb_relation(first, second)
     }
 
     fn is_in_direct_relation(&self, first: &str, second: &str) -> bool {
@@ -83,7 +85,7 @@ impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProvider<'a> {
     }
 
     fn is_in_unrelated_relation(&self, first: &str, second: &str) -> bool {
-        self.dfg_info.is_in_directly_follows_relation(first, second)
+        !self.is_in_direct_relation(first, second) && !self.is_in_direct_relation(second, first)
     }
 }
 
