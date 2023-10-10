@@ -1,4 +1,4 @@
-use crate::features::discovery::alpha::provider::DefaultAlphaRelationsProvider;
+use crate::features::discovery::alpha::provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
@@ -41,7 +41,7 @@ impl<'a> AlphaSet<'a> {
         (&self.right_classes).iter().map(|c| *c).collect()
     }
 
-    pub fn can_extend(&self, other: &Self, provider: &DefaultAlphaRelationsProvider) -> bool {
+    pub fn can_extend(&self, other: &Self, provider: &impl AlphaRelationsProvider) -> bool {
         for left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
             for right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
                 if !provider.is_in_casual_relation(left_class, right_class) {

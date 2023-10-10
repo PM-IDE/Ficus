@@ -1,15 +1,23 @@
 use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
-use crate::features::discovery::alpha::provider::DefaultAlphaRelationsProvider;
+use crate::features::discovery::alpha::provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
 use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet {
+pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
+    let dfg_info = event_log_info.get_dfg_info();
+    let provider = DefaultAlphaRelationsProvider::new(&dfg_info);
+
+    do_discover_petri_net_alpha(event_log_info, &provider)
+}
+
+fn do_discover_petri_net_alpha(
+    event_log_info: &EventLogInfo,
+    provider: &impl AlphaRelationsProvider,
+) -> DefaultPetriNet {
     let event_classes = event_log_info.get_all_event_classes();
     let dfg_info = event_log_info.get_dfg_info();
-
-    let provider = DefaultAlphaRelationsProvider::new(&dfg_info);
 
     let mut set_pairs: Vec<AlphaSet> = event_classes
         .iter()
@@ -44,7 +52,7 @@ pub fn discover_petri_net_alpha(event_log_info: EventLogInfo) -> DefaultPetriNet
             let second_set = second_set.unwrap();
 
             let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
-                && first_set.can_extend(second_set, &provider);
+                && first_set.can_extend(second_set, provider);
 
             if should_extend {
                 let new_set = first_set.extend(&second_set);

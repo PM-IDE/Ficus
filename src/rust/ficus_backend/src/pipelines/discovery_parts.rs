@@ -11,7 +11,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA, &|context, infra, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
-            let discovered_net = discover_petri_net_alpha(event_log_info);
+            let discovered_net = discover_petri_net_alpha(&event_log_info);
 
             context.put_concrete(keys.petri_net().key(), discovered_net);
 
