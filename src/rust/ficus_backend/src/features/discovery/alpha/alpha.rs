@@ -1,12 +1,14 @@
 use crate::event_log::core::event_log::EventLog;
-use crate::features::analysis::event_log_info::EventLogInfo;
+use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::provider::{
     AlphaPlusRelationsProvider, AlphaRelationsProvider, DefaultAlphaRelationsProvider,
 };
 use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+use crate::event_log::core::trace::trace::Trace;
+use crate::event_log::core::event::event::Event;
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
     let dfg_info = event_log_info.get_dfg_info();
@@ -15,11 +17,28 @@ pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNe
     do_discover_petri_net_alpha(event_log_info, &provider)
 }
 
-pub fn discover_petri_net_alpha_plus(log: &impl EventLog, event_log_info: &EventLogInfo) -> DefaultPetriNet {
+pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
+    let one_length_loop_transitions = find_set_of_one_length_loop(log);
+    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
     let dfg_info = event_log_info.get_dfg_info();
     let provider = AlphaPlusRelationsProvider::new(dfg_info, log);
 
-    do_discover_petri_net_alpha(event_log_info, &provider)
+    do_discover_petri_net_alpha(&event_log_info, &provider)
+}
+
+fn find_set_of_one_length_loop(log: &impl EventLog) -> HashSet<String> {
+    let mut one_loop_transitions = HashSet::new();
+    for trace in log.traces() {
+        let trace = trace.borrow();
+        let events = trace.events();
+        for i in 0..(events.len() - 1) {
+            if events[i].borrow().name() == events[i + 1].borrow().name() {
+                one_loop_transitions.insert(events[i].borrow().name().to_owned());
+            }
+        }
+    }
+
+    one_loop_transitions
 }
 
 fn do_discover_petri_net_alpha(
