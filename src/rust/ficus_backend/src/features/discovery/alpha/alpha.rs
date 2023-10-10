@@ -1,10 +1,12 @@
+use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
-use crate::features::discovery::alpha::provider::{AlphaPlusRelationsProvider, AlphaRelationsProvider, DefaultAlphaRelationsProvider};
+use crate::features::discovery::alpha::provider::{
+    AlphaPlusRelationsProvider, AlphaRelationsProvider, DefaultAlphaRelationsProvider,
+};
 use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
 use std::collections::HashMap;
 use std::hash::Hash;
-use crate::event_log::core::event_log::EventLog;
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
     let dfg_info = event_log_info.get_dfg_info();
