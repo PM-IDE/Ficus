@@ -11,6 +11,12 @@ class DiscoverPetriNetAlpha2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_alpha, config))
 
 
+class DiscoverPetriNetAlphaPlus2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_alpha_plus, config))
+
+
 class SerializePetriNetToPNML2(PipelinePart2):
     def __init__(self, save_path, use_names_as_ids: bool = False):
         super().__init__()

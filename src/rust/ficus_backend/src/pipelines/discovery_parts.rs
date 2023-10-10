@@ -1,5 +1,5 @@
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::alpha::discover_petri_net_alpha;
+use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus};
 use crate::features::discovery::petri_net_serialization::serialize_to_pnml_file;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};
 use crate::pipelines::pipeline_parts::PipelineParts;
@@ -31,6 +31,19 @@ impl PipelineParts {
                     error.to_string(),
                 ))),
             }
+        })
+    }
+
+    pub(super) fn discover_petri_net_alpha_plus() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS, &|context, infra, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
+
+            let discovered_net = discover_petri_net_alpha_plus(log, &event_log_info);
+
+            context.put_concrete(keys.petri_net().key(), discovered_net);
+
+            Ok(())
         })
     }
 }

@@ -38,4 +38,5 @@ impl PipelineParts {
     pub const ADD_ARTIFICIAL_START_END_EVENTS: &'static str = "AddArtificialStartEndEvents";
     pub const ADD_ARTIFICIAL_START_EVENTS: &'static str = "AddArtificialStartEvents";
     pub const ADD_ARTIFICIAL_END_EVENTS: &'static str = "AddArtificialEndEvents";
+    pub const DISCOVER_PETRI_NET_ALPHA_PLUS: &'static str = "DiscoverPetriNetAlphaPlus";
 }
