@@ -1,3 +1,4 @@
+use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::petri_net::PetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
@@ -104,35 +105,61 @@ where
     }
 
     for transition in &transitions {
-        for arc in transition.incoming_arcs() {
-            let arc_id = match use_names_as_ids {
-                true => create_arc_name(get_place_id(net.place(&arc.place_id())), get_transition_id(transition)),
-                false => arc.id().to_string(),
-            };
+        let mut incoming_arcs: Vec<(&Arc<TArcData>, String)> = transition
+            .incoming_arcs()
+            .iter()
+            .map(|arc| {
+                (
+                    arc,
+                    match use_names_as_ids {
+                        true => {
+                            create_arc_name(get_place_id(net.place(&arc.place_id())), get_transition_id(transition))
+                        }
+                        false => arc.id().to_string(),
+                    },
+                )
+            })
+            .collect();
 
+        incoming_arcs.sort_by(|first, second| first.1.cmp(&second.1));
+
+        for arc in &incoming_arcs {
             StartEndElementCookie::new_with_attrs(
                 &writer,
                 ARC_TAG_NAME,
                 &vec![
-                    (ID_ATTR_NAME, arc_id.as_str()),
-                    (SOURCE_ATTR_NAME, get_place_id(net.place(&arc.place_id())).as_str()),
+                    (ID_ATTR_NAME, arc.1.as_str()),
+                    (SOURCE_ATTR_NAME, get_place_id(net.place(&arc.0.place_id())).as_str()),
                     (TARGET_ATTR_NAME, get_transition_id(transition).as_str()),
                 ],
             )?;
         }
 
-        for arc in transition.outgoing_arcs() {
-            let arc_id = match use_names_as_ids {
-                true => create_arc_name(get_transition_id(transition), get_place_id(net.place(&arc.place_id()))),
-                false => arc.id().to_string(),
-            };
+        let mut outgoing_arcs: Vec<(&Arc<TArcData>, String)> = transition
+            .outgoing_arcs()
+            .iter()
+            .map(|arc| {
+                (
+                    arc,
+                    match use_names_as_ids {
+                        true => {
+                            create_arc_name(get_transition_id(transition), get_place_id(net.place(&arc.place_id())))
+                        }
+                        false => arc.id().to_string(),
+                    },
+                )
+            })
+            .collect();
 
+        outgoing_arcs.sort_by(|first, second| first.1.cmp(&second.1));
+
+        for arc in outgoing_arcs {
             StartEndElementCookie::new_with_attrs(
                 &writer,
                 ARC_TAG_NAME,
                 &vec![
-                    (ID_ATTR_NAME, arc_id.as_str()),
-                    (TARGET_ATTR_NAME, get_place_id(net.place(&arc.place_id())).as_str()),
+                    (ID_ATTR_NAME, arc.1.as_str()),
+                    (TARGET_ATTR_NAME, get_place_id(net.place(&arc.0.place_id())).as_str()),
                     (SOURCE_ATTR_NAME, get_transition_id(transition).as_str()),
                 ],
             )?;
