@@ -402,6 +402,31 @@ def test_discover_petri_net_alpha3():
         DiscoverPetriNetAlpha2(),
     )
 
+
+def test_discover_petri_net_alpha4():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha4',
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'C', 'B', 'D'],
+            ['E', 'F'],
+        ],
+        DiscoverPetriNetAlpha2()
+    )
+
+
+def test_discover_petri_net_alpha5():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha5',
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'C', 'B', 'D'],
+            ['A', 'E', 'D'],
+        ],
+        DiscoverPetriNetAlpha2()
+    )
+
+
 def test_discover_petri_net_alpha_plus():
     _execute_discovery_test(
         'test_discover_petri_net_alpha_plus',
@@ -413,15 +438,40 @@ def test_discover_petri_net_alpha_plus():
         DiscoverPetriNetAlphaPlus2()
     )
 
+
 def test_discover_petri_net_alpha_plus2():
     _execute_discovery_test(
-        'test_discover_petri_net_alpha_plus',
+        'test_discover_petri_net_alpha_plus2',
         [
             ['A', 'C'],
             ['A', 'B', 'C'],
             ['A', 'B', 'B', 'C'],
             ['A', 'B', 'B', 'B', 'C'],
             ['A', 'B', 'B', 'B', 'B', 'C'],
+        ],
+        DiscoverPetriNetAlphaPlus2()
+    )
+
+
+def test_discover_petri_net_alpha_plus4():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha_plus4',
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'C', 'B', 'D'],
+            ['E', 'F'],
+        ],
+        DiscoverPetriNetAlphaPlus2()
+    )
+
+
+def test_discover_petri_net_alpha_plus5():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha_plus5',
+        [
+            ['A', 'B', 'C', 'D'],
+            ['A', 'C', 'B', 'D'],
+            ['A', 'E', 'D'],
         ],
         DiscoverPetriNetAlphaPlus2()
     )
