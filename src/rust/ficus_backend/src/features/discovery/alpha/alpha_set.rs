@@ -17,11 +17,13 @@ impl<'a> AlphaSet<'a> {
         }
     }
 
-    pub fn new(left_class: &'a String, right_classes: Vec<&'a String>) -> Self {
+    pub fn new(left_class: &'a String, right_class: &'a String) -> Self {
         let mut left_classes = BTreeSet::new();
         left_classes.insert(left_class);
 
-        let right_classes = BTreeSet::from_iter(right_classes);
+        let mut right_classes = BTreeSet::new();
+        right_classes.insert(right_class);
+
         return Self {
             left_classes,
             right_classes,

@@ -94,20 +94,18 @@ fn do_discover_petri_net_alpha(
         .filter(|class| {
             dfg_info.get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
         })
-        .map(|class| {
-            AlphaSet::new(
-                class,
-                Vec::from_iter(
-                    dfg_info
-                        .get_followed_events(class)
-                        .unwrap()
-                        .keys()
-                        .filter(|second_class| {
-                            provider.is_in_casual_relation(class, second_class)
-                                && provider.is_in_unrelated_relation(second_class, second_class)
-                        }),
-                ),
-            )
+        .flat_map(|class| {
+            let mut sets = vec![];
+            let followers = dfg_info.get_followed_events(class).unwrap().keys();
+            for follower in followers {
+                if provider.is_in_casual_relation(class, follower)
+                    && provider.is_in_unrelated_relation(follower, follower)
+                {
+                    sets.push(AlphaSet::new(class, follower));
+                }
+            }
+
+            sets
         })
         .filter(|set| set.left_classes().len() > 0 && set.right_classes().len() > 0)
         .collect();
