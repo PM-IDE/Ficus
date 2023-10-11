@@ -253,4 +253,14 @@ where
     pub fn final_marking(&self) -> Option<&Marking> {
         self.final_marking.as_ref()
     }
+
+    pub fn find_place_id_by_name(&self, name: &str) -> Option<u64> {
+        for place in self.places.values() {
+            if place.name() == name {
+                return Some(place.id());
+            }
+        }
+
+        None
+    }
 }

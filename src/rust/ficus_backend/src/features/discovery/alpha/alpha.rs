@@ -1,4 +1,6 @@
+use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
+use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::provider::{
@@ -7,8 +9,6 @@ use crate::features::discovery::alpha::provider::{
 use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use crate::event_log::core::trace::trace::Trace;
-use crate::event_log::core::event::event::Event;
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
     let dfg_info = event_log_info.get_dfg_info();
@@ -18,15 +18,53 @@ pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNe
 }
 
 pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
-    let one_length_loop_transitions = find_set_of_one_length_loop(log);
-    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
+    let one_length_loop_transitions = find_transitions_one_length_loop(log);
+    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(
+        log,
+        &one_length_loop_transitions,
+    ));
     let dfg_info = event_log_info.get_dfg_info();
     let provider = AlphaPlusRelationsProvider::new(dfg_info, log);
 
-    do_discover_petri_net_alpha(&event_log_info, &provider)
+    let mut petri_net = do_discover_petri_net_alpha(&event_log_info, &provider);
+
+    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
+    for transition_name in &one_length_loop_transitions {
+        let mut alpha_set = AlphaSet::empty();
+        if let Some(followed_events) = event_log_info.get_dfg_info().get_followed_events(transition_name) {
+            for event in followed_events.keys() {
+                if event != transition_name {
+                    alpha_set.insert_right_class(event);
+                }
+            }
+        }
+
+        if let Some(precedes_events) = event_log_info.get_dfg_info().get_precedes_events(transition_name) {
+            for event in precedes_events.keys() {
+                if event != transition_name {
+                    alpha_set.insert_left_class(event);
+                }
+            }
+        }
+
+        let id = petri_net.add_transition(Transition::empty(
+            transition_name.to_owned(),
+            Some(transition_name.to_owned()),
+        ));
+
+        let place_id = match petri_net.find_place_id_by_name(alpha_set.to_string().as_str()) {
+            Some(found_place_id) => found_place_id,
+            None => petri_net.add_place(Place::with_name(alpha_set.to_string())),
+        };
+
+        petri_net.connect_transition_to_place(id, place_id, None);
+        petri_net.connect_place_to_transition(place_id, id, None);
+    }
+
+    petri_net
 }
 
-fn find_set_of_one_length_loop(log: &impl EventLog) -> HashSet<String> {
+fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
     let mut one_loop_transitions = HashSet::new();
     for trace in log.traces() {
         let trace = trace.borrow();

@@ -72,8 +72,6 @@ impl EventLogInfo {
         } = creation_dto;
 
         let mut dfg_pairs = HashMap::new();
-        let mut followed_events: HashMap<String, HashMap<String, usize>> = HashMap::new();
-        let mut events_with_single_follower = HashSet::new();
         let mut events_count = 0;
         let mut events_counts = HashMap::new();
         let mut start_event_classes = HashSet::new();
@@ -130,6 +128,10 @@ impl EventLogInfo {
             }
         }
 
+        let mut followed_events: HashMap<String, HashMap<String, usize>> = HashMap::new();
+        let mut precedes_events: HashMap<String, HashMap<String, usize>> = HashMap::new();
+        let mut events_with_single_follower = HashSet::new();
+
         for ((first, second), count) in &dfg_pairs {
             if followed_events.contains_key(first) {
                 if events_with_single_follower.contains(first) {
@@ -145,6 +147,16 @@ impl EventLogInfo {
                 followed_events.insert(first.to_owned(), map);
                 events_with_single_follower.insert(first.to_owned());
             }
+
+            if precedes_events.contains_key(second) {
+                precedes_events
+                    .get_mut(second)
+                    .unwrap()
+                    .insert(first.to_owned(), count.to_owned());
+            } else {
+                let map = HashMap::from_iter(vec![(first.to_owned(), count.to_owned())]);
+                precedes_events.insert(second.to_owned(), map);
+            }
         }
 
         EventLogInfo {
@@ -153,6 +165,7 @@ impl EventLogInfo {
             dfg_info: DfgInfo {
                 dfg_pairs,
                 followed_events,
+                precedes_events,
                 events_with_single_follower,
             },
             traces_count: log.traces().len(),
@@ -201,6 +214,7 @@ impl EventLogInfo {
 pub struct DfgInfo {
     dfg_pairs: HashMap<(String, String), usize>,
     followed_events: HashMap<String, HashMap<String, usize>>,
+    precedes_events: HashMap<String, HashMap<String, usize>>,
     events_with_single_follower: HashSet<String>,
 }
 
@@ -219,6 +233,13 @@ impl DfgInfo {
 
     pub fn get_followed_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {
         match self.followed_events.get(event_class) {
+            Some(followers_counts) => Some(followers_counts),
+            None => None,
+        }
+    }
+
+    pub fn get_precedes_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {
+        match self.precedes_events.get(event_class) {
             Some(followers_counts) => Some(followers_counts),
             None => None,
         }

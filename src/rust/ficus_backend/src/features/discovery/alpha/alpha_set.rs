@@ -10,6 +10,13 @@ pub struct AlphaSet<'a> {
 }
 
 impl<'a> AlphaSet<'a> {
+    pub fn empty() -> Self {
+        Self {
+            left_classes: BTreeSet::new(),
+            right_classes: BTreeSet::new(),
+        }
+    }
+
     pub fn new(left_class: &'a String, right_classes: Vec<&'a String>) -> Self {
         let mut left_classes = BTreeSet::new();
         left_classes.insert(left_class);
@@ -39,6 +46,14 @@ impl<'a> AlphaSet<'a> {
 
     pub fn right_classes(&self) -> Vec<&'a String> {
         (&self.right_classes).iter().map(|c| *c).collect()
+    }
+
+    pub fn insert_left_class(&mut self, class: &'a String) {
+        self.left_classes.insert(class);
+    }
+
+    pub fn insert_right_class(&mut self, class: &'a String) {
+        self.right_classes.insert(class);
     }
 
     pub fn can_extend(&self, other: &Self, provider: &impl AlphaRelationsProvider) -> bool {
