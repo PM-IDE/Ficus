@@ -9,7 +9,8 @@ from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverA
 from ficus.grpc_pipelines.constants import const_names_event_log
 from ficus.grpc_pipelines.context_values import StringContextValue, NamesLogContextValue, ContextValue
 from ficus.grpc_pipelines.data_models import PatternsKind, NarrowActivityKind, ActivityFilterKind, ActivitiesLogsSource
-from ficus.grpc_pipelines.discovery_parts import DiscoverPetriNetAlpha2, SerializePetriNetToPNML2, ViewPetriNet2
+from ficus.grpc_pipelines.discovery_parts import DiscoverPetriNetAlpha2, SerializePetriNetToPNML2, ViewPetriNet2, \
+    DiscoverPetriNetAlphaPlus2
 from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlacementsOfEventByName2, \
     DrawPlacementOfEventsByRegex2
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
@@ -399,4 +400,28 @@ def test_discover_petri_net_alpha3():
             ['A', 'B', 'D', 'B', 'D', 'B', 'C'],
         ],
         DiscoverPetriNetAlpha2(),
+    )
+
+def test_discover_petri_net_alpha_plus():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha_plus',
+        [
+            ['A', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'D', 'B', 'C'],
+        ],
+        DiscoverPetriNetAlphaPlus2()
+    )
+
+def test_discover_petri_net_alpha_plus2():
+    _execute_discovery_test(
+        'test_discover_petri_net_alpha_plus',
+        [
+            ['A', 'C'],
+            ['A', 'B', 'C'],
+            ['A', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'B', 'C'],
+        ],
+        DiscoverPetriNetAlphaPlus2()
     )
