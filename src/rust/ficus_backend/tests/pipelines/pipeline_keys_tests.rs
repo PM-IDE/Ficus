@@ -3,7 +3,7 @@ use std::{collections::HashSet, sync::Arc};
 use ficus_backend::features::analysis::patterns::activity_instances::{
     ActivityInTraceFilterKind, ActivityNarrowingKind,
 };
-use ficus_backend::features::discovery::petri_net::DefaultPetriNet;
+use ficus_backend::features::discovery::petri_netasd::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::{
@@ -13,7 +13,7 @@ use ficus_backend::{
             event_log_info::EventLogInfo,
             patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
         },
-        discovery::petri_net::PetriNet,
+        discovery::petri_netasd::PetriNet,
     },
     pipelines::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},

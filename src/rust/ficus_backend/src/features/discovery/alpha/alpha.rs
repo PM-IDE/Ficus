@@ -6,7 +6,10 @@ use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::provider::{
     AlphaPlusRelationsProvider, AlphaRelationsProvider, DefaultAlphaRelationsProvider,
 };
-use crate::features::discovery::petri_net::{DefaultPetriNet, Marking, PetriNet, Place, SingleMarking, Transition};
+use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
+use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
+use crate::features::discovery::petri_net::place::Place;
+use crate::features::discovery::petri_net::transition::Transition;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 

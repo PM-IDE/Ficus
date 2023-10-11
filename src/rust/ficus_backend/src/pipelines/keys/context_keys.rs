@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::features::discovery::petri_net::DefaultPetriNet;
+use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::{
@@ -16,7 +16,7 @@ use crate::{
                 tandem_arrays::SubArrayInTraceInfo,
             },
         },
-        discovery::petri_net::PetriNet,
+        discovery::petri_net::petri_net::PetriNet,
     },
     pipelines::{aliases::*, pipelines::Pipeline},
     utils::colors::ColorsHolder,

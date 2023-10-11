@@ -1,4 +1,6 @@
-use crate::features::discovery::petri_net::{Arc, PetriNet, Place, Transition};
+use crate::features::discovery::petri_net::petri_net::PetriNet;
+use crate::features::discovery::petri_net::place::Place;
+use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::xml_utils::{write_empty, StartEndElementCookie, XmlWriteError};
 use quick_xml::events::{BytesText, Event};
 use quick_xml::Writer;

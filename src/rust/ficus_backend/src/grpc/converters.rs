@@ -5,7 +5,11 @@ use nameof::name_of_type;
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::ActivityInTraceFilterKind::NoFilter;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::features::discovery::petri_net::{Arc, DefaultPetriNet, Marking, Place, SingleMarking, Transition};
+use crate::features::discovery::petri_net::arc::Arc;
+use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
+use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use crate::features::discovery::petri_net::place::Place;
+use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
     GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking,
     GrpcPetriNetTransition,
