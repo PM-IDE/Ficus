@@ -57,3 +57,9 @@ pub fn get_paths_to_suffix_tree_string() -> Vec<PathBuf> {
 pub fn create_suffix_tree_gold_file_path(file_name: &str) -> PathBuf {
     get_suffix_trees_gold_path().join(file_name.to_owned() + ".gold")
 }
+
+pub fn get_serialized_petri_nets_gold_path(test_name: &str) -> PathBuf {
+    get_test_data_rust_gold_path()
+        .join("pnml_petri_nets")
+        .join(format!("{test_name}.gold"))
+}
