@@ -361,6 +361,8 @@ def test_discover_petri_net_alpha():
 
 def _execute_discovery_test(test_name: str, names_log: list[list[str]], discovery_part):
     temp_file = tempfile.NamedTemporaryFile()
+    temp_file.close()
+
     gold_folder = petri_net_test_gold_dir(test_name)
     if not os.path.exists(gold_folder):
         os.makedirs(gold_folder, exist_ok=True)
