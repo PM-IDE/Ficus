@@ -83,8 +83,14 @@ fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
 }
 
 fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
-    let mut alpha_sets: Vec<AlphaSet> = info
-        .all_event_classes()
+    let mut current_sets = create_initial_sets(info, provider);
+    current_sets = maximize_sets(current_sets, provider);
+
+    create_petri_net(info, filter_out_non_maximal_sets(&current_sets))
+}
+
+fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> Vec<AlphaSet> {
+    info.all_event_classes()
         .iter()
         .filter(|class| {
             info.dfg_info().get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
@@ -103,10 +109,10 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
             sets
         })
         .filter(|set| set.left_classes().len() > 0 && set.right_classes().len() > 0)
-        .collect();
+        .collect()
+}
 
-    let mut current_sets = alpha_sets;
-
+fn maximize_sets(mut current_sets: Vec<AlphaSet>, provider: &impl AlphaRelationsProvider) -> Vec<AlphaSet> {
     loop {
         let mut extended_sets = vec![];
         let mut extended_indices = HashSet::new();
@@ -143,16 +149,18 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
         current_sets = extended_sets;
     }
 
-    let alpha_sets: Vec<&AlphaSet> = current_sets
+    current_sets
+}
+
+fn filter_out_non_maximal_sets(current_sets: &Vec<AlphaSet>) -> Vec<&AlphaSet> {
+    current_sets
         .iter()
         .filter(|pair| {
             !current_sets
                 .iter()
                 .any(|candidate| *pair != candidate && pair.is_full_subset(candidate))
         })
-        .collect();
-
-    create_petri_net(info, alpha_sets)
+        .collect()
 }
 
 fn create_petri_net(info: &EventLogInfo, alpha_sets: Vec<&AlphaSet>) -> DefaultPetriNet {
