@@ -3,4 +3,5 @@ mod ids;
 pub mod marking;
 pub mod petri_net;
 pub mod place;
+pub mod pnml_serialization;
 pub mod transition;

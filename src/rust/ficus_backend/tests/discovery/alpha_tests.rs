@@ -3,7 +3,7 @@ use crate::test_core::simple_events_logs_provider::create_simple_event_log3;
 use crate::test_core::test_paths::get_serialized_petri_nets_gold_path;
 use ficus_backend::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use ficus_backend::features::discovery::alpha::alpha::discover_petri_net_alpha;
-use ficus_backend::features::discovery::petri_net_serialization::serialize_to_pnml;
+use ficus_backend::features::discovery::petri_net::pnml_serialization::serialize_to_pnml;
 
 #[test]
 pub fn alpha_simple_test_1() {
