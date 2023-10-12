@@ -52,8 +52,6 @@ def draw_petri_net(net: PetriNet,
                    engine='dot',
                    export_path: Optional[str] = None,
                    rankdir: str = 'LR'):
-    tmp_save_file = tempfile.NamedTemporaryFile(suffix='.gv')
-
     g = graphviz.Digraph(name, engine=engine, graph_attr={
         'bgcolor': background_color,
         'rankdir': rankdir
@@ -89,7 +87,9 @@ def draw_petri_net(net: PetriNet,
             g.edge(str(transition.id), str(arc.place_id))
 
     g.attr(overlap='false')
-    g.save(tmp_save_file.name)
+
+    tmp_file_path = _create_temp_file_name()
+    g.save(tmp_file_path)
 
     if export_path is None:
         display(g)
@@ -99,6 +99,12 @@ def draw_petri_net(net: PetriNet,
             os.makedirs(dir_name, exist_ok=True)
 
         _, extension = os.path.splitext(export_path)
-        graphviz.render(engine, extension[1::], tmp_save_file.name)
-        shutil.move(tmp_save_file.name + extension, export_path)
+        graphviz.render(engine, extension[1::], tmp_file_path)
+        shutil.move(tmp_file_path + extension, export_path)
 
+
+def _create_temp_file_name() -> str:
+    tmp_save_file = tempfile.NamedTemporaryFile(suffix='.gv')
+    tmp_save_file.close()
+
+    return tmp_save_file.name
