@@ -3,13 +3,13 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 
-#[derive(Debug)]
-pub struct AlphaSet<'a> {
-    left_classes: BTreeSet<&'a String>,
-    right_classes: BTreeSet<&'a String>,
+#[derive(Debug, Clone)]
+pub struct AlphaSet {
+    left_classes: BTreeSet<String>,
+    right_classes: BTreeSet<String>,
 }
 
-impl<'a> AlphaSet<'a> {
+impl AlphaSet {
     pub fn empty() -> Self {
         Self {
             left_classes: BTreeSet::new(),
@@ -17,7 +17,7 @@ impl<'a> AlphaSet<'a> {
         }
     }
 
-    pub fn new(left_class: &'a String, right_class: &'a String) -> Self {
+    pub fn new(left_class: String, right_class: String) -> Self {
         let mut left_classes = BTreeSet::new();
         left_classes.insert(left_class);
 
@@ -42,19 +42,19 @@ impl<'a> AlphaSet<'a> {
         self.is_left_subset(other) && self.is_right_subset(other)
     }
 
-    pub fn left_classes(&self) -> Vec<&'a String> {
-        (&self.left_classes).iter().map(|c| *c).collect()
+    pub fn left_classes(&self) -> Vec<&String> {
+        (&self.left_classes).iter().collect()
     }
 
-    pub fn right_classes(&self) -> Vec<&'a String> {
-        (&self.right_classes).iter().map(|c| *c).collect()
+    pub fn right_classes(&self) -> Vec<&String> {
+        (&self.right_classes).iter().collect()
     }
 
-    pub fn insert_left_class(&mut self, class: &'a String) {
+    pub fn insert_left_class(&mut self, class: String) {
         self.left_classes.insert(class);
     }
 
-    pub fn insert_right_class(&mut self, class: &'a String) {
+    pub fn insert_right_class(&mut self, class: String) {
         self.right_classes.insert(class);
     }
 
@@ -88,10 +88,10 @@ impl<'a> AlphaSet<'a> {
 
     pub fn extend(&self, other: &Self) -> AlphaSet {
         let mut left_classes = self.left_classes.clone();
-        left_classes.extend(other.left_classes.iter());
+        left_classes.extend(other.left_classes.iter().map(|c| c.to_owned()));
 
         let mut right_classes = self.right_classes.clone();
-        right_classes.extend(other.right_classes.iter());
+        right_classes.extend(other.right_classes.iter().map(|c| c.to_owned()));
 
         Self {
             left_classes,
@@ -100,7 +100,7 @@ impl<'a> AlphaSet<'a> {
     }
 }
 
-impl<'a> Hash for AlphaSet<'a> {
+impl Hash for AlphaSet {
     fn hash<H: Hasher>(&self, state: &mut H) {
         for class in self.left_classes.iter() {
             state.write(class.as_bytes());
@@ -112,7 +112,7 @@ impl<'a> Hash for AlphaSet<'a> {
     }
 }
 
-impl<'a> PartialEq for AlphaSet<'a> {
+impl PartialEq for AlphaSet {
     fn eq(&self, other: &Self) -> bool {
         let mut this_hasher = DefaultHasher::new();
         self.hash(&mut this_hasher);
@@ -124,9 +124,9 @@ impl<'a> PartialEq for AlphaSet<'a> {
     }
 }
 
-impl<'a> Eq for AlphaSet<'a> {}
+impl Eq for AlphaSet {}
 
-impl<'a> ToString for AlphaSet<'a> {
+impl ToString for AlphaSet {
     fn to_string(&self) -> String {
         let mut repr = "[{".to_string();
         for left_class in &self.left_classes {

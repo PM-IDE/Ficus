@@ -37,7 +37,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
         if let Some(followed_events) = event_log_info.dfg_info().get_followed_events(transition_name) {
             for event in followed_events.keys() {
                 if event != transition_name {
-                    alpha_set.insert_right_class(event);
+                    alpha_set.insert_right_class(event.to_owned());
                 }
             }
         }
@@ -45,7 +45,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
         if let Some(precedes_events) = event_log_info.dfg_info().get_precedes_events(transition_name) {
             for event in precedes_events.keys() {
                 if event != transition_name {
-                    alpha_set.insert_left_class(event);
+                    alpha_set.insert_left_class(event.to_owned());
                 }
             }
         }
@@ -83,7 +83,7 @@ fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
 }
 
 fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
-    let mut set_pairs: Vec<AlphaSet> = info
+    let mut alpha_sets: Vec<AlphaSet> = info
         .all_event_classes()
         .iter()
         .filter(|class| {
@@ -96,7 +96,7 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
                 if provider.is_in_casual_relation(class, follower)
                     && provider.is_in_unrelated_relation(follower, follower)
                 {
-                    sets.push(AlphaSet::new(class, follower));
+                    sets.push(AlphaSet::new((*class).to_owned(), follower.to_owned()));
                 }
             }
 
@@ -105,34 +105,51 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
         .filter(|set| set.left_classes().len() > 0 && set.right_classes().len() > 0)
         .collect();
 
-    let mut extended_pairs = vec![];
-    for i in 0..set_pairs.len() {
-        for j in (i + 1)..set_pairs.len() {
-            let first_set = set_pairs.get(i);
-            let first_set = first_set.unwrap();
+    let mut current_sets = alpha_sets;
 
-            let second_set = set_pairs.get(j);
-            let second_set = second_set.unwrap();
+    loop {
+        let mut extended_sets = vec![];
+        let mut extended_indices = HashSet::new();
+        let mut any_change = false;
 
-            let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
-                && first_set.can_extend(second_set, provider);
+        for i in 0..current_sets.len() {
+            for j in (i + 1)..current_sets.len() {
+                let first_set = current_sets.get(i).unwrap();
+                let second_set = current_sets.get(j).unwrap();
 
-            if should_extend {
-                let new_set = first_set.extend(&second_set);
-                extended_pairs.push(new_set);
+                let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
+                    && first_set.can_extend(second_set, provider);
+
+                if should_extend {
+                    extended_indices.insert(i);
+                    extended_indices.insert(j);
+
+                    any_change = true;
+                    extended_sets.push(first_set.extend(&second_set));
+                }
             }
         }
+
+        if !any_change {
+            break;
+        }
+
+        for i in 0..current_sets.len() {
+            if !extended_indices.contains(&i) {
+                extended_sets.push(current_sets[i].clone())
+            }
+        }
+
+        current_sets = extended_sets;
     }
 
-    let alpha_sets: Vec<&AlphaSet> = set_pairs.iter().chain(extended_pairs.iter()).collect();
-    let alpha_sets: Vec<&AlphaSet> = alpha_sets
+    let alpha_sets: Vec<&AlphaSet> = current_sets
         .iter()
         .filter(|pair| {
-            !alpha_sets
+            !current_sets
                 .iter()
                 .any(|candidate| *pair != candidate && pair.is_full_subset(candidate))
         })
-        .map(|s| *s)
         .collect();
 
     create_petri_net(info, alpha_sets)
@@ -150,11 +167,11 @@ fn create_petri_net(info: &EventLogInfo, alpha_sets: Vec<&AlphaSet>) -> DefaultP
         let place_id = petri_net.add_place(Place::with_name(alpha_set.to_string()));
 
         for class in alpha_set.left_classes() {
-            petri_net.connect_transition_to_place(event_classes_to_transition_ids[class], place_id, None);
+            petri_net.connect_transition_to_place(event_classes_to_transition_ids[&class], place_id, None);
         }
 
         for class in alpha_set.right_classes() {
-            petri_net.connect_place_to_transition(place_id, event_classes_to_transition_ids[class], None);
+            petri_net.connect_place_to_transition(place_id, event_classes_to_transition_ids[&class], None);
         }
     }
 
