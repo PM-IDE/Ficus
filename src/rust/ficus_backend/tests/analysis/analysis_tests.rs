@@ -16,7 +16,7 @@ fn test_dfg_info() {
     let log = create_simple_event_log();
     let creation_dto = EventLogInfoCreationDto::default(&log);
     let log_info = EventLogInfo::create_from(creation_dto);
-    let dfg = log_info.get_dfg_info();
+    let dfg = log_info.dfg_info();
 
     assert_eq!(dfg.get_directly_follows_count(&("A".to_string(), "B".to_string())), 2);
     assert_eq!(dfg.get_directly_follows_count(&("B".to_string(), "C".to_string())), 2);

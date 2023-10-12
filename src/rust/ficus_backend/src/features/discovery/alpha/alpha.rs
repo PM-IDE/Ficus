@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
-    let dfg_info = event_log_info.get_dfg_info();
+    let dfg_info = event_log_info.dfg_info();
     let provider = DefaultAlphaRelationsProvider::new(&dfg_info);
 
     do_discover_petri_net_alpha(event_log_info, &provider)
@@ -26,7 +26,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
         log,
         &one_length_loop_transitions,
     ));
-    let dfg_info = event_log_info.get_dfg_info();
+    let dfg_info = event_log_info.dfg_info();
     let provider = AlphaPlusRelationsProvider::new(dfg_info, log);
 
     let mut petri_net = do_discover_petri_net_alpha(&event_log_info, &provider);
@@ -34,7 +34,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
     let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     for transition_name in &one_length_loop_transitions {
         let mut alpha_set = AlphaSet::empty();
-        if let Some(followed_events) = event_log_info.get_dfg_info().get_followed_events(transition_name) {
+        if let Some(followed_events) = event_log_info.dfg_info().get_followed_events(transition_name) {
             for event in followed_events.keys() {
                 if event != transition_name {
                     alpha_set.insert_right_class(event);
@@ -42,7 +42,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog) -> DefaultPetriNet {
             }
         }
 
-        if let Some(precedes_events) = event_log_info.get_dfg_info().get_precedes_events(transition_name) {
+        if let Some(precedes_events) = event_log_info.dfg_info().get_precedes_events(transition_name) {
             for event in precedes_events.keys() {
                 if event != transition_name {
                     alpha_set.insert_left_class(event);
@@ -82,21 +82,16 @@ fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
     one_loop_transitions
 }
 
-fn do_discover_petri_net_alpha(
-    event_log_info: &EventLogInfo,
-    provider: &impl AlphaRelationsProvider,
-) -> DefaultPetriNet {
-    let event_classes = event_log_info.get_all_event_classes();
-    let dfg_info = event_log_info.get_dfg_info();
-
-    let mut set_pairs: Vec<AlphaSet> = event_classes
+fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
+    let mut set_pairs: Vec<AlphaSet> = info
+        .all_event_classes()
         .iter()
         .filter(|class| {
-            dfg_info.get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
+            info.dfg_info().get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
         })
         .flat_map(|class| {
             let mut sets = vec![];
-            let followers = dfg_info.get_followed_events(class).unwrap().keys();
+            let followers = info.dfg_info().get_followed_events(class).unwrap().keys();
             for follower in followers {
                 if provider.is_in_casual_relation(class, follower)
                     && provider.is_in_unrelated_relation(follower, follower)
@@ -140,9 +135,13 @@ fn do_discover_petri_net_alpha(
         .map(|s| *s)
         .collect();
 
+    create_petri_net(info, alpha_sets)
+}
+
+fn create_petri_net(info: &EventLogInfo, alpha_sets: Vec<&AlphaSet>) -> DefaultPetriNet {
     let mut petri_net = PetriNet::empty();
     let mut event_classes_to_transition_ids = HashMap::new();
-    for class in event_classes {
+    for class in info.all_event_classes() {
         let id = petri_net.add_transition(Transition::empty(class.to_owned(), Some(class.to_owned())));
         event_classes_to_transition_ids.insert(class, id);
     }
@@ -160,17 +159,17 @@ fn do_discover_petri_net_alpha(
     }
 
     let start_place_id = petri_net.add_place(Place::empty());
-    for start_activity in event_log_info.start_event_classes() {
+    for start_activity in info.start_event_classes() {
         petri_net.connect_place_to_transition(start_place_id, event_classes_to_transition_ids[start_activity], None);
     }
 
     let end_place_id = petri_net.add_place(Place::empty());
-    for end_activity in event_log_info.end_event_classes() {
+    for end_activity in info.end_event_classes() {
         petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
     }
 
     petri_net.set_initial_marking(Marking::new(vec![SingleMarking::new(start_place_id, 1)]));
     petri_net.set_final_marking(Marking::new(vec![SingleMarking::new(end_place_id, 1)]));
 
-    return petri_net;
+    petri_net
 }

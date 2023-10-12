@@ -186,18 +186,18 @@ impl EventLogInfo {
         self.event_classes_counts.len()
     }
 
-    pub fn get_event_count(&self, event_class: &String) -> usize {
+    pub fn event_count(&self, event_class: &String) -> usize {
         match self.event_classes_counts.get(event_class) {
             Some(value) => value.to_owned(),
             None => 0,
         }
     }
 
-    pub fn get_dfg_info(&self) -> &DfgInfo {
+    pub fn dfg_info(&self) -> &DfgInfo {
         &self.dfg_info
     }
 
-    pub fn get_all_event_classes(&self) -> Vec<&String> {
+    pub fn all_event_classes(&self) -> Vec<&String> {
         self.event_classes_counts.keys().into_iter().collect()
     }
 

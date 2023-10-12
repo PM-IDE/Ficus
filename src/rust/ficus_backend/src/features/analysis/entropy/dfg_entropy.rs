@@ -21,15 +21,15 @@ where
 
     let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let pair = (first.to_owned(), second.to_owned());
-        let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
-        let first_count = log_info.get_event_count(first);
+        let pair_count = log_info.dfg_info().get_directly_follows_count(&pair);
+        let first_count = log_info.event_count(first);
         dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let pair = (second.to_owned(), first.to_owned());
-        let pair_count = log_info.get_dfg_info().get_directly_follows_count(&pair);
-        let first_count = log_info.get_event_count(first);
+        let pair_count = log_info.dfg_info().get_directly_follows_count(&pair);
+        let first_count = log_info.event_count(first);
         dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
 
@@ -43,16 +43,16 @@ where
     TLog: EventLog,
 {
     let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
-        let dfg = log_info.get_dfg_info();
+        let dfg = log_info.dfg_info();
         let dfr = dfg.get_directly_follows_count(&(first.to_owned(), second.to_owned()));
-        let first_count = log_info.get_event_count(first);
+        let first_count = log_info.event_count(first);
         dfr as f64 / first_count as f64
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
-        let dfg = log_info.get_dfg_info();
+        let dfg = log_info.dfg_info();
         let dfr = dfg.get_directly_follows_count(&(second.to_owned(), first.to_owned()));
-        let first_count = log_info.get_event_count(first);
+        let first_count = log_info.event_count(first);
         dfr as f64 / first_count as f64
     };
 
@@ -71,7 +71,7 @@ where
     TDprEntropyCalculator: Fn(&String, &String, &EventLogInfo) -> f64,
 {
     let mut entropy = HashMap::new();
-    let events_names = &log_info.get_all_event_classes();
+    let events_names = &log_info.all_event_classes();
 
     let mut dfr_events_names = events_names.clone();
     let fake_end = FAKE_EVENT_END_NAME.to_string();
