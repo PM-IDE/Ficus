@@ -12,3 +12,4 @@ ipycanvas~=0.13.1
 pytest~=7.4.2
 grpcio==1.59.0
 grpcio-tools==1.59.0
+suffix-tree==0.1.2
