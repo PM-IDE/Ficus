@@ -40,7 +40,8 @@ fn get_test_parts_names() -> Vec<String> {
         "AddArtificialStartEndEvents",
         "AddArtificialStartEvents",
         "AddArtificialEndEvents",
-        "DiscoverPetriNetAlphaPlus"
+        "DiscoverPetriNetAlphaPlus",
+        "DiscoverPetriNetAlphaPlusPlus"
     ]
 }
 
