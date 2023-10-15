@@ -107,4 +107,14 @@ where
 
         None
     }
+
+    pub fn find_transition_by_name(&self, name: &str) -> Option<&Transition<TTransitionData, TArcData>> {
+        for transition in self.transitions.values() {
+            if transition.name() == name {
+                return Some(transition);
+            }
+        }
+
+        None
+    }
 }
