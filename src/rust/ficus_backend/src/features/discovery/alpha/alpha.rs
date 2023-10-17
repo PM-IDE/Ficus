@@ -155,7 +155,7 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
     create_petri_net(info, filter_out_non_maximal_sets(&current_sets))
 }
 
-fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> Vec<AlphaSet> {
+fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
     info.all_event_classes()
         .iter()
         .filter(|class| {
@@ -178,16 +178,18 @@ fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvid
         .collect()
 }
 
-fn maximize_sets(mut current_sets: Vec<AlphaSet>, provider: &impl AlphaRelationsProvider) -> Vec<AlphaSet> {
+fn maximize_sets(mut current_sets: HashSet<AlphaSet>, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
     loop {
-        let mut extended_sets = vec![];
+        let mut extended_sets = HashSet::new();
         let mut extended_indices = HashSet::new();
         let mut any_change = false;
 
-        for i in 0..current_sets.len() {
-            for j in (i + 1)..current_sets.len() {
-                let first_set = current_sets.get(i).unwrap();
-                let second_set = current_sets.get(j).unwrap();
+        let current_sets_vector: Vec<&AlphaSet> = current_sets.iter().collect();
+
+        for i in 0..current_sets_vector.len() {
+            for j in (i + 1)..current_sets_vector.len() {
+                let first_set = current_sets_vector.get(i).unwrap();
+                let second_set = current_sets_vector.get(j).unwrap();
 
                 let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
                     && first_set.can_extend(second_set, provider);
@@ -197,7 +199,7 @@ fn maximize_sets(mut current_sets: Vec<AlphaSet>, provider: &impl AlphaRelations
                     extended_indices.insert(j);
 
                     any_change = true;
-                    extended_sets.push(first_set.extend(&second_set));
+                    extended_sets.insert(first_set.extend(&second_set));
                 }
             }
         }
@@ -206,9 +208,9 @@ fn maximize_sets(mut current_sets: Vec<AlphaSet>, provider: &impl AlphaRelations
             break;
         }
 
-        for i in 0..current_sets.len() {
+        for i in 0..current_sets_vector.len() {
             if !extended_indices.contains(&i) {
-                extended_sets.push(current_sets[i].clone())
+                extended_sets.insert(current_sets_vector[i].clone());
             }
         }
 
@@ -218,7 +220,7 @@ fn maximize_sets(mut current_sets: Vec<AlphaSet>, provider: &impl AlphaRelations
     current_sets
 }
 
-fn filter_out_non_maximal_sets(current_sets: &Vec<AlphaSet>) -> Vec<&AlphaSet> {
+fn filter_out_non_maximal_sets(current_sets: &HashSet<AlphaSet>) -> Vec<&AlphaSet> {
     current_sets
         .iter()
         .filter(|pair| {
