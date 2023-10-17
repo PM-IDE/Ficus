@@ -7,14 +7,22 @@ from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 
 class DiscoverPetriNetAlpha2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_alpha, config))
+        return _create_default_discovery_part(const_discover_petri_net_alpha)
+
+
+def _create_default_discovery_part(algo_name: str) -> GrpcPipelinePartBase:
+    config = GrpcPipelinePartConfiguration()
+    return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(algo_name, config))
 
 
 class DiscoverPetriNetAlphaPlus2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_alpha_plus, config))
+        return _create_default_discovery_part(const_discover_petri_net_alpha_plus)
+
+
+class DiscoverPetriNetAlphaPlusPlus2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_default_discovery_part(const_discover_petri_net_alpha_plus_plus)
 
 
 class SerializePetriNetToPNML2(PipelinePart2):
