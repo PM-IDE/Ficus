@@ -97,25 +97,26 @@ fn add_alpha_plus_plus_transitions(
     for transition in one_length_loop_transitions {
         if let Some(transition) = petri_net.find_transition_by_name(transition) {
             for place in petri_net.all_places() {
-                let alpha_set = place.user_data().concrete(key).unwrap();
-                for outgoing_arc in transition.outgoing_arcs() {
-                    if outgoing_arc.place_id() != place.id() {
-                        let outgoing_place = petri_net.place(&outgoing_arc.place_id());
-                        let outgoing_alpha_set = outgoing_place.user_data().concrete(key).unwrap();
-
-                        if alpha_set.is_full_subset(outgoing_alpha_set) {
-                            transitions_connections.insert((transition.id(), outgoing_place.id()));
+                if let Some(alpha_set) = place.user_data().concrete(key) {
+                    for outgoing_arc in transition.outgoing_arcs() {
+                        if outgoing_arc.place_id() != place.id() {
+                            let outgoing_place = petri_net.place(&outgoing_arc.place_id());
+                            if let Some(outgoing_alpha_set) = outgoing_place.user_data().concrete(key) {
+                                if alpha_set.is_full_subset(outgoing_alpha_set) {
+                                    transitions_connections.insert((transition.id(), outgoing_place.id()));
+                                }
+                            }
                         }
                     }
-                }
 
-                for incoming_arc in transition.incoming_arcs() {
-                    if incoming_arc.place_id() != place.id() {
-                        let incoming_place = petri_net.place(&incoming_arc.place_id());
-                        let incoming_alpha_set = incoming_place.user_data().concrete(key).unwrap();
-
-                        if alpha_set.is_full_subset(incoming_alpha_set) {
-                            places_connections.insert((incoming_place.id(), transition.id()));
+                    for incoming_arc in transition.incoming_arcs() {
+                        if incoming_arc.place_id() != place.id() {
+                            let incoming_place = petri_net.place(&incoming_arc.place_id());
+                            if let Some(incoming_alpha_set) = incoming_place.user_data().concrete(key) {
+                                if alpha_set.is_full_subset(incoming_alpha_set) {
+                                    places_connections.insert((incoming_place.id(), transition.id()));
+                                }
+                            }
                         }
                     }
                 }
