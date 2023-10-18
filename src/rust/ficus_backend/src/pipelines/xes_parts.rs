@@ -12,8 +12,8 @@ use super::{
 
 impl PipelineParts {
     pub(super) fn write_log_to_xes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::WRITE_LOG_TO_XES, &|context, _, keys, _| {
-            let path = Self::get_user_data(context, &keys.path())?;
+        Self::create_pipeline_part(Self::WRITE_LOG_TO_XES, &|context, _, keys, config| {
+            let path = Self::get_user_data(config, &keys.path())?;
             match write_log(&context.concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
                 Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(

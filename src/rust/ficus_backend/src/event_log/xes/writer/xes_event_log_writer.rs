@@ -84,7 +84,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
                 let event = event.borrow();
 
                 let attrs = vec![
-                    (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
+                    (KEY_ATTR_NAME_STR, CONCEPT_NAME_STR),
                     (VALUE_ATTR_NAME_STR, event.name()),
                 ];
 
