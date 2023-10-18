@@ -1,4 +1,5 @@
 const_read_log_from_xes = 'ReadLogFromXes'
+const_write_log_to_xes = 'WriteLogToXes'
 const_colors_event_log = 'colors_event_log'
 const_event_name = 'event_name'
 const_regex = 'regex'
