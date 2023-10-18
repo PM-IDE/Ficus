@@ -39,7 +39,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog, alpha_plus_plus: bool)
     add_one_length_loops(log, &one_length_loop_transitions, &mut petri_net);
 
     if alpha_plus_plus {
-        add_alpha_plus_plus_transitions(log, &one_length_loop_transitions, &mut petri_net);
+        add_alpha_plus_plus_transitions(&one_length_loop_transitions, &mut petri_net);
     }
 
     petri_net
@@ -86,7 +86,6 @@ fn add_one_length_loops(
 }
 
 fn add_alpha_plus_plus_transitions(
-    log: &impl EventLog,
     one_length_loop_transitions: &HashSet<String>,
     petri_net: &mut DefaultPetriNet,
 ) {
