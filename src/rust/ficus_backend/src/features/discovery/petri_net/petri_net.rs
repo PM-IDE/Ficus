@@ -2,7 +2,6 @@ use crate::features::discovery::petri_net::marking::Marking;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 pub type DefaultPetriNet = PetriNet<String, ()>;
 

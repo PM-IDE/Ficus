@@ -101,7 +101,7 @@ impl<'a> AlphaPlusRelationsProvider<'a> {
 
 pub struct AlphaSharpRelationsProvider<'a> {
     alpha_plus_provider: &'a AlphaPlusRelationsProvider<'a>,
-    info: &'a EventLogInfo
+    info: &'a EventLogInfo,
 }
 
 impl<'a> AlphaRelationsProvider for AlphaSharpRelationsProvider<'a> {
@@ -132,10 +132,11 @@ impl<'a> AlphaSharpRelationsProvider<'a> {
     }
 
     pub fn is_in_advanced_ordering_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.is_in_causal_relation(first, second) && self.check_advanced_ordering_relation_second_part(first, second)
+        self.alpha_plus_provider.is_in_causal_relation(first, second)
+            && self.check_advanced_ordering_relation_second_part(first, second)
     }
 
-    fn check_advanced_ordering_relation_second_part(&self, first: &str, second: & str) -> bool {
+    fn check_advanced_ordering_relation_second_part(&self, first: &str, second: &str) -> bool {
         let classes = self.info.all_event_classes();
         for x_class in &classes {
             for y_class in &classes {
