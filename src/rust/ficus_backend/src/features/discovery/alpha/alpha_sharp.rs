@@ -46,6 +46,19 @@ impl<'a> AlphaSharpTuple<'a> {
         }
     }
 
+    pub fn try_merge(first: &Self, second: &Self) -> Option<Self> {
+        let new = Self {
+            provider: first.provider,
+            p_in: BTreeSet::from_iter(first.p_in.iter().chain(second.p_in.iter()).map(|c| c.clone())),
+            p_out: BTreeSet::from_iter(first.p_out.iter().chain(second.p_out.iter()).map(|c| c.clone())),
+        };
+
+        match new.valid() {
+            true => Some(new),
+            false => None,
+        }
+    }
+
     pub fn valid(&self) -> bool {
         for in_set in &self.p_in {
             for out_set in &self.p_out {
@@ -181,6 +194,26 @@ impl<'a> ToString for AlphaSharpTuple<'a> {
     }
 }
 
+impl<'a> Clone for AlphaSharpTuple<'a> {
+    fn clone(&self) -> Self {
+        Self {
+            provider: self.provider,
+            p_in: BTreeSet::from_iter(self.p_in.iter().map(|t| {
+                (
+                    BTreeSet::from_iter(t.0.iter().map(|r| r.clone())),
+                    BTreeSet::from_iter(t.0.iter().map(|r| r.clone())),
+                )
+            })),
+            p_out: BTreeSet::from_iter(self.p_out.iter().map(|t| {
+                (
+                    BTreeSet::from_iter(t.0.iter().map(|r| r.clone())),
+                    BTreeSet::from_iter(t.0.iter().map(|r| r.clone())),
+                )
+            })),
+        }
+    }
+}
+
 pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     let provider = AlphaSharpRelationsProvider::new(log, &info);
@@ -189,7 +222,7 @@ pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
     let classes = info.all_event_classes();
     for first_class in &classes {
         for second_class in &classes {
-            if provider.is_in_advanced_ordering_relation(first_class, second_class) && !provider.is_in_redundant_advanced_ordering_relation(first_class, second_class) {
+            if provider.is_in_advanced_ordering_relation(first_class, second_class) {
                 advanced_pairs.insert((first_class, second_class));
             }
         }
@@ -212,6 +245,43 @@ pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
     }
 
     for x in &sharp_tuples {
+        println!("{}", x.to_string());
+    }
+
+    let mut current_set = sharp_tuples;
+    loop {
+        let mut new_set = HashSet::new();
+
+        let vec = current_set.iter().collect::<Vec<&AlphaSharpTuple>>();
+        let mut merged_indices = HashSet::new();
+
+        let mut any_change = false;
+        for i in 0..vec.len() {
+            for j in (i + 1)..vec.len() {
+                if let Some(merged) = AlphaSharpTuple::try_merge(vec.get(i).unwrap(), vec.get(j).unwrap()) {
+                    merged_indices.insert(i);
+                    merged_indices.insert(j);
+
+                    new_set.insert(merged);
+                    any_change = true;
+                }
+            }
+        }
+
+        if !any_change {
+            break;
+        }
+
+        for i in 0..vec.len() {
+            if !merged_indices.contains(&i) {
+                new_set.insert((*vec.get(i).unwrap()).clone());
+            }
+        }
+
+        current_set = new_set;
+    }
+
+    for x in &current_set {
         println!("{}", x.to_string());
     }
 }
