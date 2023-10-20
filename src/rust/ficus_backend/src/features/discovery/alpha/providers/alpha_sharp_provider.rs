@@ -1,9 +1,10 @@
-use crate::features::analysis::event_log_info::EventLogInfo;
+use crate::event_log::core::event_log::EventLog;
+use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 
 pub struct AlphaSharpRelationsProvider<'a> {
-    alpha_plus_provider: &'a AlphaPlusRelationsProvider<'a>,
+    alpha_plus_provider: AlphaPlusRelationsProvider<'a>,
     info: &'a EventLogInfo,
 }
 
@@ -77,5 +78,14 @@ impl<'a> AlphaSharpRelationsProvider<'a> {
         }
 
         false
+    }
+}
+
+impl<'a> AlphaSharpRelationsProvider<'a> {
+    pub fn new(log: &'a impl EventLog, info: &'a EventLogInfo) -> Self {
+        Self {
+            alpha_plus_provider: AlphaPlusRelationsProvider::new(info.dfg_info(), log),
+            info,
+        }
     }
 }

@@ -1,4 +1,4 @@
-use ficus_backend::event_log::simple::simple_event_log::SimpleEventLog;
+use ficus_backend::event_log::simple::simple_event_log::{SimpleEvent, SimpleEventLog};
 
 pub fn create_raw_event_log() -> Vec<Vec<&'static str>> {
     vec![vec!["A", "B", "C"], vec!["A", "B", "C"]]
@@ -151,5 +151,16 @@ pub fn create_single_trace_test_log2() -> SimpleEventLog {
     SimpleEventLog::new(&vec![
         vec!["x", "y", "z", "a", "b", "c"],
         vec!["a", "b", "c", "r", "t", "u"],
+    ])
+}
+
+pub fn create_alpha_sharp_test_log() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "C", "D", "D", "F", "G", "H", "I"],
+        vec!["B", "C", "E", "E", "F", "H", "G", "I"],
+        vec!["A", "D", "E", "D", "E", "G", "H", "I"],
+        vec!["A", "E", "D", "G", "H", "I"],
+        vec!["B", "E", "D", "H", "G", "I"],
+        vec!["B", "D", "E", "H", "G", "I"],
     ])
 }
