@@ -67,12 +67,14 @@ impl<'a> AlphaSharpRelationsProvider<'a> {
         let classes = self.info.all_event_classes();
         for c_class in &classes {
             for d_class in &classes {
-                let c_causal_d = self.is_in_causal_relation(c_class, d_class);
-                let first_advanced_d = self.is_in_advanced_ordering_relation(first, d_class);
-                let c_advanced_second = self.is_in_advanced_ordering_relation(c_class, second);
+                if c_class.as_str() != first && d_class.as_str() != second {
+                    let c_causal_d = self.is_in_causal_relation(c_class, d_class);
+                    let first_advanced_d = self.is_in_advanced_ordering_relation(first, d_class);
+                    let c_advanced_second = self.is_in_advanced_ordering_relation(c_class, second);
 
-                if c_causal_d && first_advanced_d && c_advanced_second {
-                    return true;
+                    if c_causal_d && first_advanced_d && c_advanced_second {
+                        return true;
+                    }
                 }
             }
         }

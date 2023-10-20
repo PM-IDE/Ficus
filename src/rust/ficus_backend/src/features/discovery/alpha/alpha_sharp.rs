@@ -62,11 +62,16 @@ impl<'a> AlphaSharpTuple<'a> {
     pub fn valid(&self) -> bool {
         for in_set in &self.p_in {
             for out_set in &self.p_out {
-                let x_set = &in_set.1;
-                let y_set = &out_set.0;
+                for a in &in_set.0 {
+                    for b in &out_set.1 {
+                        if !self.provider.is_in_advanced_ordering_relation(a, b) {
+                            return false;
+                        }
+                    }
+                }
 
-                for x in x_set {
-                    for y in y_set {
+                for x in &in_set.1 {
+                    for y in &out_set.0 {
                         if self.provider.is_in_parallel_relation(x, y) {
                             return false;
                         }
@@ -75,17 +80,19 @@ impl<'a> AlphaSharpTuple<'a> {
             }
         }
 
-        for first_in_set in &self.p_in {
-            for second_in_set in &self.p_in {
-                if !self.any_parallel_items(&first_in_set.0, &second_in_set.0) {
+        let p_in = self.p_in.iter().collect::<Vec<&(BTreeSet<&'a String>, BTreeSet<&'a String>)>>();
+        for i in 0..p_in.len() {
+            for j in (i + 1)..p_in.len() {
+                if !self.any_parallel_items(&p_in[i].0, &p_in[j].0) {
                     return false;
                 }
             }
         }
 
-        for first_out_set in &self.p_out {
-            for second_out_set in &self.p_out {
-                if !self.any_parallel_items(&first_out_set.1, &second_out_set.1) {
+        let p_out = self.p_out.iter().collect::<Vec<&(BTreeSet<&'a String>, BTreeSet<&'a String>)>>();
+        for i in 0..p_out.len() {
+            for j in (i + 1)..p_out.len() {
+                if !self.any_parallel_items(&p_out[i].1, &p_out[j].1) {
                     return false;
                 }
             }
@@ -222,7 +229,7 @@ pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
     let classes = info.all_event_classes();
     for first_class in &classes {
         for second_class in &classes {
-            if provider.is_in_advanced_ordering_relation(first_class, second_class) {
+            if provider.is_in_advanced_ordering_relation(first_class, second_class) && !provider.is_in_redundant_advanced_ordering_relation(first_class, second_class) {
                 advanced_pairs.insert((first_class, second_class));
             }
         }

@@ -164,3 +164,20 @@ pub fn create_alpha_sharp_test_log() -> SimpleEventLog {
         vec!["B", "D", "E", "H", "G", "I"],
     ])
 }
+
+pub fn create_alpha_sharp_test_log2() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "C", "C", "D"],
+        vec!["A", "B", "C", "B", "C", "D"],
+    ])
+}
+
+
+pub fn create_alpha_sharp_test_log3() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "D"],
+        vec!["A", "B", "D"],
+        vec!["A", "C", "D"],
+        vec!["A", "B", "C", "D"],
+    ])
+}
