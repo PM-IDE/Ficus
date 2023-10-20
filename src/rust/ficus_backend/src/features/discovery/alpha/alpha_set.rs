@@ -61,7 +61,7 @@ impl AlphaSet {
     pub fn can_extend(&self, other: &Self, provider: &impl AlphaRelationsProvider) -> bool {
         for left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
             for right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
-                if !provider.is_in_casual_relation(left_class, right_class) {
+                if !provider.is_in_causal_relation(left_class, right_class) {
                     return false;
                 }
             }

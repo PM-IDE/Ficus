@@ -165,7 +165,7 @@ fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvid
             let mut sets = vec![];
             let followers = info.dfg_info().get_followed_events(class).unwrap().keys();
             for follower in followers {
-                if provider.is_in_casual_relation(class, follower)
+                if provider.is_in_causal_relation(class, follower)
                     && provider.is_in_unrelated_relation(follower, follower)
                 {
                     sets.push(AlphaSet::new((*class).to_owned(), follower.to_owned()));
