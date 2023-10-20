@@ -1,4 +1,4 @@
-use crate::features::discovery::alpha::provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
+use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};

@@ -3,8 +3,9 @@ use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
-use crate::features::discovery::alpha::provider::{
-    AlphaPlusRelationsProvider, AlphaRelationsProvider, DefaultAlphaRelationsProvider,
+use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
+use crate::features::discovery::alpha::providers::alpha_provider::{
+    AlphaRelationsProvider, DefaultAlphaRelationsProvider,
 };
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
