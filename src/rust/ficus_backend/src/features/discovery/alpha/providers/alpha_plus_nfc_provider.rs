@@ -4,6 +4,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
+use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 
 pub struct AlphaPlusNfcRelationsProvider<'a, TLog>
 where
@@ -128,5 +129,73 @@ where
 
     pub fn is_in_concave_arrow_relation(&self, first: &str, second: &str) -> bool {
         self.is_in_causal_relation(first, second) || self.is_in_right_double_arrow_relation(first, second)
+    }
+
+    pub fn is_in_w1_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if self.is_in_direct_relation(first, second) {
+            return false;
+        }
+
+        for event_class in self.info.all_event_classes() {
+            if let Some(transition_id) = petri_net.find_place_id_by_name(event_class) {
+                let transition = petri_net.transition(&transition_id);
+                for first_incoming_arc in transition.incoming_arcs() {
+                    'second_loop: for second_incoming_arc in transition.incoming_arcs() {
+                        let first_place_id = first_incoming_arc.place_id();
+                        let second_place_id = second_incoming_arc.place_id();
+
+                        if first_place_id == second_place_id {
+                            continue 'second_loop;
+                        }
+
+                        let first_place_preset = petri_net.get_incoming_transitions(&first_place_id);
+                        let second_place_preset = petri_net.get_incoming_transitions(&second_place_id);
+
+                        let mut first_in_first_place_preset = false;
+                        for first_pre_transition in &first_place_preset {
+                            if first_pre_transition.name() == first {
+                                first_in_first_place_preset = true;
+                                break;
+                            }
+                        }
+
+                        if !first_in_first_place_preset {
+                            continue 'second_loop;
+                        }
+
+                        for second_pre_transition in &second_place_preset {
+                            if second_pre_transition.name() == first {
+                                continue 'second_loop;
+                            }
+                        }
+
+                        let second_place_postset = petri_net.get_outgoing_transitions(&second_place_id);
+
+                        let mut second_in_second_place_postset = false;
+                        for second_post_transition in &second_place_postset {
+                            if second_post_transition.name() == second {
+                                second_in_second_place_postset = true;
+                                break;
+                            }
+                        }
+
+                        if !second_in_second_place_postset {
+                            continue 'second_loop;
+                        }
+
+                        for second_pre_transition in &second_place_preset {
+                            let name = second_pre_transition.name();
+                            if self.is_in_concave_arrow_relation(name, first) || self.is_in_parallel_relation(name, first) {
+                                continue 'second_loop;
+                            }
+                        }
+
+                        return true;
+                    }
+                }
+            }
+        }
+
+        false
     }
 }
