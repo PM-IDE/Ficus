@@ -13,10 +13,7 @@ fn interval_tree_test() {
 
     let mut tree = IntervalTree::new(&intervals, |left, right| *left..*right);
 
-    assert_eq!(
-        tree.search_overlaps_for_point(5),
-        [Interval::new(-5, 10), Interval::new(5, 6)]
-    );
+    assert_eq!(tree.search_overlaps_for_point(5), [Interval::new(-5, 10), Interval::new(5, 6)]);
 
     assert_eq!(
         tree.search_overlaps_for_point(2),

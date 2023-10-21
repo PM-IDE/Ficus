@@ -45,10 +45,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
 
         for classifier in log.classifiers() {
             let keys = classifier.keys.join(" ");
-            let attrs = vec![
-                (NAME_ATTR_NAME_STR, classifier.name.as_str()),
-                (KEYS_ATTR_NAME_STR, keys.as_str()),
-            ];
+            let attrs = vec![(NAME_ATTR_NAME_STR, classifier.name.as_str()), (KEYS_ATTR_NAME_STR, keys.as_str())];
 
             write_empty(&mut writer.borrow_mut(), CLASSIFIER_TAG_NAME_STR, &attrs)?;
         }
@@ -83,18 +80,12 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
                 let _event_cookie = StartEndElementCookie::new(&writer, EVENT_TAG_NAME_STR);
                 let event = event.borrow();
 
-                let attrs = vec![
-                    (KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR),
-                    (VALUE_ATTR_NAME_STR, event.name()),
-                ];
+                let attrs = vec![(KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR), (VALUE_ATTR_NAME_STR, event.name())];
 
                 write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
 
                 let date_string = event.timestamp().to_rfc3339();
-                let attrs = vec![
-                    (KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR),
-                    (VALUE_ATTR_NAME_STR, date_string.as_str()),
-                ];
+                let attrs = vec![(KEY_ATTR_NAME_STR, TIME_TIMESTAMP_STR), (VALUE_ATTR_NAME_STR, date_string.as_str())];
 
                 write_empty(&mut writer.borrow_mut(), DATE_TAG_NAME_STR, &attrs)?;
 
@@ -122,11 +113,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
     }
 }
 
-fn write_payload_tag(
-    writer: &RefCell<Writer<Cursor<Vec<u8>>>>,
-    key: &str,
-    value: &EventPayloadValue,
-) -> Result<(), XmlWriteError> {
+fn write_payload_tag(writer: &RefCell<Writer<Cursor<Vec<u8>>>>, key: &str, value: &EventPayloadValue) -> Result<(), XmlWriteError> {
     let tag_name = match value {
         EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
         EventPayloadValue::String(_) => STRING_TAG_NAME_STR,

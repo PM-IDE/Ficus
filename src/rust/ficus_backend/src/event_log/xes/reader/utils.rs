@@ -28,11 +28,7 @@ pub fn read_payload_like_tag(tag: &BytesStart) -> Option<PayloadTagDescriptor> {
         Err(_) => return None,
     };
 
-    let descriptor = PayloadTagDescriptor {
-        payload_type,
-        key,
-        value,
-    };
+    let descriptor = PayloadTagDescriptor { payload_type, key, value };
 
     Some(descriptor)
 }

@@ -16,9 +16,7 @@ impl PipelineParts {
             let path = Self::get_user_data(context, &keys.path())?;
             match write_log(&context.concrete(&keys.event_log().key()).unwrap(), path) {
                 Ok(()) => Ok(()),
-                Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                    err.to_string(),
-                ))),
+                Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(err.to_string()))),
             }
         })
     }

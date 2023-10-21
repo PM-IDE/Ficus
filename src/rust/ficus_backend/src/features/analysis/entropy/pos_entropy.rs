@@ -11,11 +11,7 @@ where
     calculate_entropies(log, ignored_events.as_ref(), calculate_pos_entropy_for_event)
 }
 
-pub fn calculate_pos_entropy_for_event<TLog>(
-    log: &TLog,
-    event_name: &String,
-    ignored_events: Option<&HashSet<String>>,
-) -> f64
+pub fn calculate_pos_entropy_for_event<TLog>(log: &TLog, event_name: &String, ignored_events: Option<&HashSet<String>>) -> f64
 where
     TLog: EventLog,
 {

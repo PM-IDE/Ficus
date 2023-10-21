@@ -7,10 +7,7 @@ use crate::utils::suffix_tree::{
 
 use super::{contexts::PatternsDiscoveryStrategy, tandem_arrays::SubArrayInTraceInfo};
 
-pub fn find_maximal_repeats(
-    log: &Vec<Vec<u64>>,
-    strategy: &PatternsDiscoveryStrategy,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
+pub fn find_maximal_repeats(log: &Vec<Vec<u64>>, strategy: &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_maximal_repeats())
 }
 
@@ -58,11 +55,8 @@ where
     }
 }
 
-fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(
-    log: &Vec<Vec<u64>>,
-    finder: &TFinder,
-    pusher: &mut TRepeatsPusher,
-) where
+fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(log: &Vec<Vec<u64>>, finder: &TFinder, pusher: &mut TRepeatsPusher)
+where
     TFinder: Fn(&SuffixTree<u64>) -> Vec<(usize, usize)>,
     TRepeatsPusher: FnMut(&[(usize, usize)]) -> (),
 {
@@ -99,16 +93,10 @@ fn find_from_single_merged_trace<TFinder, TRepeatsPusher>(
     }
 }
 
-pub fn find_super_maximal_repeats(
-    log: &Vec<Vec<u64>>,
-    strategy: &PatternsDiscoveryStrategy,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
+pub fn find_super_maximal_repeats(log: &Vec<Vec<u64>>, strategy: &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_super_maximal_repeats())
 }
 
-pub fn find_near_super_maximal_repeats(
-    log: &Vec<Vec<u64>>,
-    strategy: &PatternsDiscoveryStrategy,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
+pub fn find_near_super_maximal_repeats(log: &Vec<Vec<u64>>, strategy: &PatternsDiscoveryStrategy) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_repeats(log, strategy, |tree| tree.find_near_super_maximal_repeats())
 }

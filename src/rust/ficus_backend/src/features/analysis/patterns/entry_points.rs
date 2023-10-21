@@ -4,9 +4,7 @@ use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::patterns::activity_instances::ActivitiesLogSource;
 
 use super::{
-    activity_instances::{
-        self, create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo,
-    },
+    activity_instances::{self, create_new_log_from_activities_instances, extract_activities_instances, ActivityInTraceInfo},
     contexts::{ActivitiesDiscoveryContext, ActivitiesInstancesDiscoveryContext, PatternsDiscoveryContext},
     repeat_sets::{build_repeat_set_tree_from_repeats, build_repeat_sets, ActivityNode, SubArrayWithTraceIndex},
     repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
@@ -23,9 +21,7 @@ pub enum PatternsKind {
     NearSuperMaximalRepeats,
 }
 
-pub fn find_patterns<TClassExtractor, TLog>(
-    context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
-) -> Vec<Vec<SubArrayInTraceInfo>>
+pub fn find_patterns<TClassExtractor, TLog>(context: &PatternsDiscoveryContext<TClassExtractor, TLog>) -> Vec<Vec<SubArrayInTraceInfo>>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,
@@ -40,9 +36,7 @@ where
     }
 }
 
-pub fn find_repeats<TClassExtractor, TLog>(
-    context: &PatternsDiscoveryContext<TClassExtractor, TLog>,
-) -> Vec<SubArrayWithTraceIndex>
+pub fn find_repeats<TClassExtractor, TLog>(context: &PatternsDiscoveryContext<TClassExtractor, TLog>) -> Vec<SubArrayWithTraceIndex>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,

@@ -35,32 +35,29 @@ impl<'a> AlphaPlusRelationsProvider<'a> {
 }
 
 impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProvider<'a> {
-    fn is_in_causal_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second)
-            && (!self.is_in_direct_relation(second, first) || self.is_in_romb_relation(first, second))
+    fn causal_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second) && (!self.direct_relation(second, first) || self.romb_relation(first, second))
     }
 
-    fn is_in_parallel_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second)
-            && self.is_in_direct_relation(second, first)
-            && !self.is_in_romb_relation(first, second)
+    fn parallel_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second) && self.direct_relation(second, first) && !self.romb_relation(first, second)
     }
 
-    fn is_in_direct_relation(&self, first: &str, second: &str) -> bool {
+    fn direct_relation(&self, first: &str, second: &str) -> bool {
         self.dfg_info.is_in_directly_follows_relation(first, second)
     }
 
-    fn is_in_unrelated_relation(&self, first: &str, second: &str) -> bool {
-        !self.is_in_direct_relation(first, second) && !self.is_in_direct_relation(second, first)
+    fn unrelated_relation(&self, first: &str, second: &str) -> bool {
+        !self.direct_relation(first, second) && !self.direct_relation(second, first)
     }
 }
 
 impl<'a> AlphaPlusRelationsProvider<'a> {
-    pub fn is_in_triangle_relation(&self, first: &str, second: &str) -> bool {
+    pub fn triangle_relation(&self, first: &str, second: &str) -> bool {
         self.triangle_relations.contains(&(first.to_owned(), second.to_owned()))
     }
 
-    pub fn is_in_romb_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_triangle_relation(first, second) && self.is_in_triangle_relation(second, first)
+    pub fn romb_relation(&self, first: &str, second: &str) -> bool {
+        self.triangle_relation(first, second) && self.triangle_relation(second, first)
     }
 }

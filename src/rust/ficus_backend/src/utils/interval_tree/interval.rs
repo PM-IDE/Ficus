@@ -28,11 +28,7 @@ where
     TData: PartialEq + Eq + Copy,
 {
     pub fn new(left: TElement, right: TElement) -> Interval<TElement, TData> {
-        Interval {
-            left,
-            right,
-            data: None,
-        }
+        Interval { left, right, data: None }
     }
 
     pub fn new_with_data(left: TElement, right: TElement, data: Option<TData>) -> Interval<TElement, TData> {

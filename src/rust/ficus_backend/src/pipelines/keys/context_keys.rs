@@ -88,8 +88,7 @@ impl ContextKeys {
     }
 
     pub fn trace_activities(&self) -> &DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>> {
-        self.find_concrete_key::<TracesActivities>(Self::TRACE_ACTIVITIES)
-            .unwrap()
+        self.find_concrete_key::<TracesActivities>(Self::TRACE_ACTIVITIES).unwrap()
     }
 
     pub fn is_trace_activities(&self, key: &dyn ContextKey) -> bool {
@@ -113,8 +112,7 @@ impl ContextKeys {
     }
 
     pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
-        self.find_concrete_key::<ActivitiesToLogs>(Self::ACTIVITIES_TO_LOGS)
-            .unwrap()
+        self.find_concrete_key::<ActivitiesToLogs>(Self::ACTIVITIES_TO_LOGS).unwrap()
     }
 
     pub fn is_activities_to_logs(&self, key: &dyn ContextKey) -> bool {
@@ -138,8 +136,7 @@ impl ContextKeys {
     }
 
     pub fn names_event_log(&self) -> &DefaultContextKey<Vec<Vec<String>>> {
-        self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG)
-            .unwrap()
+        self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG).unwrap()
     }
 
     pub fn is_names_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -163,8 +160,7 @@ impl ContextKeys {
     }
 
     pub fn narrow_activities(&self) -> &DefaultContextKey<ActivityNarrowingKind> {
-        self.find_concrete_key::<ActivityNarrowingKind>(Self::NARROW_ACTIVITIES)
-            .unwrap()
+        self.find_concrete_key::<ActivityNarrowingKind>(Self::NARROW_ACTIVITIES).unwrap()
     }
 
     pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {
@@ -188,8 +184,7 @@ impl ContextKeys {
     }
 
     pub fn colors_event_log(&self) -> &DefaultContextKey<ColorsEventLog> {
-        self.find_concrete_key::<ColorsEventLog>(Self::COLORS_EVENT_LOG)
-            .unwrap()
+        self.find_concrete_key::<ColorsEventLog>(Self::COLORS_EVENT_LOG).unwrap()
     }
 
     pub fn is_colors_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -246,8 +241,7 @@ impl ContextKeys {
     }
 
     pub fn event_classes_regexes(&self) -> &DefaultContextKey<Vec<String>> {
-        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES_REGEXES)
-            .unwrap()
+        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES_REGEXES).unwrap()
     }
 
     pub fn is_event_classes_regexes(&self, key: &dyn ContextKey) -> bool {

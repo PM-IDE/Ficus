@@ -29,9 +29,7 @@ impl PipelineParts {
 
             match serialize_to_pnml_file(petri_net, save_path, use_names_as_ids) {
                 Ok(_) => Ok(()),
-                Err(error) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                    error.to_string(),
-                ))),
+                Err(error) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(error.to_string()))),
             }
         })
     }
@@ -57,9 +55,8 @@ impl PipelineParts {
     }
 
     pub(super) fn discover_petri_net_alpha_plus_plus() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(
-            Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS,
-            &|context, infra, keys, config| Self::do_discover_petri_net_alpha_plus(context, keys, true),
-        )
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS, &|context, infra, keys, config| {
+            Self::do_discover_petri_net_alpha_plus(context, keys, true)
+        })
     }
 }

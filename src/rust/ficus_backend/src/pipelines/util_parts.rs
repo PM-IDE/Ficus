@@ -23,11 +23,7 @@ use crate::{
 use super::{keys::context_keys::ContextKeys, pipelines::PipelinePartFactory};
 
 impl PipelineParts {
-    pub(super) fn create_hashed_event_log(
-        config: &UserDataImpl,
-        keys: &ContextKeys,
-        log: &XesEventLogImpl,
-    ) -> Vec<Vec<u64>> {
+    pub(super) fn create_hashed_event_log(config: &UserDataImpl, keys: &ContextKeys, log: &XesEventLogImpl) -> Vec<Vec<u64>> {
         match Self::get_user_data(config, keys.event_class_regex()) {
             Ok(regex) => {
                 let hasher = RegexEventHasher::new(regex).ok().unwrap();

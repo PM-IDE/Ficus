@@ -56,9 +56,7 @@ pub fn create_log_from_filter_out_chaotic_events_with_noise() -> SimpleEventLog 
     let mut raw_log = vec![];
 
     for _ in 0..10 {
-        raw_log.push(vec![
-            "d", "v", "d", "d", "a", "d", "b", "c", "x", "d", "d", "d", "d", "d",
-        ]);
+        raw_log.push(vec!["d", "v", "d", "d", "a", "d", "b", "c", "x", "d", "d", "d", "d", "d"]);
         raw_log.push(vec!["a", "d", "d", "d", "d", "b", "d", "x", "c", "d"]);
         raw_log.push(vec!["d", "d", "d", "v", "d", "a", "x", "b", "c", "d"]);
     }
@@ -122,8 +120,7 @@ pub fn create_log_for_max_repeats4() -> SimpleEventLog {
 
 pub fn create_log_for_max_repeats5() -> SimpleEventLog {
     SimpleEventLog::new(&vec![vec![
-        "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b", "d",
-        "c",
+        "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b", "d", "c",
     ]])
 }
 
@@ -134,24 +131,17 @@ pub fn create_maximal_repeats_log() -> SimpleEventLog {
         vec!["b", "b", "b", "c", "d", "b", "b", "b", "c", "c", "a", "a"],
         vec!["a", "a", "a", "d", "a", "b", "b", "c", "c", "c"],
         vec![
-            "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b",
-            "d", "c",
+            "a", "a", "a", "c", "d", "c", "d", "c", "b", "e", "d", "b", "c", "c", "b", "a", "d", "b", "d", "e", "b", "d", "c",
         ],
     ])
 }
 
 pub fn create_single_trace_test_log1() -> SimpleEventLog {
-    SimpleEventLog::new(&vec![
-        vec!["a", "b", "c", "x", "y", "z"],
-        vec!["r", "t", "u", "a", "b", "c"],
-    ])
+    SimpleEventLog::new(&vec![vec!["a", "b", "c", "x", "y", "z"], vec!["r", "t", "u", "a", "b", "c"]])
 }
 
 pub fn create_single_trace_test_log2() -> SimpleEventLog {
-    SimpleEventLog::new(&vec![
-        vec!["x", "y", "z", "a", "b", "c"],
-        vec!["a", "b", "c", "r", "t", "u"],
-    ])
+    SimpleEventLog::new(&vec![vec!["x", "y", "z", "a", "b", "c"], vec!["a", "b", "c", "r", "t", "u"]])
 }
 
 pub fn create_alpha_sharp_test_log() -> SimpleEventLog {

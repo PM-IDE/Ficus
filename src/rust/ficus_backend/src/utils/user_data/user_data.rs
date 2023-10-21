@@ -127,9 +127,7 @@ impl Clone for UserDataImpl {
                     new_map.insert(key.clone(), Rc::clone(value));
                 }
 
-                Self {
-                    values_map: Some(new_map),
-                }
+                Self { values_map: Some(new_map) }
             }
         }
     }

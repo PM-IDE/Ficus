@@ -1,8 +1,6 @@
 use std::{collections::HashSet, sync::Arc};
 
-use ficus_backend::features::analysis::patterns::activity_instances::{
-    ActivityInTraceFilterKind, ActivityNarrowingKind,
-};
+use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;

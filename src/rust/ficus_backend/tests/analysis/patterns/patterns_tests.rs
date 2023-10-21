@@ -13,16 +13,14 @@ use ficus_backend::{
         contexts::PatternsDiscoveryStrategy,
         repeats::{find_maximal_repeats, find_near_super_maximal_repeats, find_super_maximal_repeats},
         tandem_arrays::{
-            find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, SubArrayInTraceInfo,
-            TandemArrayInfo,
+            find_maximal_tandem_arrays_with_length, find_primitive_tandem_arrays_with_length, SubArrayInTraceInfo, TandemArrayInfo,
         },
     },
 };
 
 use crate::test_core::simple_events_logs_provider::{
-    create_log_for_max_repeats2, create_log_from_taxonomy_of_patterns, create_maximal_repeats_log,
-    create_no_tandem_array_log, create_one_tandem_array_log, create_single_trace_test_log1,
-    create_single_trace_test_log2,
+    create_log_for_max_repeats2, create_log_from_taxonomy_of_patterns, create_maximal_repeats_log, create_no_tandem_array_log,
+    create_one_tandem_array_log, create_single_trace_test_log1, create_single_trace_test_log2,
 };
 
 #[test]
@@ -140,22 +138,14 @@ fn test_tandem_arrays2_string() {
 
     let tandem_arrays = find_primitive_tandem_arrays_with_length(&hashes, 10);
 
-    assert_eq!(
-        dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log),
-        ["dabc"]
-    );
+    assert_eq!(dump_repeats_to_string(&to_sub_arrays(&tandem_arrays.borrow()), &log), ["dabc"]);
 }
 
 #[test]
 fn test_maximal_repeats_single_merged_trace1() {
     execute_test_with_positions(
         create_single_trace_test_log1,
-        |log| {
-            dump_repeats(&find_maximal_repeats(
-                log,
-                &PatternsDiscoveryStrategy::FromSingleMergedTrace,
-            ))
-        },
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)),
         &[(0, 0, 3)],
     );
 }
@@ -173,12 +163,7 @@ fn test_maximal_repeats_single_merged_trace1_string() {
 fn test_maximal_repeats_single_merged_trace2() {
     execute_test_with_positions(
         create_single_trace_test_log2,
-        |log| {
-            dump_repeats(&find_maximal_repeats(
-                log,
-                &PatternsDiscoveryStrategy::FromSingleMergedTrace,
-            ))
-        },
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)),
         &[(0, 3, 6)],
     );
 }
@@ -196,12 +181,7 @@ fn test_maximal_repeats_single_merged_trace2_string() {
 fn test_maximal_repeats_single_merged_trace3() {
     execute_test_with_positions(
         create_maximal_repeats_log,
-        |log| {
-            dump_repeats(&find_maximal_repeats(
-                log,
-                &PatternsDiscoveryStrategy::FromSingleMergedTrace,
-            ))
-        },
+        |log| dump_repeats(&find_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)),
         &[
             (0, 0, 1),
             (0, 0, 2),
@@ -243,8 +223,8 @@ fn test_maximal_repeats_single_merged_trace3_string() {
         create_maximal_repeats_log,
         |log| find_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).clone(),
         &[
-            "a", "aa", "aaa", "ab", "abc", "abcd", "ad", "b", "bb", "bbbc", "bbc", "bbcc", "bbcd", "bc", "bcc", "bcda",
-            "bcdbb", "bd", "c", "cb", "cc", "cd", "cdc", "d", "da", "dab", "dabc", "db", "dc", "e",
+            "a", "aa", "aaa", "ab", "abc", "abcd", "ad", "b", "bb", "bbbc", "bbc", "bbcc", "bbcd", "bc", "bcc", "bcda", "bcdbb", "bd", "c",
+            "cb", "cc", "cd", "cdc", "d", "da", "dab", "dabc", "db", "dc", "e",
         ],
     );
 }
@@ -253,12 +233,7 @@ fn test_maximal_repeats_single_merged_trace3_string() {
 fn test_super_maximal_repeats_single_merged_trace() {
     execute_test_with_positions(
         create_maximal_repeats_log,
-        |log| {
-            dump_repeats(&find_super_maximal_repeats(
-                log,
-                &PatternsDiscoveryStrategy::FromSingleMergedTrace,
-            ))
-        },
+        |log| dump_repeats(&find_super_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)),
         &[
             (0, 1, 5),
             (0, 2, 7),
@@ -328,8 +303,8 @@ fn test_near_super_maximal_repeats_single_merged_trace_string() {
         create_maximal_repeats_log,
         |log| find_near_super_maximal_repeats(&log, &PatternsDiscoveryStrategy::FromSingleMergedTrace).clone(),
         &[
-            "aa", "abcd", "ad", "bb", "bbbc", "bbcc", "bbcd", "bcc", "bcda", "bcdbb", "bd", "cb", "cc", "cdc", "dab",
-            "dabc", "db", "dc", "e",
+            "aa", "abcd", "ad", "bb", "bbbc", "bbcc", "bbcd", "bcc", "bcda", "bcdbb", "bd", "cb", "cc", "cdc", "dab", "dabc", "db", "dc",
+            "e",
         ],
     );
 }

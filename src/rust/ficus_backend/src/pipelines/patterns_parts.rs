@@ -121,9 +121,7 @@ impl PipelineParts {
             PatternsKindDto::MaximalTandemArrays => {
                 Self::find_tandem_arrays_and_put_to_context(context, keys, config, find_maximal_tandem_arrays)?
             }
-            PatternsKindDto::MaximalRepeats => {
-                Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)?
-            }
+            PatternsKindDto::MaximalRepeats => Self::find_repeats_and_put_to_context(context, keys, config, find_maximal_repeats)?,
             PatternsKindDto::SuperMaximalRepeats => {
                 Self::find_repeats_and_put_to_context(context, keys, config, find_super_maximal_repeats)?
             }

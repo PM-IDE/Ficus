@@ -1,8 +1,6 @@
 use std::{cell::RefCell, ops::Deref, rc::Rc};
 
-use ficus_backend::features::analysis::patterns::activity_instances::{
-    ActivityInTraceFilterKind, ActivityNarrowingKind,
-};
+use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use ficus_backend::{
     event_log::core::event::event_hasher::default_class_extractor,
     features::analysis::patterns::{
@@ -151,12 +149,7 @@ fn test_repeat_set_tree2() {
 
     assert_eq!(
         get_top_level_activities_event_classes(&repeats),
-        [[
-            3102445089172487244,
-            7393736521911212725,
-            8186225505942432243,
-            16993177596579750922
-        ]]
+        [[3102445089172487244, 7393736521911212725, 8186225505942432243, 16993177596579750922]]
     );
 }
 
@@ -183,12 +176,7 @@ fn test_repeat_set_tree3() {
     assert_eq!(
         get_top_level_activities_event_classes(&repeats),
         [
-            vec![
-                3102445089172487244,
-                7393736521911212725,
-                8186225505942432243,
-                16993177596579750922
-            ],
+            vec![3102445089172487244, 7393736521911212725, 8186225505942432243, 16993177596579750922],
             vec![16528679900032520146]
         ]
     );
@@ -218,12 +206,7 @@ fn test_repeat_set_tree4() {
     assert_eq!(
         get_top_level_activities_event_classes(&repeats),
         [
-            vec![
-                3102445089172487244,
-                7393736521911212725,
-                8186225505942432243,
-                16993177596579750922
-            ],
+            vec![3102445089172487244, 7393736521911212725, 8186225505942432243, 16993177596579750922],
             vec![16528679900032520146]
         ]
     );

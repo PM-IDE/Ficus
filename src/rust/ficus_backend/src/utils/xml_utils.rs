@@ -35,11 +35,7 @@ impl Debug for XmlWriteError {
 
 impl Error for XmlWriteError {}
 
-pub fn write_empty(
-    writer: &mut Writer<Cursor<Vec<u8>>>,
-    tag_name: &str,
-    attrs: &Vec<(&str, &str)>,
-) -> Result<(), XmlWriteError> {
+pub fn write_empty(writer: &mut Writer<Cursor<Vec<u8>>>, tag_name: &str, attrs: &Vec<(&str, &str)>) -> Result<(), XmlWriteError> {
     let mut empty_tag = BytesStart::new(tag_name);
     for (name, value) in attrs {
         empty_tag.push_attribute((*name, *value));
@@ -66,10 +62,7 @@ impl<'a> Drop for StartEndElementCookie<'a> {
 }
 
 impl<'a> StartEndElementCookie<'a> {
-    pub fn new(
-        writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>,
-        tag_name: &'a str,
-    ) -> Result<StartEndElementCookie<'a>, XmlWriteError> {
+    pub fn new(writer: &'a RefCell<Writer<Cursor<Vec<u8>>>>, tag_name: &'a str) -> Result<StartEndElementCookie<'a>, XmlWriteError> {
         let start = quick_xml::events::Event::Start(BytesStart::new(tag_name));
 
         match writer.borrow_mut().write_event(start) {

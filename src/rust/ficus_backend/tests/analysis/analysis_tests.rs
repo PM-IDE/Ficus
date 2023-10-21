@@ -7,8 +7,7 @@ use ficus_backend::features::analysis::{
 };
 
 use crate::test_core::simple_events_logs_provider::{
-    create_log_from_filter_out_chaotic_events, create_log_from_filter_out_chaotic_events_with_noise,
-    create_simple_event_log,
+    create_log_from_filter_out_chaotic_events, create_log_from_filter_out_chaotic_events_with_noise, create_simple_event_log,
 };
 
 #[test]

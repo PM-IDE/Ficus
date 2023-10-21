@@ -127,21 +127,13 @@ pub fn extract_activities_instances(
                 continue;
             }
 
-            if !current_activity
-                .as_ref()
-                .unwrap()
-                .borrow()
-                .event_classes
-                .contains(&event_hash)
-            {
+            if !current_activity.as_ref().unwrap().borrow().event_classes.contains(&event_hash) {
                 let mut new_set = current_event_classes.clone();
                 new_set.insert(event_hash);
 
                 let mut found_new_set = false;
                 for activities_set in activities_by_size.borrow().iter() {
-                    if activities_set.len() == 0
-                        || activities_set[0].borrow().len() < current_activity.as_ref().unwrap().borrow().len()
-                    {
+                    if activities_set.len() == 0 || activities_set[0].borrow().len() < current_activity.as_ref().unwrap().borrow().len() {
                         continue;
                     }
 
@@ -160,8 +152,7 @@ pub fn extract_activities_instances(
                 }
 
                 if !found_new_set {
-                    let activity =
-                        narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes, narrow_kind);
+                    let activity = narrow_activity(current_activity.as_ref().unwrap(), &current_event_classes, narrow_kind);
 
                     current_activity = Some(activity);
 
@@ -222,9 +213,7 @@ fn is_suitable_activity_instance(
     }
 }
 
-fn split_activities_nodes_by_size(
-    activities: &mut Vec<Rc<RefCell<ActivityNode>>>,
-) -> Rc<RefCell<Vec<Vec<Rc<RefCell<ActivityNode>>>>>> {
+fn split_activities_nodes_by_size(activities: &mut Vec<Rc<RefCell<ActivityNode>>>) -> Rc<RefCell<Vec<Vec<Rc<RefCell<ActivityNode>>>>>> {
     if activities.is_empty() {
         return Rc::new(RefCell::new(vec![]));
     }
@@ -280,12 +269,8 @@ fn narrow_activity(
 
     let result = result.iter();
     let result = match narrow_kind {
-        ActivityNarrowingKind::NarrowUp => {
-            result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()))
-        }
-        ActivityNarrowingKind::NarrowDown => {
-            result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len()))
-        }
+        ActivityNarrowingKind::NarrowUp => result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len())),
+        ActivityNarrowingKind::NarrowDown => result.min_by(|first, second| first.borrow().len().cmp(&second.borrow().len())),
         _ => panic!("Should not be reached"),
     };
 
@@ -359,9 +344,7 @@ impl ActivityInstancesKeys {
         let map = map.as_mut().ok().unwrap();
 
         if let Some(key) = map.get(&type_id) {
-            key.downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>()
-                .unwrap()
-                .clone()
+            key.downcast_ref::<DefaultKey<Vec<Rc<RefCell<TEvent>>>>>().unwrap().clone()
         } else {
             let key = DefaultKey::<Vec<Rc<RefCell<TEvent>>>>::new("UNDERLYING_EVENTS".to_owned());
             map.insert(type_id, Box::new(key) as Box<dyn Any>);
@@ -491,17 +474,13 @@ where
     TracesActivities(&'a TLog, &'a Vec<Vec<ActivityInTraceInfo>>, usize),
 }
 
-pub fn create_logs_for_activities<TLog>(
-    activities_source: &ActivitiesLogSource<TLog>,
-) -> HashMap<String, Rc<RefCell<TLog>>>
+pub fn create_logs_for_activities<TLog>(activities_source: &ActivitiesLogSource<TLog>) -> HashMap<String, Rc<RefCell<TLog>>>
 where
     TLog: EventLog,
 {
     match activities_source {
         ActivitiesLogSource::Log(log) => create_activities_logs_from_log(log),
-        ActivitiesLogSource::TracesActivities(log, activities, level) => {
-            create_log_from_traces_activities(log, activities, *level)
-        }
+        ActivitiesLogSource::TracesActivities(log, activities, level) => create_log_from_traces_activities(log, activities, *level),
     }
 }
 
@@ -511,12 +490,7 @@ fn create_activities_logs_from_log<TLog: EventLog>(log: &TLog) -> HashMap<String
 
     for trace in log.traces() {
         for event in trace.borrow().events() {
-            if event
-                .borrow_mut()
-                .user_data()
-                .get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key)
-                .is_some()
-            {
+            if event.borrow_mut().user_data().get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key).is_some() {
                 let name = event.borrow().name().to_owned();
                 let mut new_trace = TLog::TTrace::empty();
                 substitute_underlying_events::<TLog>(event, &mut new_trace);
@@ -666,11 +640,7 @@ where
 {
     let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };
 
-    if let Some(underlying_events) = event
-        .borrow_mut()
-        .user_data()
-        .get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key)
-    {
+    if let Some(underlying_events) = event.borrow_mut().user_data().get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key) {
         for underlying_event in underlying_events {
             substitute_underlying_events::<TLog>(underlying_event, trace);
         }

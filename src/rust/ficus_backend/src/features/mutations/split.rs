@@ -123,10 +123,7 @@ fn create_initial_groups<TTrace>(traces: &Vec<TracePointer<TTrace>>) -> Vec<Vec<
     vec![groups]
 }
 
-fn update_groups<TTrace>(
-    groups: &Vec<Vec<TracePointer<TTrace>>>,
-    index: usize,
-) -> (Vec<Vec<TracePointer<TTrace>>>, bool)
+fn update_groups<TTrace>(groups: &Vec<Vec<TracePointer<TTrace>>>, index: usize) -> (Vec<Vec<TracePointer<TTrace>>>, bool)
 where
     TTrace: Trace,
 {

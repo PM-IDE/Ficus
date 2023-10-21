@@ -4,9 +4,7 @@ use crate::utils::{
     user_data::user_data::{UserData, UserDataImpl},
 };
 
-use super::{
-    context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys,
-};
+use super::{context::PipelineContext, errors::pipeline_errors::PipelinePartExecutionError, keys::context_keys::ContextKeys};
 
 pub struct Pipeline {
     parts: Vec<Box<dyn PipelinePart>>,
@@ -77,14 +75,8 @@ impl PipelinePart for ParallelPipelinePart {
     }
 }
 
-type PipelinePartExecutor = Box<
-    dyn Fn(
-        &mut PipelineContext,
-        &PipelineInfrastructure,
-        &ContextKeys,
-        &UserDataImpl,
-    ) -> Result<(), PipelinePartExecutionError>,
->;
+type PipelinePartExecutor =
+    Box<dyn Fn(&mut PipelineContext, &PipelineInfrastructure, &ContextKeys, &UserDataImpl) -> Result<(), PipelinePartExecutionError>>;
 
 pub struct DefaultPipelinePart {
     name: String,

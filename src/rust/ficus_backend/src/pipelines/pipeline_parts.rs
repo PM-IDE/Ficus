@@ -1,7 +1,5 @@
 use crate::pipelines::context::{PipelineContext, PipelineInfrastructure};
-use crate::pipelines::errors::pipeline_errors::{
-    MissingContextError, PipelinePartExecutionError, RawPartExecutionError,
-};
+use crate::pipelines::errors::pipeline_errors::{MissingContextError, PipelinePartExecutionError, RawPartExecutionError};
 use crate::pipelines::keys::context_key::DefaultContextKey;
 use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipelines::{DefaultPipelinePart, PipelinePartFactory};
@@ -131,9 +129,7 @@ impl PipelineParts {
     pub(super) fn try_parse_regex(raw_regex: &str) -> Result<Regex, PipelinePartExecutionError> {
         match Regex::new(raw_regex) {
             Ok(regex) => Ok(regex),
-            Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(
-                err.to_string(),
-            ))),
+            Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(err.to_string()))),
         }
     }
 }

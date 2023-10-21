@@ -98,10 +98,7 @@ where
         let cookie = StartEndElementCookie::new_with_attrs(
             &writer,
             TRANSITION_TAG_NAME,
-            &vec![(
-                ID_ATTR_NAME,
-                create_transition_id(transition, use_names_as_ids).as_str(),
-            )],
+            &vec![(ID_ATTR_NAME, create_transition_id(transition, use_names_as_ids).as_str())],
         );
 
         if let Some(data) = transition.data() {
@@ -180,10 +177,7 @@ where
                     SOURCE_ATTR_NAME,
                     create_place_id(net.place(&arc.0.place_id()), use_names_as_ids).as_str(),
                 ),
-                (
-                    TARGET_ATTR_NAME,
-                    create_transition_id(transition, use_names_as_ids).as_str(),
-                ),
+                (TARGET_ATTR_NAME, create_transition_id(transition, use_names_as_ids).as_str()),
             ],
         )?;
     }
@@ -239,10 +233,7 @@ where
                     TARGET_ATTR_NAME,
                     create_place_id(net.place(&arc.0.place_id()), use_names_as_ids).as_str(),
                 ),
-                (
-                    SOURCE_ATTR_NAME,
-                    create_transition_id(transition, use_names_as_ids).as_str(),
-                ),
+                (SOURCE_ATTR_NAME, create_transition_id(transition, use_names_as_ids).as_str()),
             ],
         )?;
     }
@@ -257,10 +248,7 @@ fn create_place_id(place: &Place, use_names_as_ids: bool) -> String {
     }
 }
 
-fn create_transition_id<TTransitionData, TArcData>(
-    transition: &Transition<TTransitionData, TArcData>,
-    use_names_as_ids: bool,
-) -> String
+fn create_transition_id<TTransitionData, TArcData>(transition: &Transition<TTransitionData, TArcData>, use_names_as_ids: bool) -> String
 where
     TTransitionData: ToString,
 {

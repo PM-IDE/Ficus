@@ -48,38 +48,38 @@ where
         self.info
     }
 
-    pub fn is_in_triangle_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.is_in_triangle_relation(first, second)
+    pub fn triangle_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.triangle_relation(first, second)
     }
 
-    pub fn is_in_direct_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.is_in_direct_relation(first, second)
+    pub fn direct_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.direct_relation(first, second)
     }
 
-    pub fn is_in_causal_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.is_in_direct_relation(first, second)
-            && (!self.alpha_plus_provider.is_in_direct_relation(second, first)
-                || self.is_in_triangle_relation(first, second)
-                || self.is_in_triangle_relation(second, first))
+    pub fn causal_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.direct_relation(first, second)
+            && (!self.alpha_plus_provider.direct_relation(second, first)
+                || self.triangle_relation(first, second)
+                || self.triangle_relation(second, first))
     }
 
-    pub fn is_in_unrelated_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.is_in_unrelated_relation(first, second)
+    pub fn unrelated_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.unrelated_relation(first, second)
     }
 
-    pub fn is_in_parallel_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second)
-            && self.is_in_direct_relation(second, first)
-            && !(self.is_in_triangle_relation(first, second) || self.is_in_triangle_relation(second, first))
+    pub fn parallel_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second)
+            && self.direct_relation(second, first)
+            && !(self.triangle_relation(first, second) || self.triangle_relation(second, first))
     }
 
-    pub fn is_in_left_triangle_relation(&self, first: &str, second: &str) -> bool {
-        if !self.is_in_unrelated_relation(first, second) {
+    pub fn left_triangle_relation(&self, first: &str, second: &str) -> bool {
+        if !self.unrelated_relation(first, second) {
             return false;
         }
 
         for class in self.info.all_event_classes() {
-            if self.is_in_causal_relation(class, first) && self.is_in_causal_relation(class, second) {
+            if self.causal_relation(class, first) && self.causal_relation(class, second) {
                 return true;
             }
         }
@@ -87,13 +87,13 @@ where
         false
     }
 
-    pub fn is_in_right_triangle_relation(&self, first: &str, second: &str) -> bool {
-        if !self.is_in_unrelated_relation(first, second) {
+    pub fn right_triangle_relation(&self, first: &str, second: &str) -> bool {
+        if !self.unrelated_relation(first, second) {
             return false;
         }
 
         for class in self.info.all_event_classes() {
-            if self.is_in_causal_relation(first, class) && self.is_in_causal_relation(second, class) {
+            if self.causal_relation(first, class) && self.causal_relation(second, class) {
                 return true;
             }
         }
@@ -101,7 +101,7 @@ where
         false
     }
 
-    pub fn is_in_right_double_arrow_relation(&mut self, first: &str, second: &str) -> bool {
+    pub fn right_double_arrow_relation(&mut self, first: &str, second: &str) -> bool {
         let value = self.calculate_right_double_arrow_relation(first, second);
         self.right_double_arrow_cache.put(first, second, value);
 
@@ -113,7 +113,7 @@ where
             return *cached_value;
         }
 
-        if self.is_in_direct_relation(first, second) {
+        if self.direct_relation(first, second) {
             return false;
         }
 
@@ -140,9 +140,7 @@ where
                             }
 
                             actual_length += 1;
-                            if self.is_in_left_triangle_relation(event_name, first)
-                                || self.is_in_right_triangle_relation(event_name, first)
-                            {
+                            if self.left_triangle_relation(event_name, first) || self.right_triangle_relation(event_name, first) {
                                 all_suitable = false;
                                 break;
                             }
@@ -159,11 +157,11 @@ where
         false
     }
 
-    pub fn is_in_concave_arrow_relation(&mut self, first: &str, second: &str) -> bool {
-        self.is_in_causal_relation(first, second) || self.is_in_right_double_arrow_relation(first, second)
+    pub fn concave_arrow_relation(&mut self, first: &str, second: &str) -> bool {
+        self.causal_relation(first, second) || self.right_double_arrow_relation(first, second)
     }
 
-    pub fn is_in_w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w1_relation(first, second, petri_net);
         self.w1_cache.put(first, second, value);
 
@@ -175,7 +173,7 @@ where
             return *value;
         }
 
-        if self.is_in_direct_relation(first, second) {
+        if self.direct_relation(first, second) {
             return false;
         }
 
@@ -228,9 +226,7 @@ where
 
                         for second_pre_transition in &second_place_preset {
                             let name = second_pre_transition.name();
-                            if self.is_in_concave_arrow_relation(name, first)
-                                || self.is_in_parallel_relation(name, first)
-                            {
+                            if self.concave_arrow_relation(name, first) || self.parallel_relation(name, first) {
                                 continue 'second_loop;
                             }
                         }
@@ -244,7 +240,7 @@ where
         false
     }
 
-    pub fn is_in_w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w21_relation(first, second, petri_net);
         self.w21_cache.put(first, second, value);
 
@@ -256,7 +252,7 @@ where
             return *value;
         }
 
-        if !self.is_in_right_double_arrow_relation(first, second) {
+        if !self.right_double_arrow_relation(first, second) {
             return false;
         }
 
@@ -267,7 +263,7 @@ where
             }
 
             for second_streak in self.info.all_event_classes() {
-                if !self.is_in_left_triangle_relation(second, second_streak) {
+                if !self.left_triangle_relation(second, second_streak) {
                     continue;
                 }
 
@@ -280,13 +276,13 @@ where
 
                     for t in &post_set {
                         if !first_condition {
-                            first_condition = self.is_in_concave_arrow_relation(t.name(), second);
-                            first_condition |= self.is_in_parallel_relation(t.name(), second);
+                            first_condition = self.concave_arrow_relation(t.name(), second);
+                            first_condition |= self.parallel_relation(t.name(), second);
                         }
 
                         if !second_condition {
-                            second_condition = self.is_in_concave_arrow_relation(t.name(), second_streak);
-                            second_condition |= self.is_in_parallel_relation(t.name(), second_streak);
+                            second_condition = self.concave_arrow_relation(t.name(), second_streak);
+                            second_condition |= self.parallel_relation(t.name(), second_streak);
                         }
                     }
 
@@ -300,7 +296,7 @@ where
         false
     }
 
-    pub fn is_in_w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w22_relation(first, second, petri_net);
         self.w22_cache.put(first, second, value);
 
@@ -312,7 +308,7 @@ where
             return *value;
         }
 
-        if !self.is_in_right_double_arrow_relation(first, second) {
+        if !self.right_double_arrow_relation(first, second) {
             return false;
         }
 
@@ -323,7 +319,7 @@ where
             }
 
             for first_streak in self.info.all_event_classes() {
-                if !self.is_in_right_triangle_relation(first, first_streak) {
+                if !self.right_triangle_relation(first, first_streak) {
                     continue;
                 }
 
@@ -335,13 +331,13 @@ where
                     let mut second_condition = false;
                     for preset_task in preset_tasks {
                         if !first_condition {
-                            first_condition = self.is_in_concave_arrow_relation(first, preset_task.name());
-                            first_condition |= self.is_in_parallel_relation(first, preset_task.name());
+                            first_condition = self.concave_arrow_relation(first, preset_task.name());
+                            first_condition |= self.parallel_relation(first, preset_task.name());
                         }
 
                         if !second_condition {
-                            second_condition = self.is_in_concave_arrow_relation(first_streak, preset_task.name());
-                            second_condition |= self.is_in_parallel_relation(first_streak, preset_task.name());
+                            second_condition = self.concave_arrow_relation(first_streak, preset_task.name());
+                            second_condition |= self.parallel_relation(first_streak, preset_task.name());
                         }
                     }
 
@@ -355,11 +351,11 @@ where
         false
     }
 
-    pub fn is_in_w2_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
-        self.is_in_w21_relation(first, second, petri_net) || self.is_in_w22_relation(first, second, petri_net)
+    pub fn w2_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        self.w21_relation(first, second, petri_net) || self.w22_relation(first, second, petri_net)
     }
 
-    pub fn is_in_w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w3_relation(first, second, petri_net);
         self.w3_cache.put(first, second, value);
 
@@ -371,7 +367,7 @@ where
             return *value;
         }
 
-        if !self.is_in_right_double_arrow_relation(first, second) {
+        if !self.right_double_arrow_relation(first, second) {
             return false;
         }
 
@@ -397,31 +393,29 @@ where
                     continue;
                 }
 
-                if self.is_in_right_double_arrow_relation(first, second_streak) {
+                if self.right_double_arrow_relation(first, second_streak) {
                     continue;
                 }
 
-                if self.is_in_right_double_arrow_relation(first_streak, second) {
+                if self.right_double_arrow_relation(first_streak, second) {
                     continue;
                 }
 
-                if !self.is_in_right_double_arrow_relation(first_streak, second_streak) {
+                if !self.right_double_arrow_relation(first_streak, second_streak) {
                     continue;
                 }
 
                 let mut right_set = HashSet::new();
                 for task in self.info.all_event_classes() {
-                    if self.is_in_right_double_arrow_relation(first, task) {
+                    if self.right_double_arrow_relation(first, task) {
                         continue;
                     }
 
-                    if !self.is_in_right_double_arrow_relation(first_streak, task) {
+                    if !self.right_double_arrow_relation(first_streak, task) {
                         continue;
                     }
 
-                    if !(self.is_in_parallel_relation(second_streak, task)
-                        || self.is_in_concave_arrow_relation(second_streak, task))
-                    {
+                    if !(self.parallel_relation(second_streak, task) || self.concave_arrow_relation(second_streak, task)) {
                         continue;
                     }
 

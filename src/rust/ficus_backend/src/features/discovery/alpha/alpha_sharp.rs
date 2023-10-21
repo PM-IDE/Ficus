@@ -28,15 +28,9 @@ impl<'a> AlphaSharpTuple<'a> {
         p_out: (&'a String, &'a String),
         provider: &'a AlphaSharpRelationsProvider<'a>,
     ) -> Option<Self> {
-        let p_in = BTreeSet::from_iter(vec![(
-            BTreeSet::from_iter(vec![p_in.0]),
-            BTreeSet::from_iter(vec![p_in.1]),
-        )]);
+        let p_in = BTreeSet::from_iter(vec![(BTreeSet::from_iter(vec![p_in.0]), BTreeSet::from_iter(vec![p_in.1]))]);
 
-        let p_out = BTreeSet::from_iter(vec![(
-            BTreeSet::from_iter(vec![p_out.0]),
-            BTreeSet::from_iter(vec![p_out.1]),
-        )]);
+        let p_out = BTreeSet::from_iter(vec![(BTreeSet::from_iter(vec![p_out.0]), BTreeSet::from_iter(vec![p_out.1]))]);
 
         let tuple = Self { provider, p_in, p_out };
 
@@ -64,7 +58,7 @@ impl<'a> AlphaSharpTuple<'a> {
             for out_set in &self.p_out {
                 for a in &in_set.0 {
                     for b in &out_set.1 {
-                        if !self.provider.is_in_advanced_ordering_relation(a, b) {
+                        if !self.provider.advanced_ordering_relation(a, b) {
                             return false;
                         }
                     }
@@ -72,7 +66,7 @@ impl<'a> AlphaSharpTuple<'a> {
 
                 for x in &in_set.1 {
                     for y in &out_set.0 {
-                        if self.provider.is_in_parallel_relation(x, y) {
+                        if self.provider.parallel_relation(x, y) {
                             return false;
                         }
                     }
@@ -105,7 +99,7 @@ impl<'a> AlphaSharpTuple<'a> {
         let mut any_parallel = false;
         'a_set_parallel_check_loop: for first_a in first_set {
             for second_a in second_set {
-                if self.provider.is_in_parallel_relation(first_a, second_a) {
+                if self.provider.parallel_relation(first_a, second_a) {
                     any_parallel = true;
                     break 'a_set_parallel_check_loop;
                 }
@@ -229,7 +223,9 @@ pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
     let classes = info.all_event_classes();
     for first_class in &classes {
         for second_class in &classes {
-            if provider.is_in_advanced_ordering_relation(first_class, second_class) && !provider.is_in_redundant_advanced_ordering_relation(first_class, second_class) {
+            if provider.advanced_ordering_relation(first_class, second_class)
+                && !provider.redundant_advanced_ordering_relation(first_class, second_class)
+            {
                 advanced_pairs.insert((first_class, second_class));
             }
         }

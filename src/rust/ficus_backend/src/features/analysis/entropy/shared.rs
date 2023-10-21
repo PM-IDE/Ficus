@@ -44,11 +44,7 @@ fn calculate_vector_length<TLog>(log: &TLog) -> usize
 where
     TLog: EventLog,
 {
-    log.traces()
-        .into_iter()
-        .map(|trace| trace.borrow().events().len())
-        .max()
-        .unwrap()
+    log.traces().into_iter().map(|trace| trace.borrow().events().len()).max().unwrap()
 }
 
 pub fn calculate_pos_entropy(probabilities: &mut Vec<f64>, traces_count: f64) -> f64 {

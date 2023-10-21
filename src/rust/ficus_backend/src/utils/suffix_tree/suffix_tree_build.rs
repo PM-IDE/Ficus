@@ -85,10 +85,7 @@ where
             }
 
             if !self.slice.equals(current_node.left + current_state.pos, left) {
-                return BuildState {
-                    node_index: None,
-                    pos: 0,
-                };
+                return BuildState { node_index: None, pos: 0 };
             }
 
             let current_interval_len = right - left;

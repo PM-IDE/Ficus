@@ -11,8 +11,7 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
-    GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking,
-    GrpcPetriNetTransition,
+    GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -20,16 +19,15 @@ use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
         patterns::{
-            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy,
-            repeat_sets::SubArrayWithTraceIndex, tandem_arrays::SubArrayInTraceInfo,
+            activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy, repeat_sets::SubArrayWithTraceIndex,
+            tandem_arrays::SubArrayInTraceInfo,
         },
     },
     ficus_proto::{
-        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace,
-        GrpcContextValue, GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog,
-        GrpcHashesEventLogContextValue, GrpcHashesLogTrace, GrpcNamesEventLog, GrpcNamesEventLogContextValue,
-        GrpcNamesTrace, GrpcSubArrayWithTraceIndex, GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray,
-        GrpcTraceSubArrays,
+        grpc_context_value::ContextValue, GrpcColor, GrpcColoredRectangle, GrpcColorsEventLog, GrpcColorsTrace, GrpcContextValue,
+        GrpcEventLogInfo, GrpcEventLogTraceSubArraysContextValue, GrpcHashesEventLog, GrpcHashesEventLogContextValue, GrpcHashesLogTrace,
+        GrpcNamesEventLog, GrpcNamesEventLogContextValue, GrpcNamesTrace, GrpcSubArrayWithTraceIndex,
+        GrpcSubArraysWithTraceIndexContextValue, GrpcTraceSubArray, GrpcTraceSubArrays,
     },
     pipelines::{
         aliases::ColorsEventLog,
@@ -120,11 +118,7 @@ fn put_names_log_to_context(key: &dyn Key, grpc_log: &GrpcNamesEventLogContextVa
     user_data.put_any::<Vec<Vec<String>>>(key, names_log);
 }
 
-pub fn convert_to_grpc_context_value(
-    key: &dyn ContextKey,
-    value: &dyn Any,
-    keys: &ContextKeys,
-) -> Option<GrpcContextValue> {
+pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys: &ContextKeys) -> Option<GrpcContextValue> {
     if keys.is_path(key) {
         try_convert_to_string_context_value(value)
     } else if keys.is_hashes_event_log(key) {
@@ -246,9 +240,9 @@ fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcCont
         }
 
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::TraceIndexSubArrays(
-                GrpcSubArraysWithTraceIndexContextValue { sub_arrays },
-            )),
+            context_value: Some(ContextValue::TraceIndexSubArrays(GrpcSubArraysWithTraceIndexContextValue {
+                sub_arrays,
+            })),
         })
     }
 }
@@ -266,9 +260,7 @@ fn try_convert_to_grpc_colors_event_log(value: &dyn Any) -> Option<GrpcContextVa
                 grpc_trace.push(convert_to_grpc_colored_rect(colored_rect))
             }
 
-            grpc_traces.push(GrpcColorsTrace {
-                event_colors: grpc_trace,
-            })
+            grpc_traces.push(GrpcColorsTrace { event_colors: grpc_trace })
         }
 
         Some(GrpcContextValue {
@@ -314,11 +306,7 @@ fn try_convert_to_grpc_petri_net(value: &dyn Any) -> Option<GrpcContextValue> {
         None
     } else {
         let petri_net = value.downcast_ref::<DefaultPetriNet>().unwrap();
-        let grpc_places: Vec<GrpcPetriNetPlace> = petri_net
-            .all_places()
-            .iter()
-            .map(|place| convert_to_grpc_place(place))
-            .collect();
+        let grpc_places: Vec<GrpcPetriNetPlace> = petri_net.all_places().iter().map(|place| convert_to_grpc_place(place)).collect();
 
         let grpc_transitions: Vec<GrpcPetriNetTransition> = petri_net
             .all_transitions()
@@ -344,9 +332,7 @@ fn convert_to_grpc_place(place: &Place) -> GrpcPetriNetPlace {
     }
 }
 
-fn convert_to_grpc_transition<TTransitionData, TArcData>(
-    transition: &Transition<TTransitionData, TArcData>,
-) -> GrpcPetriNetTransition
+fn convert_to_grpc_transition<TTransitionData, TArcData>(transition: &Transition<TTransitionData, TArcData>) -> GrpcPetriNetTransition
 where
     TTransitionData: ToString,
 {

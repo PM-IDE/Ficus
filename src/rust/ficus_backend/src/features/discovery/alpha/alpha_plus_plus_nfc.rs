@@ -35,11 +35,7 @@ impl<'a> AlphaPlusPlusNfcTriple<'a> {
         }
     }
 
-    pub fn try_merge<TLog: EventLog>(
-        first: &Self,
-        second: &Self,
-        provider: &AlphaPlusNfcRelationsProvider<'a, TLog>,
-    ) -> Option<Self> {
+    pub fn try_merge<TLog: EventLog>(first: &Self, second: &Self, provider: &AlphaPlusNfcRelationsProvider<'a, TLog>) -> Option<Self> {
         let merge_sets = |first: &BTreeSet<&'a String>, second: &BTreeSet<&'a String>| -> BTreeSet<&'a String> {
             first.iter().chain(second.iter()).map(|class| *class).collect()
         };
@@ -60,25 +56,19 @@ impl<'a> AlphaPlusPlusNfcTriple<'a> {
         for a_class in &self.a_classes {
             for b_class in &self.b_classes {
                 for c_class in &self.c_classes {
-                    if !(provider.is_in_direct_relation(a_class, c_class)
-                        && !provider.is_in_triangle_relation(c_class, a_class))
-                    {
+                    if !(provider.direct_relation(a_class, c_class) && !provider.triangle_relation(c_class, a_class)) {
                         return false;
                     }
 
-                    if !(provider.is_in_direct_relation(c_class, b_class)
-                        && !provider.is_in_triangle_relation(c_class, b_class))
-                    {
+                    if !(provider.direct_relation(c_class, b_class) && !provider.triangle_relation(c_class, b_class)) {
                         return false;
                     }
 
-                    if provider.is_in_parallel_relation(a_class, b_class) {
+                    if provider.parallel_relation(a_class, b_class) {
                         return false;
                     }
 
-                    if !provider.is_in_unrelated_relation(a_class, a_class)
-                        || !provider.is_in_unrelated_relation(b_class, b_class)
-                    {
+                    if !provider.unrelated_relation(a_class, a_class) || !provider.unrelated_relation(b_class, b_class) {
                         return false;
                     }
                 }
@@ -117,8 +107,7 @@ impl<'a> PartialEq for AlphaPlusPlusNfcTriple<'a> {
 
 impl<'a> Clone for AlphaPlusPlusNfcTriple<'a> {
     fn clone(&self) -> Self {
-        let clone_set =
-            |set: &BTreeSet<&'a String>| -> BTreeSet<&'a String> { set.iter().map(|class| *class).collect() };
+        let clone_set = |set: &BTreeSet<&'a String>| -> BTreeSet<&'a String> { set.iter().map(|class| *class).collect() };
 
         Self {
             a_classes: clone_set(&self.a_classes),

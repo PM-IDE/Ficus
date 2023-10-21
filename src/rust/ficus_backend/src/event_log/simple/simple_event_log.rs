@@ -170,10 +170,7 @@ impl SimpleTrace {
         let mut events = Vec::new();
         let mut current_date = TRACE_EVENT_START_DATE;
         for raw_event in raw_trace {
-            events.push(Rc::new(RefCell::new(SimpleEvent::new(
-                raw_event.to_string(),
-                current_date,
-            ))));
+            events.push(Rc::new(RefCell::new(SimpleEvent::new(raw_event.to_string(), current_date))));
             current_date = current_date + Duration::seconds(1);
         }
 

@@ -46,10 +46,7 @@ impl TandemArrayInfo {
     }
 }
 
-pub fn find_primitive_tandem_arrays(
-    log: &Vec<Vec<u64>>,
-    max_tandem_array_length: usize,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
+pub fn find_primitive_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length: usize) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_primitive_tandem_arrays_with_length(log, max_tandem_array_length)
         .borrow()
         .iter()
@@ -87,10 +84,7 @@ pub fn find_primitive_tandem_arrays_with_length(
     Rc::clone(&primitive_arrays_ptr)
 }
 
-pub fn find_maximal_tandem_arrays(
-    log: &Vec<Vec<u64>>,
-    max_tandem_array_length: usize,
-) -> Vec<Vec<SubArrayInTraceInfo>> {
+pub fn find_maximal_tandem_arrays(log: &Vec<Vec<u64>>, max_tandem_array_length: usize) -> Vec<Vec<SubArrayInTraceInfo>> {
     find_maximal_tandem_arrays_with_length(log, max_tandem_array_length)
         .borrow()
         .iter()

@@ -152,11 +152,7 @@ impl ContextKeys {
         Self::insert_key_to_map(context, key, name);
     }
 
-    fn insert_key_to_map<T: 'static>(
-        context: &mut ContextKeysInitContext,
-        key: Box<DefaultContextKey<T>>,
-        name: &'static str,
-    ) {
+    fn insert_key_to_map<T: 'static>(context: &mut ContextKeysInitContext, key: Box<DefaultContextKey<T>>, name: &'static str) {
         context.insert(name, &key);
     }
 

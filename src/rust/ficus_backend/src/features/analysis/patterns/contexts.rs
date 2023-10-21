@@ -127,8 +127,7 @@ where
     pub high_level_event_factory: TEvtFactory,
 }
 
-impl<TClassExtractor, TLog, TNameCreator, TEvtFactory>
-    ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory>
+impl<TClassExtractor, TLog, TNameCreator, TEvtFactory> ActivitiesInstancesDiscoveryContext<TClassExtractor, TLog, TNameCreator, TEvtFactory>
 where
     TLog: EventLog,
     TClassExtractor: Fn(&TLog::TEvent) -> u64,

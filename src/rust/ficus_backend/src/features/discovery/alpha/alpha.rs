@@ -4,9 +4,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
-use crate::features::discovery::alpha::providers::alpha_provider::{
-    AlphaRelationsProvider, DefaultAlphaRelationsProvider,
-};
+use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
 use crate::features::discovery::petri_net::place::Place;
@@ -29,10 +27,7 @@ pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNe
 
 pub fn discover_petri_net_alpha_plus(log: &impl EventLog, alpha_plus_plus: bool) -> DefaultPetriNet {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
-    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(
-        log,
-        &one_length_loop_transitions,
-    ));
+    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
     let dfg_info = event_log_info.dfg_info();
     let provider = AlphaPlusRelationsProvider::new(dfg_info, log);
 
@@ -46,11 +41,7 @@ pub fn discover_petri_net_alpha_plus(log: &impl EventLog, alpha_plus_plus: bool)
     petri_net
 }
 
-fn add_one_length_loops(
-    log: &impl EventLog,
-    one_length_loop_transitions: &HashSet<String>,
-    petri_net: &mut DefaultPetriNet,
-) {
+fn add_one_length_loops(log: &impl EventLog, one_length_loop_transitions: &HashSet<String>, petri_net: &mut DefaultPetriNet) {
     let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
 
     for transition_name in one_length_loop_transitions {
@@ -71,10 +62,7 @@ fn add_one_length_loops(
             }
         }
 
-        let id = petri_net.add_transition(Transition::empty(
-            transition_name.to_owned(),
-            Some(transition_name.to_owned()),
-        ));
+        let id = petri_net.add_transition(Transition::empty(transition_name.to_owned(), Some(transition_name.to_owned())));
 
         let place_id = match petri_net.find_place_id_by_name(alpha_set.to_string().as_str()) {
             Some(found_place_id) => found_place_id,
@@ -86,11 +74,7 @@ fn add_one_length_loops(
     }
 }
 
-fn add_alpha_plus_plus_transitions(
-    log: &impl EventLog,
-    one_length_loop_transitions: &HashSet<String>,
-    petri_net: &mut DefaultPetriNet,
-) {
+fn add_alpha_plus_plus_transitions(log: &impl EventLog, one_length_loop_transitions: &HashSet<String>, petri_net: &mut DefaultPetriNet) {
     let key = Lazy::get(&ALPHA_SET).unwrap();
     let mut transitions_connections = HashSet::new();
     let mut places_connections = HashSet::new();
@@ -159,16 +143,12 @@ fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelatio
 fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
     info.all_event_classes()
         .iter()
-        .filter(|class| {
-            info.dfg_info().get_followed_events(class).is_some() && provider.is_in_unrelated_relation(class, class)
-        })
+        .filter(|class| info.dfg_info().get_followed_events(class).is_some() && provider.unrelated_relation(class, class))
         .flat_map(|class| {
             let mut sets = vec![];
             let followers = info.dfg_info().get_followed_events(class).unwrap().keys();
             for follower in followers {
-                if provider.is_in_causal_relation(class, follower)
-                    && provider.is_in_unrelated_relation(follower, follower)
-                {
+                if provider.causal_relation(class, follower) && provider.unrelated_relation(follower, follower) {
                     sets.push(AlphaSet::new((*class).to_owned(), follower.to_owned()));
                 }
             }

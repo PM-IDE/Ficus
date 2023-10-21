@@ -21,9 +21,9 @@ use crate::pipelines::context::PipelineInfrastructure;
 use crate::{
     ficus_proto::{
         grpc_backend_service_server::GrpcBackendService, grpc_get_context_value_result::ContextValueResult,
-        grpc_pipeline_final_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue,
-        GrpcGetContextValueRequest, GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest,
-        GrpcPipelineFinalResult, GrpcPipelinePart, GrpcPipelinePartExecutionResult,
+        grpc_pipeline_final_result::ExecutionResult, grpc_pipeline_part_base::Part, GrpcContextKeyValue, GrpcGetContextValueRequest,
+        GrpcGetContextValueResult, GrpcGuid, GrpcPipeline, GrpcPipelineExecutionRequest, GrpcPipelineFinalResult, GrpcPipelinePart,
+        GrpcPipelinePartExecutionResult,
     },
     pipelines::{
         context::LogMessageHandler,
@@ -128,8 +128,7 @@ impl<'a> ServicePipelineExecutionContext<'a> {
 
 #[tonic::async_trait]
 impl GrpcBackendService for FicusService {
-    type ExecutePipelineStream =
-        Pin<Box<dyn Stream<Item = Result<GrpcPipelinePartExecutionResult, Status>> + Send + Sync + 'static>>;
+    type ExecutePipelineStream = Pin<Box<dyn Stream<Item = Result<GrpcPipelinePartExecutionResult, Status>> + Send + Sync + 'static>>;
 
     async fn execute_pipeline(
         &self,
@@ -143,21 +142,11 @@ impl GrpcBackendService for FicusService {
         tokio::task::spawn_blocking(move || {
             let grpc_pipeline = request.get_ref().pipeline.as_ref().unwrap();
             let context_values = &request.get_ref().initial_context;
-            let context = ServicePipelineExecutionContext::new(
-                grpc_pipeline,
-                context_values,
-                context_keys,
-                pipeline_parts,
-                sender,
-            );
+            let context = ServicePipelineExecutionContext::new(grpc_pipeline, context_values, context_keys, pipeline_parts, sender);
 
             match Self::execute_grpc_pipeline(&context) {
                 Ok((guid, created_context)) => {
-                    contexts
-                        .lock()
-                        .as_mut()
-                        .unwrap()
-                        .insert(guid.guid.to_owned(), created_context);
+                    contexts.lock().as_mut().unwrap().insert(guid.guid.to_owned(), created_context);
 
                     context
                         .sender()
@@ -176,10 +165,7 @@ impl GrpcBackendService for FicusService {
         Ok(Response::new(Box::pin(ReceiverStream::new(receiver))))
     }
 
-    async fn get_context_value(
-        &self,
-        request: Request<GrpcGetContextValueRequest>,
-    ) -> Result<Response<GrpcGetContextValueResult>, Status> {
+    async fn get_context_value(&self, request: Request<GrpcGetContextValueRequest>) -> Result<Response<GrpcGetContextValueResult>, Status> {
         let key_name = &request.get_ref().key.as_ref().unwrap().name;
         let result = match self.context_keys.find_key(key_name) {
             None => Self::create_get_context_value_error("Failed to find key for key name".to_string()),
@@ -210,10 +196,7 @@ impl GrpcBackendService for FicusService {
         let guid_str = &request.get_ref().guid;
 
         match contexts.remove(guid_str) {
-            None => Err(Status::not_found(format!(
-                "The session for {} does not exist",
-                guid_str
-            ))),
+            None => Err(Status::not_found(format!("The session for {} does not exist", guid_str))),
             Some(_) => Ok(Response::new(())),
         }
     }
@@ -229,10 +212,7 @@ impl FicusService {
         let infra = PipelineInfrastructure::new(Some(context.log_message_handler()));
 
         match pipeline.execute(&mut pipeline_context, &infra, context.keys()) {
-            Ok(()) => Ok((
-                GrpcGuid { guid: id.to_string() },
-                pipeline_context.devastate_user_data(),
-            )),
+            Ok(()) => Ok((GrpcGuid { guid: id.to_string() }, pipeline_context.devastate_user_data())),
             Err(err) => Err(err),
         }
     }
@@ -250,27 +230,18 @@ impl FicusService {
                 Part::ParallelPart(_) => todo!(),
                 Part::SimpleContextRequestPart(part) => {
                     let key_name = part.key.as_ref().unwrap().name.clone();
-                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid)
-                        .ok()
-                        .unwrap();
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
 
                     pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), None));
                 }
                 Part::ComplexContextRequestPart(part) => {
                     let grpc_default_part = part.before_pipeline_part.as_ref().unwrap();
-                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid)
-                        .ok()
-                        .unwrap();
+                    let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
 
                     match Self::find_default_part(grpc_default_part, context) {
                         Some(found_part) => {
                             let key_name = part.key.as_ref().unwrap().name.clone();
-                            pipeline.push(Self::create_get_context_part(
-                                key_name,
-                                uuid,
-                                &context.sender(),
-                                Some(found_part),
-                            ));
+                            pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), Some(found_part)));
                         }
                         None => todo!(),
                     }
@@ -318,11 +289,7 @@ impl FicusService {
         }
     }
 
-    fn try_convert_context_value(
-        &self,
-        key: &Box<dyn ContextKey>,
-        context_value: &dyn Any,
-    ) -> GrpcGetContextValueResult {
+    fn try_convert_context_value(&self, key: &Box<dyn ContextKey>, context_value: &dyn Any) -> GrpcGetContextValueResult {
         let value = convert_to_grpc_context_value(key.as_ref(), context_value, &self.context_keys);
         if let Some(grpc_context_value) = value {
             GrpcGetContextValueResult {

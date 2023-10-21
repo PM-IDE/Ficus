@@ -30,11 +30,7 @@ pub struct GetContextValuePipelinePart {
 
 impl GetContextValuePipelinePart {
     pub fn new(key_name: String, uuid: Uuid, handler: GetContextHandler) -> Self {
-        Self {
-            key_name,
-            handler,
-            uuid,
-        }
+        Self { key_name, handler, uuid }
     }
 
     pub fn create_context_pipeline_part(

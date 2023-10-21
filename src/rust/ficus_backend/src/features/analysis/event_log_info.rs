@@ -149,10 +149,7 @@ impl EventLogInfo {
             }
 
             if precedes_events.contains_key(second) {
-                precedes_events
-                    .get_mut(second)
-                    .unwrap()
-                    .insert(first.to_owned(), count.to_owned());
+                precedes_events.get_mut(second).unwrap().insert(first.to_owned(), count.to_owned());
             } else {
                 let map = HashMap::from_iter(vec![(first.to_owned(), count.to_owned())]);
                 precedes_events.insert(second.to_owned(), map);

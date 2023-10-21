@@ -19,12 +19,7 @@ fn test_set_name() {
     let log = create_simple_event_log();
     let value = String::from_utf8("ASDASD".into()).ok().unwrap();
 
-    execute_test_set_test(
-        &log,
-        &value,
-        |event| event.name(),
-        |event, value| event.set_name(value.to_owned()),
-    )
+    execute_test_set_test(&log, &value, |event| event.name(), |event, value| event.set_name(value.to_owned()))
 }
 
 #[test]
@@ -32,20 +27,11 @@ fn test_set_date() {
     let log = create_simple_event_log();
     let value = Utc::now();
 
-    execute_test_set_test(
-        &log,
-        &value,
-        |event| event.timestamp(),
-        |event, value| event.set_timestamp(*value),
-    )
+    execute_test_set_test(&log, &value, |event| event.timestamp(), |event, value| event.set_timestamp(*value))
 }
 
-fn execute_test_set_test<TValue, TGet, TSet>(
-    log: &SimpleEventLog,
-    value: &TValue,
-    get_property: TGet,
-    set_property: TSet,
-) where
+fn execute_test_set_test<TValue, TGet, TSet>(log: &SimpleEventLog, value: &TValue, get_property: TGet, set_property: TSet)
+where
     TGet: Fn(&SimpleEvent) -> &TValue,
     TSet: Fn(&mut SimpleEvent, &TValue) -> (),
     TValue: PartialEq + Debug,

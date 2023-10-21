@@ -100,11 +100,7 @@ fn test_maximal_repeats_string() {
 
 #[test]
 fn test_maximal_repeats2() {
-    execute_test_with_tuple_dump(
-        "abcdxabcyabcz".as_bytes(),
-        |_, tree| tree.find_maximal_repeats(),
-        vec![(0, 3)],
-    );
+    execute_test_with_tuple_dump("abcdxabcyabcz".as_bytes(), |_, tree| tree.find_maximal_repeats(), vec![(0, 3)]);
 }
 
 #[test]
@@ -304,17 +300,7 @@ fn test_near_super_maximal_repeats6() {
     execute_test_with_tuple_dump(
         create_max_repeats_trace_5(),
         |_, tree| tree.find_near_super_maximal_repeats(),
-        vec![
-            (0, 1),
-            (0, 2),
-            (3, 4),
-            (3, 6),
-            (4, 6),
-            (7, 9),
-            (9, 10),
-            (10, 12),
-            (17, 19),
-        ],
+        vec![(0, 1), (0, 2), (3, 4), (3, 6), (4, 6), (7, 9), (9, 10), (10, 12), (17, 19)],
     );
 }
 

@@ -87,15 +87,7 @@ impl TraceXesEventLogIterator {
                         let key = descriptor.key.as_str();
                         let value = descriptor.value.as_str();
 
-                        Self::set_parsed_value(
-                            payload_type,
-                            key,
-                            value,
-                            &mut name,
-                            &mut date,
-                            &mut lifecycle,
-                            &mut payload,
-                        );
+                        Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &mut payload);
                     }
                     None => continue,
                 },

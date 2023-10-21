@@ -1,10 +1,10 @@
 use crate::features::analysis::event_log_info::DfgInfo;
 
 pub trait AlphaRelationsProvider {
-    fn is_in_causal_relation(&self, first: &str, second: &str) -> bool;
-    fn is_in_parallel_relation(&self, first: &str, second: &str) -> bool;
-    fn is_in_direct_relation(&self, first: &str, second: &str) -> bool;
-    fn is_in_unrelated_relation(&self, first: &str, second: &str) -> bool;
+    fn causal_relation(&self, first: &str, second: &str) -> bool;
+    fn parallel_relation(&self, first: &str, second: &str) -> bool;
+    fn direct_relation(&self, first: &str, second: &str) -> bool;
+    fn unrelated_relation(&self, first: &str, second: &str) -> bool;
 }
 
 pub struct DefaultAlphaRelationsProvider<'a> {
@@ -18,19 +18,19 @@ impl<'a> DefaultAlphaRelationsProvider<'a> {
 }
 
 impl<'a> AlphaRelationsProvider for DefaultAlphaRelationsProvider<'a> {
-    fn is_in_causal_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second) && !self.is_in_direct_relation(second, first)
+    fn causal_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second) && !self.direct_relation(second, first)
     }
 
-    fn is_in_parallel_relation(&self, first: &str, second: &str) -> bool {
-        self.is_in_direct_relation(first, second) && self.is_in_direct_relation(second, first)
+    fn parallel_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second) && self.direct_relation(second, first)
     }
 
-    fn is_in_direct_relation(&self, first: &str, second: &str) -> bool {
+    fn direct_relation(&self, first: &str, second: &str) -> bool {
         self.dfg_info.is_in_directly_follows_relation(first, second)
     }
 
-    fn is_in_unrelated_relation(&self, first: &str, second: &str) -> bool {
-        !self.is_in_direct_relation(first, second) && !self.is_in_direct_relation(second, first)
+    fn unrelated_relation(&self, first: &str, second: &str) -> bool {
+        !self.direct_relation(first, second) && !self.direct_relation(second, first)
     }
 }

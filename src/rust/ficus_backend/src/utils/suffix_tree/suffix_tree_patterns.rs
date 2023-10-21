@@ -64,13 +64,7 @@ where
         Some(patterns)
     }
 
-    fn dfs_pattern_search(
-        &self,
-        index: usize,
-        patterns: &mut Vec<(usize, usize)>,
-        pattern_length: usize,
-        mut suffix_length: usize,
-    ) {
+    fn dfs_pattern_search(&self, index: usize, patterns: &mut Vec<(usize, usize)>, pattern_length: usize, mut suffix_length: usize) {
         let nodes = self.nodes.borrow();
         let node = nodes.get(index).unwrap();
         suffix_length += node.edge_len();
