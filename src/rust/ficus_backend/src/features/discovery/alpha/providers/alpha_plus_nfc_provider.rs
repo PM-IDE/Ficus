@@ -225,16 +225,14 @@ where
                     let mut second_condition = false;
 
                     for t in &post_set {
-                        if self.is_in_concave_arrow_relation(t.name(), second)
-                            || self.is_in_parallel_relation(t.name(), second)
-                        {
-                            first_condition = true;
+                        if !first_condition {
+                            first_condition = self.is_in_concave_arrow_relation(t.name(), second);
+                            first_condition |= self.is_in_parallel_relation(t.name(), second);
                         }
 
-                        if self.is_in_concave_arrow_relation(t.name(), second_streak)
-                            || self.is_in_parallel_relation(t.name(), second_streak)
-                        {
-                            second_condition = true;
+                        if !second_condition {
+                            second_condition = self.is_in_concave_arrow_relation(t.name(), second_streak);
+                            second_condition |= self.is_in_parallel_relation(t.name(), second_streak);
                         }
                     }
 
@@ -271,16 +269,14 @@ where
                     let mut first_condition = false;
                     let mut second_condition = false;
                     for preset_task in preset_tasks {
-                        if self.is_in_concave_arrow_relation(first, preset_task.name())
-                            || self.is_in_parallel_relation(first, preset_task.name())
-                        {
-                            first_condition = true;
+                        if !first_condition {
+                            first_condition = self.is_in_concave_arrow_relation(first, preset_task.name());
+                            first_condition |= self.is_in_parallel_relation(first, preset_task.name());
                         }
 
-                        if self.is_in_concave_arrow_relation(first_streak, preset_task.name())
-                            || self.is_in_parallel_relation(first_streak, preset_task.name())
-                        {
-                            second_condition = true;
+                        if !second_condition {
+                            second_condition = self.is_in_concave_arrow_relation(first_streak, preset_task.name());
+                            second_condition |= self.is_in_parallel_relation(first_streak, preset_task.name());
                         }
                     }
 
