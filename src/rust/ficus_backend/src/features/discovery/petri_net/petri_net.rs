@@ -118,7 +118,9 @@ where
         self.places.get(id).as_ref().unwrap()
     }
 
-    pub fn transition(&self, id: &u64) -> &Transition<TTransitionData, TArcData> { self.transitions.get(id).as_ref().unwrap() }
+    pub fn transition(&self, id: &u64) -> &Transition<TTransitionData, TArcData> {
+        self.transitions.get(id).as_ref().unwrap()
+    }
 
     pub fn set_initial_marking(&mut self, marking: Marking) {
         self.initial_marking = Some(marking)

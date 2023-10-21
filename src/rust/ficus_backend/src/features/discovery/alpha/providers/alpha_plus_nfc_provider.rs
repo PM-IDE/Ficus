@@ -4,6 +4,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
+use crate::features::discovery::alpha::providers::relations_cache::RelationsCache;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use std::collections::HashSet;
 
@@ -19,6 +20,11 @@ where
     alpha_plus_provider: AlphaPlusRelationsProvider<'a>,
     info: &'a EventLogInfo,
     log: &'a TLog,
+    right_double_arrow_cache: RelationsCache,
+    w1_cache: RelationsCache,
+    w21_cache: RelationsCache,
+    w22_cache: RelationsCache,
+    w3_cache: RelationsCache,
 }
 
 impl<'a, TLog> AlphaPlusNfcRelationsProvider<'a, TLog>
@@ -30,6 +36,11 @@ where
             alpha_plus_provider: AlphaPlusRelationsProvider::new(info.dfg_info(), log),
             info,
             log,
+            right_double_arrow_cache: RelationsCache::empty(),
+            w1_cache: RelationsCache::empty(),
+            w21_cache: RelationsCache::empty(),
+            w22_cache: RelationsCache::empty(),
+            w3_cache: RelationsCache::empty(),
         }
     }
 
@@ -86,7 +97,18 @@ where
         false
     }
 
-    pub fn is_in_right_double_arrow_relation(&self, first: &str, second: &str) -> bool {
+    pub fn is_in_right_double_arrow_relation(&mut self, first: &str, second: &str) -> bool {
+        let value = self.calculate_right_double_arrow_relation(first, second);
+        self.right_double_arrow_cache.put(first, second, value);
+
+        value
+    }
+
+    fn calculate_right_double_arrow_relation(&self, first: &str, second: &str) -> bool {
+        if let Some(cached_value) = self.right_double_arrow_cache.try_get(first, second) {
+            return *cached_value;
+        }
+
         if self.is_in_direct_relation(first, second) {
             return false;
         }
@@ -133,11 +155,22 @@ where
         false
     }
 
-    pub fn is_in_concave_arrow_relation(&self, first: &str, second: &str) -> bool {
+    pub fn is_in_concave_arrow_relation(&mut self, first: &str, second: &str) -> bool {
         self.is_in_causal_relation(first, second) || self.is_in_right_double_arrow_relation(first, second)
     }
 
-    pub fn is_in_w1_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn is_in_w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        let value = self.calculate_w1_relation(first, second, petri_net);
+        self.w1_cache.put(first, second, value);
+
+        value
+    }
+
+    pub fn calculate_w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if let Some(value) = self.w1_cache.try_get(first, second) {
+            return *value;
+        }
+
         if self.is_in_direct_relation(first, second) {
             return false;
         }
@@ -207,7 +240,18 @@ where
         false
     }
 
-    pub fn is_in_w21_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn is_in_w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        let value = self.calculate_w21_relation(first, second, petri_net);
+        self.w21_cache.put(first, second, value);
+
+        value
+    }
+
+    fn calculate_w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if let Some(value) = self.w21_cache.try_get(first, second) {
+            return *value;
+        }
+
         if !self.is_in_right_double_arrow_relation(first, second) {
             return false;
         }
@@ -252,7 +296,18 @@ where
         false
     }
 
-    pub fn is_in_w22_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn is_in_w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        let value = self.calculate_w22_relation(first, second, petri_net);
+        self.w22_cache.put(first, second, value);
+
+        value
+    }
+
+    fn calculate_w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if let Some(value) = self.w22_cache.try_get(first, second) {
+            return *value;
+        }
+
         if !self.is_in_right_double_arrow_relation(first, second) {
             return false;
         }
@@ -296,11 +351,22 @@ where
         false
     }
 
-    pub fn is_in_w2_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn is_in_w2_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         self.is_in_w21_relation(first, second, petri_net) || self.is_in_w22_relation(first, second, petri_net)
     }
 
-    pub fn is_in_w3_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+    pub fn is_in_w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        let value = self.calculate_w3_relation(first, second, petri_net);
+        self.w3_cache.put(first, second, value);
+
+        value
+    }
+
+    fn calculate_w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if let Some(value) = self.w3_cache.try_get(first, second) {
+            return *value;
+        }
+
         if !self.is_in_right_double_arrow_relation(first, second) {
             return false;
         }
