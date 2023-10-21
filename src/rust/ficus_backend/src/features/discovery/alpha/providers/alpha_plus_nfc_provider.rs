@@ -185,7 +185,9 @@ where
 
                         for second_pre_transition in &second_place_preset {
                             let name = second_pre_transition.name();
-                            if self.is_in_concave_arrow_relation(name, first) || self.is_in_parallel_relation(name, first) {
+                            if self.is_in_concave_arrow_relation(name, first)
+                                || self.is_in_parallel_relation(name, first)
+                            {
                                 continue 'second_loop;
                             }
                         }
@@ -210,8 +212,8 @@ where
                 return false;
             }
 
-            for b_streak in self.info.all_event_classes() {
-                if !self.is_in_left_triangle_relation(second, b_streak) {
+            for second_streak in self.info.all_event_classes() {
+                if !self.is_in_left_triangle_relation(second, second_streak) {
                     continue;
                 }
 
@@ -223,11 +225,15 @@ where
                     let mut second_condition = false;
 
                     for t in &post_set {
-                        if self.is_in_concave_arrow_relation(t.name(), second) || self.is_in_parallel_relation(t.name(), second) {
+                        if self.is_in_concave_arrow_relation(t.name(), second)
+                            || self.is_in_parallel_relation(t.name(), second)
+                        {
                             first_condition = true;
                         }
 
-                        if self.is_in_concave_arrow_relation(t.name(), b_streak) || self.is_in_parallel_relation(t.name(), b_streak) {
+                        if self.is_in_concave_arrow_relation(t.name(), second_streak)
+                            || self.is_in_parallel_relation(t.name(), second_streak)
+                        {
                             second_condition = true;
                         }
                     }
@@ -239,7 +245,56 @@ where
             }
         }
 
+        false
+    }
+
+    pub fn is_in_w22_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if !self.is_in_right_double_arrow_relation(first, second) {
+            return false;
+        }
+
+        if let Some(second_transition) = petri_net.find_transition_by_name(second) {
+            let second_preset = second_transition.incoming_arcs();
+            if second_preset.len() <= 1 {
+                return false;
+            }
+
+            for first_streak in self.info.all_event_classes() {
+                if !self.is_in_right_triangle_relation(first, first_streak) {
+                    continue;
+                }
+
+                for preset_arc in second_preset {
+                    let preset_place_id = preset_arc.place_id();
+
+                    let preset_tasks = petri_net.get_incoming_transitions(&preset_place_id);
+                    let mut first_condition = false;
+                    let mut second_condition = false;
+                    for preset_task in preset_tasks {
+                        if self.is_in_concave_arrow_relation(first, preset_task.name())
+                            || self.is_in_parallel_relation(first, preset_task.name())
+                        {
+                            first_condition = true;
+                        }
+
+                        if self.is_in_concave_arrow_relation(first_streak, preset_task.name())
+                            || self.is_in_parallel_relation(first_streak, preset_task.name())
+                        {
+                            second_condition = true;
+                        }
+                    }
+
+                    if !first_condition && second_condition {
+                        return true;
+                    }
+                }
+            }
+        }
 
         false
+    }
+
+    pub fn is_in_w2_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        self.is_in_w21_relation(first, second, petri_net) || self.is_in_w22_relation(first, second, petri_net)
     }
 }
