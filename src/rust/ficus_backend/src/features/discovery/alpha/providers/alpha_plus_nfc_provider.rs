@@ -97,9 +97,16 @@ where
                 if events[i].borrow().name() == second {
                     if let Some(first_index) = last_first_index {
                         let mut all_suitable = true;
+                        let mut actual_length = 0;
+
                         for j in first_index..i {
                             let event = events[j].borrow();
                             let event_name = event.name();
+                            if self.info.event_count(event_name) == 0 {
+                                continue;
+                            }
+
+                            actual_length += 1;
                             if self.is_in_left_triangle_relation(event_name, first)
                                 || self.is_in_right_triangle_relation(event_name, first)
                             {
@@ -108,7 +115,7 @@ where
                             }
                         }
 
-                        if all_suitable {
+                        if all_suitable && actual_length > 0 {
                             return true;
                         }
                     }
