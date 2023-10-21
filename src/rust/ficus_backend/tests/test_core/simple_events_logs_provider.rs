@@ -166,12 +166,8 @@ pub fn create_alpha_sharp_test_log() -> SimpleEventLog {
 }
 
 pub fn create_alpha_sharp_test_log2() -> SimpleEventLog {
-    SimpleEventLog::new(&vec![
-        vec!["A", "C", "C", "D"],
-        vec!["A", "B", "C", "B", "C", "D"],
-    ])
+    SimpleEventLog::new(&vec![vec!["A", "C", "C", "D"], vec!["A", "B", "C", "B", "C", "D"]])
 }
-
 
 pub fn create_alpha_sharp_test_log3() -> SimpleEventLog {
     SimpleEventLog::new(&vec![
@@ -179,5 +175,16 @@ pub fn create_alpha_sharp_test_log3() -> SimpleEventLog {
         vec!["A", "B", "D"],
         vec!["A", "C", "D"],
         vec!["A", "B", "C", "D"],
+    ])
+}
+
+pub fn create_alpha_plus_plus_nfc_test_log() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "B", "E", "G"],
+        vec!["A", "C", "F", "G"],
+        vec!["A", "B", "D", "D", "E", "G"],
+        vec!["A", "C", "D", "F", "G"],
+        vec!["A", "C", "D", "D", "E", "G"],
+        vec!["A", "C", "D", "F", "G"],
     ])
 }
