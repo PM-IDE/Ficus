@@ -27,12 +27,12 @@ where
         }
     }
 
-    pub fn add_incoming_arc(&mut self, place_id: u64, data: Option<TArcData>) {
-        self.incoming_arcs.push(Arc::new(place_id, data))
+    pub fn add_incoming_arc(&mut self, place_id: &u64, data: Option<TArcData>) {
+        self.incoming_arcs.push(Arc::new(*place_id, data))
     }
 
-    pub fn add_outgoing_arc(&mut self, place_id: u64, data: Option<TArcData>) {
-        self.outgoing_arcs.push(Arc::new(place_id, data))
+    pub fn add_outgoing_arc(&mut self, place_id: &u64, data: Option<TArcData>) {
+        self.outgoing_arcs.push(Arc::new(*place_id, data))
     }
 
     pub fn remove_incoming_arc(&mut self, arc_index: usize) -> Arc<TArcData> {
