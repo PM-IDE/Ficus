@@ -198,4 +198,48 @@ where
 
         false
     }
+
+    pub fn is_in_w21_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if !self.is_in_right_double_arrow_relation(first, second) {
+            return false;
+        }
+
+        if let Some(first_transition) = petri_net.find_transition_by_name(first) {
+            let first_outgoing_arcs = first_transition.outgoing_arcs();
+            if first_outgoing_arcs.len() <= 1 {
+                return false;
+            }
+
+            for b_streak in self.info.all_event_classes() {
+                if !self.is_in_left_triangle_relation(second, b_streak) {
+                    continue;
+                }
+
+                for first_outgoing_arc in first_outgoing_arcs {
+                    let place_id = first_outgoing_arc.place_id();
+                    let post_set = petri_net.get_outgoing_transitions(&place_id);
+
+                    let mut first_condition = false;
+                    let mut second_condition = false;
+
+                    for t in &post_set {
+                        if self.is_in_concave_arrow_relation(t.name(), second) || self.is_in_parallel_relation(t.name(), second) {
+                            first_condition = true;
+                        }
+
+                        if self.is_in_concave_arrow_relation(t.name(), b_streak) || self.is_in_parallel_relation(t.name(), b_streak) {
+                            second_condition = true;
+                        }
+                    }
+
+                    if !first_condition && second_condition {
+                        return true;
+                    }
+                }
+            }
+        }
+
+
+        false
+    }
 }
