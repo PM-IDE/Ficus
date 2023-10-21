@@ -5,6 +5,12 @@ use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use std::collections::HashSet;
+
+enum PrePostSet {
+    PreSet,
+    PostSet,
+}
 
 pub struct AlphaPlusNfcRelationsProvider<'a, TLog>
 where
@@ -292,5 +298,94 @@ where
 
     pub fn is_in_w2_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         self.is_in_w21_relation(first, second, petri_net) || self.is_in_w22_relation(first, second, petri_net)
+    }
+
+    pub fn is_in_w3_relation(&self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
+        if !self.is_in_right_double_arrow_relation(first, second) {
+            return false;
+        }
+
+        let first_post_set = Self::get_pre_or_post_set(petri_net, first, PrePostSet::PostSet);
+        let second_pre_set = Self::get_pre_or_post_set(petri_net, second, PrePostSet::PreSet);
+
+        for first_streak in self.info.all_event_classes() {
+            for second_streak in self.info.all_event_classes() {
+                if first_streak == second_streak {
+                    continue;
+                }
+
+                let first_streak_post_set = Self::get_pre_or_post_set(petri_net, first_streak, PrePostSet::PostSet);
+                let second_streak_pre_set = Self::get_pre_or_post_set(petri_net, second_streak, PrePostSet::PreSet);
+
+                let first_intersection: HashSet<&u64> = first_post_set.intersection(&first_streak_post_set).collect();
+                if first_intersection.len() == 0 {
+                    continue;
+                }
+
+                let second_intersection: HashSet<&u64> = second_pre_set.intersection(&second_streak_pre_set).collect();
+                if second_intersection.len() == 0 {
+                    continue;
+                }
+
+                if self.is_in_right_double_arrow_relation(first, second_streak) {
+                    continue;
+                }
+
+                if self.is_in_right_double_arrow_relation(first_streak, second) {
+                    continue;
+                }
+
+                if !self.is_in_right_double_arrow_relation(first_streak, second_streak) {
+                    continue;
+                }
+
+                let mut right_set = HashSet::new();
+                for task in self.info.all_event_classes() {
+                    if self.is_in_right_double_arrow_relation(first, task) {
+                        continue;
+                    }
+
+                    if !self.is_in_right_double_arrow_relation(first_streak, task) {
+                        continue;
+                    }
+
+                    if !(self.is_in_parallel_relation(second_streak, task)
+                        || self.is_in_concave_arrow_relation(second_streak, task))
+                    {
+                        continue;
+                    }
+
+                    let task_pre_set = Self::get_pre_or_post_set(petri_net, task, PrePostSet::PreSet);
+                    let intersection: HashSet<&u64> = second_streak_pre_set.intersection(&task_pre_set).collect();
+                    if intersection.len() == 0 {
+                        continue;
+                    }
+
+                    for place_id in &task_pre_set {
+                        right_set.insert(*place_id);
+                    }
+                }
+
+                for place_id in second_streak_pre_set {
+                    right_set.insert(place_id);
+                }
+
+                if second_pre_set.is_subset(&right_set) {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+
+    fn get_pre_or_post_set(petri_net: &DefaultPetriNet, transition_name: &str, pre_set: PrePostSet) -> HashSet<u64> {
+        let transition = petri_net.find_transition_by_name(transition_name).unwrap();
+        let arcs = match pre_set {
+            PrePostSet::PreSet => transition.incoming_arcs(),
+            PrePostSet::PostSet => transition.outgoing_arcs(),
+        };
+
+        return arcs.iter().map(|arc| arc.place_id()).collect();
     }
 }
