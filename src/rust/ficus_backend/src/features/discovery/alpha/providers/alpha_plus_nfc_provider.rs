@@ -44,6 +44,10 @@ where
         }
     }
 
+    pub fn log_info(&self) -> &'a EventLogInfo {
+        self.info
+    }
+
     pub fn is_in_triangle_relation(&self, first: &str, second: &str) -> bool {
         self.alpha_plus_provider.is_in_triangle_relation(first, second)
     }
