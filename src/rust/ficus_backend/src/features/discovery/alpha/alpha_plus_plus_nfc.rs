@@ -35,6 +35,27 @@ impl<'a> AlphaPlusPlusNfcTriple<'a> {
         }
     }
 
+    pub fn try_merge<TLog: EventLog>(
+        first: &Self,
+        second: &Self,
+        provider: &AlphaPlusNfcRelationsProvider<'a, TLog>,
+    ) -> Option<Self> {
+        let merge_sets = |first: &BTreeSet<&'a String>, second: &BTreeSet<&'a String>| -> BTreeSet<&'a String> {
+            first.iter().chain(second.iter()).map(|class| *class).collect()
+        };
+
+        let new_triple = Self {
+            a_classes: merge_sets(&first.a_classes, &second.a_classes),
+            b_classes: merge_sets(&first.b_classes, &second.b_classes),
+            c_classes: merge_sets(&first.c_classes, &second.c_classes),
+        };
+
+        match new_triple.valid(provider) {
+            true => Some(new_triple),
+            false => None,
+        }
+    }
+
     pub fn valid<TLog: EventLog>(&self, provider: &AlphaPlusNfcRelationsProvider<'a, TLog>) -> bool {
         for a_class in &self.a_classes {
             for b_class in &self.b_classes {
@@ -94,6 +115,19 @@ impl<'a> PartialEq for AlphaPlusPlusNfcTriple<'a> {
     }
 }
 
+impl<'a> Clone for AlphaPlusPlusNfcTriple<'a> {
+    fn clone(&self) -> Self {
+        let clone_set =
+            |set: &BTreeSet<&'a String>| -> BTreeSet<&'a String> { set.iter().map(|class| *class).collect() };
+
+        Self {
+            a_classes: clone_set(&self.a_classes),
+            b_classes: clone_set(&self.b_classes),
+            c_classes: clone_set(&self.c_classes),
+        }
+    }
+}
+
 impl<'a> Eq for AlphaPlusPlusNfcTriple<'a> {}
 
 impl<'a> ToString for AlphaPlusPlusNfcTriple<'a> {
@@ -146,7 +180,41 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         }
     }
 
-    for triple in &triples {
+    let mut current_triples = triples;
+    loop {
+        let mut any_change = false;
+        let vec: Vec<&AlphaPlusPlusNfcTriple> = current_triples.iter().collect();
+        let mut merged_indices = HashSet::new();
+        let mut new_triples = HashSet::new();
+
+        for i in 0..vec.len() {
+            for j in (i + 1)..vec.len() {
+                let first = vec.get(i).unwrap();
+                let second = vec.get(j).unwrap();
+
+                if let Some(merged_triple) = AlphaPlusPlusNfcTriple::try_merge(first, second, &provider) {
+                    any_change = true;
+                    new_triples.insert(merged_triple);
+                    merged_indices.insert(i);
+                    merged_indices.insert(j);
+                }
+            }
+        }
+
+        if !any_change {
+            break;
+        }
+
+        for i in 0..vec.len() {
+            if !merged_indices.contains(&i) {
+                new_triples.insert((*vec.get(i).unwrap()).clone());
+            }
+        }
+
+        current_triples = new_triples;
+    }
+
+    for triple in &current_triples {
         println!("{:?}", triple.to_string());
     }
 }
