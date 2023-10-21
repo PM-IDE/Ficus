@@ -81,8 +81,8 @@ fn add_one_length_loops(
             None => petri_net.add_place(Place::with_name(alpha_set.to_string())),
         };
 
-        petri_net.connect_transition_to_place(id, place_id, None);
-        petri_net.connect_place_to_transition(place_id, id, None);
+        petri_net.connect_transition_to_place(&id, &place_id, None);
+        petri_net.connect_place_to_transition(&place_id, &id, None);
     }
 }
 
@@ -126,11 +126,11 @@ fn add_alpha_plus_plus_transitions(
     }
 
     for connection in transitions_connections {
-        petri_net.connect_transition_to_place(connection.0, connection.1, None);
+        petri_net.connect_transition_to_place(&connection.0, &connection.1, None);
     }
 
     for connection in places_connections {
-        petri_net.connect_place_to_transition(connection.0, connection.1, None);
+        petri_net.connect_place_to_transition(&connection.0, &connection.1, None);
     }
 }
 
@@ -246,22 +246,22 @@ fn create_petri_net(info: &EventLogInfo, alpha_sets: Vec<&AlphaSet>) -> DefaultP
         let place_id = petri_net.add_place(place);
 
         for class in alpha_set.left_classes() {
-            petri_net.connect_transition_to_place(event_classes_to_transition_ids[&class], place_id, None);
+            petri_net.connect_transition_to_place(&event_classes_to_transition_ids[&class], &place_id, None);
         }
 
         for class in alpha_set.right_classes() {
-            petri_net.connect_place_to_transition(place_id, event_classes_to_transition_ids[&class], None);
+            petri_net.connect_place_to_transition(&place_id, &event_classes_to_transition_ids[&class], None);
         }
     }
 
     let start_place_id = petri_net.add_place(Place::empty());
     for start_activity in info.start_event_classes() {
-        petri_net.connect_place_to_transition(start_place_id, event_classes_to_transition_ids[start_activity], None);
+        petri_net.connect_place_to_transition(&start_place_id, &event_classes_to_transition_ids[start_activity], None);
     }
 
     let end_place_id = petri_net.add_place(Place::empty());
     for end_activity in info.end_event_classes() {
-        petri_net.connect_transition_to_place(event_classes_to_transition_ids[end_activity], end_place_id, None);
+        petri_net.connect_transition_to_place(&event_classes_to_transition_ids[end_activity], &end_place_id, None);
     }
 
     petri_net.set_initial_marking(Marking::new(vec![SingleMarking::new(start_place_id, 1)]));
