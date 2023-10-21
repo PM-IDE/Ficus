@@ -134,7 +134,7 @@ fn add_alpha_plus_plus_transitions(
     }
 }
 
-fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
+pub fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> {
     let mut one_loop_transitions = HashSet::new();
     for trace in log.traces() {
         let trace = trace.borrow();
