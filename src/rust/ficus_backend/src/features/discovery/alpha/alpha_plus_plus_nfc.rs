@@ -1,7 +1,7 @@
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::alpha::find_transitions_one_length_loop;
+use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha_plus, find_transitions_one_length_loop};
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashSet};
@@ -203,7 +203,31 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         current_triples = new_triples;
     }
 
-    for triple in &current_triples {
-        println!("{:?}", triple.to_string());
+    let petri_net = discover_petri_net_alpha_plus(log, false);
+
+    let info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
+    let mut provider = AlphaPlusNfcRelationsProvider::new(&info, log);
+
+    let mut w1_relations = HashSet::new();
+    for a_class in info.all_event_classes() {
+        for b_class in info.all_event_classes() {
+            if provider.w1_relation(a_class, b_class, &petri_net) {
+                w1_relations.insert((a_class, b_class));
+                provider.add_additional_causal_relation(a_class, b_class);
+            }
+        }
+    }
+
+    let mut w2_relations = HashSet::new();
+    for a_class in info.all_event_classes() {
+        for b_class in info.all_event_classes() {
+            if provider.w2_relation(a_class, b_class, &petri_net) {
+                w2_relations.insert((a_class, b_class));
+            }
+        }
+    }
+
+    for tuple in &w1_relations {
+        println!("({}, {})", tuple.0, tuple.1);
     }
 }

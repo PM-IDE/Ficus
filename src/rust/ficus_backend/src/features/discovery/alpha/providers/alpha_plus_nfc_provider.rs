@@ -17,6 +17,7 @@ pub struct AlphaPlusNfcRelationsProvider<'a, TLog>
 where
     TLog: EventLog,
 {
+    additional_causal_relations: HashSet<(&'a str, &'a str)>,
     alpha_plus_provider: AlphaPlusRelationsProvider<'a>,
     info: &'a EventLogInfo,
     log: &'a TLog,
@@ -33,6 +34,7 @@ where
 {
     pub fn new(info: &'a EventLogInfo, log: &'a TLog) -> Self {
         Self {
+            additional_causal_relations: HashSet::new(),
             alpha_plus_provider: AlphaPlusRelationsProvider::new(info.dfg_info(), log),
             info,
             log,
@@ -56,7 +58,11 @@ where
         self.alpha_plus_provider.direct_relation(first, second)
     }
 
-    pub fn causal_relation(&self, first: &str, second: &str) -> bool {
+    pub fn causal_relation(&self, first: &'a str, second: &'a str) -> bool {
+        if self.additional_causal_relations.contains(&(first, second)) {
+            return true;
+        }
+
         self.alpha_plus_provider.direct_relation(first, second)
             && (!self.alpha_plus_provider.direct_relation(second, first)
                 || self.triangle_relation(first, second)
@@ -178,8 +184,7 @@ where
         }
 
         for event_class in self.info.all_event_classes() {
-            if let Some(transition_id) = petri_net.find_place_id_by_name(event_class) {
-                let transition = petri_net.transition(&transition_id);
+            if let Some(transition) = petri_net.find_transition_by_name(event_class) {
                 for first_incoming_arc in transition.incoming_arcs() {
                     'second_loop: for second_incoming_arc in transition.incoming_arcs() {
                         let first_place_id = first_incoming_arc.place_id();
@@ -451,5 +456,9 @@ where
         };
 
         return arcs.iter().map(|arc| arc.place_id()).collect();
+    }
+
+    pub fn add_additional_causal_relation(&mut self, first: &'a String, second: &'a String) {
+        self.additional_causal_relations.insert((first, second));
     }
 }
