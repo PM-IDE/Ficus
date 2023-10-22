@@ -6,6 +6,7 @@ use crate::features::discovery::alpha::alpha::{
 };
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
+use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
 use std::collections::hash_map::DefaultHasher;
@@ -314,39 +315,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         }
     }
 
-    let mut current_triples = triples;
-    loop {
-        let mut any_change = false;
-        let vec: Vec<&AlphaPlusPlusNfcTriple> = current_triples.iter().collect();
-        let mut merged_indices = HashSet::new();
-        let mut new_triples = HashSet::new();
-
-        for i in 0..vec.len() {
-            for j in (i + 1)..vec.len() {
-                let first = vec.get(i).unwrap();
-                let second = vec.get(j).unwrap();
-
-                if let Some(merged_triple) = AlphaPlusPlusNfcTriple::try_merge(first, second, &provider) {
-                    any_change = true;
-                    new_triples.insert(merged_triple);
-                    merged_indices.insert(i);
-                    merged_indices.insert(j);
-                }
-            }
-        }
-
-        if !any_change {
-            break;
-        }
-
-        for i in 0..vec.len() {
-            if !merged_indices.contains(&i) {
-                new_triples.insert((*vec.get(i).unwrap()).clone());
-            }
-        }
-
-        current_triples = new_triples;
-    }
+    let mut current_triples = maximize(triples, |first, second| AlphaPlusPlusNfcTriple::try_merge(first, second, &provider));
 
     let petri_net = discover_petri_net_alpha_plus(log, false);
 
