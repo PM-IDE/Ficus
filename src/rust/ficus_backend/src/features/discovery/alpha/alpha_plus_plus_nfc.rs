@@ -9,6 +9,7 @@ use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::Alpha
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
+use chrono::format::Numeric::Second;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashSet};
 use std::hash::{Hash, Hasher};
@@ -158,13 +159,21 @@ impl<'a> ToString for AlphaPlusPlusNfcTriple<'a> {
 }
 
 struct ExtendedAlphaSet<'a> {
-    alpha_set: &'a AlphaSet,
+    alpha_set: AlphaSet,
     left_extension: BTreeSet<&'a String>,
     right_extension: BTreeSet<&'a String>,
 }
 
 impl<'a> ExtendedAlphaSet<'a> {
-    pub fn new(alpha_set: &'a AlphaSet, left_extension: &'a String, right_extension: &'a String) -> Self {
+    pub fn new_without_extensions(alpha_set: AlphaSet) -> Self {
+        Self {
+            alpha_set,
+            left_extension: BTreeSet::new(),
+            right_extension: BTreeSet::new(),
+        }
+    }
+
+    pub fn new(alpha_set: AlphaSet, left_extension: &'a String, right_extension: &'a String) -> Self {
         Self {
             alpha_set,
             left_extension: BTreeSet::from_iter(vec![left_extension]),
@@ -173,7 +182,7 @@ impl<'a> ExtendedAlphaSet<'a> {
     }
 
     pub fn try_new<TLog: EventLog>(
-        alpha_set: &'a AlphaSet,
+        alpha_set: AlphaSet,
         left_extension: &'a String,
         right_extension: &'a String,
         provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
@@ -239,6 +248,22 @@ impl<'a> ExtendedAlphaSet<'a> {
 
         true
     }
+
+    pub fn subset(&self, other: &Self) -> bool {
+        if !self.alpha_set.is_full_subset(&other.alpha_set) {
+            false
+        } else {
+            self.left_extension.is_subset(&other.left_extension) && self.right_extension.is_subset(&other.right_extension)
+        }
+    }
+
+    pub fn merge(&self, other: &Self) -> Self {
+        Self {
+            alpha_set: self.alpha_set.extend(&other.alpha_set),
+            left_extension: self.left_extension.iter().chain(&other.left_extension).map(|c| *c).collect(),
+            right_extension: self.right_extension.iter().chain(&other.right_extension).map(|c| *c).collect(),
+        }
+    }
 }
 
 impl<'a> Hash for ExtendedAlphaSet<'a> {
@@ -297,6 +322,16 @@ impl<'a> ToString for ExtendedAlphaSet<'a> {
     }
 }
 
+impl<'a> Clone for ExtendedAlphaSet<'a> {
+    fn clone(&self) -> Self {
+        Self {
+            alpha_set: self.alpha_set.clone(),
+            left_extension: self.left_extension.iter().map(|c| *c).collect(),
+            right_extension: self.right_extension.iter().map(|c| *c).collect(),
+        }
+    }
+}
+
 pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
@@ -343,18 +378,29 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
 
     eliminate_by_reduction_rule_1(&mut w2_relations, &mut provider, &petri_net, &info);
 
-    let mut extended_sets = HashSet::new();
+    let mut x_w = HashSet::new();
     let alpha_net = discover_petri_net_alpha(&info);
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
             for pair in w1_relations.iter().chain(w2_relations.iter()) {
-                let set = ExtendedAlphaSet::try_new(alpha_set, pair.0, pair.1, &mut provider, &w1_relations, &w2_relations);
+                let set = ExtendedAlphaSet::try_new(alpha_set.clone(), pair.0, pair.1, &mut provider, &w1_relations, &w2_relations);
                 if let Some(extended_alpha_set) = set {
-                    extended_sets.insert(extended_alpha_set);
+                    x_w.insert(extended_alpha_set);
                 }
             }
         }
     }
+
+    for place in alpha_net.all_places() {
+        if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
+            x_w.insert(ExtendedAlphaSet::new_without_extensions(alpha_set.clone()));
+        }
+    }
+
+    let y_w = maximize(x_w, |first, second| match first.subset(second) {
+        true => Some(first.merge(second)),
+        false => None,
+    });
 }
 
 fn eliminate_by_reduction_rule_1<TLog: EventLog>(
