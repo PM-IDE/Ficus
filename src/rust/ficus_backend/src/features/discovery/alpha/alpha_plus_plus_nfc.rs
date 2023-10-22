@@ -1,8 +1,12 @@
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha_plus, find_transitions_one_length_loop};
+use crate::features::discovery::alpha::alpha::{
+    discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop, ALPHA_SET,
+};
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
+use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use crate::utils::user_data::user_data::UserData;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashSet};
 use std::hash::{Hash, Hasher};
@@ -227,7 +231,73 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         }
     }
 
-    for tuple in &w1_relations {
+    eliminate_by_reduction_rule_1(&mut w2_relations, &mut provider, &petri_net, &info);
+
+    let alpha_net = discover_petri_net_alpha(&info);
+    for place in alpha_net.all_places() {
+        if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
+            'pair_loop: for pair in w1_relations.iter().chain(w2_relations.iter()) {
+                let a = pair.0;
+                let b = pair.1;
+
+                if alpha_set.contains_left(a) || alpha_set.contains_right(b) {
+                    continue;
+                }
+
+                for a_class in alpha_set.left_classes() {
+                    if !(w1_relations.contains(&(a_class, b)) || w2_relations.contains(&(a_class, b))) {
+                        continue 'pair_loop;
+                    }
+
+                    if !(provider.unrelated_relation(a, a_class) && !provider.right_double_arrow_relation(a, a_class)) {
+                        continue 'pair_loop;
+                    }
+                }
+
+                for b_class in alpha_set.right_classes() {
+                    if !(w1_relations.contains(&(a, b_class)) || w2_relations.contains(&(a, b_class))) {
+                        continue 'pair_loop;
+                    }
+
+                    if !(provider.unrelated_relation(b_class, b) && !provider.right_double_arrow_relation(b_class, b)) {
+                        continue 'pair_loop;
+                    }
+                }
+
+                if !(w1_relations.contains(&(a, b)) || w2_relations.contains(&(a, b))) {
+                    continue 'pair_loop;
+                }
+
+                println!("{}", alpha_set.to_string());
+            }
+        }
+    }
+
+    for tuple in &w2_relations {
         println!("({}, {})", tuple.0, tuple.1);
+    }
+}
+
+fn eliminate_by_reduction_rule_1<TLog: EventLog>(
+    w2_relations: &mut HashSet<(&String, &String)>,
+    provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+    petri_net: &DefaultPetriNet,
+    info: &EventLogInfo,
+) {
+    let mut to_remove = Vec::new();
+    for w2_relation in w2_relations.iter() {
+        let a = w2_relation.0;
+        let c = w2_relation.1;
+        for b in info.all_event_classes() {
+            if (provider.w2_relation(a, b, petri_net) && provider.concave_arrow_relation(b, c))
+                || (provider.w2_relation(b, c, petri_net) && provider.concave_arrow_relation(a, b))
+            {
+                to_remove.push(w2_relation.clone());
+            }
+        }
+    }
+
+    for item in &to_remove {
+        w2_relations.remove(item);
     }
 }

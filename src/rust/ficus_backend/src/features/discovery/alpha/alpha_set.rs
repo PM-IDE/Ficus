@@ -42,6 +42,14 @@ impl AlphaSet {
         self.is_left_subset(other) && self.is_right_subset(other)
     }
 
+    pub fn contains_left(&self, class: &str) -> bool {
+        self.left_classes.contains(class)
+    }
+
+    pub fn contains_right(&self, class: &str) -> bool {
+        self.right_classes.contains(class)
+    }
+
     pub fn left_classes(&self) -> Vec<&String> {
         (&self.left_classes).iter().collect()
     }

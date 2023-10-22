@@ -16,7 +16,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::string::ToString;
 
-static ALPHA_SET: Lazy<DefaultKey<AlphaSet>> = Lazy::new(|| DefaultKey::new("alpha_set".to_string()));
+pub static ALPHA_SET: Lazy<DefaultKey<AlphaSet>> = Lazy::new(|| DefaultKey::new("alpha_set".to_string()));
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
     let dfg_info = event_log_info.dfg_info();
