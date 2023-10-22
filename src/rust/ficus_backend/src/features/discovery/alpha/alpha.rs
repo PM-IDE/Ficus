@@ -5,6 +5,7 @@ use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreati
 use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
+use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
 use crate::features::discovery::petri_net::place::Place;
@@ -159,46 +160,15 @@ fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvid
         .collect()
 }
 
-fn maximize_sets(mut current_sets: HashSet<AlphaSet>, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
-    loop {
-        let mut extended_sets = HashSet::new();
-        let mut extended_indices = HashSet::new();
-        let mut any_change = false;
+fn maximize_sets(current_sets: HashSet<AlphaSet>, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
+    maximize(current_sets, |first, second| {
+        let should_extend = (first.is_left_subset(second) || first.is_right_subset(second)) && first.can_extend(second, provider);
 
-        let current_sets_vector: Vec<&AlphaSet> = current_sets.iter().collect();
-
-        for i in 0..current_sets_vector.len() {
-            for j in (i + 1)..current_sets_vector.len() {
-                let first_set = current_sets_vector.get(i).unwrap();
-                let second_set = current_sets_vector.get(j).unwrap();
-
-                let should_extend = (first_set.is_left_subset(second_set) || first_set.is_right_subset(second_set))
-                    && first_set.can_extend(second_set, provider);
-
-                if should_extend {
-                    extended_indices.insert(i);
-                    extended_indices.insert(j);
-
-                    any_change = true;
-                    extended_sets.insert(first_set.extend(&second_set));
-                }
-            }
+        match should_extend {
+            true => Some(first.extend(&second)),
+            false => None,
         }
-
-        if !any_change {
-            break;
-        }
-
-        for i in 0..current_sets_vector.len() {
-            if !extended_indices.contains(&i) {
-                extended_sets.insert(current_sets_vector[i].clone());
-            }
-        }
-
-        current_sets = extended_sets;
-    }
-
-    current_sets
+    })
 }
 
 fn filter_out_non_maximal_sets(current_sets: &HashSet<AlphaSet>) -> Vec<&AlphaSet> {

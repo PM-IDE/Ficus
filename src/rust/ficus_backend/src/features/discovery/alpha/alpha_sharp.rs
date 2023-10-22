@@ -2,6 +2,7 @@ use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_sharp_provider::AlphaSharpRelationsProvider;
+use crate::features::discovery::alpha::utils::maximize;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashSet};
 use std::hash::{Hash, Hasher};
@@ -251,38 +252,7 @@ pub fn discover_petri_net_alpha_sharp(log: &impl EventLog) {
         println!("{}", x.to_string());
     }
 
-    let mut current_set = sharp_tuples;
-    loop {
-        let mut new_set = HashSet::new();
-
-        let vec = current_set.iter().collect::<Vec<&AlphaSharpTuple>>();
-        let mut merged_indices = HashSet::new();
-
-        let mut any_change = false;
-        for i in 0..vec.len() {
-            for j in (i + 1)..vec.len() {
-                if let Some(merged) = AlphaSharpTuple::try_merge(vec.get(i).unwrap(), vec.get(j).unwrap()) {
-                    merged_indices.insert(i);
-                    merged_indices.insert(j);
-
-                    new_set.insert(merged);
-                    any_change = true;
-                }
-            }
-        }
-
-        if !any_change {
-            break;
-        }
-
-        for i in 0..vec.len() {
-            if !merged_indices.contains(&i) {
-                new_set.insert((*vec.get(i).unwrap()).clone());
-            }
-        }
-
-        current_set = new_set;
-    }
+    let current_set = maximize(sharp_tuples, |first, second| AlphaSharpTuple::try_merge(first, second));
 
     for x in &current_set {
         println!("{}", x.to_string());
