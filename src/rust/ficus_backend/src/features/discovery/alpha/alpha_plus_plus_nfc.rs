@@ -4,6 +4,7 @@ use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreati
 use crate::features::discovery::alpha::alpha::{
     discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop, ALPHA_SET,
 };
+use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
@@ -155,6 +156,146 @@ impl<'a> ToString for AlphaPlusPlusNfcTriple<'a> {
     }
 }
 
+struct ExtendedAlphaSet<'a> {
+    alpha_set: &'a AlphaSet,
+    left_extension: BTreeSet<&'a String>,
+    right_extension: BTreeSet<&'a String>,
+}
+
+impl<'a> ExtendedAlphaSet<'a> {
+    pub fn new(alpha_set: &'a AlphaSet, left_extension: &'a String, right_extension: &'a String) -> Self {
+        Self {
+            alpha_set,
+            left_extension: BTreeSet::from_iter(vec![left_extension]),
+            right_extension: BTreeSet::from_iter(vec![right_extension]),
+        }
+    }
+
+    pub fn try_new<TLog: EventLog>(
+        alpha_set: &'a AlphaSet,
+        left_extension: &'a String,
+        right_extension: &'a String,
+        provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+        w1_relations: &HashSet<(&'a String, &'a String)>,
+        w2_relations: &HashSet<(&'a String, &'a String)>,
+    ) -> Option<Self> {
+        let new_set = Self::new(alpha_set, left_extension, right_extension);
+        match new_set.valid(provider, w1_relations, w2_relations) {
+            true => Some(new_set),
+            false => None,
+        }
+    }
+
+    pub fn valid<TLog: EventLog>(
+        &self,
+        provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+        w1_relations: &HashSet<(&'a String, &'a String)>,
+        w2_relations: &HashSet<(&'a String, &'a String)>,
+    ) -> bool {
+        for a in &self.left_extension {
+            if self.alpha_set.contains_left(a) {
+                return false;
+            }
+        }
+
+        for b in &self.right_extension {
+            if self.alpha_set.contains_right(b) {
+                return false;
+            }
+        }
+
+        for a_class in self.alpha_set.left_classes() {
+            for b in &self.right_extension {
+                if !(w1_relations.contains(&(a_class, b)) || w2_relations.contains(&(a_class, b))) {
+                    return false;
+                }
+            }
+        }
+
+        for b_class in self.alpha_set.right_classes().iter().chain(self.right_extension.iter()) {
+            for a in &self.left_extension {
+                if !(w1_relations.contains(&(a, b_class)) || w2_relations.contains(&(a, b_class))) {
+                    return false;
+                }
+            }
+        }
+
+        for a_class in self.alpha_set.left_classes() {
+            for a in &self.left_extension {
+                if !(provider.unrelated_relation(a, a_class) && !provider.right_double_arrow_relation(a, a_class)) {
+                    return false;
+                }
+            }
+        }
+
+        for b_class in self.alpha_set.right_classes() {
+            for b in &self.right_extension {
+                if !(provider.unrelated_relation(b_class, b) && !provider.right_double_arrow_relation(b_class, b)) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> Hash for ExtendedAlphaSet<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.alpha_set.hash(state);
+        for left in &self.left_extension {
+            state.write(left.as_bytes());
+        }
+
+        for right in &self.right_extension {
+            state.write(right.as_bytes());
+        }
+    }
+}
+
+impl<'a> PartialEq for ExtendedAlphaSet<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        let mut self_hasher = DefaultHasher::new();
+        self.hash(&mut self_hasher);
+
+        let mut other_hasher = DefaultHasher::new();
+        other.hash(&mut other_hasher);
+
+        self_hasher.finish() == other_hasher.finish()
+    }
+}
+
+impl<'a> Eq for ExtendedAlphaSet<'a> {}
+
+impl<'a> ToString for ExtendedAlphaSet<'a> {
+    fn to_string(&self) -> String {
+        let mut repr = String::new();
+        repr.push('(');
+        repr.push_str(self.alpha_set.to_string().as_str());
+        repr.push_str(", ");
+
+        let serilize_set = |set: &BTreeSet<&'a String>| {
+            repr.push('{');
+            for item in set {
+                repr.push_str(item);
+                repr.push(',');
+            }
+
+            if set.len() > 0 {
+                repr.remove(repr.len() - 1);
+            }
+
+            repr.push_str("}, ");
+        };
+
+        repr.remove(repr.len() - 1);
+        repr.remove(repr.len() - 1);
+
+        repr.push(')');
+        repr
+    }
+}
+
 pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
@@ -233,48 +374,17 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
 
     eliminate_by_reduction_rule_1(&mut w2_relations, &mut provider, &petri_net, &info);
 
+    let mut extended_sets = HashSet::new();
     let alpha_net = discover_petri_net_alpha(&info);
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
-            'pair_loop: for pair in w1_relations.iter().chain(w2_relations.iter()) {
-                let a = pair.0;
-                let b = pair.1;
-
-                if alpha_set.contains_left(a) || alpha_set.contains_right(b) {
-                    continue;
+            for pair in w1_relations.iter().chain(w2_relations.iter()) {
+                let set = ExtendedAlphaSet::try_new(alpha_set, pair.0, pair.1, &mut provider, &w1_relations, &w2_relations);
+                if let Some(extended_alpha_set) = set {
+                    extended_sets.insert(extended_alpha_set);
                 }
-
-                for a_class in alpha_set.left_classes() {
-                    if !(w1_relations.contains(&(a_class, b)) || w2_relations.contains(&(a_class, b))) {
-                        continue 'pair_loop;
-                    }
-
-                    if !(provider.unrelated_relation(a, a_class) && !provider.right_double_arrow_relation(a, a_class)) {
-                        continue 'pair_loop;
-                    }
-                }
-
-                for b_class in alpha_set.right_classes() {
-                    if !(w1_relations.contains(&(a, b_class)) || w2_relations.contains(&(a, b_class))) {
-                        continue 'pair_loop;
-                    }
-
-                    if !(provider.unrelated_relation(b_class, b) && !provider.right_double_arrow_relation(b_class, b)) {
-                        continue 'pair_loop;
-                    }
-                }
-
-                if !(w1_relations.contains(&(a, b)) || w2_relations.contains(&(a, b))) {
-                    continue 'pair_loop;
-                }
-
-                println!("{}", alpha_set.to_string());
             }
         }
-    }
-
-    for tuple in &w2_relations {
-        println!("({}, {})", tuple.0, tuple.1);
     }
 }
 
