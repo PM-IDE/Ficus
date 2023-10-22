@@ -138,7 +138,7 @@ where
                         let mut all_suitable = true;
                         let mut actual_length = 0;
 
-                        for j in first_index..i {
+                        for j in (first_index + 1)..i {
                             let event = events[j].borrow();
                             let event_name = event.name();
                             if self.info.event_count(event_name) == 0 {
