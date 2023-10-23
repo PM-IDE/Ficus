@@ -211,3 +211,24 @@ pub fn create_alpha_plus_plus_nfc_test_log4() -> SimpleEventLog {
 pub fn create_alpha_plus_plus_nfc_test_log5() -> SimpleEventLog {
     SimpleEventLog::new(&vec![vec!["A", "B", "C"], vec!["A", "B", "D", "E"], vec!["A", "D", "B", "E"]])
 }
+
+pub fn create_alpha_plus_plus_nfc_test_log6() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["A", "C", "D"], vec!["B", "C", "E"]])
+}
+
+pub fn create_alpha_plus_plus_nfc_test_log7() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "C", "F", "D"],
+        vec!["A", "F", "C", "D"],
+        vec!["B", "C", "G", "E"],
+        vec!["B", "G", "C", "E"],
+    ])
+}
+
+pub fn create_alpha_plus_plus_nfc_test_log8() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["A", "C", "D"], vec!["B", "C", "F", "E"], vec!["B", "F", "C", "E"]])
+}
+
+pub fn create_alpha_plus_plus_nfc_test_log9() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![vec!["A", "C", "E", "B", "C", "D"]])
+}
