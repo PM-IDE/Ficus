@@ -1,6 +1,7 @@
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
+use crate::features::analysis::patterns::activity_instances::process_activities_in_trace;
 use crate::features::discovery::alpha::alpha::{
     discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop, ALPHA_SET,
 };
@@ -9,6 +10,8 @@ use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::Alpha
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
+use futures::AsyncReadExt;
+use quick_xml::name::PrefixDeclaration::Default;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::hash::{Hash, Hasher};
@@ -321,6 +324,86 @@ impl<'a> ToString for ExtendedAlphaSet<'a> {
     }
 }
 
+struct W3Pair<'a> {
+    first: BTreeSet<&'a String>,
+    second: BTreeSet<&'a String>,
+}
+
+impl<'a> W3Pair<'a> {
+    pub fn new(first: &'a String, second: &'a String) -> Self {
+        Self {
+            first: BTreeSet::from_iter(vec![first]),
+            second: BTreeSet::from_iter(vec![second]),
+        }
+    }
+
+    pub fn try_new<TLog: EventLog>(
+        first: &'a String,
+        second: &'a String,
+        w3_relations: &HashSet<(&String, &String)>,
+        provider: &AlphaPlusNfcRelationsProvider<TLog>,
+    ) -> Option<Self> {
+        let new_pair = Self::new(first, second);
+        match new_pair.valid(w3_relations, provider) {
+            true => Some(new_pair),
+            false => None,
+        }
+    }
+
+    fn valid<TLog: EventLog>(&self, w3_relations: &HashSet<(&String, &String)>, provider: &AlphaPlusNfcRelationsProvider<TLog>) -> bool {
+        for first in self.first.iter() {
+            for second in self.second.iter() {
+                if !(w3_relations.contains(&(first, second))
+                    && provider.unrelated_relation(first, first)
+                    && provider.unrelated_relation(second, second))
+                {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    fn merge(&self, other: &Self) -> Self {
+        Self {
+            first: self.first.iter().chain(other.first.iter()).map(|c| *c).collect(),
+            second: self.second.iter().chain(other.second.iter()).map(|c| *c).collect(),
+        }
+    }
+}
+
+impl<'a> Hash for W3Pair<'a> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for class in self.first.iter().chain(self.second.iter()) {
+            state.write(class.as_bytes());
+        }
+    }
+}
+
+impl<'a> PartialEq for W3Pair<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        let mut self_hasher = DefaultHasher::new();
+        self.hash(&mut self_hasher);
+
+        let mut other_hasher = DefaultHasher::new();
+        other.hash(&mut other_hasher);
+
+        self_hasher.finish() == other_hasher.finish()
+    }
+}
+
+impl<'a> Eq for W3Pair<'a> {}
+
+impl<'a> Clone for W3Pair<'a> {
+    fn clone(&self) -> Self {
+        Self {
+            first: self.first.iter().map(|c| *c).collect(),
+            second: self.second.iter().map(|c| *c).collect(),
+        }
+    }
+}
+
 impl<'a> Clone for ExtendedAlphaSet<'a> {
     fn clone(&self) -> Self {
         Self {
@@ -417,9 +500,23 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
     let w3_closure = construct_w3_transitive_closure_cache(&w3_relations);
     eliminate_w3_relations_by_rule_2(&mut w3_relations, &w3_closure);
 
-    for w3_relation in &w3_relations {
-        println!("({}, {})", w3_relation.0, w3_relation.1);
+    let mut x_w = HashSet::new();
+    for first_class in info.all_event_classes() {
+        for second_class in info.all_event_classes() {
+            if let Some(pair) = W3Pair::try_new(first_class, second_class, &w3_relations, &provider) {
+                x_w.insert(pair);
+            }
+        }
     }
+
+    let z_w = maximize(x_w, |first, second| {
+        let new_pair = first.merge(second);
+        if new_pair.valid(&w3_relations, &provider) {
+            Some(new_pair)
+        } else {
+            None
+        }
+    });
 }
 
 fn eliminate_by_reduction_rule_1<TLog: EventLog>(
