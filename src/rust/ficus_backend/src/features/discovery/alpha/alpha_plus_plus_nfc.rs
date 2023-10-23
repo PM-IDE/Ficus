@@ -9,9 +9,8 @@ use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::Alpha
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
-use chrono::format::Numeric::Second;
 use std::collections::hash_map::DefaultHasher;
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::hash::{Hash, Hasher};
 
 struct AlphaPlusPlusNfcTriple<'a> {
@@ -401,6 +400,26 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         true => Some(first.merge(second)),
         false => None,
     });
+
+    for w2_relation in &w2_relations {
+        provider.add_additional_causal_relation(w2_relation.0, w2_relation.1);
+    }
+
+    let mut w3_relations = HashSet::new();
+    for a_class in info.all_event_classes() {
+        for b_class in info.all_event_classes() {
+            if provider.w3_relation(a_class, b_class, &petri_net) {
+                w3_relations.insert((a_class, b_class));
+            }
+        }
+    }
+
+    let w3_closure = construct_w3_transitive_closure_cache(&w3_relations);
+    eliminate_w3_relations_by_rule_2(&mut w3_relations, &w3_closure);
+
+    for w3_relation in &w3_relations {
+        println!("({}, {})", w3_relation.0, w3_relation.1);
+    }
 }
 
 fn eliminate_by_reduction_rule_1<TLog: EventLog>(
@@ -424,5 +443,75 @@ fn eliminate_by_reduction_rule_1<TLog: EventLog>(
 
     for item in &to_remove {
         w2_relations.remove(item);
+    }
+}
+
+fn construct_w3_transitive_closure_cache<'a>(w3_relations: &'a HashSet<(&'a String, &'a String)>) -> HashMap<String, HashSet<String>> {
+    let mut graph: HashMap<&String, HashSet<&String>> = HashMap::new();
+    let mut all_classes = HashSet::new();
+    for relation in w3_relations {
+        if let Some(children) = graph.get_mut(relation.0) {
+            children.insert(relation.1);
+        } else {
+            graph.insert(relation.0, HashSet::from_iter(vec![relation.1]));
+        }
+
+        all_classes.insert(relation.0);
+        all_classes.insert(relation.1);
+    }
+
+    let mut closure: HashMap<String, HashSet<String>> = HashMap::new();
+
+    for first_class in &all_classes {
+        for second_class in &all_classes {
+            if let Some(children) = graph.get(first_class) {
+                if children.contains(second_class) {
+                    continue;
+                }
+            }
+
+            let mut is_in_closure = false;
+            let mut q = VecDeque::new();
+            q.push_back(first_class);
+
+            'q_loop: while !q.is_empty() {
+                let current_class = q.pop_front().unwrap();
+                if let Some(children) = graph.get(current_class) {
+                    if children.contains(second_class) {
+                        is_in_closure = true;
+                        break 'q_loop;
+                    } else {
+                        for child in children {
+                            q.push_back(child);
+                        }
+                    }
+                }
+            }
+
+            if is_in_closure {
+                if let Some(children) = closure.get_mut(*first_class) {
+                    children.insert((**second_class).clone());
+                } else {
+                    closure.insert((**first_class).clone(), HashSet::from_iter(vec![(**second_class).clone()]));
+                }
+            }
+        }
+    }
+
+    closure
+}
+
+fn eliminate_w3_relations_by_rule_2(w3_relations: &mut HashSet<(&String, &String)>, closure_cache: &HashMap<String, HashSet<String>>) {
+    let mut to_remove = HashSet::new();
+    for relation in w3_relations.iter() {
+        if let Some(children) = closure_cache.get(relation.0) {
+            if children.contains(relation.1) {
+                to_remove.insert(relation.clone());
+            }
+        }
+    }
+
+    for item in &to_remove {
+        w3_relations.remove(item);
     }
 }
