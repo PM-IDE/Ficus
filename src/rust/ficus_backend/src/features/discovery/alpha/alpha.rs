@@ -204,12 +204,12 @@ fn create_petri_net(info: &EventLogInfo, alpha_sets: Vec<&AlphaSet>) -> DefaultP
         }
     }
 
-    let start_place_id = petri_net.add_place(Place::empty());
+    let start_place_id = petri_net.add_place(Place::with_name("StartPlace".to_string()));
     for start_activity in info.start_event_classes() {
         petri_net.connect_place_to_transition(&start_place_id, &event_classes_to_transition_ids[start_activity], None);
     }
 
-    let end_place_id = petri_net.add_place(Place::empty());
+    let end_place_id = petri_net.add_place(Place::with_name("EndPlace".to_string()));
     for end_activity in info.end_event_classes() {
         petri_net.connect_transition_to_place(&event_classes_to_transition_ids[end_activity], &end_place_id, None);
     }
