@@ -1,41 +1,32 @@
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
+use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::utils::hash_utils::compare_based_on_hashes;
-use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 
 #[derive(Debug, Clone)]
 pub struct AlphaSet {
-    left_classes: BTreeSet<String>,
-    right_classes: BTreeSet<String>,
+    two_sets: TwoSets<String>,
 }
 
 impl AlphaSet {
     pub fn empty() -> Self {
         Self {
-            left_classes: BTreeSet::new(),
-            right_classes: BTreeSet::new(),
+            two_sets: TwoSets::empty(),
         }
     }
 
     pub fn new(left_class: String, right_class: String) -> Self {
-        let mut left_classes = BTreeSet::new();
-        left_classes.insert(left_class);
-
-        let mut right_classes = BTreeSet::new();
-        right_classes.insert(right_class);
-
-        return Self {
-            left_classes,
-            right_classes,
-        };
+        Self {
+            two_sets: TwoSets::new_one_element(left_class, right_class),
+        }
     }
 
     pub fn is_left_subset(&self, other: &Self) -> bool {
-        self.left_classes.is_subset(&other.left_classes)
+        self.two_sets.is_first_subset(&other.two_sets)
     }
 
     pub fn is_right_subset(&self, other: &Self) -> bool {
-        self.right_classes.is_subset(&other.right_classes)
+        self.two_sets.is_second_subset(&other.two_sets)
     }
 
     pub fn is_full_subset(&self, other: &Self) -> bool {
@@ -43,48 +34,48 @@ impl AlphaSet {
     }
 
     pub fn contains_left(&self, class: &str) -> bool {
-        self.left_classes.contains(class)
+        self.two_sets.first_set().contains(class)
     }
 
     pub fn contains_right(&self, class: &str) -> bool {
-        self.right_classes.contains(class)
+        self.two_sets.second_set().contains(class)
     }
 
     pub fn left_classes(&self) -> Vec<&String> {
-        (&self.left_classes).iter().collect()
+        self.two_sets.first_set().iter().collect()
     }
 
     pub fn right_classes(&self) -> Vec<&String> {
-        (&self.right_classes).iter().collect()
+        self.two_sets.second_set().iter().collect()
     }
 
     pub fn insert_left_class(&mut self, class: String) {
-        self.left_classes.insert(class);
+        self.two_sets.first_set_mut().insert(class);
     }
 
     pub fn insert_right_class(&mut self, class: String) {
-        self.right_classes.insert(class);
+        self.two_sets.second_set_mut().insert(class);
     }
 
     pub fn can_extend(&self, other: &Self, provider: &impl AlphaRelationsProvider) -> bool {
-        for left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
-            for right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
+        for left_class in self.two_sets.first_set().iter().chain(other.two_sets.first_set().iter()) {
+            for right_class in self.two_sets.second_set().iter().chain(other.two_sets.second_set().iter()) {
                 if !provider.causal_relation(left_class, right_class) {
                     return false;
                 }
             }
         }
 
-        for first_left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
-            for second_left_class in self.left_classes.iter().chain(other.left_classes.iter()) {
+        for first_left_class in self.two_sets.first_set().iter().chain(other.two_sets.first_set().iter()) {
+            for second_left_class in self.two_sets.first_set().iter().chain(other.two_sets.first_set().iter()) {
                 if !provider.unrelated_relation(first_left_class, second_left_class) {
                     return false;
                 }
             }
         }
 
-        for first_right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
-            for second_right_class in self.right_classes.iter().chain(other.right_classes.iter()) {
+        for first_right_class in self.two_sets.second_set().iter().chain(other.two_sets.second_set().iter()) {
+            for second_right_class in self.two_sets.second_set().iter().chain(other.two_sets.second_set().iter()) {
                 if !provider.unrelated_relation(first_right_class, second_right_class) {
                     return false;
                 }
@@ -95,28 +86,15 @@ impl AlphaSet {
     }
 
     pub fn extend(&self, other: &Self) -> AlphaSet {
-        let mut left_classes = self.left_classes.clone();
-        left_classes.extend(other.left_classes.iter().map(|c| c.to_owned()));
-
-        let mut right_classes = self.right_classes.clone();
-        right_classes.extend(other.right_classes.iter().map(|c| c.to_owned()));
-
         Self {
-            left_classes,
-            right_classes,
+            two_sets: self.two_sets.merge(&other.two_sets),
         }
     }
 }
 
 impl Hash for AlphaSet {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for class in self.left_classes.iter() {
-            state.write(class.as_bytes());
-        }
-
-        for class in self.right_classes.iter() {
-            state.write(class.as_bytes());
-        }
+        self.two_sets.hash(state)
     }
 }
 
@@ -130,29 +108,6 @@ impl Eq for AlphaSet {}
 
 impl ToString for AlphaSet {
     fn to_string(&self) -> String {
-        let mut repr = "[{".to_string();
-        for left_class in &self.left_classes {
-            repr.push_str(left_class.as_str());
-            repr.push(',');
-        }
-
-        if self.left_classes.len() > 0 {
-            repr.remove(repr.len() - 1);
-        }
-
-        repr.push_str("} {");
-
-        for right_class in &self.right_classes {
-            repr.push_str(right_class.as_str());
-            repr.push(',');
-        }
-
-        if self.right_classes.len() > 0 {
-            repr.remove(repr.len() - 1);
-        }
-
-        repr.push_str("}]");
-
-        repr
+        self.two_sets.to_string()
     }
 }
