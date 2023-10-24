@@ -9,6 +9,7 @@ use crate::features::discovery::alpha::alpha_set::AlphaSet;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use crate::utils::hash_utils::compare_based_on_hashes;
 use crate::utils::user_data::user_data::UserData;
 use futures::AsyncReadExt;
 use quick_xml::name::PrefixDeclaration::Default;
@@ -104,13 +105,7 @@ impl<'a> Hash for AlphaPlusPlusNfcTriple<'a> {
 
 impl<'a> PartialEq for AlphaPlusPlusNfcTriple<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let mut self_hasher = DefaultHasher::new();
-        self.hash(&mut self_hasher);
-
-        let mut other_hasher = DefaultHasher::new();
-        other.hash(&mut other_hasher);
-
-        self_hasher.finish() == other_hasher.finish()
+        compare_based_on_hashes(self, other)
     }
 }
 
@@ -283,13 +278,7 @@ impl<'a> Hash for ExtendedAlphaSet<'a> {
 
 impl<'a> PartialEq for ExtendedAlphaSet<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let mut self_hasher = DefaultHasher::new();
-        self.hash(&mut self_hasher);
-
-        let mut other_hasher = DefaultHasher::new();
-        other.hash(&mut other_hasher);
-
-        self_hasher.finish() == other_hasher.finish()
+        compare_based_on_hashes(self, other)
     }
 }
 
@@ -383,13 +372,7 @@ impl<'a> Hash for W3Pair<'a> {
 
 impl<'a> PartialEq for W3Pair<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let mut self_hasher = DefaultHasher::new();
-        self.hash(&mut self_hasher);
-
-        let mut other_hasher = DefaultHasher::new();
-        other.hash(&mut other_hasher);
-
-        self_hasher.finish() == other_hasher.finish()
+        compare_based_on_hashes(self, other)
     }
 }
 

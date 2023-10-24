@@ -3,6 +3,7 @@ use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreati
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_sharp_provider::AlphaSharpRelationsProvider;
 use crate::features::discovery::alpha::utils::maximize;
+use crate::utils::hash_utils::compare_based_on_hashes;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashSet};
 use std::hash::{Hash, Hasher};
@@ -132,13 +133,7 @@ impl<'a> Hash for AlphaSharpTuple<'a> {
 
 impl<'a> PartialEq for AlphaSharpTuple<'a> {
     fn eq(&self, other: &Self) -> bool {
-        let mut first_hasher = DefaultHasher::new();
-        self.hash(&mut first_hasher);
-
-        let mut second_hasher = DefaultHasher::new();
-        other.hash(&mut second_hasher);
-
-        first_hasher.finish() == second_hasher.finish()
+        compare_based_on_hashes(self, other)
     }
 }
 

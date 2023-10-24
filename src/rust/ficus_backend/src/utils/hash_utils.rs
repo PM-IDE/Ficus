@@ -21,3 +21,13 @@ where
 
     hash
 }
+
+pub fn compare_based_on_hashes<T: Hash>(first: &T, second: &T) -> bool {
+    let mut first_hasher = DefaultHasher::new();
+    first.hash(&mut first_hasher);
+
+    let mut second_hasher = DefaultHasher::new();
+    second.hash(&mut second_hasher);
+
+    first_hasher.finish() == second_hasher.finish()
+}

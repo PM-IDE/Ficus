@@ -1,4 +1,5 @@
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
+use crate::utils::hash_utils::compare_based_on_hashes;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
@@ -122,13 +123,7 @@ impl Hash for AlphaSet {
 
 impl PartialEq for AlphaSet {
     fn eq(&self, other: &Self) -> bool {
-        let mut this_hasher = DefaultHasher::new();
-        self.hash(&mut this_hasher);
-
-        let mut other_hasher = DefaultHasher::new();
-        other.hash(&mut other_hasher);
-
-        this_hasher.finish() == other_hasher.finish()
+        compare_based_on_hashes(self, other)
     }
 }
 
