@@ -1,9 +1,9 @@
-use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
 use crate::event_log::core::event_log::EventLog;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
 use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::utils::hash_utils::compare_based_on_hashes;
+use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 
 pub(crate) struct W3Pair<'a> {
     two_sets: TwoSets<&'a String>,
@@ -29,7 +29,11 @@ impl<'a> W3Pair<'a> {
         }
     }
 
-    pub fn valid<TLog: EventLog>(&self, w3_relations: &HashSet<(&String, &String)>, provider: &AlphaPlusNfcRelationsProvider<TLog>) -> bool {
+    pub fn valid<TLog: EventLog>(
+        &self,
+        w3_relations: &HashSet<(&String, &String)>,
+        provider: &AlphaPlusNfcRelationsProvider<TLog>,
+    ) -> bool {
         for first in self.two_sets.first_set().iter() {
             for second in self.two_sets.second_set().iter() {
                 if !(w3_relations.contains(&(first, second))

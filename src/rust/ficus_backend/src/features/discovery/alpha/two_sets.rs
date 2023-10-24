@@ -15,10 +15,7 @@ where
     T: Hash + Eq + ToString + Ord + Copy,
 {
     pub fn new(first_set: BTreeSet<T>, second_set: BTreeSet<T>) -> Self {
-        Self {
-            first_set,
-            second_set
-        }
+        Self { first_set, second_set }
     }
 
     pub fn new_one_element(first: T, second: T) -> Self {

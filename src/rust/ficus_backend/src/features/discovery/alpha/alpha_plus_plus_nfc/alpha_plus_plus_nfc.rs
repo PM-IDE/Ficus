@@ -4,6 +4,9 @@ use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreati
 use crate::features::discovery::alpha::alpha::{
     discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop, ALPHA_SET,
 };
+use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc_triple::AlphaPlusPlusNfcTriple;
+use crate::features::discovery::alpha::alpha_plus_plus_nfc::extended_alpha_set::ExtendedAlphaSet;
+use crate::features::discovery::alpha::alpha_plus_plus_nfc::w3_pair::W3Pair;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
 use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::features::discovery::alpha::utils::maximize;
@@ -11,9 +14,6 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::user_data::user_data::UserData;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::Hash;
-use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc_triple::AlphaPlusPlusNfcTriple;
-use crate::features::discovery::alpha::alpha_plus_plus_nfc::extended_alpha_set::ExtendedAlphaSet;
-use crate::features::discovery::alpha::alpha_plus_plus_nfc::w3_pair::W3Pair;
 
 pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
