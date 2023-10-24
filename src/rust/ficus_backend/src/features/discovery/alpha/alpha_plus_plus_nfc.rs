@@ -1,7 +1,6 @@
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::analysis::patterns::activity_instances::process_activities_in_trace;
 use crate::features::discovery::alpha::alpha::{
     discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop, ALPHA_SET,
 };
@@ -11,9 +10,6 @@ use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::utils::hash_utils::compare_based_on_hashes;
 use crate::utils::user_data::user_data::UserData;
-use futures::AsyncReadExt;
-use quick_xml::name::PrefixDeclaration::Default;
-use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::hash::{Hash, Hasher};
 
@@ -86,6 +82,13 @@ impl<'a> AlphaPlusPlusNfcTriple<'a> {
         }
 
         true
+    }
+
+    pub fn two_sets(&self) -> TwoSets<&'a String> {
+        TwoSets {
+            first_set: self.a_classes.iter().chain(self.c_classes.iter()).map(|c| *c).collect(),
+            second_set: self.b_classes.iter().chain(self.c_classes.iter()).map(|c| *c).collect(),
+        }
     }
 }
 
@@ -261,6 +264,25 @@ impl<'a> ExtendedAlphaSet<'a> {
             right_extension: self.right_extension.iter().chain(&other.right_extension).map(|c| *c).collect(),
         }
     }
+
+    pub fn two_sets(&'a self) -> TwoSets<&'a String> {
+        TwoSets {
+            first_set: self
+                .alpha_set
+                .left_classes()
+                .iter()
+                .chain(self.left_extension.iter())
+                .map(|c| *c)
+                .collect(),
+            second_set: self
+                .alpha_set
+                .right_classes()
+                .iter()
+                .chain(self.right_extension.iter())
+                .map(|c| *c)
+                .collect(),
+        }
+    }
 }
 
 impl<'a> Hash for ExtendedAlphaSet<'a> {
@@ -314,15 +336,13 @@ impl<'a> ToString for ExtendedAlphaSet<'a> {
 }
 
 struct W3Pair<'a> {
-    first: BTreeSet<&'a String>,
-    second: BTreeSet<&'a String>,
+    two_sets: TwoSets<&'a String>,
 }
 
 impl<'a> W3Pair<'a> {
     pub fn new(first: &'a String, second: &'a String) -> Self {
         Self {
-            first: BTreeSet::from_iter(vec![first]),
-            second: BTreeSet::from_iter(vec![second]),
+            two_sets: TwoSets::new_one_element(first, second),
         }
     }
 
@@ -340,8 +360,8 @@ impl<'a> W3Pair<'a> {
     }
 
     fn valid<TLog: EventLog>(&self, w3_relations: &HashSet<(&String, &String)>, provider: &AlphaPlusNfcRelationsProvider<TLog>) -> bool {
-        for first in self.first.iter() {
-            for second in self.second.iter() {
+        for first in self.two_sets.first_set.iter() {
+            for second in self.two_sets.second_set.iter() {
                 if !(w3_relations.contains(&(first, second))
                     && provider.unrelated_relation(first, first)
                     && provider.unrelated_relation(second, second))
@@ -356,17 +376,18 @@ impl<'a> W3Pair<'a> {
 
     fn merge(&self, other: &Self) -> Self {
         Self {
-            first: self.first.iter().chain(other.first.iter()).map(|c| *c).collect(),
-            second: self.second.iter().chain(other.second.iter()).map(|c| *c).collect(),
+            two_sets: self.two_sets.merge(&other.two_sets),
         }
+    }
+
+    pub fn two_sets(&self) -> TwoSets<&'a String> {
+        self.two_sets.clone()
     }
 }
 
 impl<'a> Hash for W3Pair<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for class in self.first.iter().chain(self.second.iter()) {
-            state.write(class.as_bytes());
-        }
+        self.two_sets.hash(state)
     }
 }
 
@@ -381,8 +402,7 @@ impl<'a> Eq for W3Pair<'a> {}
 impl<'a> Clone for W3Pair<'a> {
     fn clone(&self) -> Self {
         Self {
-            first: self.first.iter().map(|c| *c).collect(),
-            second: self.second.iter().map(|c| *c).collect(),
+            two_sets: self.two_sets.clone(),
         }
     }
 }
@@ -397,25 +417,134 @@ impl<'a> Clone for ExtendedAlphaSet<'a> {
     }
 }
 
+struct TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    first_set: BTreeSet<T>,
+    second_set: BTreeSet<T>,
+}
+
+impl<T> TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    pub fn new(first_set: &BTreeSet<T>, second: &BTreeSet<T>) -> Self {
+        Self {
+            first_set: first_set.iter().map(|c| *c).collect(),
+            second_set: first_set.iter().map(|c| *c).collect(),
+        }
+    }
+
+    pub fn new_one_element(first: T, second: T) -> Self {
+        Self {
+            first_set: BTreeSet::from_iter(vec![first]),
+            second_set: BTreeSet::from_iter(vec![second]),
+        }
+    }
+
+    pub fn is_full_subset(&self, other: &Self) -> bool {
+        self.first_set.is_subset(&other.first_set) && self.second_set.is_subset(&other.second_set)
+    }
+
+    pub fn merge(&self, other: &TwoSets<T>) -> Self {
+        Self {
+            first_set: self.first_set.iter().chain(other.first_set.iter()).map(|c| *c).collect(),
+            second_set: self.second_set.iter().chain(other.second_set.iter()).map(|c| *c).collect(),
+        }
+    }
+}
+
+impl<T> Hash for TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for item in &self.first_set {
+            state.write(item.to_string().as_bytes());
+        }
+
+        for item in &self.second_set {
+            state.write(item.to_string().as_bytes());
+        }
+    }
+}
+
+impl<T> PartialEq for TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    fn eq(&self, other: &Self) -> bool {
+        compare_based_on_hashes(self, other)
+    }
+}
+
+impl<T> Eq for TwoSets<T> where T: Hash + Eq + ToString + Ord + Copy {}
+
+impl<T> Clone for TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    fn clone(&self) -> Self {
+        Self {
+            first_set: self.first_set.iter().map(|c| *c).collect(),
+            second_set: self.second_set.iter().map(|c| *c).collect(),
+        }
+    }
+}
+
+impl<T> ToString for TwoSets<T>
+where
+    T: Hash + Eq + ToString + Ord + Copy,
+{
+    fn to_string(&self) -> String {
+        let mut repr = String::new();
+        repr.push('(');
+
+        let mut write_set = |set: &BTreeSet<T>, repr: &mut String| {
+            repr.push('{');
+            for item in set {
+                repr.push_str(item.to_string().as_str());
+                repr.push(',');
+            }
+
+            if set.len() > 0 {
+                repr.remove(repr.len() - 1);
+            }
+
+            repr.push('}');
+        };
+
+        write_set(&self.first_set, &mut repr);
+
+        repr.push_str(", ");
+
+        write_set(&self.second_set, &mut repr);
+
+        repr.push(')');
+        repr
+    }
+}
+
 pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
 
     let provider = AlphaPlusNfcRelationsProvider::new(&info, log);
 
-    let mut triples = HashSet::new();
+    let mut x_w = HashSet::new();
 
     for a_class in info.all_event_classes() {
         for b_class in info.all_event_classes() {
             for c_class in &one_length_loop_transitions {
                 if let Some(triple) = AlphaPlusPlusNfcTriple::try_new(a_class, b_class, c_class, &provider) {
-                    triples.insert(triple);
+                    x_w.insert(triple);
                 }
             }
         }
     }
 
-    let mut current_triples = maximize(triples, |first, second| AlphaPlusPlusNfcTriple::try_merge(first, second, &provider));
+    let l_w = maximize(x_w, |first, second| AlphaPlusPlusNfcTriple::try_merge(first, second, &provider));
 
     let petri_net = discover_petri_net_alpha_plus(log, false);
 
@@ -500,6 +629,38 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
             None
         }
     });
+
+    let mut p_w = HashSet::new();
+    let check_should_add_to_pw = |two_sets: &TwoSets<&String>| {
+        for l_w_item in &l_w {
+            if l_w_item.a_classes.eq(&two_sets.first_set) && l_w_item.b_classes.eq(&two_sets.second_set) {
+                return false;
+            }
+        }
+
+        true
+    };
+
+    for item in &z_w {
+        if check_should_add_to_pw(&item.two_sets) {
+            p_w.insert(item.two_sets());
+        }
+    }
+
+    for item in &y_w {
+        let two_sets = item.two_sets();
+        if check_should_add_to_pw(&two_sets) {
+            p_w.insert(two_sets);
+        }
+    }
+
+    for l_w_item in &l_w {
+        p_w.insert(l_w_item.two_sets());
+    }
+
+    for p in &p_w {
+        println!("{}", p.to_string());
+    }
 }
 
 fn eliminate_by_reduction_rule_1<TLog: EventLog>(
