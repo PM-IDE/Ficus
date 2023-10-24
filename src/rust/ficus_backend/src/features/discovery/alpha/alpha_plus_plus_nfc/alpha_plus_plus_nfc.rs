@@ -11,11 +11,13 @@ use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::Alpha
 use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use crate::features::discovery::petri_net::place::Place;
+use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::user_data::user_data::UserData;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::Hash;
 
-pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
+pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> DefaultPetriNet {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
 
@@ -147,9 +149,25 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) {
         p_w.insert(l_w_item.two_sets());
     }
 
-    for p in &p_w {
-        println!("{}", p.to_string());
+    let mut resulting_net = DefaultPetriNet::empty();
+    let mut transitions_to_ids = HashMap::new();
+    for transition in info.all_event_classes().iter().chain(one_length_loop_transitions.iter()) {
+        let id = resulting_net.add_transition(Transition::empty((*transition).to_owned(), None));
+        transitions_to_ids.insert(*transition, id);
     }
+
+    for place in &p_w {
+        let place_id = resulting_net.add_place(Place::with_name(place.to_string()));
+        for transition in place.first_set() {
+            resulting_net.connect_place_to_transition(&place_id, transitions_to_ids.get(transition).unwrap(), None);
+        }
+
+        for transition in place.second_set() {
+            resulting_net.connect_transition_to_place(transitions_to_ids.get(transition).unwrap(), &place_id, None);
+        }
+    }
+
+    resulting_net
 }
 
 fn eliminate_by_reduction_rule_1<TLog: EventLog>(
