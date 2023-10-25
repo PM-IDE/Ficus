@@ -1,6 +1,7 @@
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus};
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc;
+use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};
@@ -14,7 +15,8 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA, &|context, infra, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
-            let discovered_net = discover_petri_net_alpha(&event_log_info);
+            let provider = DefaultAlphaRelationsProvider::new(event_log_info.dfg_info());
+            let discovered_net = discover_petri_net_alpha(&event_log_info, &provider);
 
             context.put_concrete(keys.petri_net().key(), discovered_net);
 

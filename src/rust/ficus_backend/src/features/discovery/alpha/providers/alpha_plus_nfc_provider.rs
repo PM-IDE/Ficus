@@ -28,6 +28,36 @@ where
     w3_cache: RelationsCache,
 }
 
+impl<'a, TLog> AlphaRelationsProvider for AlphaPlusNfcRelationsProvider<'a, TLog>
+where
+    TLog: EventLog,
+{
+    fn causal_relation(&self, first: &str, second: &str) -> bool {
+        if self.additional_causal_relations.contains(&(first, second)) {
+            return true;
+        }
+
+        self.alpha_plus_provider.direct_relation(first, second)
+            && (!self.alpha_plus_provider.direct_relation(second, first)
+                || self.triangle_relation(first, second)
+                || self.triangle_relation(second, first))
+    }
+
+    fn parallel_relation(&self, first: &str, second: &str) -> bool {
+        self.direct_relation(first, second)
+            && self.direct_relation(second, first)
+            && !(self.triangle_relation(first, second) || self.triangle_relation(second, first))
+    }
+
+    fn direct_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.direct_relation(first, second)
+    }
+
+    fn unrelated_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.unrelated_relation(first, second)
+    }
+}
+
 impl<'a, TLog> AlphaPlusNfcRelationsProvider<'a, TLog>
 where
     TLog: EventLog,
@@ -52,31 +82,6 @@ where
 
     pub fn triangle_relation(&self, first: &str, second: &str) -> bool {
         self.alpha_plus_provider.triangle_relation(first, second)
-    }
-
-    pub fn direct_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.direct_relation(first, second)
-    }
-
-    pub fn causal_relation(&self, first: &'a str, second: &'a str) -> bool {
-        if self.additional_causal_relations.contains(&(first, second)) {
-            return true;
-        }
-
-        self.alpha_plus_provider.direct_relation(first, second)
-            && (!self.alpha_plus_provider.direct_relation(second, first)
-                || self.triangle_relation(first, second)
-                || self.triangle_relation(second, first))
-    }
-
-    pub fn unrelated_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.unrelated_relation(first, second)
-    }
-
-    pub fn parallel_relation(&self, first: &str, second: &str) -> bool {
-        self.direct_relation(first, second)
-            && self.direct_relation(second, first)
-            && !(self.triangle_relation(first, second) || self.triangle_relation(second, first))
     }
 
     pub fn left_triangle_relation(&self, first: &str, second: &str) -> bool {

@@ -64,7 +64,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
     eliminate_by_reduction_rule_1(&mut w2_relations, &mut provider, &petri_net, &info);
 
     let mut x_w = HashSet::new();
-    let alpha_net = discover_petri_net_alpha(&info);
+    let alpha_net = discover_petri_net_alpha(&info, &provider);
 
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
@@ -93,6 +93,10 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
             x_w.insert(ExtendedAlphaSet::new_without_extensions(alpha_set.clone()));
         }
+    }
+
+    for x in &x_w {
+        println!("{}", x.to_string());
     }
 
     let y_w = maximize(x_w, |first, second| {

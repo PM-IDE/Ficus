@@ -19,11 +19,9 @@ use std::string::ToString;
 
 pub static ALPHA_SET: Lazy<DefaultKey<AlphaSet>> = Lazy::new(|| DefaultKey::new("alpha_set".to_string()));
 
-pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo) -> DefaultPetriNet {
+pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
     let dfg_info = event_log_info.dfg_info();
-    let provider = DefaultAlphaRelationsProvider::new(&dfg_info);
-
-    do_discover_petri_net_alpha(event_log_info, &provider)
+    do_discover_petri_net_alpha(event_log_info, provider)
 }
 
 pub fn discover_petri_net_alpha_plus(log: &impl EventLog, alpha_plus_plus: bool) -> DefaultPetriNet {
