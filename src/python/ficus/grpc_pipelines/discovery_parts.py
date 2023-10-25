@@ -25,6 +25,11 @@ class DiscoverPetriNetAlphaPlusPlus2(PipelinePart2):
         return _create_default_discovery_part(const_discover_petri_net_alpha_plus_plus)
 
 
+class DiscoverPetriNetAlphaPlusPlusNfc2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return _create_default_discovery_part(const_discover_petri_net_alpha_plus_plus_nfc)
+
+
 class SerializePetriNetToPNML2(PipelinePart2):
     def __init__(self, save_path, use_names_as_ids: bool = False):
         super().__init__()

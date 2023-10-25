@@ -59,6 +59,7 @@ const_add_start_artificial_events = 'AddArtificialStartEvents'
 const_add_end_artificial_events = 'AddArtificialEndEvents'
 const_discover_petri_net_alpha_plus = 'DiscoverPetriNetAlphaPlus'
 const_discover_petri_net_alpha_plus_plus = 'DiscoverPetriNetAlphaPlusPlus'
+const_discover_petri_net_alpha_plus_plus_nfc = 'DiscoverPetriNetAlphaPlusPlusNfc'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'
