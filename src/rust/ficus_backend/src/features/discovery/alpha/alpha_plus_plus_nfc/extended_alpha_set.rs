@@ -29,6 +29,22 @@ impl<'a> ExtendedAlphaSet<'a> {
         }
     }
 
+    pub fn new_only_left(alpha_set: AlphaSet, left_extension: &'a String) -> Self {
+        Self {
+            alpha_set,
+            left_extension: BTreeSet::from_iter(vec![left_extension]),
+            right_extension: BTreeSet::new(),
+        }
+    }
+
+    pub fn new_only_right(alpha_set: AlphaSet, right_extension: &'a String) -> Self {
+        Self {
+            alpha_set,
+            left_extension: BTreeSet::new(),
+            right_extension: BTreeSet::from_iter(vec![right_extension]),
+        }
+    }
+
     pub fn try_new<TLog: EventLog>(
         alpha_set: AlphaSet,
         left_extension: &'a String,
@@ -38,6 +54,34 @@ impl<'a> ExtendedAlphaSet<'a> {
         w2_relations: &HashSet<(&'a String, &'a String)>,
     ) -> Option<Self> {
         let new_set = Self::new(alpha_set, left_extension, right_extension);
+        match new_set.valid(provider, w1_relations, w2_relations) {
+            true => Some(new_set),
+            false => None,
+        }
+    }
+
+    pub fn try_new_only_left<TLog: EventLog>(
+        alpha_set: AlphaSet,
+        left_extension: &'a String,
+        provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+        w1_relations: &HashSet<(&'a String, &'a String)>,
+        w2_relations: &HashSet<(&'a String, &'a String)>,
+    ) -> Option<Self> {
+        let new_set = Self::new_only_left(alpha_set, left_extension);
+        match new_set.valid(provider, w1_relations, w2_relations) {
+            true => Some(new_set),
+            false => None,
+        }
+    }
+
+    pub fn try_new_only_right<TLog: EventLog>(
+        alpha_set: AlphaSet,
+        right_extension: &'a String,
+        provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+        w1_relations: &HashSet<(&'a String, &'a String)>,
+        w2_relations: &HashSet<(&'a String, &'a String)>,
+    ) -> Option<Self> {
+        let new_set = Self::new_only_right(alpha_set, right_extension);
         match new_set.valid(provider, w1_relations, w2_relations) {
             true => Some(new_set),
             false => None,

@@ -74,6 +74,18 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
                     x_w.insert(extended_alpha_set);
                 }
             }
+
+            for class in info.all_event_classes() {
+                let set = ExtendedAlphaSet::try_new_only_left(alpha_set.clone(), class, &mut provider, &w1_relations, &w2_relations);
+                if let Some(set) = set {
+                    x_w.insert(set);
+                }
+
+                let set = ExtendedAlphaSet::try_new_only_right(alpha_set.clone(), class, &mut provider, &w1_relations, &w2_relations);
+                if let Some(set) = set {
+                    x_w.insert(set);
+                }
+            }
         }
     }
 
