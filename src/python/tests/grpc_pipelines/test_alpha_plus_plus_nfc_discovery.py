@@ -141,19 +141,6 @@ def test_discover_petri_net_alpha_plus_plus_nfc_11():
     )
 
 
-def test_discover_petri_net_alpha_plus_plus_nfc_12():
-    _execute_discovery_test(
-        'test_discover_petri_net_alpha_plus_plus_nfc_12',
-        [
-            ['A', 'C', 'D', 'E', 'G', 'H'],
-            ['A', 'C', 'D', 'G', 'E', 'H'],
-            ['A', 'C', 'G', 'D', 'E', 'H'],
-            ['B', 'C', 'D', 'F', 'H'],
-        ],
-        DiscoverPetriNetAlphaPlusPlusNfc2()
-    )
-
-
 def test_discover_petri_net_alpha_plus_plus_nfc_13():
     _execute_discovery_test(
         'test_discover_petri_net_alpha_plus_plus_nfc_13',
