@@ -19,7 +19,6 @@ where
 {
     additional_causal_relations: HashSet<(&'a str, &'a str)>,
     alpha_plus_provider: AlphaPlusRelationsProviderImpl<'a>,
-    info: &'a EventLogInfo,
     log: &'a TLog,
     right_double_arrow_cache: RelationsCache,
     w1_cache: RelationsCache,
@@ -56,6 +55,10 @@ where
     fn unrelated_relation(&self, first: &str, second: &str) -> bool {
         self.alpha_plus_provider.unrelated_relation(first, second)
     }
+
+    fn log_info(&self) -> &EventLogInfo {
+        self.alpha_plus_provider.log_info()
+    }
 }
 
 impl<'a, TLog> AlphaPlusRelationsProvider for AlphaPlusNfcRelationsProvider<'a, TLog>
@@ -69,17 +72,20 @@ where
     fn romb_relation(&self, first: &str, second: &str) -> bool {
         self.triangle_relation(first, second) && self.triangle_relation(second, first)
     }
+
+    fn one_length_loop_transitions(&self) -> &HashSet<String> {
+        self.alpha_plus_provider.one_length_loop_transitions()
+    }
 }
 
 impl<'a, TLog> AlphaPlusNfcRelationsProvider<'a, TLog>
 where
     TLog: EventLog,
 {
-    pub fn new(info: &'a EventLogInfo, log: &'a TLog) -> Self {
+    pub fn new(info: &'a EventLogInfo, log: &'a TLog, one_length_loop_transitions: &'a HashSet<String>) -> Self {
         Self {
             additional_causal_relations: HashSet::new(),
-            alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info.dfg_info(), log),
-            info,
+            alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info, log, one_length_loop_transitions),
             log,
             right_double_arrow_cache: RelationsCache::empty(),
             w1_cache: RelationsCache::empty(),
@@ -89,8 +95,8 @@ where
         }
     }
 
-    pub fn log_info(&self) -> &'a EventLogInfo {
-        self.info
+    pub fn log_info(&'a self) -> &'a EventLogInfo {
+        self.alpha_plus_provider.log_info()
     }
 
     pub fn left_triangle_relation(&self, first: &str, second: &str) -> bool {
@@ -98,7 +104,7 @@ where
             return false;
         }
 
-        for class in self.info.all_event_classes() {
+        for class in self.log_info().all_event_classes() {
             if self.causal_relation(class, first) && self.causal_relation(class, second) {
                 return true;
             }
@@ -112,7 +118,7 @@ where
             return false;
         }
 
-        for class in self.info.all_event_classes() {
+        for class in self.log_info().all_event_classes() {
             if self.causal_relation(first, class) && self.causal_relation(second, class) {
                 return true;
             }
@@ -155,7 +161,7 @@ where
                         for j in (first_index + 1)..i {
                             let event = events[j].borrow();
                             let event_name = event.name();
-                            if self.info.event_count(event_name) == 0 {
+                            if self.log_info().event_count(event_name) == 0 {
                                 continue;
                             }
 
@@ -197,7 +203,7 @@ where
             return false;
         }
 
-        for event_class in self.info.all_event_classes() {
+        for event_class in self.alpha_plus_provider.log_info.all_event_classes() {
             if let Some(transition) = petri_net.find_transition_by_name(event_class) {
                 for first_incoming_arc in transition.incoming_arcs() {
                     'second_loop: for second_incoming_arc in transition.incoming_arcs() {
@@ -281,7 +287,7 @@ where
                 return false;
             }
 
-            for second_streak in self.info.all_event_classes() {
+            for second_streak in self.alpha_plus_provider.log_info.all_event_classes() {
                 if !self.left_triangle_relation(second, second_streak) {
                     continue;
                 }
@@ -337,7 +343,7 @@ where
                 return false;
             }
 
-            for first_streak in self.info.all_event_classes() {
+            for first_streak in self.alpha_plus_provider.log_info.all_event_classes() {
                 if !self.right_triangle_relation(first, first_streak) {
                     continue;
                 }
@@ -393,8 +399,8 @@ where
         let first_post_set = Self::get_pre_or_post_set(petri_net, first, PrePostSet::PostSet);
         let second_pre_set = Self::get_pre_or_post_set(petri_net, second, PrePostSet::PreSet);
 
-        for first_streak in self.info.all_event_classes() {
-            for second_streak in self.info.all_event_classes() {
+        for first_streak in self.alpha_plus_provider.log_info.all_event_classes() {
+            for second_streak in self.alpha_plus_provider.log_info.all_event_classes() {
                 if first_streak == second_streak {
                     continue;
                 }
@@ -425,7 +431,7 @@ where
                 }
 
                 let mut right_set = HashSet::new();
-                for task in self.info.all_event_classes() {
+                for task in self.alpha_plus_provider.log_info.all_event_classes() {
                     if self.right_double_arrow_relation(first, task) {
                         continue;
                     }

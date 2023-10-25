@@ -5,15 +5,17 @@ pub trait AlphaRelationsProvider {
     fn parallel_relation(&self, first: &str, second: &str) -> bool;
     fn direct_relation(&self, first: &str, second: &str) -> bool;
     fn unrelated_relation(&self, first: &str, second: &str) -> bool;
+
+    fn log_info(&self) -> &EventLogInfo;
 }
 
 pub struct DefaultAlphaRelationsProvider<'a> {
-    dfg_info: &'a DfgInfo,
+    log_info: &'a EventLogInfo,
 }
 
 impl<'a> DefaultAlphaRelationsProvider<'a> {
-    pub fn new(dfg_info: &'a DfgInfo) -> Self {
-        Self { dfg_info }
+    pub fn new(log_info: &'a EventLogInfo) -> Self {
+        Self { log_info }
     }
 }
 
@@ -27,10 +29,14 @@ impl<'a> AlphaRelationsProvider for DefaultAlphaRelationsProvider<'a> {
     }
 
     fn direct_relation(&self, first: &str, second: &str) -> bool {
-        self.dfg_info.is_in_directly_follows_relation(first, second)
+        self.log_info.dfg_info().is_in_directly_follows_relation(first, second)
     }
 
     fn unrelated_relation(&self, first: &str, second: &str) -> bool {
         !self.direct_relation(first, second) && !self.direct_relation(second, first)
+    }
+
+    fn log_info(&self) -> &EventLogInfo {
+        self.log_info
     }
 }

@@ -16,8 +16,8 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA, &|context, infra, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
-            let provider = DefaultAlphaRelationsProvider::new(event_log_info.dfg_info());
-            let discovered_net = discover_petri_net_alpha(&event_log_info, &provider);
+            let provider = DefaultAlphaRelationsProvider::new(&event_log_info);
+            let discovered_net = discover_petri_net_alpha(&provider);
 
             context.put_concrete(keys.petri_net().key(), discovered_net);
 
@@ -54,10 +54,9 @@ impl PipelineParts {
         let one_length_loop_transitions = find_transitions_one_length_loop(log);
         let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
 
-        let dfg_info = event_log_info.dfg_info();
-        let provider = AlphaPlusRelationsProviderImpl::new(dfg_info, log);
+        let provider = AlphaPlusRelationsProviderImpl::new(&event_log_info, log, &one_length_loop_transitions);
 
-        let discovered_net = discover_petri_net_alpha_plus(log, &provider, &event_log_info, &one_length_loop_transitions, alpha_plus_plus);
+        let discovered_net = discover_petri_net_alpha_plus(log, &provider, alpha_plus_plus);
 
         context.put_concrete(keys.petri_net().key(), discovered_net);
 

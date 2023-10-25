@@ -2,6 +2,7 @@ use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::alpha_plus_provider::{AlphaPlusRelationsProvider, AlphaPlusRelationsProviderImpl};
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
+use std::collections::HashSet;
 
 pub struct AlphaSharpRelationsProvider<'a> {
     alpha_plus_provider: AlphaPlusRelationsProviderImpl<'a>,
@@ -23,6 +24,10 @@ impl<'a> AlphaRelationsProvider for AlphaSharpRelationsProvider<'a> {
 
     fn unrelated_relation(&self, first: &str, second: &str) -> bool {
         self.alpha_plus_provider.unrelated_relation(first, second)
+    }
+
+    fn log_info(&self) -> &EventLogInfo {
+        self.alpha_plus_provider.log_info()
     }
 }
 
@@ -83,9 +88,9 @@ impl<'a> AlphaSharpRelationsProvider<'a> {
 }
 
 impl<'a> AlphaSharpRelationsProvider<'a> {
-    pub fn new(log: &'a impl EventLog, info: &'a EventLogInfo) -> Self {
+    pub fn new(log: &'a impl EventLog, info: &'a EventLogInfo, one_length_loop_transitions: &'a HashSet<String>) -> Self {
         Self {
-            alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info.dfg_info(), log),
+            alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info, log, one_length_loop_transitions),
             info,
         }
     }

@@ -21,7 +21,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
 
-    let provider = AlphaPlusNfcRelationsProvider::new(&info, log);
+    let provider = AlphaPlusNfcRelationsProvider::new(&info, log, &one_length_loop_transitions);
 
     let mut x_w = HashSet::new();
 
@@ -37,10 +37,10 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
 
     let l_w = maximize(x_w, |first, second| AlphaPlusPlusNfcTriple::try_merge(first, second, &provider));
 
-    let petri_net = discover_petri_net_alpha_plus(log, &provider, &info, &one_length_loop_transitions, false);
+    let petri_net = discover_petri_net_alpha_plus(log, &provider, false);
 
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
-    let mut provider = AlphaPlusNfcRelationsProvider::new(&info, log);
+    let mut provider = AlphaPlusNfcRelationsProvider::new(&info, log, &one_length_loop_transitions);
 
     let mut w1_relations = HashSet::new();
     for a_class in info.all_event_classes() {
@@ -64,7 +64,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
     eliminate_by_reduction_rule_1(&mut w2_relations, &mut provider, &petri_net, &info);
 
     let mut x_w = HashSet::new();
-    let alpha_net = discover_petri_net_alpha(&info, &provider);
+    let alpha_net = discover_petri_net_alpha(&provider);
 
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {

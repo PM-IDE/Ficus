@@ -1,22 +1,25 @@
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::trace::Trace;
-use crate::features::analysis::event_log_info::DfgInfo;
+use crate::features::analysis::event_log_info::{DfgInfo, EventLogInfo};
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use std::collections::HashSet;
 
 pub trait AlphaPlusRelationsProvider: AlphaRelationsProvider {
     fn triangle_relation(&self, first: &str, second: &str) -> bool;
     fn romb_relation(&self, first: &str, second: &str) -> bool;
+
+    fn one_length_loop_transitions(&self) -> &HashSet<String>;
 }
 
 pub struct AlphaPlusRelationsProviderImpl<'a> {
-    dfg_info: &'a DfgInfo,
+    pub log_info: &'a EventLogInfo,
     triangle_relations: HashSet<(String, String)>,
+    one_length_loop_transitions: &'a HashSet<String>,
 }
 
 impl<'a> AlphaPlusRelationsProviderImpl<'a> {
-    pub fn new(dfg_info: &'a DfgInfo, log: &'a impl EventLog) -> Self {
+    pub fn new(log_info: &'a EventLogInfo, log: &'a impl EventLog, one_length_loop_transitions: &'a HashSet<String>) -> Self {
         let mut triangle_relations = HashSet::new();
         for trace in log.traces() {
             let trace = trace.borrow();
@@ -33,8 +36,9 @@ impl<'a> AlphaPlusRelationsProviderImpl<'a> {
         }
 
         Self {
-            dfg_info,
+            log_info,
             triangle_relations,
+            one_length_loop_transitions,
         }
     }
 }
@@ -49,11 +53,15 @@ impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProviderImpl<'a> {
     }
 
     fn direct_relation(&self, first: &str, second: &str) -> bool {
-        self.dfg_info.is_in_directly_follows_relation(first, second)
+        self.log_info.dfg_info().is_in_directly_follows_relation(first, second)
     }
 
     fn unrelated_relation(&self, first: &str, second: &str) -> bool {
         !self.direct_relation(first, second) && !self.direct_relation(second, first)
+    }
+
+    fn log_info(&self) -> &EventLogInfo {
+        self.log_info
     }
 }
 
@@ -64,5 +72,9 @@ impl<'a> AlphaPlusRelationsProvider for AlphaPlusRelationsProviderImpl<'a> {
 
     fn romb_relation(&self, first: &str, second: &str) -> bool {
         self.triangle_relation(first, second) && self.triangle_relation(second, first)
+    }
+
+    fn one_length_loop_transitions(&self) -> &HashSet<String> {
+        self.one_length_loop_transitions
     }
 }

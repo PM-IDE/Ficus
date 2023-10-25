@@ -19,22 +19,20 @@ use std::string::ToString;
 
 pub static ALPHA_SET: Lazy<DefaultKey<AlphaSet>> = Lazy::new(|| DefaultKey::new("alpha_set".to_string()));
 
-pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
-    do_discover_petri_net_alpha(event_log_info, provider)
+pub fn discover_petri_net_alpha(provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
+    do_discover_petri_net_alpha(provider)
 }
 
 pub fn discover_petri_net_alpha_plus(
     log: &impl EventLog,
     provider: &impl AlphaPlusRelationsProvider,
-    info: &EventLogInfo,
-    one_length_loop_transitions: &HashSet<String>,
     alpha_plus_plus: bool,
 ) -> DefaultPetriNet {
-    let mut petri_net = do_discover_petri_net_alpha(info, provider);
-    add_one_length_loops(log, one_length_loop_transitions, &mut petri_net);
+    let mut petri_net = do_discover_petri_net_alpha(provider);
+    add_one_length_loops(log, provider.one_length_loop_transitions(), &mut petri_net);
 
     if alpha_plus_plus {
-        add_alpha_plus_plus_transitions(log, one_length_loop_transitions, &mut petri_net);
+        add_alpha_plus_plus_transitions(log, provider.one_length_loop_transitions(), &mut petri_net);
     }
 
     petri_net
@@ -132,14 +130,16 @@ pub fn find_transitions_one_length_loop(log: &impl EventLog) -> HashSet<String> 
     one_loop_transitions
 }
 
-fn do_discover_petri_net_alpha(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
-    let mut current_sets = create_initial_sets(info, provider);
+fn do_discover_petri_net_alpha(provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
+    let mut current_sets = create_initial_sets(provider);
     current_sets = maximize_sets(current_sets, provider);
 
-    create_petri_net(info, filter_out_non_maximal_sets(&current_sets))
+    create_petri_net(provider.log_info(), filter_out_non_maximal_sets(&current_sets))
 }
 
-fn create_initial_sets(info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
+fn create_initial_sets(provider: &impl AlphaRelationsProvider) -> HashSet<AlphaSet> {
+    let info = provider.log_info();
+
     info.all_event_classes()
         .iter()
         .filter(|class| info.dfg_info().get_followed_events(class).is_some() && provider.unrelated_relation(class, class))
