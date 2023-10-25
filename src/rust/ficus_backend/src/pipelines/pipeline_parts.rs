@@ -64,6 +64,7 @@ impl PipelineParts {
             Self::add_artificial_end_events(),
             Self::discover_petri_net_alpha_plus(),
             Self::discover_petri_net_alpha_plus_plus(),
+            Self::discover_petri_net_alpha_plus_plus_nfc(),
         ];
 
         let mut names_to_parts = HashMap::new();
