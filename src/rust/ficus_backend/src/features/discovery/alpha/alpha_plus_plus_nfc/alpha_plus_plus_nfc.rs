@@ -37,7 +37,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
 
     let l_w = maximize(x_w, |first, second| AlphaPlusPlusNfcTriple::try_merge(first, second, &provider));
 
-    let petri_net = discover_petri_net_alpha_plus(log, false);
+    let petri_net = discover_petri_net_alpha_plus(log, &provider, &info, &one_length_loop_transitions, false);
 
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
     let mut provider = AlphaPlusNfcRelationsProvider::new(&info, log);
@@ -93,10 +93,6 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
             x_w.insert(ExtendedAlphaSet::new_without_extensions(alpha_set.clone()));
         }
-    }
-
-    for x in &x_w {
-        println!("{}", x.to_string());
     }
 
     let y_w = maximize(x_w, |first, second| {

@@ -1,6 +1,7 @@
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus};
+use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop};
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc;
+use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProviderImpl;
 use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
@@ -50,7 +51,13 @@ impl PipelineParts {
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
 
-        let discovered_net = discover_petri_net_alpha_plus(log, alpha_plus_plus);
+        let one_length_loop_transitions = find_transitions_one_length_loop(log);
+        let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
+
+        let dfg_info = event_log_info.dfg_info();
+        let provider = AlphaPlusRelationsProviderImpl::new(dfg_info, log);
+
+        let discovered_net = discover_petri_net_alpha_plus(log, &provider, &event_log_info, &one_length_loop_transitions, alpha_plus_plus);
 
         context.put_concrete(keys.petri_net().key(), discovered_net);
 

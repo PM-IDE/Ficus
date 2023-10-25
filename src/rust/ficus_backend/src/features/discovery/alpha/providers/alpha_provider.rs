@@ -1,4 +1,4 @@
-use crate::features::analysis::event_log_info::DfgInfo;
+use crate::features::analysis::event_log_info::{DfgInfo, EventLogInfo};
 
 pub trait AlphaRelationsProvider {
     fn causal_relation(&self, first: &str, second: &str) -> bool;

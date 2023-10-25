@@ -2,7 +2,7 @@ use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::EventLogInfo;
-use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
+use crate::features::discovery::alpha::providers::alpha_plus_provider::{AlphaPlusRelationsProvider, AlphaPlusRelationsProviderImpl};
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use crate::features::discovery::alpha::providers::relations_cache::RelationsCache;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
@@ -18,7 +18,7 @@ where
     TLog: EventLog,
 {
     additional_causal_relations: HashSet<(&'a str, &'a str)>,
-    alpha_plus_provider: AlphaPlusRelationsProvider<'a>,
+    alpha_plus_provider: AlphaPlusRelationsProviderImpl<'a>,
     info: &'a EventLogInfo,
     log: &'a TLog,
     right_double_arrow_cache: RelationsCache,
@@ -58,6 +58,19 @@ where
     }
 }
 
+impl<'a, TLog> AlphaPlusRelationsProvider for AlphaPlusNfcRelationsProvider<'a, TLog>
+where
+    TLog: EventLog,
+{
+    fn triangle_relation(&self, first: &str, second: &str) -> bool {
+        self.alpha_plus_provider.triangle_relation(first, second)
+    }
+
+    fn romb_relation(&self, first: &str, second: &str) -> bool {
+        self.triangle_relation(first, second) && self.triangle_relation(second, first)
+    }
+}
+
 impl<'a, TLog> AlphaPlusNfcRelationsProvider<'a, TLog>
 where
     TLog: EventLog,
@@ -65,7 +78,7 @@ where
     pub fn new(info: &'a EventLogInfo, log: &'a TLog) -> Self {
         Self {
             additional_causal_relations: HashSet::new(),
-            alpha_plus_provider: AlphaPlusRelationsProvider::new(info.dfg_info(), log),
+            alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info.dfg_info(), log),
             info,
             log,
             right_double_arrow_cache: RelationsCache::empty(),
@@ -78,10 +91,6 @@ where
 
     pub fn log_info(&self) -> &'a EventLogInfo {
         self.info
-    }
-
-    pub fn triangle_relation(&self, first: &str, second: &str) -> bool {
-        self.alpha_plus_provider.triangle_relation(first, second)
     }
 
     pub fn left_triangle_relation(&self, first: &str, second: &str) -> bool {

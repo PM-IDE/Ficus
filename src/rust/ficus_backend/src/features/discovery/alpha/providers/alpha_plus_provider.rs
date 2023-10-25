@@ -5,12 +5,17 @@ use crate::features::analysis::event_log_info::DfgInfo;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use std::collections::HashSet;
 
-pub struct AlphaPlusRelationsProvider<'a> {
+pub trait AlphaPlusRelationsProvider: AlphaRelationsProvider {
+    fn triangle_relation(&self, first: &str, second: &str) -> bool;
+    fn romb_relation(&self, first: &str, second: &str) -> bool;
+}
+
+pub struct AlphaPlusRelationsProviderImpl<'a> {
     dfg_info: &'a DfgInfo,
     triangle_relations: HashSet<(String, String)>,
 }
 
-impl<'a> AlphaPlusRelationsProvider<'a> {
+impl<'a> AlphaPlusRelationsProviderImpl<'a> {
     pub fn new(dfg_info: &'a DfgInfo, log: &'a impl EventLog) -> Self {
         let mut triangle_relations = HashSet::new();
         for trace in log.traces() {
@@ -34,7 +39,7 @@ impl<'a> AlphaPlusRelationsProvider<'a> {
     }
 }
 
-impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProvider<'a> {
+impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProviderImpl<'a> {
     fn causal_relation(&self, first: &str, second: &str) -> bool {
         self.direct_relation(first, second) && (!self.direct_relation(second, first) || self.romb_relation(first, second))
     }
@@ -52,12 +57,12 @@ impl<'a> AlphaRelationsProvider for AlphaPlusRelationsProvider<'a> {
     }
 }
 
-impl<'a> AlphaPlusRelationsProvider<'a> {
-    pub fn triangle_relation(&self, first: &str, second: &str) -> bool {
+impl<'a> AlphaPlusRelationsProvider for AlphaPlusRelationsProviderImpl<'a> {
+    fn triangle_relation(&self, first: &str, second: &str) -> bool {
         self.triangle_relations.contains(&(first.to_owned(), second.to_owned()))
     }
 
-    pub fn romb_relation(&self, first: &str, second: &str) -> bool {
+    fn romb_relation(&self, first: &str, second: &str) -> bool {
         self.triangle_relation(first, second) && self.triangle_relation(second, first)
     }
 }

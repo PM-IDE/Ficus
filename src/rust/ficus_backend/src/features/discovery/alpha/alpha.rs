@@ -20,21 +20,21 @@ use std::string::ToString;
 pub static ALPHA_SET: Lazy<DefaultKey<AlphaSet>> = Lazy::new(|| DefaultKey::new("alpha_set".to_string()));
 
 pub fn discover_petri_net_alpha(event_log_info: &EventLogInfo, provider: &impl AlphaRelationsProvider) -> DefaultPetriNet {
-    let dfg_info = event_log_info.dfg_info();
     do_discover_petri_net_alpha(event_log_info, provider)
 }
 
-pub fn discover_petri_net_alpha_plus(log: &impl EventLog, alpha_plus_plus: bool) -> DefaultPetriNet {
-    let one_length_loop_transitions = find_transitions_one_length_loop(log);
-    let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default_ignore(log, &one_length_loop_transitions));
-    let dfg_info = event_log_info.dfg_info();
-    let provider = AlphaPlusRelationsProvider::new(dfg_info, log);
-
-    let mut petri_net = do_discover_petri_net_alpha(&event_log_info, &provider);
-    add_one_length_loops(log, &one_length_loop_transitions, &mut petri_net);
+pub fn discover_petri_net_alpha_plus(
+    log: &impl EventLog,
+    provider: &impl AlphaPlusRelationsProvider,
+    info: &EventLogInfo,
+    one_length_loop_transitions: &HashSet<String>,
+    alpha_plus_plus: bool,
+) -> DefaultPetriNet {
+    let mut petri_net = do_discover_petri_net_alpha(info, provider);
+    add_one_length_loops(log, one_length_loop_transitions, &mut petri_net);
 
     if alpha_plus_plus {
-        add_alpha_plus_plus_transitions(log, &one_length_loop_transitions, &mut petri_net);
+        add_alpha_plus_plus_transitions(log, one_length_loop_transitions, &mut petri_net);
     }
 
     petri_net

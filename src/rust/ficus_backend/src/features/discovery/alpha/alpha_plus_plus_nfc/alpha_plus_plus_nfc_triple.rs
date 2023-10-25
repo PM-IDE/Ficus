@@ -1,5 +1,6 @@
 use crate::event_log::core::event_log::EventLog;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
+use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProvider;
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
 use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::utils::hash_utils::compare_based_on_hashes;
