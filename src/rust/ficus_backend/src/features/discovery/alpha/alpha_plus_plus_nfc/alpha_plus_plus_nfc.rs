@@ -65,6 +65,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
 
     let mut x_w = HashSet::new();
     let alpha_net = discover_petri_net_alpha(&info);
+
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
             for pair in w1_relations.iter().chain(w2_relations.iter()) {
@@ -82,9 +83,17 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         }
     }
 
-    let y_w = maximize(x_w, |first, second| match first.subset(second) {
-        true => Some(first.merge(second)),
-        false => None,
+    let y_w = maximize(x_w, |first, second| {
+        if !first.alpha_set().eq(second.alpha_set()) {
+            return None;
+        }
+
+        let new = first.merge(second);
+        if new.valid(&mut provider, &w1_relations, &w2_relations) {
+            Some(new)
+        } else {
+            None
+        }
     });
 
     for w2_relation in &w2_relations {
@@ -157,18 +166,18 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         .map(|c| *c)
         .chain(one_length_loop_transitions.iter())
     {
-        let id = resulting_net.add_transition(Transition::empty((*transition).to_owned(), None));
+        let id = resulting_net.add_transition(Transition::empty((*transition).to_owned(), Some((*transition).to_owned())));
         transitions_to_ids.insert(transition, id);
     }
 
     for place in &p_w {
         let place_id = resulting_net.add_place(Place::with_name(place.to_string()));
         for transition in place.first_set() {
-            resulting_net.connect_place_to_transition(&place_id, transitions_to_ids.get(transition).unwrap(), None);
+            resulting_net.connect_transition_to_place(transitions_to_ids.get(transition).unwrap(), &place_id, None);
         }
 
         for transition in place.second_set() {
-            resulting_net.connect_transition_to_place(transitions_to_ids.get(transition).unwrap(), &place_id, None);
+            resulting_net.connect_place_to_transition(&place_id, transitions_to_ids.get(transition).unwrap(), None);
         }
     }
 

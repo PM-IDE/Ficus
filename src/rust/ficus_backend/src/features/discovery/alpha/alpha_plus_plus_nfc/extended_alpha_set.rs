@@ -122,6 +122,10 @@ impl<'a> ExtendedAlphaSet<'a> {
 
         TwoSets::new(first.map(|c| *c).collect(), second.map(|c| *c).collect())
     }
+
+    pub fn alpha_set(&self) -> &AlphaSet {
+        &self.alpha_set
+    }
 }
 
 impl<'a> Hash for ExtendedAlphaSet<'a> {

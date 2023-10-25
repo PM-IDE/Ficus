@@ -3,7 +3,7 @@ use std::hash::Hash;
 
 pub fn maximize<TElement: Hash + Eq + Clone>(
     elements: HashSet<TElement>,
-    merger: impl Fn(&TElement, &TElement) -> Option<TElement>,
+    mut merger: impl FnMut(&TElement, &TElement) -> Option<TElement>,
 ) -> HashSet<TElement> {
     let mut current = elements;
 
