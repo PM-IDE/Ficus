@@ -80,7 +80,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
                 let _event_cookie = StartEndElementCookie::new(&writer, EVENT_TAG_NAME_STR);
                 let event = event.borrow();
 
-                let attrs = vec![(KEY_ATTR_NAME_STR, NAME_ATTR_NAME_STR), (VALUE_ATTR_NAME_STR, event.name())];
+                let attrs = vec![(KEY_ATTR_NAME_STR, CONCEPT_NAME_STR), (VALUE_ATTR_NAME_STR, event.name())];
 
                 write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
 
