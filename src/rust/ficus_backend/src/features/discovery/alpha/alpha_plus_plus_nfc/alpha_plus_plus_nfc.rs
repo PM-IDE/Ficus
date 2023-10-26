@@ -47,9 +47,12 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         for b_class in info.all_event_classes() {
             if provider.w1_relation(a_class, b_class, &petri_net) {
                 w1_relations.insert((a_class, b_class));
-                provider.add_additional_causal_relation(a_class, b_class);
             }
         }
+    }
+
+    for pair in &w1_relations {
+        provider.add_additional_causal_relation(pair.0, pair.1);
     }
 
     let petri_net = discover_petri_net_alpha_plus(log, &provider, false);
@@ -70,10 +73,12 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
 
     for place in alpha_net.all_places() {
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
-            for pair in w1_relations.iter().chain(w2_relations.iter()) {
-                let set = ExtendedAlphaSet::try_new(alpha_set.clone(), pair.0, pair.1, &mut provider, &w1_relations, &w2_relations);
-                if let Some(extended_alpha_set) = set {
-                    x_w.insert(extended_alpha_set);
+            for first_class in info.all_event_classes() {
+                for second_class in info.all_event_classes() {
+                    let set = ExtendedAlphaSet::try_new(alpha_set.clone(), first_class, second_class, &mut provider, &w1_relations, &w2_relations);
+                    if let Some(extended_alpha_set) = set {
+                        x_w.insert(extended_alpha_set);
+                    }
                 }
             }
 
