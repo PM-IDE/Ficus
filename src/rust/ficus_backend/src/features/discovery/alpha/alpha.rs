@@ -145,10 +145,9 @@ fn create_initial_sets(provider: &impl AlphaRelationsProvider) -> HashSet<AlphaS
         .filter(|class| info.dfg_info().get_followed_events(class).is_some() && provider.unrelated_relation(class, class))
         .flat_map(|class| {
             let mut sets = vec![];
-            let followers = info.dfg_info().get_followed_events(class).unwrap().keys();
-            for follower in followers {
-                if provider.causal_relation(class, follower) && provider.unrelated_relation(follower, follower) {
-                    sets.push(AlphaSet::new((*class).to_owned(), follower.to_owned()));
+            for candidate in info.all_event_classes() {
+                if provider.causal_relation(class, candidate) && provider.unrelated_relation(candidate, candidate) {
+                    sets.push(AlphaSet::new((*class).to_owned(), candidate.to_owned()));
                 }
             }
 
