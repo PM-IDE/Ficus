@@ -54,7 +54,18 @@ impl<'a> ExtendedAlphaSet<'a> {
         w1_relations: &HashSet<(&'a String, &'a String)>,
         w2_relations: &HashSet<(&'a String, &'a String)>,
     ) -> Option<Self> {
-        let new_set = Self::new(alpha_set, left_extension, right_extension);
+        Self::try_new_internal(provider, w1_relations, w2_relations, move || {
+            Self::new(alpha_set, left_extension, right_extension)
+        })
+    }
+
+    fn try_new_internal<TLog: EventLog>(
+        provider: &mut AlphaPlusNfcRelationsProvider<TLog>,
+        w1_relations: &HashSet<(&'a String, &'a String)>,
+        w2_relations: &HashSet<(&'a String, &'a String)>,
+        factory: impl FnOnce() -> Self,
+    ) -> Option<Self> {
+        let new_set = factory();
         match new_set.valid(provider, w1_relations, w2_relations) {
             true => Some(new_set),
             false => None,
@@ -68,11 +79,9 @@ impl<'a> ExtendedAlphaSet<'a> {
         w1_relations: &HashSet<(&'a String, &'a String)>,
         w2_relations: &HashSet<(&'a String, &'a String)>,
     ) -> Option<Self> {
-        let new_set = Self::new_only_left(alpha_set, left_extension);
-        match new_set.valid(provider, w1_relations, w2_relations) {
-            true => Some(new_set),
-            false => None,
-        }
+        Self::try_new_internal(provider, w1_relations, w2_relations, || {
+            Self::new_only_left(alpha_set, left_extension)
+        })
     }
 
     pub fn try_new_only_right<TLog: EventLog>(
@@ -82,11 +91,9 @@ impl<'a> ExtendedAlphaSet<'a> {
         w1_relations: &HashSet<(&'a String, &'a String)>,
         w2_relations: &HashSet<(&'a String, &'a String)>,
     ) -> Option<Self> {
-        let new_set = Self::new_only_right(alpha_set, right_extension);
-        match new_set.valid(provider, w1_relations, w2_relations) {
-            true => Some(new_set),
-            false => None,
-        }
+        Self::try_new_internal(provider, w1_relations, w2_relations, || {
+            Self::new_only_right(alpha_set, right_extension)
+        })
     }
 
     pub fn valid<TLog: EventLog>(

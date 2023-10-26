@@ -3,7 +3,7 @@ use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::utils::hash_utils::compare_based_on_hashes;
 use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AlphaSet {
     two_sets: TwoSets<String>,
 }
@@ -109,5 +109,13 @@ impl Eq for AlphaSet {}
 impl ToString for AlphaSet {
     fn to_string(&self) -> String {
         self.two_sets.to_string()
+    }
+}
+
+impl Clone for AlphaSet {
+    fn clone(&self) -> Self {
+        Self {
+            two_sets: self.two_sets.clone(),
+        }
     }
 }
