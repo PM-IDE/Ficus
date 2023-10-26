@@ -14,12 +14,14 @@ pub fn maximize<TElement: Hash + Eq + Clone>(
         let mut merged_indices = HashSet::new();
 
         for i in 0..vec.len() {
-            for j in (i + 1)..vec.len() {
-                if let Some(merged) = merger(vec.get(i).unwrap(), vec.get(j).unwrap()) {
-                    any_change = true;
-                    new_elements.insert(merged);
-                    merged_indices.insert(i);
-                    merged_indices.insert(j);
+            for j in 0..vec.len() {
+                if i != j {
+                    if let Some(merged) = merger(vec.get(i).unwrap(), vec.get(j).unwrap()) {
+                        any_change = true;
+                        new_elements.insert(merged);
+                        merged_indices.insert(i);
+                        merged_indices.insert(j);
+                    }
                 }
             }
         }
