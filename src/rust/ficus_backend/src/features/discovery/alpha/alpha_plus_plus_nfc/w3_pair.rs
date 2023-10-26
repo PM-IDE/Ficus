@@ -37,10 +37,23 @@ impl<'a> W3Pair<'a> {
     ) -> bool {
         for first in self.two_sets.first_set().iter() {
             for second in self.two_sets.second_set().iter() {
-                if !(w3_relations.contains(&(first, second))
-                    && provider.unrelated_relation(first, first)
-                    && provider.unrelated_relation(second, second))
-                {
+                if !(w3_relations.contains(&(first, second))) {
+                    return false;
+                }
+            }
+        }
+
+        for first_el in self.two_sets.first_set() {
+            for second_el in self.two_sets.first_set() {
+                if !provider.unrelated_relation(first_el, second_el) {
+                    return false;
+                }
+            }
+        }
+
+        for first_el in self.two_sets.second_set() {
+            for second_el in self.two_sets.second_set() {
+                if !provider.unrelated_relation(first_el, second_el) {
                     return false;
                 }
             }
