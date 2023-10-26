@@ -52,6 +52,8 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         }
     }
 
+    let petri_net = discover_petri_net_alpha_plus(log, &provider, false);
+
     let mut w2_relations = HashSet::new();
     for a_class in info.all_event_classes() {
         for b_class in info.all_event_classes() {
@@ -111,6 +113,8 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
     for w2_relation in &w2_relations {
         provider.add_additional_causal_relation(w2_relation.0, w2_relation.1);
     }
+
+    let petri_net = discover_petri_net_alpha_plus(log, &provider, false);
 
     let mut w3_relations = HashSet::new();
     for a_class in info.all_event_classes() {
