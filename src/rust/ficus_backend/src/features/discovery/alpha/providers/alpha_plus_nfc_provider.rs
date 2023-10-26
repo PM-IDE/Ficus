@@ -175,6 +175,8 @@ where
                         if all_suitable && actual_length > 0 {
                             return true;
                         }
+
+                        last_first_index = None;
                     }
                 }
             }
@@ -445,7 +447,7 @@ where
                     }
 
                     let task_pre_set = Self::get_pre_or_post_set(petri_net, task, PrePostSet::PreSet);
-                    let intersection: HashSet<&u64> = second_streak_pre_set.intersection(&task_pre_set).collect();
+                    let intersection: HashSet<&u64> = second_pre_set.intersection(&task_pre_set).collect();
                     if intersection.len() == 0 {
                         continue;
                     }
