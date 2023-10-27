@@ -1,4 +1,3 @@
-use quick_xml::escape::unescape_with;
 use std::collections::HashMap;
 
 pub struct RelationsCache {
@@ -31,5 +30,30 @@ impl RelationsCache {
         }
 
         map.insert(second.to_owned(), value);
+    }
+}
+
+pub struct RelationsCaches {
+    caches: HashMap<&'static str, RelationsCache>
+}
+
+impl RelationsCaches {
+    pub fn new(caches_names: &'static [&'static str]) -> Self {
+        let mut caches = HashMap::new();
+        for name in caches_names {
+            caches.insert(*name, RelationsCache::empty());
+        }
+
+        Self {
+            caches
+        }
+    }
+
+    pub fn cache(&self, cache_name: &'static str) -> &RelationsCache {
+        self.caches.get(cache_name).unwrap()
+    }
+
+    pub fn cache_mut(&mut self, cache_name: &'static str) -> &mut RelationsCache {
+        self.caches.get_mut(cache_name).unwrap()
     }
 }

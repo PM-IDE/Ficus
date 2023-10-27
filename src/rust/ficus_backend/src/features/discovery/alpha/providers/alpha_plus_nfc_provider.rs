@@ -7,11 +7,20 @@ use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelations
 use crate::features::discovery::alpha::providers::relations_cache::RelationsCache;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use std::collections::HashSet;
+use super::relations_cache::RelationsCaches;
 
 enum PrePostSet {
     PreSet,
     PostSet,
 }
+
+const RIGHT_DOUBLE_ARROW_CACHE: &'static str = "right_double_arrow_cache";
+const W1_CACHE: &'static str = "w1_cache";
+const W21_CACHE: &'static str = "w21_cache";
+const W22_CACHE: &'static str = "w22_cache";
+const W3_CACHE: &'static str = "w3_cache";
+
+static RELATIONS_NAMES: &'static [&'static str] = &[RIGHT_DOUBLE_ARROW_CACHE, W1_CACHE, W21_CACHE, W22_CACHE, W3_CACHE];
 
 pub struct AlphaPlusNfcRelationsProvider<'a, TLog>
 where
@@ -20,11 +29,7 @@ where
     additional_causal_relations: HashSet<(&'a str, &'a str)>,
     alpha_plus_provider: AlphaPlusRelationsProviderImpl<'a>,
     log: &'a TLog,
-    right_double_arrow_cache: RelationsCache,
-    w1_cache: RelationsCache,
-    w21_cache: RelationsCache,
-    w22_cache: RelationsCache,
-    w3_cache: RelationsCache,
+    caches: RelationsCaches
 }
 
 impl<'a, TLog> AlphaRelationsProvider for AlphaPlusNfcRelationsProvider<'a, TLog>
@@ -87,11 +92,7 @@ where
             additional_causal_relations: HashSet::new(),
             alpha_plus_provider: AlphaPlusRelationsProviderImpl::new(info, log, one_length_loop_transitions),
             log,
-            right_double_arrow_cache: RelationsCache::empty(),
-            w1_cache: RelationsCache::empty(),
-            w21_cache: RelationsCache::empty(),
-            w22_cache: RelationsCache::empty(),
-            w3_cache: RelationsCache::empty(),
+            caches: RelationsCaches::new(RELATIONS_NAMES)
         }
     }
 
@@ -129,13 +130,13 @@ where
 
     pub fn right_double_arrow_relation(&mut self, first: &str, second: &str) -> bool {
         let value = self.calculate_right_double_arrow_relation(first, second);
-        self.right_double_arrow_cache.put(first, second, value);
+        self.caches.cache_mut(RIGHT_DOUBLE_ARROW_CACHE).put(first, second, value);
 
         value
     }
 
     fn calculate_right_double_arrow_relation(&self, first: &str, second: &str) -> bool {
-        if let Some(cached_value) = self.right_double_arrow_cache.try_get(first, second) {
+        if let Some(cached_value) = self.caches.cache(RIGHT_DOUBLE_ARROW_CACHE).try_get(first, second) {
             return *cached_value;
         }
 
@@ -191,13 +192,13 @@ where
 
     pub fn w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w1_relation(first, second, petri_net);
-        self.w1_cache.put(first, second, value);
+        self.caches.cache_mut(W1_CACHE).put(first, second, value);
 
         value
     }
 
     pub fn calculate_w1_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
-        if let Some(value) = self.w1_cache.try_get(first, second) {
+        if let Some(value) = self.caches.cache(W1_CACHE).try_get(first, second) {
             return *value;
         }
 
@@ -269,13 +270,13 @@ where
 
     pub fn w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w21_relation(first, second, petri_net);
-        self.w21_cache.put(first, second, value);
+        self.caches.cache_mut(W21_CACHE).put(first, second, value);
 
         value
     }
 
     fn calculate_w21_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
-        if let Some(value) = self.w21_cache.try_get(first, second) {
+        if let Some(value) = self.caches.cache(W21_CACHE).try_get(first, second) {
             return *value;
         }
 
@@ -325,13 +326,13 @@ where
 
     pub fn w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w22_relation(first, second, petri_net);
-        self.w22_cache.put(first, second, value);
+        self.caches.cache_mut(W22_CACHE).put(first, second, value);
 
         value
     }
 
     fn calculate_w22_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
-        if let Some(value) = self.w22_cache.try_get(first, second) {
+        if let Some(value) = self.caches.cache(W22_CACHE).try_get(first, second) {
             return *value;
         }
 
@@ -384,13 +385,13 @@ where
 
     pub fn w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
         let value = self.calculate_w3_relation(first, second, petri_net);
-        self.w3_cache.put(first, second, value);
+        self.caches.cache_mut(W3_CACHE).put(first, second, value);
 
         value
     }
 
     fn calculate_w3_relation(&mut self, first: &str, second: &str, petri_net: &DefaultPetriNet) -> bool {
-        if let Some(value) = self.w3_cache.try_get(first, second) {
+        if let Some(value) = self.caches.cache(W3_CACHE).try_get(first, second) {
             return *value;
         }
 
