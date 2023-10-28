@@ -25,6 +25,7 @@ message GrpcContextValue {
         GrpcStrings strings = 12;
         GrpcPipeline pipeline = 13;
         GrpcPetriNet petriNet = 14;
+        GrpcGraph graph = 15;
     }
 }
 
@@ -133,4 +134,19 @@ message GrpcComplexContextRequestPipelinePart {
     GrpcContextKey key = 1;
     GrpcPipelinePart beforePipelinePart = 2;
     GrpcUuid frontendPartUuid = 3;
+}
+
+message GrpcGraph {
+    repeated GrpcGraphVertex vertices = 1;
+    repeated GrpcGraphEdge edges = 2;
+}
+
+message GrpcGraphVertex {
+    int64 id = 1;
+    string data = 2;
+}
+
+message GrpcGraphEdge {
+    uint64 from_edge = 1;
+    uint64 to_edge = 2;
 }

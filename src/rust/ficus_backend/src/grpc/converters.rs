@@ -94,6 +94,7 @@ pub(super) fn put_into_user_data(
             user_data.put_any::<Pipeline>(key, pipeline);
         }
         ContextValue::PetriNet(_) => todo!(),
+        ContextValue::Graph(_) => todo!(),
     }
 }
 
