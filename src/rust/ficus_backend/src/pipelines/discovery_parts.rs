@@ -1,3 +1,4 @@
+use crate::features::analysis::directly_follows_graph::construct_dfg;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop};
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc;
@@ -74,6 +75,16 @@ impl PipelineParts {
             let log = Self::get_user_data(context, keys.event_log())?;
             let discovered_petri_net = discover_petri_net_alpha_plus_plus_nfc(log);
             context.put_concrete(keys.petri_net().key(), discovered_petri_net);
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn discover_directly_follows_graph() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_DFG, &|context, _, keys, _| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
+            context.put_concrete(keys.graph().key(), construct_dfg(&info));
 
             Ok(())
         })

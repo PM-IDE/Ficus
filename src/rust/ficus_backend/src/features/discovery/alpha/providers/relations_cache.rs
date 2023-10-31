@@ -34,7 +34,7 @@ impl RelationsCache {
 }
 
 pub struct RelationsCaches {
-    caches: HashMap<&'static str, RelationsCache>
+    caches: HashMap<&'static str, RelationsCache>,
 }
 
 impl RelationsCaches {
@@ -44,9 +44,7 @@ impl RelationsCaches {
             caches.insert(*name, RelationsCache::empty());
         }
 
-        Self {
-            caches
-        }
+        Self { caches }
     }
 
     pub fn cache(&self, cache_name: &'static str) -> &RelationsCache {

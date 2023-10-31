@@ -11,10 +11,12 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
-    GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
+    GrpcGraph, GrpcGraphEdge, GrpcGraphVertex, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace,
+    GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::graph::graph::{DefaultGraph, Graph, GraphEdge, GraphNode};
 use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
@@ -136,6 +138,8 @@ pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys
         try_convert_to_grpc_event_log_info(value)
     } else if keys.is_petri_net(key) {
         try_convert_to_grpc_petri_net(value)
+    } else if keys.is_graph(key) {
+        try_convert_to_grpc_graph(value)
     } else {
         None
     }
@@ -383,5 +387,54 @@ fn convert_to_grpc_single_marking(marking: &SingleMarking) -> GrpcPetriNetSingle
     GrpcPetriNetSinglePlaceMarking {
         place_id: marking.place_id() as i64,
         tokens_count: marking.tokens_count() as i64,
+    }
+}
+
+fn try_convert_to_grpc_graph(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<DefaultGraph>() {
+        None
+    } else {
+        let graph = value.downcast_ref::<DefaultGraph>().unwrap();
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::Graph(convert_to_grpc_graph(graph))),
+        })
+    }
+}
+
+fn convert_to_grpc_graph<TNodeData, TEdgeData>(graph: &Graph<TNodeData, TEdgeData>) -> GrpcGraph
+where
+    TNodeData: ToString,
+    TEdgeData: ToString,
+{
+    let nodes: Vec<GrpcGraphVertex> = graph.all_nodes().iter().map(|node| convert_to_grpc_graph_node(*node)).collect();
+    let edges: Vec<GrpcGraphEdge> = graph.all_edges().iter().map(|edge| convert_to_grpc_graph_edge(*edge)).collect();
+
+    GrpcGraph { edges, vertices: nodes }
+}
+
+fn convert_to_grpc_graph_node<TNodeData>(node: &GraphNode<TNodeData>) -> GrpcGraphVertex
+where
+    TNodeData: ToString,
+{
+    GrpcGraphVertex {
+        id: *node.id(),
+        data: match node.data() {
+            None => "".to_string(),
+            Some(data) => data.to_string(),
+        },
+    }
+}
+
+fn convert_to_grpc_graph_edge<TEdgeData>(edge: &GraphEdge<TEdgeData>) -> GrpcGraphEdge
+where
+    TEdgeData: ToString,
+{
+    GrpcGraphEdge {
+        from_edge: *edge.from_node(),
+        to_edge: *edge.to_node(),
+        data: match edge.data() {
+            None => "".to_string(),
+            Some(data) => data.to_string(),
+        },
     }
 }

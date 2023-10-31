@@ -4,6 +4,7 @@ use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFil
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
     features::{
@@ -321,5 +322,13 @@ impl ContextKeys {
 
     pub fn is_pnml_use_names_as_ids(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.pnml_use_names_as_ids(), key)
+    }
+
+    pub fn graph(&self) -> &DefaultContextKey<DefaultGraph> {
+        self.find_concrete_key::<DefaultGraph>(Self::GRAPH).unwrap()
+    }
+
+    pub fn is_graph(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.graph(), key)
     }
 }

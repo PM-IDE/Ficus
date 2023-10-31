@@ -1,27 +1,46 @@
-use std::{sync::atomic::{AtomicU64, Ordering}, collections::HashMap};
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicU64, Ordering},
+};
 
-pub struct Graph<TNodeData, TEdgeData> where TNodeData: ToString, TEdgeData: ToString {
+pub type DefaultGraph = Graph<String, String>;
+
+pub struct Graph<TNodeData, TEdgeData>
+where
+    TNodeData: ToString,
+    TEdgeData: ToString,
+{
     edges: HashMap<u64, GraphEdge<TEdgeData>>,
     nodes: HashMap<u64, GraphNode<TNodeData>>,
 }
 
-pub struct GraphEdge<TEdgeData> where TEdgeData: ToString {
+pub struct GraphEdge<TEdgeData>
+where
+    TEdgeData: ToString,
+{
     id: u64,
     first_node_id: u64,
     second_node_id: u64,
     data: Option<TEdgeData>,
 }
 
-pub struct GraphNode<TNodeData> where TNodeData: ToString {
+pub struct GraphNode<TNodeData>
+where
+    TNodeData: ToString,
+{
     id: u64,
-    data: Option<TNodeData>
+    data: Option<TNodeData>,
 }
 
-impl<TNodeData, TEdgeData> Graph<TNodeData, TEdgeData> where TNodeData: ToString, TEdgeData: ToString  {
+impl<TNodeData, TEdgeData> Graph<TNodeData, TEdgeData>
+where
+    TNodeData: ToString,
+    TEdgeData: ToString,
+{
     pub fn empty() -> Self {
         Self {
             edges: HashMap::new(),
-            nodes: HashMap::new()
+            nodes: HashMap::new(),
         }
     }
 
@@ -58,13 +77,16 @@ impl<TNodeData, TEdgeData> Graph<TNodeData, TEdgeData> where TNodeData: ToString
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
-impl<TEdgeData> GraphEdge<TEdgeData> where TEdgeData: ToString {
+impl<TEdgeData> GraphEdge<TEdgeData>
+where
+    TEdgeData: ToString,
+{
     pub fn new(first_node_id: u64, second_node_id: u64, data: Option<TEdgeData>) -> Self {
         Self {
             first_node_id,
             second_node_id,
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
-            data
+            data,
         }
     }
 
@@ -75,13 +97,24 @@ impl<TEdgeData> GraphEdge<TEdgeData> where TEdgeData: ToString {
     pub fn id(&self) -> &u64 {
         &self.id
     }
+
+    pub fn from_node(&self) -> &u64 {
+        &self.first_node_id
+    }
+
+    pub fn to_node(&self) -> &u64 {
+        &self.second_node_id
+    }
 }
 
-impl<TNodeData> GraphNode<TNodeData> where TNodeData: ToString {
+impl<TNodeData> GraphNode<TNodeData>
+where
+    TNodeData: ToString,
+{
     pub fn new(data: Option<TNodeData>) -> Self {
         Self {
             id: NEXT_ID.fetch_add(1, Ordering::SeqCst),
-            data
+            data,
         }
     }
 

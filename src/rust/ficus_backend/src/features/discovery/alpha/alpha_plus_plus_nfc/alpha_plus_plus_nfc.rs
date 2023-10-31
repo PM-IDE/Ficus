@@ -75,7 +75,14 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         if let Some(alpha_set) = place.user_data().concrete(&ALPHA_SET) {
             for first_class in info.all_event_classes() {
                 for second_class in info.all_event_classes() {
-                    let set = ExtendedAlphaSet::try_new(alpha_set.clone(), first_class, second_class, &mut provider, &w1_relations, &w2_relations);
+                    let set = ExtendedAlphaSet::try_new(
+                        alpha_set.clone(),
+                        first_class,
+                        second_class,
+                        &mut provider,
+                        &w1_relations,
+                        &w2_relations,
+                    );
                     if let Some(extended_alpha_set) = set {
                         x_w.insert(extended_alpha_set);
                     }
