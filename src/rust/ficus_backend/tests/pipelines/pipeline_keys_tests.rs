@@ -4,6 +4,7 @@ use ficus_backend::features::analysis::patterns::activity_instances::{ActivityIn
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
+use ficus_backend::utils::graph::graph::DefaultGraph;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
     features::{
@@ -87,6 +88,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<TracesActivities>(keys, ContextKeys::TRACE_ACTIVITIES, &mut used);
         assert_existence::<ColorsEventLog>(keys, ContextKeys::COLORS_EVENT_LOG, &mut used);
         assert_existence::<ColorsHolder>(keys, ContextKeys::COLORS_HOLDER, &mut used);
+        assert_existence::<DefaultGraph>(keys, ContextKeys::GRAPH, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -137,7 +139,8 @@ fn get_all_keys_names() -> Vec<String> {
         "hashes_event_log",
         "names_event_log",
         "colors_event_log",
-        "colors_holder"
+        "colors_holder",
+        "graph"
     ]
 }
 
@@ -195,6 +198,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<DefaultPetriNet>(keys, ContextKeys::PETRI_NET, &mut used);
         assert_keys_equivalence::<RepeatSets>(keys, ContextKeys::REPEAT_SETS, &mut used);        
         assert_keys_equivalence::<TracesActivities>(keys, ContextKeys::TRACE_ACTIVITIES, &mut used);        
+        assert_keys_equivalence::<DefaultGraph>(keys, ContextKeys::GRAPH, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })

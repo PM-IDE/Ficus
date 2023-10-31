@@ -42,7 +42,8 @@ fn get_test_parts_names() -> Vec<String> {
         "AddArtificialEndEvents",
         "DiscoverPetriNetAlphaPlus",
         "DiscoverPetriNetAlphaPlusPlus",
-        "DiscoverPetriNetAlphaPlusPlusNfc"
+        "DiscoverPetriNetAlphaPlusPlusNfc",
+        "DiscoverDirectlyFollowsGraph"
     ]
 }
 
