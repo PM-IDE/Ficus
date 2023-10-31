@@ -1,4 +1,4 @@
-from ficus.grpc_pipelines.discovery_parts import DiscoverDirectlyFollowsGraph
+from ficus.grpc_pipelines.discovery_parts import ViewDirectlyFollowsGraph
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from tests.grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log
@@ -12,6 +12,6 @@ def test_dfg_discovery():
         ],
         Pipeline2(
             UseNamesEventLog2(),
-            DiscoverDirectlyFollowsGraph()
+            ViewDirectlyFollowsGraph()
         )
     )

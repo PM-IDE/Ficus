@@ -86,7 +86,7 @@ class ViewPetriNet2(ViewGraphLikeFormalismPart2):
                        export_path=self.export_path)
 
 
-class DiscoverDirectlyFollowsGraph(ViewGraphLikeFormalismPart2):
+class ViewDirectlyFollowsGraph(ViewGraphLikeFormalismPart2):
     def __init__(self,
                  name: str = 'dfg_graph',
                  background_color: str = 'white',
