@@ -1,3 +1,4 @@
+from ficus.discovery.graph import draw_graph, from_grpc_graph
 from ficus.discovery.petri_net import draw_petri_net
 from ficus.grpc_pipelines.context_values import from_grpc_petri_net
 from ficus.grpc_pipelines.grpc_pipelines import *
@@ -45,9 +46,8 @@ class SerializePetriNetToPNML2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_serialize_petri_net_to_pnml, config))
 
 
-class ViewPetriNet2(PipelinePart2WithCallback):
+class ViewGraphLikeFormalismPart2(PipelinePart2WithCallback):
     def __init__(self,
-                 show_places_names: bool = False,
                  name: str = 'petri_net',
                  background_color: str = 'white',
                  engine='dot',
@@ -55,11 +55,22 @@ class ViewPetriNet2(PipelinePart2WithCallback):
                  rankdir: str = 'LR'):
         super().__init__()
         self.export_path = export_path
-        self.show_places_names = show_places_names
         self.name = name
         self.background_color = background_color
         self.engine = engine
         self.rankdir = rankdir
+
+
+class ViewPetriNet2(ViewGraphLikeFormalismPart2):
+    def __init__(self,
+                 show_places_names: bool = False,
+                 name: str = 'petri_net',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
+        super().__init__(name, background_color, engine, export_path, rankdir)
+        self.show_places_names = show_places_names
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_simple_get_context_value_part(self.uuid, const_petri_net)
@@ -75,11 +86,23 @@ class ViewPetriNet2(PipelinePart2WithCallback):
                        export_path=self.export_path)
 
 
-class DiscoverDirectlyFollowsGraph(PipelinePart2WithCallback):
+class DiscoverDirectlyFollowsGraph(ViewGraphLikeFormalismPart2):
+    def __init__(self,
+                 name: str = 'dfg_graph',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
+        super().__init__(name, background_color, engine, export_path, rankdir)
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_complex_get_context_part(self.uuid, const_graph, const_discover_directly_follows_graph, GrpcPipelinePartConfiguration())
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
     def execute_callback(self, context_value: GrpcContextValue):
-        graph = context_value.graph
-        print(graph)
+        draw_graph(from_grpc_graph(context_value.graph),
+                   name=self.name,
+                   background_color=self.background_color,
+                   engine=self.engine,
+                   rankdir=self.rankdir,
+                   export_path=self.export_path)
