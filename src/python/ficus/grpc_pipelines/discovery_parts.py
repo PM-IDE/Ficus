@@ -1,7 +1,8 @@
 from ficus.discovery.petri_net import draw_petri_net
 from ficus.grpc_pipelines.context_values import from_grpc_petri_net
 from ficus.grpc_pipelines.grpc_pipelines import *
-from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part
+from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part, \
+    _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 
 
@@ -72,3 +73,13 @@ class ViewPetriNet2(PipelinePart2WithCallback):
                        engine=self.engine,
                        rankdir=self.rankdir,
                        export_path=self.export_path)
+
+
+class DiscoverDirectlyFollowsGraph(PipelinePart2WithCallback):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_complex_get_context_part(self.uuid, const_graph, const_discover_directly_follows_graph, GrpcPipelinePartConfiguration())
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        graph = context_value.graph
+        print(graph)

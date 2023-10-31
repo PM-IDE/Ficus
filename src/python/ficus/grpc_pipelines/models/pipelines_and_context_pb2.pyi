@@ -14,7 +14,7 @@ class GrpcContextKey(_message.Message):
     def __init__(self, name: _Optional[str] = ...) -> None: ...
 
 class GrpcContextValue(_message.Message):
-    __slots__ = ["string", "hashes_log", "names_log", "uint32", "traces_sub_arrays", "trace_index_sub_arrays", "bool", "xes_event_log", "colors_log", "enum", "event_log_info", "strings", "pipeline", "petriNet"]
+    __slots__ = ["string", "hashes_log", "names_log", "uint32", "traces_sub_arrays", "trace_index_sub_arrays", "bool", "xes_event_log", "colors_log", "enum", "event_log_info", "strings", "pipeline", "petriNet", "graph"]
     STRING_FIELD_NUMBER: _ClassVar[int]
     HASHES_LOG_FIELD_NUMBER: _ClassVar[int]
     NAMES_LOG_FIELD_NUMBER: _ClassVar[int]
@@ -29,6 +29,7 @@ class GrpcContextValue(_message.Message):
     STRINGS_FIELD_NUMBER: _ClassVar[int]
     PIPELINE_FIELD_NUMBER: _ClassVar[int]
     PETRINET_FIELD_NUMBER: _ClassVar[int]
+    GRAPH_FIELD_NUMBER: _ClassVar[int]
     string: str
     hashes_log: GrpcHashesEventLogContextValue
     names_log: GrpcNamesEventLogContextValue
@@ -43,7 +44,8 @@ class GrpcContextValue(_message.Message):
     strings: GrpcStrings
     pipeline: GrpcPipeline
     petriNet: _pm_models_pb2.GrpcPetriNet
-    def __init__(self, string: _Optional[str] = ..., hashes_log: _Optional[_Union[GrpcHashesEventLogContextValue, _Mapping]] = ..., names_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., uint32: _Optional[int] = ..., traces_sub_arrays: _Optional[_Union[GrpcEventLogTraceSubArraysContextValue, _Mapping]] = ..., trace_index_sub_arrays: _Optional[_Union[GrpcSubArraysWithTraceIndexContextValue, _Mapping]] = ..., bool: bool = ..., xes_event_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., colors_log: _Optional[_Union[GrpcColorsEventLog, _Mapping]] = ..., enum: _Optional[_Union[GrpcEnum, _Mapping]] = ..., event_log_info: _Optional[_Union[GrpcEventLogInfo, _Mapping]] = ..., strings: _Optional[_Union[GrpcStrings, _Mapping]] = ..., pipeline: _Optional[_Union[GrpcPipeline, _Mapping]] = ..., petriNet: _Optional[_Union[_pm_models_pb2.GrpcPetriNet, _Mapping]] = ...) -> None: ...
+    graph: GrpcGraph
+    def __init__(self, string: _Optional[str] = ..., hashes_log: _Optional[_Union[GrpcHashesEventLogContextValue, _Mapping]] = ..., names_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., uint32: _Optional[int] = ..., traces_sub_arrays: _Optional[_Union[GrpcEventLogTraceSubArraysContextValue, _Mapping]] = ..., trace_index_sub_arrays: _Optional[_Union[GrpcSubArraysWithTraceIndexContextValue, _Mapping]] = ..., bool: bool = ..., xes_event_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., colors_log: _Optional[_Union[GrpcColorsEventLog, _Mapping]] = ..., enum: _Optional[_Union[GrpcEnum, _Mapping]] = ..., event_log_info: _Optional[_Union[GrpcEventLogInfo, _Mapping]] = ..., strings: _Optional[_Union[GrpcStrings, _Mapping]] = ..., pipeline: _Optional[_Union[GrpcPipeline, _Mapping]] = ..., petriNet: _Optional[_Union[_pm_models_pb2.GrpcPetriNet, _Mapping]] = ..., graph: _Optional[_Union[GrpcGraph, _Mapping]] = ...) -> None: ...
 
 class GrpcContextKeyValue(_message.Message):
     __slots__ = ["key", "value"]
@@ -208,3 +210,29 @@ class GrpcComplexContextRequestPipelinePart(_message.Message):
     beforePipelinePart: GrpcPipelinePart
     frontendPartUuid: _util_pb2.GrpcUuid
     def __init__(self, key: _Optional[_Union[GrpcContextKey, _Mapping]] = ..., beforePipelinePart: _Optional[_Union[GrpcPipelinePart, _Mapping]] = ..., frontendPartUuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
+
+class GrpcGraph(_message.Message):
+    __slots__ = ["nodes", "edges"]
+    NODES_FIELD_NUMBER: _ClassVar[int]
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    nodes: _containers.RepeatedCompositeFieldContainer[GrpcGraphNode]
+    edges: _containers.RepeatedCompositeFieldContainer[GrpcGraphEdge]
+    def __init__(self, nodes: _Optional[_Iterable[_Union[GrpcGraphNode, _Mapping]]] = ..., edges: _Optional[_Iterable[_Union[GrpcGraphEdge, _Mapping]]] = ...) -> None: ...
+
+class GrpcGraphNode(_message.Message):
+    __slots__ = ["id", "data"]
+    ID_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    id: int
+    data: str
+    def __init__(self, id: _Optional[int] = ..., data: _Optional[str] = ...) -> None: ...
+
+class GrpcGraphEdge(_message.Message):
+    __slots__ = ["from_node", "to_node", "data"]
+    FROM_NODE_FIELD_NUMBER: _ClassVar[int]
+    TO_NODE_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    from_node: int
+    to_node: int
+    data: str
+    def __init__(self, from_node: _Optional[int] = ..., to_node: _Optional[int] = ..., data: _Optional[str] = ...) -> None: ...
