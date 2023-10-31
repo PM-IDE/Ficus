@@ -142,11 +142,12 @@ message GrpcGraph {
 }
 
 message GrpcGraphVertex {
-    int64 id = 1;
+    uint64 id = 1;
     string data = 2;
 }
 
 message GrpcGraphEdge {
     uint64 from_edge = 1;
     uint64 to_edge = 2;
+    string data = 3;
 }
