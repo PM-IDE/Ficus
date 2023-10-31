@@ -11,7 +11,7 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
-    GrpcGraph, GrpcGraphEdge, GrpcGraphVertex, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace,
+    GrpcGraph, GrpcGraphEdge, GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace,
     GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
@@ -406,17 +406,17 @@ where
     TNodeData: ToString,
     TEdgeData: ToString,
 {
-    let nodes: Vec<GrpcGraphVertex> = graph.all_nodes().iter().map(|node| convert_to_grpc_graph_node(*node)).collect();
+    let nodes: Vec<GrpcGraphNode> = graph.all_nodes().iter().map(|node| convert_to_grpc_graph_node(*node)).collect();
     let edges: Vec<GrpcGraphEdge> = graph.all_edges().iter().map(|edge| convert_to_grpc_graph_edge(*edge)).collect();
 
-    GrpcGraph { edges, vertices: nodes }
+    GrpcGraph { edges, nodes }
 }
 
-fn convert_to_grpc_graph_node<TNodeData>(node: &GraphNode<TNodeData>) -> GrpcGraphVertex
+fn convert_to_grpc_graph_node<TNodeData>(node: &GraphNode<TNodeData>) -> GrpcGraphNode
 where
     TNodeData: ToString,
 {
-    GrpcGraphVertex {
+    GrpcGraphNode {
         id: *node.id(),
         data: match node.data() {
             None => "".to_string(),
@@ -430,8 +430,8 @@ where
     TEdgeData: ToString,
 {
     GrpcGraphEdge {
-        from_edge: *edge.from_node(),
-        to_edge: *edge.to_node(),
+        from_node: *edge.from_node(),
+        to_node: *edge.to_node(),
         data: match edge.data() {
             None => "".to_string(),
             Some(data) => data.to_string(),
