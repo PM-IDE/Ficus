@@ -80,7 +80,7 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
             .dfg_info()
             .get_directly_follows_count(&(second.to_owned(), first.to_owned()));
 
-        let measure = (b_follows_a - a_follows_b) as f64 / (b_follows_a + a_follows_b + 1) as f64;
+        let measure = (b_follows_a as f64 - a_follows_b as f64)/ (b_follows_a as f64 + a_follows_b as f64 + 1.0);
         measure > self.dependency_threshold
     }
 
