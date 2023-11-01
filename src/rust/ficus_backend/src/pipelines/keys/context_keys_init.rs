@@ -302,7 +302,7 @@ impl ContextKeys {
     }
 
     fn insert_positive_observations_threshold(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<usize>(context, Self::POSITIVE_OBSERVATIONS_THRESHOLD)
+        Self::insert_key::<u32>(context, Self::POSITIVE_OBSERVATIONS_THRESHOLD)
     }
 
     fn insert_relative_to_best_threshold(context: &mut ContextKeysInitContext) {

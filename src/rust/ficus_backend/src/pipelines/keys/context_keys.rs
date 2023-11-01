@@ -340,8 +340,8 @@ impl ContextKeys {
         Self::are_keys_equal(self.dependency_threshold(), key)
     }
 
-    pub fn positive_observations_threshold(&self) -> &DefaultContextKey<usize> {
-        self.find_concrete_key::<usize>(Self::POSITIVE_OBSERVATIONS_THRESHOLD).unwrap()
+    pub fn positive_observations_threshold(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::POSITIVE_OBSERVATIONS_THRESHOLD).unwrap()
     }
 
     pub fn is_positive_observations_threshold(&self, key: &dyn ContextKey) -> bool {

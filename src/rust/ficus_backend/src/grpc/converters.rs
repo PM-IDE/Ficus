@@ -97,6 +97,7 @@ pub(super) fn put_into_user_data(
         }
         ContextValue::PetriNet(_) => todo!(),
         ContextValue::Graph(_) => todo!(),
+        ContextValue::Float(value) => user_data.put_any::<f64>(key, *value as f64),
     }
 }
 

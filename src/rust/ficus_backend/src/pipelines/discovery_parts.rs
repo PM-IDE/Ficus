@@ -95,7 +95,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_HEURISTIC, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let dependency_threshold = *Self::get_user_data(config, keys.dependency_threshold())?;
-            let positive_observations_threshold = *Self::get_user_data(config, keys.positive_observations_threshold())?;
+            let positive_observations_threshold = *Self::get_user_data(config, keys.positive_observations_threshold())? as usize;
             let relative_to_best_threshold = *Self::get_user_data(config, keys.relative_to_best_threshold())?;
 
             let petri_net = discover_petri_net_heuristic(
@@ -104,6 +104,7 @@ impl PipelineParts {
                 positive_observations_threshold,
                 relative_to_best_threshold,
             );
+
             context.put_concrete(keys.petri_net().key(), petri_net);
 
             Ok(())

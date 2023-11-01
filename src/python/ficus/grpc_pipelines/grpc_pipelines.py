@@ -8,7 +8,7 @@ from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStr
 from ficus.grpc_pipelines.constants import *
 from ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
-    StringsContextValue
+    StringsContextValue, FloatContextValue
 from ficus.grpc_pipelines.data_models import PatternsDiscoveryStrategy, PatternsKind, NarrowActivityKind, \
     ActivityFilterKind, ActivitiesLogsSource
 from ficus.grpc_pipelines.models.backend_service_pb2 import *
@@ -218,6 +218,10 @@ def _create_default_pipeline_part(name: str, config=GrpcPipelinePartConfiguratio
 
 def append_string_value(config: GrpcPipelinePartConfiguration, key: str, value: str):
     _append_context_value(config, key, StringContextValue(value))
+
+
+def append_float_value(config: GrpcPipelinePartConfiguration, key: str, value: float):
+    _append_context_value(config, key, FloatContextValue(value))
 
 
 def _append_context_value(config: GrpcPipelinePartConfiguration, key: str, value: ContextValue):

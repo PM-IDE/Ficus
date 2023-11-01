@@ -32,6 +32,22 @@ class DiscoverPetriNetAlphaPlusPlusNfc2(PipelinePart2):
         return _create_default_discovery_part(const_discover_petri_net_alpha_plus_plus_nfc)
 
 
+class DiscoverPetriNetHeuristic2(PipelinePart2):
+    def __init__(self, dependency_threshold: float, positive_observations_threshold: int, relative_to_best_threshold: float):
+        super().__init__()
+        self.dependency_threshold = dependency_threshold
+        self.positive_observations_threshold = positive_observations_threshold
+        self.relative_to_best_threshold = relative_to_best_threshold
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_float_value(config, const_dependency_relation_threshold, self.dependency_threshold)
+        append_uint32_value(config, const_positive_observations_threshold, self.positive_observations_threshold)
+        append_float_value(config, const_relative_to_best_threshold, self.relative_to_best_threshold)
+
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_heuristic, config))
+
+
 class SerializePetriNetToPNML2(PipelinePart2):
     def __init__(self, save_path, use_names_as_ids: bool = False):
         super().__init__()

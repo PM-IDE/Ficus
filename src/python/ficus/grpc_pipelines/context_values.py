@@ -23,6 +23,14 @@ class StringContextValue(ContextValue):
 
 
 @dataclass
+class FloatContextValue(ContextValue):
+    value: float
+
+    def to_grpc_context_value(self) -> GrpcContextValue:
+        return GrpcContextValue(float=self.value)
+
+
+@dataclass
 class Uint32ContextValue(ContextValue):
     value: int
 
