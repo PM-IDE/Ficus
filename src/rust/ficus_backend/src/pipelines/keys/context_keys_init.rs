@@ -83,6 +83,9 @@ impl ContextKeys {
     pub const ACTIVITY_IN_TRACE_FILTER_KIND: &'static str = "activity_in_trace_filter_kind";
     pub const ACTIVITIES_LOGS_SOURCE: &'static str = "activities_logs_source";
     pub const PNML_USE_NAMES_AS_IDS: &'static str = "pnml_use_names_as_ids";
+    pub const DEPENDENCY_THRESHOLD: &'static str = "dependency_threshold";
+    pub const POSITIVE_OBSERVATIONS_THRESHOLD: &'static str = "positive_observations_threshold";
+    pub const RELATIVE_TO_BEST_THRESHOLD: &'static str = "relative_to_best_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -122,6 +125,9 @@ impl ContextKeys {
         Self::insert_activity_in_filter_kind(&mut context);
         Self::insert_activities_logs_source(&mut context);
         Self::insert_pnml_use_names_as_ids(&mut context);
+        Self::insert_dependency_threshold(&mut context);
+        Self::insert_positive_observations_threshold(&mut context);
+        Self::insert_relative_to_best_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -289,5 +295,17 @@ impl ContextKeys {
 
     fn insert_graph(context: &mut ContextKeysInitContext) {
         Self::insert_key::<DefaultGraph>(context, Self::GRAPH);
+    }
+
+    fn insert_dependency_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::DEPENDENCY_THRESHOLD)
+    }
+
+    fn insert_positive_observations_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<usize>(context, Self::POSITIVE_OBSERVATIONS_THRESHOLD)
+    }
+
+    fn insert_relative_to_best_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::RELATIVE_TO_BEST_THRESHOLD)
     }
 }

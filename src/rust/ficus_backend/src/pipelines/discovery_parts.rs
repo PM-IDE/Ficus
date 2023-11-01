@@ -4,6 +4,7 @@ use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discove
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProviderImpl;
 use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
+use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};
@@ -85,6 +86,25 @@ impl PipelineParts {
             let log = Self::get_user_data(context, keys.event_log())?;
             let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
             context.put_concrete(keys.graph().key(), construct_dfg(&info));
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn discover_petri_net_heuristic_miner() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_HEURISTIC, &|context, _, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let dependency_threshold = *Self::get_user_data(config, keys.dependency_threshold())?;
+            let positive_observations_threshold = *Self::get_user_data(config, keys.positive_observations_threshold())?;
+            let relative_to_best_threshold = *Self::get_user_data(config, keys.relative_to_best_threshold())?;
+
+            let petri_net = discover_petri_net_heuristic(
+                log,
+                dependency_threshold,
+                positive_observations_threshold,
+                relative_to_best_threshold,
+            );
+            context.put_concrete(keys.petri_net().key(), petri_net);
 
             Ok(())
         })

@@ -331,4 +331,28 @@ impl ContextKeys {
     pub fn is_graph(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.graph(), key)
     }
+
+    pub fn dependency_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::DEPENDENCY_THRESHOLD).unwrap()
+    }
+
+    pub fn is_dependency_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.dependency_threshold(), key)
+    }
+
+    pub fn positive_observations_threshold(&self) -> &DefaultContextKey<usize> {
+        self.find_concrete_key::<usize>(Self::POSITIVE_OBSERVATIONS_THRESHOLD).unwrap()
+    }
+
+    pub fn is_positive_observations_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.positive_observations_threshold(), key)
+    }
+
+    pub fn relative_to_best_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::RELATIVE_TO_BEST_THRESHOLD).unwrap()
+    }
+
+    pub fn is_relative_to_best_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.relative_to_best_threshold(), key)
+    }
 }
