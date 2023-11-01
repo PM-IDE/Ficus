@@ -5,6 +5,7 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use std::collections::HashMap;
+use crate::features::discovery::alpha::providers::alpha_plus_provider::calculate_triangle_relations;
 
 pub fn discover_petri_net_heuristic(
     log: &impl EventLog,
@@ -15,6 +16,7 @@ pub fn discover_petri_net_heuristic(
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     let provider = DefaultAlphaRelationsProvider::new(&info);
     let provider = HeuristicMinerMeasureProvider::new(
+        log,
         provider,
         dependency_threshold,
         positive_observations_threshold,
@@ -49,17 +51,20 @@ pub(crate) struct HeuristicMinerMeasureProvider<'a> {
     dependency_threshold: f64,
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
+    triangle_relations: HashMap<(String, String), usize>,
     provider: DefaultAlphaRelationsProvider<'a>,
 }
 
 impl<'a> HeuristicMinerMeasureProvider<'a> {
     pub fn new(
+        log: &impl EventLog,
         provider: DefaultAlphaRelationsProvider<'a>,
         dependency_threshold: f64,
         positive_observations_threshold: usize,
         relative_to_best_threshold: f64,
     ) -> Self {
         Self {
+            triangle_relations: calculate_triangle_relations(log),
             dependency_threshold,
             positive_observations_threshold,
             relative_to_best_threshold,
@@ -82,6 +87,14 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
 
         let measure = (b_follows_a as f64 - a_follows_b as f64) / (b_follows_a as f64 + a_follows_b as f64 + 1.0);
         measure > self.dependency_threshold
+    }
+
+    fn triangle_measure(&self, first: &str, second: &str) -> usize {
+        if let Some(measure) = self.triangle_relations.get(&(first.to_owned(), second.to_owned())) {
+            *measure
+        } else {
+            0
+        }
     }
 
     pub fn log_info(&self) -> &EventLogInfo {
