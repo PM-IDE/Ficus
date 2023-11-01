@@ -43,7 +43,8 @@ fn get_test_parts_names() -> Vec<String> {
         "DiscoverPetriNetAlphaPlus",
         "DiscoverPetriNetAlphaPlusPlus",
         "DiscoverPetriNetAlphaPlusPlusNfc",
-        "DiscoverDirectlyFollowsGraph"
+        "DiscoverDirectlyFollowsGraph",
+        "DiscoverPetriNetHeuristic"
     ]
 }
 
