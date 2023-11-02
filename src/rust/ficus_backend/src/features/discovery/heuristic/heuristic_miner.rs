@@ -73,20 +73,20 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
     }
 
     pub fn dependency_relation(&self, first: &str, second: &str) -> bool {
-        let b_follows_a = self
-            .provider
-            .log_info()
-            .dfg_info()
-            .get_directly_follows_count(&(first.to_owned(), second.to_owned()));
+        let b_follows_a = self.get_directly_follows_count(first, second);
+        let a_follows_b = self.get_directly_follows_count(second, first);
 
-        let a_follows_b = self
-            .provider
-            .log_info()
-            .dfg_info()
-            .get_directly_follows_count(&(second.to_owned(), first.to_owned()));
+        let measure = if first != second {
+            (b_follows_a as f64 - a_follows_b as f64) / (b_follows_a as f64 + a_follows_b as f64 + 1.0)
+        } else {
+            a_follows_b as f64 / (a_follows_b as f64 + 1.0)
+        };
 
-        let measure = (b_follows_a as f64 - a_follows_b as f64) / (b_follows_a as f64 + a_follows_b as f64 + 1.0);
         measure > self.dependency_threshold
+    }
+
+    fn get_directly_follows_count(&self, first: &str, second: &str) -> usize {
+        self.provider.log_info().dfg_info().get_directly_follows_count(&(first.to_owned(), second.to_owned()))
     }
 
     fn triangle_measure(&self, first: &str, second: &str) -> usize {
