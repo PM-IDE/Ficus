@@ -77,7 +77,9 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
         let a_follows_b = self.get_directly_follows_count(second, first) as f64;
 
         let measure = if first != second {
-            (b_follows_a - a_follows_b) / (b_follows_a + a_follows_b + 1.0)
+            let default_measure = (b_follows_a - a_follows_b) / (b_follows_a + a_follows_b + 1.0);
+            let triangle_measure = self.triangle_measure(first, second) as f64;
+            default_measure.max(triangle_measure)
         } else {
             a_follows_b / (a_follows_b + 1.0)
         };
