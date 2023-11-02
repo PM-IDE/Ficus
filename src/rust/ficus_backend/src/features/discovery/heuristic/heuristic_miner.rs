@@ -73,13 +73,13 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
     }
 
     pub fn dependency_relation(&self, first: &str, second: &str) -> bool {
-        let b_follows_a = self.get_directly_follows_count(first, second);
-        let a_follows_b = self.get_directly_follows_count(second, first);
+        let b_follows_a = self.get_directly_follows_count(first, second) as f64;
+        let a_follows_b = self.get_directly_follows_count(second, first) as f64;
 
         let measure = if first != second {
-            (b_follows_a as f64 - a_follows_b as f64) / (b_follows_a as f64 + a_follows_b as f64 + 1.0)
+            (b_follows_a - a_follows_b) / (b_follows_a + a_follows_b + 1.0)
         } else {
-            a_follows_b as f64 / (a_follows_b as f64 + 1.0)
+            a_follows_b / (a_follows_b + 1.0)
         };
 
         measure > self.dependency_threshold
