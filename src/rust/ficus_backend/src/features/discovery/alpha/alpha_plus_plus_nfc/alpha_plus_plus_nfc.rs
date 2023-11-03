@@ -8,11 +8,11 @@ use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc_
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::extended_alpha_set::ExtendedAlphaSet;
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::w3_pair::W3Pair;
 use crate::features::discovery::alpha::providers::alpha_plus_nfc_provider::AlphaPlusNfcRelationsProvider;
-use crate::features::discovery::alpha::two_sets::TwoSets;
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
+use crate::utils::sets::two_sets::TwoSets;
 use crate::utils::user_data::user_data::UserData;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::hash::Hash;
