@@ -129,6 +129,7 @@ impl ContextKeys {
         Self::insert_dependency_threshold(&mut context);
         Self::insert_positive_observations_threshold(&mut context);
         Self::insert_relative_to_best_threshold(&mut context);
+        Self::insert_and_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
