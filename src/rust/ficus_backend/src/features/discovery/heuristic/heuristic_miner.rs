@@ -2,10 +2,82 @@ use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::alpha_plus_provider::calculate_triangle_relations;
 use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
+use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
-use std::collections::HashMap;
+use crate::utils::hash_utils::compare_based_on_hashes;
+use std::collections::{BTreeSet, HashMap, HashSet};
+use std::hash::{Hash, Hasher};
+
+struct OneSet<T>
+where
+    T: Hash + Eq + Ord + Clone,
+{
+    set: BTreeSet<T>,
+}
+
+impl<T> OneSet<T>
+where
+    T: Hash + Eq + Ord + Clone,
+{
+    pub fn empty() -> Self {
+        Self { set: BTreeSet::new() }
+    }
+
+    pub fn new(el: T) -> Self {
+        Self {
+            set: BTreeSet::from_iter(vec![el]),
+        }
+    }
+
+    pub fn new_two_elements(first: T, second: T) -> Self {
+        Self {
+            set: BTreeSet::from_iter(vec![first, second]),
+        }
+    }
+
+    pub fn merge(&self, other: &Self) -> Self {
+        Self {
+            set: self.set.iter().chain(other.set.iter()).map(|el| el.clone()).collect(),
+        }
+    }
+
+    pub fn set(&self) -> &BTreeSet<T> {
+        &self.set
+    }
+}
+
+impl<T> Hash for OneSet<T>
+where
+    T: Hash + Eq + Ord + Clone,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for el in &self.set {
+            el.hash(state);
+        }
+    }
+}
+
+impl<T> PartialEq for OneSet<T>
+where
+    T: Hash + Eq + Ord + Clone,
+{
+    fn eq(&self, other: &Self) -> bool {
+        compare_based_on_hashes(self, other)
+    }
+}
+
+impl<T> Eq for OneSet<T> where T: Hash + Eq + Ord + Clone {}
+
+impl<T> Clone for OneSet<T>
+where
+    T: Hash + Eq + Ord + Clone,
+{
+    fn clone(&self) -> Self {
+        Self { set: self.set.clone() }
+    }
+}
 
 pub fn discover_petri_net_heuristic(
     log: &impl EventLog,
@@ -34,14 +106,67 @@ pub fn discover_petri_net_heuristic(
     }
 
     for first_class in provider.log_info().all_event_classes() {
+        let mut followers = Vec::new();
         for second_class in provider.log_info().all_event_classes() {
             if provider.dependency_relation(first_class, second_class) {
-                let first_id = classes_to_ids.get(first_class).unwrap();
-                let second_id = classes_to_ids.get(second_class).unwrap();
+                followers.push(second_class);
+            }
+        }
 
-                let place_id = petri_net.add_place(Place::with_name(format!("{}, {}", first_class, second_class)));
-                petri_net.connect_place_to_transition(&place_id, second_id, None);
-                petri_net.connect_transition_to_place(first_id, &place_id, None);
+        let mut and_relations = HashSet::new();
+        for i in 0..followers.len() {
+            for j in (i + 1)..followers.len() {
+                let first = *followers.get(i).unwrap();
+                let second = *followers.get(j).unwrap();
+
+                if first != second && provider.and_or_xor_relation(first_class, first, second) == AndOrXorRelation::And {
+                    and_relations.insert(OneSet::new_two_elements(first, second));
+                }
+            }
+        }
+
+        let parallel_groups = maximize(and_relations, |first, second| {
+            let candidate = first.merge(second);
+            for first_el in candidate.set() {
+                for second_el in candidate.set() {
+                    if first_el != second_el && provider.and_or_xor_relation(first_class, first_el, second_el) != AndOrXorRelation::And {
+                        return None;
+                    }
+                }
+            }
+
+            Some(candidate)
+        });
+
+        let mut used = HashSet::new();
+        let post_place_id = petri_net.add_place(Place::with_name(format!("post_{first_class}")));
+        petri_net.connect_transition_to_place(classes_to_ids.get(first_class).unwrap(), &post_place_id, None);
+
+        for group in &parallel_groups {
+            let name = format!("silent_start_{first_class}");
+            let id = petri_net.add_transition(Transition::empty(name.to_owned(), Some(name.to_owned())));
+            petri_net.connect_place_to_transition(&post_place_id, &id, None);
+
+            let name = format!("silent_end_{first_class}");
+            let final_transition_id = petri_net.add_transition(Transition::empty(name.to_owned(), Some(name.to_owned())));
+
+            for el in group.set().iter() {
+                let place_id = petri_net.add_place(Place::with_name(format!("pre_{el}")));
+                petri_net.connect_transition_to_place(&id, &place_id, None);
+                petri_net.connect_place_to_transition(&place_id, classes_to_ids.get(*el).unwrap(), None);
+
+                let after_place_id = petri_net.add_place(Place::with_name(format!("post_{el}")));
+                petri_net.connect_transition_to_place(classes_to_ids.get(*el).unwrap(), &after_place_id, None);
+                petri_net.connect_place_to_transition(&after_place_id, &final_transition_id, None);
+
+                *classes_to_ids.get_mut(*el).unwrap() = final_transition_id;
+                used.insert(*el);
+            }
+        }
+
+        for follower in &followers {
+            if !used.contains(follower) {
+                petri_net.connect_place_to_transition(&post_place_id, classes_to_ids.get(*follower).unwrap(), None);
             }
         }
     }
@@ -61,6 +186,7 @@ pub(crate) struct HeuristicMinerMeasureProvider<'a> {
     dependency_relations: DependencyRelations,
 }
 
+#[derive(PartialEq)]
 pub enum AndOrXorRelation {
     And,
     Xor,
