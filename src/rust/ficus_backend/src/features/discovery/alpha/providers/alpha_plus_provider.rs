@@ -20,7 +20,11 @@ pub struct AlphaPlusRelationsProviderImpl<'a> {
 
 impl<'a> AlphaPlusRelationsProviderImpl<'a> {
     pub fn new(log_info: &'a EventLogInfo, log: &'a impl EventLog, one_length_loop_transitions: &'a HashSet<String>) -> Self {
-        let mut triangle_relations = calculate_triangle_relations(log).keys().into_iter().map(|el| (el.0.to_owned(), el.1.to_owned())).collect();
+        let mut triangle_relations = calculate_triangle_relations(log)
+            .keys()
+            .into_iter()
+            .map(|el| (el.0.to_owned(), el.1.to_owned()))
+            .collect();
 
         Self {
             log_info,

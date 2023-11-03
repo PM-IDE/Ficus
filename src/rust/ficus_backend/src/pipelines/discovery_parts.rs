@@ -104,7 +104,7 @@ impl PipelineParts {
                 dependency_threshold,
                 positive_observations_threshold,
                 relative_to_best_threshold,
-                and_threshold
+                and_threshold,
             );
 
             context.put_concrete(keys.petri_net().key(), petri_net);

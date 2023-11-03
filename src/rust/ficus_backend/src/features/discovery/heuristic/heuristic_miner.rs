@@ -1,11 +1,11 @@
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
+use crate::features::discovery::alpha::providers::alpha_plus_provider::calculate_triangle_relations;
 use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use std::collections::HashMap;
-use crate::features::discovery::alpha::providers::alpha_plus_provider::calculate_triangle_relations;
 
 pub fn discover_petri_net_heuristic(
     log: &impl EventLog,
@@ -22,7 +22,7 @@ pub fn discover_petri_net_heuristic(
         dependency_threshold,
         positive_observations_threshold,
         relative_to_best_threshold,
-        and_threshold
+        and_threshold,
     );
 
     let mut petri_net = DefaultPetriNet::empty();
@@ -58,12 +58,12 @@ pub(crate) struct HeuristicMinerMeasureProvider<'a> {
     and_threshold: f64,
     triangle_relations: HashMap<(String, String), usize>,
     provider: DefaultAlphaRelationsProvider<'a>,
-    dependency_relations: DependencyRelations
+    dependency_relations: DependencyRelations,
 }
 
 pub enum AndOrXorRelation {
     And,
-    Xor
+    Xor,
 }
 
 impl<'a> HeuristicMinerMeasureProvider<'a> {
@@ -82,7 +82,7 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
             relative_to_best_threshold,
             provider,
             dependency_relations: DependencyRelations::new(),
-            and_threshold
+            and_threshold,
         };
 
         provider.initialize_dependency_relations();
@@ -113,9 +113,7 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
 
         for key in self.provider.log_info().all_event_classes() {
             if let Some(values) = relations.get_mut(key.as_str()) {
-                let best_value = values.iter().max_by(|first, second| {
-                    first.1.total_cmp(&second.1)
-                }).unwrap().1;
+                let best_value = values.iter().max_by(|first, second| first.1.total_cmp(&second.1)).unwrap().1;
 
                 let min_value = best_value * (1.0 - self.relative_to_best_threshold);
                 for i in (0..values.len()).rev() {
@@ -171,7 +169,10 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
     }
 
     fn get_directly_follows_count(&self, first: &str, second: &str) -> usize {
-        self.provider.log_info().dfg_info().get_directly_follows_count(&(first.to_owned(), second.to_owned()))
+        self.provider
+            .log_info()
+            .dfg_info()
+            .get_directly_follows_count(&(first.to_owned(), second.to_owned()))
     }
 
     fn triangle_measure(&self, first: &str, second: &str) -> usize {
