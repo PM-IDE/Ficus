@@ -76,8 +76,9 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<ActivitiesLogsSourceDto>(keys, ContextKeys::ACTIVITIES_LOGS_SOURCE, &mut used);
         assert_existence::<bool>(keys, ContextKeys::PNML_USE_NAMES_AS_IDS, &mut used);
         assert_existence::<f64>(keys, ContextKeys::DEPENDENCY_THRESHOLD, &mut used);
-        assert_existence::<usize>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
+        assert_existence::<u32>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -133,6 +134,7 @@ fn get_all_keys_names() -> Vec<String> {
         "dependency_threshold",
         "positive_observations_threshold",
         "relative_to_best_threshold",
+        "and_threshold",
 
         "event_log",
         "activities",
@@ -194,8 +196,9 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<ActivitiesLogsSourceDto>(keys, ContextKeys::ACTIVITIES_LOGS_SOURCE, &mut used);
         assert_keys_equivalence::<bool>(keys, ContextKeys::PNML_USE_NAMES_AS_IDS, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::DEPENDENCY_THRESHOLD, &mut used);
-        assert_keys_equivalence::<usize>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
+        assert_keys_equivalence::<u32>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
