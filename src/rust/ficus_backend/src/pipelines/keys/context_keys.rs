@@ -363,4 +363,12 @@ impl ContextKeys {
     pub fn is_and_threshold(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.and_threshold(), key)
     }
+
+    pub fn loop_length_two_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::LOOP_LENGTH_TWO_THRESHOLD).unwrap()
+    }
+
+    pub fn is_loop_length_two_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.loop_length_two_threshold(), key)
+    }
 }

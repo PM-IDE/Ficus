@@ -11,6 +11,7 @@ pub(crate) struct HeuristicMinerRelationsProvider<'a> {
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
     and_threshold: f64,
+    loop_length_two_threshold: f64,
     triangle_relations: HashMap<(String, String), usize>,
     provider: DefaultAlphaRelationsProvider<'a>,
     dependency_relations: DependencyRelations,
@@ -30,12 +31,14 @@ impl<'a> HeuristicMinerRelationsProvider<'a> {
         positive_observations_threshold: usize,
         relative_to_best_threshold: f64,
         and_threshold: f64,
+        loop_length_two_threshold: f64,
     ) -> Self {
         let mut provider = Self {
             triangle_relations: calculate_triangle_relations(log),
             dependency_threshold,
             positive_observations_threshold,
             relative_to_best_threshold,
+            loop_length_two_threshold,
             provider,
             dependency_relations: DependencyRelations::new(),
             and_threshold,
@@ -117,7 +120,7 @@ impl<'a> HeuristicMinerRelationsProvider<'a> {
         let a_b = self.triangle_occurrences_count(first, second) as f64;
         let b_a = self.triangle_occurrences_count(second, first) as f64;
 
-        (a_b + b_a) / (a_b + b_a + 1.0) > self.dependency_threshold
+        (a_b + b_a) / (a_b + b_a + 1.0) > self.loop_length_two_threshold
     }
 
     fn calculate_dependency_measure(&self, first: &str, second: &str) -> f64 {

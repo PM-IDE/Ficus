@@ -16,6 +16,7 @@ pub fn discover_petri_net_heuristic(
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
     and_threshold: f64,
+    loop_length_two_threshold: f64,
 ) -> DefaultPetriNet {
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     let provider = DefaultAlphaRelationsProvider::new(&info);
@@ -26,6 +27,7 @@ pub fn discover_petri_net_heuristic(
         positive_observations_threshold,
         relative_to_best_threshold,
         and_threshold,
+        loop_length_two_threshold,
     );
 
     let mut petri_net = DefaultPetriNet::empty();

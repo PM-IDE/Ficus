@@ -87,6 +87,7 @@ impl ContextKeys {
     pub const POSITIVE_OBSERVATIONS_THRESHOLD: &'static str = "positive_observations_threshold";
     pub const RELATIVE_TO_BEST_THRESHOLD: &'static str = "relative_to_best_threshold";
     pub const AND_THRESHOLD: &'static str = "and_threshold";
+    pub const LOOP_LENGTH_TWO_THRESHOLD: &'static str = "loop_length_two_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -130,6 +131,7 @@ impl ContextKeys {
         Self::insert_positive_observations_threshold(&mut context);
         Self::insert_relative_to_best_threshold(&mut context);
         Self::insert_and_threshold(&mut context);
+        Self::insert_loop_length_two_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -313,5 +315,9 @@ impl ContextKeys {
 
     fn insert_and_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::AND_THRESHOLD)
+    }
+
+    fn insert_loop_length_two_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::LOOP_LENGTH_TWO_THRESHOLD)
     }
 }

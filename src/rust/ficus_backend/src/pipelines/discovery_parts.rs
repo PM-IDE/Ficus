@@ -98,6 +98,7 @@ impl PipelineParts {
             let positive_observations_threshold = *Self::get_user_data(config, keys.positive_observations_threshold())? as usize;
             let relative_to_best_threshold = *Self::get_user_data(config, keys.relative_to_best_threshold())?;
             let and_threshold = *Self::get_user_data(config, keys.and_threshold())?;
+            let loop_length_two_threshold = *Self::get_user_data(config, keys.loop_length_two_threshold())?;
 
             let petri_net = discover_petri_net_heuristic(
                 log,
@@ -105,6 +106,7 @@ impl PipelineParts {
                 positive_observations_threshold,
                 relative_to_best_threshold,
                 and_threshold,
+                loop_length_two_threshold,
             );
 
             context.put_concrete(keys.petri_net().key(), petri_net);
