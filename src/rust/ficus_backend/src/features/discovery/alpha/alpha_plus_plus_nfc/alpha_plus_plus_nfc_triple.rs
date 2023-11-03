@@ -120,12 +120,10 @@ impl<'a> PartialEq for AlphaPlusPlusNfcTriple<'a> {
 
 impl<'a> Clone for AlphaPlusPlusNfcTriple<'a> {
     fn clone(&self) -> Self {
-        let clone_set = |set: &BTreeSet<&'a String>| -> BTreeSet<&'a String> { set.iter().map(|class| *class).collect() };
-
         Self {
-            a_classes: clone_set(&self.a_classes),
-            b_classes: clone_set(&self.b_classes),
-            c_classes: clone_set(&self.c_classes),
+            a_classes: self.a_classes.clone(),
+            b_classes: self.b_classes.clone(),
+            c_classes: self.c_classes.clone(),
         }
     }
 }
