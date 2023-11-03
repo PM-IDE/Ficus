@@ -27,6 +27,7 @@ const_graph = 'graph'
 const_dependency_relation_threshold = 'dependency_threshold'
 const_positive_observations_threshold = 'positive_observations_threshold'
 const_relative_to_best_threshold = 'relative_to_best_threshold'
+const_and_threshold = 'and_threshold'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

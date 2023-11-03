@@ -33,17 +33,23 @@ class DiscoverPetriNetAlphaPlusPlusNfc2(PipelinePart2):
 
 
 class DiscoverPetriNetHeuristic2(PipelinePart2):
-    def __init__(self, dependency_threshold: float, positive_observations_threshold: int, relative_to_best_threshold: float):
+    def __init__(self,
+                 dependency_threshold: float = 0.8,
+                 positive_observations_threshold: int = 1,
+                 relative_to_best_threshold: float = 1.0,
+                 and_threshold: float = 0.1):
         super().__init__()
         self.dependency_threshold = dependency_threshold
         self.positive_observations_threshold = positive_observations_threshold
         self.relative_to_best_threshold = relative_to_best_threshold
+        self.and_threshold = and_threshold
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_float_value(config, const_dependency_relation_threshold, self.dependency_threshold)
         append_uint32_value(config, const_positive_observations_threshold, self.positive_observations_threshold)
         append_float_value(config, const_relative_to_best_threshold, self.relative_to_best_threshold)
+        append_float_value(config, const_and_threshold, self.and_threshold)
 
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_heuristic, config))
 
