@@ -9,6 +9,7 @@ use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::hash_utils::compare_based_on_hashes;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
+use crate::features::analysis::patterns::activity_instances::process_activities_in_trace;
 
 struct OneSet<T>
 where
@@ -113,6 +114,10 @@ pub fn discover_petri_net_heuristic(
             }
         }
 
+        if followers.len() == 0 {
+            continue;
+        }
+
         let mut and_relations = HashSet::new();
         for i in 0..followers.len() {
             for j in (i + 1)..followers.len() {
@@ -147,19 +152,11 @@ pub fn discover_petri_net_heuristic(
             let id = petri_net.add_transition(Transition::empty(name.to_owned(), Some(name.to_owned())));
             petri_net.connect_place_to_transition(&post_place_id, &id, None);
 
-            let name = format!("silent_end_{first_class}");
-            let final_transition_id = petri_net.add_transition(Transition::empty(name.to_owned(), Some(name.to_owned())));
-
             for el in group.set().iter() {
                 let place_id = petri_net.add_place(Place::with_name(format!("pre_{el}")));
                 petri_net.connect_transition_to_place(&id, &place_id, None);
                 petri_net.connect_place_to_transition(&place_id, classes_to_ids.get(*el).unwrap(), None);
 
-                let after_place_id = petri_net.add_place(Place::with_name(format!("post_{el}")));
-                petri_net.connect_transition_to_place(classes_to_ids.get(*el).unwrap(), &after_place_id, None);
-                petri_net.connect_place_to_transition(&after_place_id, &final_transition_id, None);
-
-                *classes_to_ids.get_mut(*el).unwrap() = final_transition_id;
                 used.insert(*el);
             }
         }
@@ -169,6 +166,33 @@ pub fn discover_petri_net_heuristic(
                 petri_net.connect_place_to_transition(&post_place_id, classes_to_ids.get(*follower).unwrap(), None);
             }
         }
+    }
+
+    let mut places_to_transitions = vec![];
+    let mut transitions_to_places = vec![];
+    for first_class in info.all_event_classes() {
+        for second_class in info.all_event_classes() {
+            if first_class != second_class && provider.loop_length_two_relation(first_class, second_class) {
+                let first_transition = petri_net.find_transition_by_name(first_class).unwrap();
+                let second_transition = petri_net.find_transition_by_name(second_class).unwrap();
+
+                for output_arc in second_transition.outgoing_arcs() {
+                    places_to_transitions.push((output_arc.place_id(), first_transition.id()));
+                }
+
+                for incoming_arc in second_transition.incoming_arcs() {
+                    transitions_to_places.push((first_transition.id(), incoming_arc.place_id()));
+                }
+            }
+        }
+    }
+
+    for (place_id, transition_id) in places_to_transitions {
+        petri_net.connect_place_to_transition(&place_id, &transition_id, None);
+    }
+
+    for (transition_id, place_id) in transitions_to_places {
+        petri_net.connect_transition_to_place(&transition_id, &place_id, None);
     }
 
     petri_net
@@ -283,6 +307,13 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
         }
     }
 
+    pub fn loop_length_two_relation(&self, first: &str, second: &str) -> bool {
+        let a_b = self.triangle_occurences_count(first, second) as f64;
+        let b_a = self.triangle_occurences_count(second, first) as f64;
+
+        (a_b + b_a) / (a_b + b_a + 1.0) > self.dependency_threshold
+    }
+
     fn calculate_dependency_measure(&self, first: &str, second: &str) -> f64 {
         let b_follows_a = self.get_directly_follows_count(first, second) as f64;
         let a_follows_b = self.get_directly_follows_count(second, first) as f64;
@@ -301,7 +332,7 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
             .get_directly_follows_count(&(first.to_owned(), second.to_owned()))
     }
 
-    fn triangle_measure(&self, first: &str, second: &str) -> usize {
+    fn triangle_occurences_count(&self, first: &str, second: &str) -> usize {
         if let Some(measure) = self.triangle_relations.get(&(first.to_owned(), second.to_owned())) {
             *measure
         } else {
