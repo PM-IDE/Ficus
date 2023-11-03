@@ -86,6 +86,7 @@ impl ContextKeys {
     pub const DEPENDENCY_THRESHOLD: &'static str = "dependency_threshold";
     pub const POSITIVE_OBSERVATIONS_THRESHOLD: &'static str = "positive_observations_threshold";
     pub const RELATIVE_TO_BEST_THRESHOLD: &'static str = "relative_to_best_threshold";
+    pub const AND_THRESHOLD: &'static str = "and_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -307,5 +308,9 @@ impl ContextKeys {
 
     fn insert_relative_to_best_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::RELATIVE_TO_BEST_THRESHOLD)
+    }
+
+    fn insert_and_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::AND_THRESHOLD)
     }
 }

@@ -12,6 +12,7 @@ pub fn discover_petri_net_heuristic(
     dependency_threshold: f64,
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
+    and_threshold: f64,
 ) -> DefaultPetriNet {
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     let provider = DefaultAlphaRelationsProvider::new(&info);
@@ -21,6 +22,7 @@ pub fn discover_petri_net_heuristic(
         dependency_threshold,
         positive_observations_threshold,
         relative_to_best_threshold,
+        and_threshold
     );
 
     let mut petri_net = DefaultPetriNet::empty();
@@ -53,9 +55,15 @@ pub(crate) struct HeuristicMinerMeasureProvider<'a> {
     dependency_threshold: f64,
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
+    and_threshold: f64,
     triangle_relations: HashMap<(String, String), usize>,
     provider: DefaultAlphaRelationsProvider<'a>,
     dependency_relations: DependencyRelations
+}
+
+pub enum AndOrXorRelation {
+    And,
+    Xor
 }
 
 impl<'a> HeuristicMinerMeasureProvider<'a> {
@@ -65,6 +73,7 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
         dependency_threshold: f64,
         positive_observations_threshold: usize,
         relative_to_best_threshold: f64,
+        and_threshold: f64,
     ) -> Self {
         let mut provider = Self {
             triangle_relations: calculate_triangle_relations(log),
@@ -72,7 +81,8 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
             positive_observations_threshold,
             relative_to_best_threshold,
             provider,
-            dependency_relations: DependencyRelations::new()
+            dependency_relations: DependencyRelations::new(),
+            and_threshold
         };
 
         provider.initialize_dependency_relations();
@@ -131,6 +141,21 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
             values.contains_key(second)
         } else {
             false
+        }
+    }
+
+    pub fn and_or_xor_relation(&self, a: &str, b: &str, c: &str) -> AndOrXorRelation {
+        let b_c = self.get_directly_follows_count(b, c) as f64;
+        let c_b = self.get_directly_follows_count(c, b) as f64;
+        let a_b = self.get_directly_follows_count(a, b) as f64;
+        let a_c = self.get_directly_follows_count(a, c) as f64;
+
+        let and_xor_measure = (b_c + c_b) / (a_b + a_c + 1.0);
+
+        if and_xor_measure > self.and_threshold {
+            AndOrXorRelation::And
+        } else {
+            AndOrXorRelation::Xor
         }
     }
 
