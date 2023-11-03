@@ -3,13 +3,12 @@ use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreati
 use crate::features::discovery::alpha::providers::alpha_plus_provider::calculate_triangle_relations;
 use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
 use crate::features::discovery::alpha::utils::maximize;
-use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
+use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::hash_utils::compare_based_on_hashes;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::{Hash, Hasher};
-use crate::features::analysis::patterns::activity_instances::process_activities_in_trace;
 
 struct OneSet<T>
 where
@@ -100,6 +99,13 @@ pub fn discover_petri_net_heuristic(
 
     let mut petri_net = DefaultPetriNet::empty();
 
+    construct_heuristic_petri_net(&info, &provider, &mut petri_net);
+    add_length_two_loops(&info, &provider, &mut petri_net);
+
+    petri_net
+}
+
+fn construct_heuristic_petri_net(log: &EventLogInfo, provider: &HeuristicMinerMeasureProvider, petri_net: &mut DefaultPetriNet) {
     let mut classes_to_ids = HashMap::new();
     for class in provider.log_info().all_event_classes() {
         let id = petri_net.add_transition(Transition::empty(class.to_owned(), Some(class.to_owned())));
@@ -167,7 +173,9 @@ pub fn discover_petri_net_heuristic(
             }
         }
     }
+}
 
+fn add_length_two_loops(info: &EventLogInfo, provider: &HeuristicMinerMeasureProvider, petri_net: &mut DefaultPetriNet) {
     let mut places_to_transitions = vec![];
     let mut transitions_to_places = vec![];
     for first_class in info.all_event_classes() {
@@ -194,8 +202,6 @@ pub fn discover_petri_net_heuristic(
     for (transition_id, place_id) in transitions_to_places {
         petri_net.connect_transition_to_place(&transition_id, &place_id, None);
     }
-
-    petri_net
 }
 
 type DependencyRelations = HashMap<String, HashMap<String, f64>>;
