@@ -47,12 +47,15 @@ pub fn discover_petri_net_heuristic(
     petri_net
 }
 
+type DependencyRelations = HashMap<String, HashMap<String, f64>>;
+
 pub(crate) struct HeuristicMinerMeasureProvider<'a> {
     dependency_threshold: f64,
     positive_observations_threshold: usize,
     relative_to_best_threshold: f64,
     triangle_relations: HashMap<(String, String), usize>,
     provider: DefaultAlphaRelationsProvider<'a>,
+    dependency_relations: DependencyRelations
 }
 
 impl<'a> HeuristicMinerMeasureProvider<'a> {
@@ -63,28 +66,83 @@ impl<'a> HeuristicMinerMeasureProvider<'a> {
         positive_observations_threshold: usize,
         relative_to_best_threshold: f64,
     ) -> Self {
-        Self {
+        let mut provider = Self {
             triangle_relations: calculate_triangle_relations(log),
             dependency_threshold,
             positive_observations_threshold,
             relative_to_best_threshold,
             provider,
+            dependency_relations: DependencyRelations::new()
+        };
+
+        provider.initialize_dependency_relations();
+        provider
+    }
+
+    fn initialize_dependency_relations(&mut self) {
+        let mut relations = HashMap::<String, Vec<(String, f64)>>::new();
+        for first_class in self.provider.log_info().all_event_classes() {
+            for second_class in self.provider.log_info().all_event_classes() {
+                let second_follows_first = self.get_directly_follows_count(first_class, second_class);
+                if second_follows_first < self.positive_observations_threshold {
+                    continue;
+                }
+
+                let measure = self.calculate_dependency_measure(first_class, second_class);
+                if measure <= self.dependency_threshold {
+                    continue;
+                }
+
+                if let Some(values) = relations.get_mut(first_class) {
+                    values.push((second_class.to_owned(), measure));
+                } else {
+                    relations.insert(first_class.to_owned(), vec![(second_class.to_owned(), measure)]);
+                }
+            }
+        }
+
+        for key in self.provider.log_info().all_event_classes() {
+            if let Some(values) = relations.get_mut(key.as_str()) {
+                let best_value = values.iter().max_by(|first, second| {
+                    first.1.total_cmp(&second.1)
+                }).unwrap().1;
+
+                let min_value = best_value * (1.0 - self.relative_to_best_threshold);
+                for i in (0..values.len()).rev() {
+                    if values[i].1 < min_value {
+                        values.remove(i);
+                    }
+                }
+            }
+        }
+
+        for (key, values) in relations {
+            let mut map = HashMap::new();
+            for (second_key, value) in values {
+                map.insert(second_key, value);
+            }
+
+            self.dependency_relations.insert(key, map);
         }
     }
 
     pub fn dependency_relation(&self, first: &str, second: &str) -> bool {
+        if let Some(values) = self.dependency_relations.get(first) {
+            values.contains_key(second)
+        } else {
+            false
+        }
+    }
+
+    fn calculate_dependency_measure(&self, first: &str, second: &str) -> f64 {
         let b_follows_a = self.get_directly_follows_count(first, second) as f64;
         let a_follows_b = self.get_directly_follows_count(second, first) as f64;
 
-        let measure = if first != second {
-            let default_measure = (b_follows_a - a_follows_b) / (b_follows_a + a_follows_b + 1.0);
-            let triangle_measure = self.triangle_measure(first, second) as f64;
-            default_measure.max(triangle_measure)
+        if first != second {
+            (b_follows_a - a_follows_b) / (b_follows_a + a_follows_b + 1.0)
         } else {
             a_follows_b / (a_follows_b + 1.0)
-        };
-
-        measure > self.dependency_threshold
+        }
     }
 
     fn get_directly_follows_count(&self, first: &str, second: &str) -> usize {
