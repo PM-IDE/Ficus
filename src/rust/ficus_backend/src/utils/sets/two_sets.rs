@@ -75,11 +75,11 @@ where
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         for item in &self.first_set {
-            state.write(item.to_string().as_bytes());
+            item.hash(state);
         }
 
         for item in &self.second_set {
-            state.write(item.to_string().as_bytes());
+            item.hash(state);
         }
     }
 }
