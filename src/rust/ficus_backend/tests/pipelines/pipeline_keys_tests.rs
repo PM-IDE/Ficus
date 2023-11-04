@@ -79,6 +79,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<u32>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::LOOP_LENGTH_TWO_THRESHOLD, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -135,6 +136,7 @@ fn get_all_keys_names() -> Vec<String> {
         "positive_observations_threshold",
         "relative_to_best_threshold",
         "and_threshold",
+        "loop_length_two_threshold",
 
         "event_log",
         "activities",
@@ -199,6 +201,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<u32>(keys, ContextKeys::POSITIVE_OBSERVATIONS_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::LOOP_LENGTH_TWO_THRESHOLD, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
