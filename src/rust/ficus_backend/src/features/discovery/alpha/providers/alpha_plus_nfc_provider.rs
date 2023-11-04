@@ -29,7 +29,7 @@ where
     additional_causal_relations: HashSet<(&'a str, &'a str)>,
     alpha_plus_provider: AlphaPlusRelationsProviderImpl<'a>,
     log: &'a TLog,
-    caches: RelationsCaches,
+    caches: RelationsCaches<bool>,
 }
 
 impl<'a, TLog> AlphaRelationsProvider for AlphaPlusNfcRelationsProvider<'a, TLog>
