@@ -20,15 +20,13 @@ where
     };
 
     let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
-        let pair = (first.to_owned(), second.to_owned());
-        let pair_count = log_info.dfg_info().get_directly_follows_count(&pair);
+        let pair_count = log_info.dfg_info().get_directly_follows_count(first, second);
         let first_count = log_info.event_count(first);
         dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
-        let pair = (second.to_owned(), first.to_owned());
-        let pair_count = log_info.dfg_info().get_directly_follows_count(&pair);
+        let pair_count = log_info.dfg_info().get_directly_follows_count(second, first);
         let first_count = log_info.event_count(first);
         dfr_or_dpr_calculator(pair_count, log_info.event_classes_count(), first_count)
     };
@@ -44,14 +42,14 @@ where
 {
     let dfr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let dfg = log_info.dfg_info();
-        let dfr = dfg.get_directly_follows_count(&(first.to_owned(), second.to_owned()));
+        let dfr = dfg.get_directly_follows_count(first, second);
         let first_count = log_info.event_count(first);
         dfr as f64 / first_count as f64
     };
 
     let dpr_calculator = |first: &String, second: &String, log_info: &EventLogInfo| {
         let dfg = log_info.dfg_info();
-        let dfr = dfg.get_directly_follows_count(&(second.to_owned(), first.to_owned()));
+        let dfr = dfg.get_directly_follows_count(second, first);
         let first_count = log_info.event_count(first);
         dfr as f64 / first_count as f64
     };

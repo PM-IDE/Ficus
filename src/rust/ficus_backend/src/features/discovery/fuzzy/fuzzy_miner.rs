@@ -1,3 +1,4 @@
+use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::relations_cache::RelationsCaches;
 use crate::utils::graph::graph::Graph;
@@ -5,7 +6,7 @@ use std::collections::HashMap;
 
 pub type FuzzyGraph = Graph<String, f64>;
 
-pub fn discover_graph_fuzzy(log: &EventLogInfo) -> FuzzyGraph {
+pub fn discover_graph_fuzzy(log: &impl EventLog) -> FuzzyGraph {
     let mut graph = FuzzyGraph::empty();
 
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
@@ -33,8 +34,6 @@ impl<'a> FuzzyMetricsProvider<'a> {
     }
 
     pub fn binary_frequency_significance(&self, first_class: &String, second_class: &String) -> f64 {
-        self.log_info
-            .dfg_info()
-            .get_directly_follows_count(&(first_class.to_owned(), second_class.to_owned())) as f64
+        self.log_info.dfg_info().get_directly_follows_count(first_class, second_class) as f64
     }
 }

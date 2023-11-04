@@ -71,7 +71,7 @@ impl EventLogInfo {
             ignored_events,
         } = creation_dto;
 
-        let mut dfg_pairs = HashMap::new();
+        let mut dfg_pairs: HashMap<String, HashMap<String, usize>> = HashMap::new();
         let mut events_count = 0;
         let mut events_counts = HashMap::new();
         let mut start_event_classes = HashSet::new();
@@ -82,8 +82,16 @@ impl EventLogInfo {
         };
 
         let mut update_pairs_count = |first_name: &String, second_name: &String| {
-            let pair = (first_name.to_owned(), second_name.to_owned());
-            increase_in_map(&mut dfg_pairs, &pair);
+            if let Some(values) = dfg_pairs.get_mut(first_name) {
+                if let Some(count) = values.get_mut(second_name) {
+                    *count += 1;
+                } else {
+                    values.insert(second_name.to_string(), 1);
+                }
+            } else {
+                let map = HashMap::from_iter(vec![(second_name.to_owned(), 1)]);
+                dfg_pairs.insert(first_name.to_owned(), map);
+            }
         };
 
         for trace in log.traces() {
@@ -132,27 +140,29 @@ impl EventLogInfo {
         let mut precedes_events: HashMap<String, HashMap<String, usize>> = HashMap::new();
         let mut events_with_single_follower = HashSet::new();
 
-        for ((first, second), count) in &dfg_pairs {
-            if followed_events.contains_key(first) {
-                if events_with_single_follower.contains(first) {
-                    events_with_single_follower.remove(first);
+        for (first, followers_map) in &dfg_pairs {
+            for (second, count) in followers_map {
+                if followed_events.contains_key(first) {
+                    if events_with_single_follower.contains(first) {
+                        events_with_single_follower.remove(first);
+                    }
+
+                    if !followed_events.get(first).unwrap().contains_key(second) {
+                        let followers_map = followed_events.get_mut(first).unwrap();
+                        followers_map.insert(second.to_owned(), count.to_owned());
+                    }
+                } else {
+                    let map = HashMap::from_iter(vec![(second.to_owned(), count.to_owned())]);
+                    followed_events.insert(first.to_owned(), map);
+                    events_with_single_follower.insert(first.to_owned());
                 }
 
-                if !followed_events.get(first).unwrap().contains_key(second) {
-                    let followers_map = followed_events.get_mut(first).unwrap();
-                    followers_map.insert(second.to_owned(), count.to_owned());
+                if precedes_events.contains_key(second) {
+                    precedes_events.get_mut(second).unwrap().insert(first.to_owned(), count.to_owned());
+                } else {
+                    let map = HashMap::from_iter(vec![(first.to_owned(), count.to_owned())]);
+                    precedes_events.insert(second.to_owned(), map);
                 }
-            } else {
-                let map = HashMap::from_iter(vec![(second.to_owned(), count.to_owned())]);
-                followed_events.insert(first.to_owned(), map);
-                events_with_single_follower.insert(first.to_owned());
-            }
-
-            if precedes_events.contains_key(second) {
-                precedes_events.get_mut(second).unwrap().insert(first.to_owned(), count.to_owned());
-            } else {
-                let map = HashMap::from_iter(vec![(first.to_owned(), count.to_owned())]);
-                precedes_events.insert(second.to_owned(), map);
             }
         }
 
@@ -209,23 +219,29 @@ impl EventLogInfo {
 
 #[derive(Debug)]
 pub struct DfgInfo {
-    dfg_pairs: HashMap<(String, String), usize>,
+    dfg_pairs: HashMap<String, HashMap<String, usize>>,
     followed_events: HashMap<String, HashMap<String, usize>>,
     precedes_events: HashMap<String, HashMap<String, usize>>,
     events_with_single_follower: HashSet<String>,
 }
 
 impl DfgInfo {
-    pub fn get_directly_follows_count(&self, pair: &(String, String)) -> usize {
-        match self.dfg_pairs.get(pair) {
-            Some(count) => count.to_owned(),
-            None => 0,
+    pub fn get_directly_follows_count(&self, first: &String, second: &String) -> usize {
+        if let Some(values) = self.dfg_pairs.get(first) {
+            if let Some(dfg_count) = values.get(second) {
+                return *dfg_count;
+            }
         }
+
+        0
     }
 
     pub fn is_in_directly_follows_relation(&self, left: &str, right: &str) -> bool {
-        //todo: xDdDDDDDDD====))))
-        return self.dfg_pairs.get(&(left.to_owned(), right.to_owned())).is_some();
+        if let Some(values) = self.dfg_pairs.get(left) {
+            values.contains_key(right)
+        } else {
+            false
+        }
     }
 
     pub fn get_followed_events(&self, event_class: &String) -> Option<&HashMap<String, usize>> {

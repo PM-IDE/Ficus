@@ -101,7 +101,7 @@ impl<'a> HeuristicMinerRelationsProvider<'a> {
         }
     }
 
-    pub fn and_or_xor_relation(&self, a: &str, b: &str, c: &str) -> AndOrXorRelation {
+    pub fn and_or_xor_relation(&self, a: &String, b: &String, c: &String) -> AndOrXorRelation {
         let b_c = self.get_directly_follows_count(b, c) as f64;
         let c_b = self.get_directly_follows_count(c, b) as f64;
         let a_b = self.get_directly_follows_count(a, b) as f64;
@@ -123,7 +123,7 @@ impl<'a> HeuristicMinerRelationsProvider<'a> {
         (a_b + b_a) / (a_b + b_a + 1.0) > self.loop_length_two_threshold
     }
 
-    fn calculate_dependency_measure(&self, first: &str, second: &str) -> f64 {
+    fn calculate_dependency_measure(&self, first: &String, second: &String) -> f64 {
         let b_follows_a = self.get_directly_follows_count(first, second) as f64;
         let a_follows_b = self.get_directly_follows_count(second, first) as f64;
 
@@ -134,11 +134,8 @@ impl<'a> HeuristicMinerRelationsProvider<'a> {
         }
     }
 
-    fn get_directly_follows_count(&self, first: &str, second: &str) -> usize {
-        self.provider
-            .log_info()
-            .dfg_info()
-            .get_directly_follows_count(&(first.to_owned(), second.to_owned()))
+    fn get_directly_follows_count(&self, first: &String, second: &String) -> usize {
+        self.provider.log_info().dfg_info().get_directly_follows_count(first, second)
     }
 
     fn triangle_occurrences_count(&self, first: &str, second: &str) -> usize {
