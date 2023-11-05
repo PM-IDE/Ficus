@@ -100,6 +100,38 @@ where
             false
         }
     }
+
+    #[rustfmt:skip]
+    pub fn to_default_graph(self) -> DefaultGraph {
+        DefaultGraph {
+            nodes: self.nodes.iter().map(|pair| {
+                (
+                    *pair.0,
+                    GraphNode {
+                        id: pair.1.id.to_owned(),
+                        data: match &pair.1.data {
+                            None => None,
+                            Some(data) => Some(data.to_string()),
+                        },
+                    },
+                )
+            }).collect(),
+            connections: self.connections.iter().map(|pair| {
+                (
+                    *pair.0,
+                    pair.1.iter().map(|pair| {
+                        (
+                            *pair.0,
+                            match &pair.1 {
+                                None => None,
+                                Some(data) => Some(data.to_string()),
+                            },
+                        )
+                    }).collect(),
+                )
+            }).collect(),
+        }
+    }
 }
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);

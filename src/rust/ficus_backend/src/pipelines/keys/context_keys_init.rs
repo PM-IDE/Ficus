@@ -88,6 +88,10 @@ impl ContextKeys {
     pub const RELATIVE_TO_BEST_THRESHOLD: &'static str = "relative_to_best_threshold";
     pub const AND_THRESHOLD: &'static str = "and_threshold";
     pub const LOOP_LENGTH_TWO_THRESHOLD: &'static str = "loop_length_two_threshold";
+    pub const UNARY_FREQUENCY_THRESHOLD: &'static str = "unary_frequency_threshold";
+    pub const BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD: &'static str = "binary_frequency_significance_threshold";
+    pub const PRESERVE_THRESHOLD: &'static str = "preserve_threshold";
+    pub const RATIO_THRESHOLD: &'static str = "ratio_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -132,6 +136,10 @@ impl ContextKeys {
         Self::insert_relative_to_best_threshold(&mut context);
         Self::insert_and_threshold(&mut context);
         Self::insert_loop_length_two_threshold(&mut context);
+        Self::insert_unary_frequency_threshold(&mut context);
+        Self::insert_binary_significance_threshold(&mut context);
+        Self::insert_preserve_threshold(&mut context);
+        Self::insert_ratio_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -319,5 +327,21 @@ impl ContextKeys {
 
     fn insert_loop_length_two_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::LOOP_LENGTH_TWO_THRESHOLD)
+    }
+
+    fn insert_unary_frequency_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::UNARY_FREQUENCY_THRESHOLD);
+    }
+
+    fn insert_binary_significance_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD);
+    }
+
+    fn insert_preserve_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::PRESERVE_THRESHOLD);
+    }
+
+    fn insert_ratio_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::RATIO_THRESHOLD);
     }
 }

@@ -371,4 +371,37 @@ impl ContextKeys {
     pub fn is_loop_length_two_threshold(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.loop_length_two_threshold(), key)
     }
+
+    pub fn unary_frequency_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::UNARY_FREQUENCY_THRESHOLD).unwrap()
+    }
+
+    pub fn is_unary_frequency_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.unary_frequency_threshold(), key)
+    }
+
+    pub fn binary_significance_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD)
+            .unwrap()
+    }
+
+    pub fn is_binary_significance_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.binary_significance_threshold(), key)
+    }
+
+    pub fn preserve_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::PRESERVE_THRESHOLD).unwrap()
+    }
+
+    pub fn is_preserve_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.preserve_threshold(), key)
+    }
+
+    pub fn ratio_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::RATIO_THRESHOLD).unwrap()
+    }
+
+    pub fn is_ratio_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.ratio_threshold(), key)
+    }
 }

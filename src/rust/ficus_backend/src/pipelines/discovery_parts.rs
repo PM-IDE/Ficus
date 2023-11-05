@@ -4,6 +4,7 @@ use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discove
 use crate::features::discovery::alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlusRelationsProviderImpl;
 use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
+use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
@@ -110,6 +111,22 @@ impl PipelineParts {
             );
 
             context.put_concrete(keys.petri_net().key(), petri_net);
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn discover_fuzzy_graph() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::DISCOVER_FUZZY_GRAPH, &|context, _, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let unary_freq_threshold = *Self::get_user_data(config, keys.unary_frequency_threshold())?;
+            let binary_sig_threshold = *Self::get_user_data(config, keys.binary_significance_threshold())?;
+            let preserve_ratio = *Self::get_user_data(config, keys.preserve_threshold())?;
+            let ratio_threshold = *Self::get_user_data(config, keys.ratio_threshold())?;
+
+            let graph = discover_graph_fuzzy(log, unary_freq_threshold, binary_sig_threshold, preserve_ratio, ratio_threshold);
+
+            context.put_concrete(keys.graph().key(), graph.to_default_graph());
 
             Ok(())
         })

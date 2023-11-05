@@ -43,4 +43,5 @@ impl PipelineParts {
     pub const DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS_NFC: &'static str = "DiscoverPetriNetAlphaPlusPlusNfc";
     pub const DISCOVER_DFG: &'static str = "DiscoverDirectlyFollowsGraph";
     pub const DISCOVER_PETRI_NET_HEURISTIC: &'static str = "DiscoverPetriNetHeuristic";
+    pub const DISCOVER_FUZZY_GRAPH: &'static str = "DiscoverFuzzyGraph";
 }
