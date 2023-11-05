@@ -12,7 +12,6 @@ use ficus_backend::{
             event_log_info::EventLogInfo,
             patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
         },
-        discovery::petri_net::petri_net::PetriNet,
     },
     pipelines::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},
@@ -80,6 +79,10 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::LOOP_LENGTH_TWO_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::UNARY_FREQUENCY_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::PRESERVE_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::RATIO_THRESHOLD, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -137,6 +140,10 @@ fn get_all_keys_names() -> Vec<String> {
         "relative_to_best_threshold",
         "and_threshold",
         "loop_length_two_threshold",
+        "unary_frequency_threshold",
+        "binary_frequency_significance_threshold",
+        "preserve_threshold",
+        "ratio_threshold",
 
         "event_log",
         "activities",
@@ -202,6 +209,10 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<f64>(keys, ContextKeys::RELATIVE_TO_BEST_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::AND_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::LOOP_LENGTH_TWO_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::UNARY_FREQUENCY_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::PRESERVE_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::RATIO_THRESHOLD, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);

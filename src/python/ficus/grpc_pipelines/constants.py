@@ -73,7 +73,7 @@ const_discover_petri_net_alpha_plus_plus = 'DiscoverPetriNetAlphaPlusPlus'
 const_discover_petri_net_alpha_plus_plus_nfc = 'DiscoverPetriNetAlphaPlusPlusNfc'
 const_discover_directly_follows_graph = 'DiscoverDirectlyFollowsGraph'
 const_discover_petri_net_heuristic = 'DiscoverPetriNetHeuristic'
-const_discover_graph_fuzzy = 'DiscoverGraphFuzzy'
+const_discover_graph_fuzzy = 'DiscoverFuzzyGraph'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'
