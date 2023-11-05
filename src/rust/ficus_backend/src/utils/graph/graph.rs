@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::{
     collections::HashMap,
     sync::atomic::{AtomicU64, Ordering},
@@ -10,8 +11,8 @@ where
     TNodeData: ToString,
     TEdgeData: ToString,
 {
-    edges: HashMap<u64, GraphEdge<TEdgeData>>,
     nodes: HashMap<u64, GraphNode<TNodeData>>,
+    connections: HashMap<u64, HashMap<u64, Option<TEdgeData>>>,
 }
 
 pub struct GraphEdge<TEdgeData>
@@ -35,11 +36,11 @@ where
 impl<TNodeData, TEdgeData> Graph<TNodeData, TEdgeData>
 where
     TNodeData: ToString,
-    TEdgeData: ToString,
+    TEdgeData: ToString + Display,
 {
     pub fn empty() -> Self {
         Self {
-            edges: HashMap::new(),
+            connections: HashMap::new(),
             nodes: HashMap::new(),
         }
     }
@@ -48,8 +49,15 @@ where
         (&self.nodes).values().into_iter().collect()
     }
 
-    pub fn all_edges(&self) -> Vec<&GraphEdge<TEdgeData>> {
-        (&self.edges).values().into_iter().collect()
+    pub fn all_edges(&self) -> Vec<GraphEdge<&TEdgeData>> {
+        let mut edges = vec![];
+        for (first, connections) in &self.connections {
+            for (second, data) in connections {
+                edges.push(GraphEdge::new(*first, *second, data.as_ref()))
+            }
+        }
+
+        edges
     }
 
     pub fn add_node(&mut self, node_data: Option<TNodeData>) -> u64 {
@@ -60,18 +68,37 @@ where
         id
     }
 
-    pub fn connect_nodes(&mut self, first_node_id: &u64, second_node_id: &u64, edge_data: Option<TEdgeData>) -> Option<u64> {
-        if let Some(_) = self.nodes.get(first_node_id) {
-            if let Some(_) = self.nodes.get(second_node_id) {
-                let edge = GraphEdge::new(*first_node_id, *second_node_id, edge_data);
-                let id = *edge.id();
-                self.edges.insert(*edge.id(), edge);
-
-                return Some(id);
-            }
+    pub fn connect_nodes(&mut self, first_node_id: &u64, second_node_id: &u64, edge_data: Option<TEdgeData>) {
+        if self.are_nodes_connected(first_node_id, second_node_id) {
+            return;
         }
 
-        None
+        if let Some(_) = self.nodes.get(first_node_id) {
+            if let Some(_) = self.nodes.get(second_node_id) {
+                if let Some(connections) = self.connections.get_mut(first_node_id) {
+                    connections.insert(second_node_id.to_owned(), edge_data);
+                } else {
+                    let new_connections = HashMap::from_iter(vec![(second_node_id.to_owned(), edge_data)]);
+                    self.connections.insert(first_node_id.to_owned(), new_connections);
+                }
+            }
+        }
+    }
+
+    pub fn are_nodes_connected(&self, first_node_id: &u64, second_node_id: &u64) -> bool {
+        if let Some(connections) = self.connections.get(first_node_id) {
+            connections.contains_key(second_node_id)
+        } else {
+            false
+        }
+    }
+
+    pub fn disconnect_nodes(&mut self, first_node_id: &u64, second_node_id: &u64) -> bool {
+        if let Some(connections) = self.connections.get_mut(first_node_id) {
+            connections.remove(second_node_id).is_some()
+        } else {
+            false
+        }
     }
 }
 

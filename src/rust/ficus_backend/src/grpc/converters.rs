@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
@@ -405,10 +406,10 @@ fn try_convert_to_grpc_graph(value: &dyn Any) -> Option<GrpcContextValue> {
 fn convert_to_grpc_graph<TNodeData, TEdgeData>(graph: &Graph<TNodeData, TEdgeData>) -> GrpcGraph
 where
     TNodeData: ToString,
-    TEdgeData: ToString,
+    TEdgeData: ToString + Display,
 {
     let nodes: Vec<GrpcGraphNode> = graph.all_nodes().iter().map(|node| convert_to_grpc_graph_node(*node)).collect();
-    let edges: Vec<GrpcGraphEdge> = graph.all_edges().iter().map(|edge| convert_to_grpc_graph_edge(*edge)).collect();
+    let edges: Vec<GrpcGraphEdge> = graph.all_edges().iter().map(|edge| convert_to_grpc_graph_edge(edge)).collect();
 
     GrpcGraph { edges, nodes }
 }
