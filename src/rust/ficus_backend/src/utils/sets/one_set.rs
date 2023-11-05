@@ -38,6 +38,10 @@ where
     pub fn set(&self) -> &BTreeSet<T> {
         &self.set
     }
+
+    pub fn insert(&mut self, item: T) {
+        self.set.insert(item);
+    }
 }
 
 impl<T> Hash for OneSet<T>

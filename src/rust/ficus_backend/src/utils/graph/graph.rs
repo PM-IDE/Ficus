@@ -105,6 +105,39 @@ where
         }
     }
 
+    pub fn all_connected_nodes(&self, node_id: &u64) -> Vec<&u64> {
+        let mut connected_nodes = match self.connections.get(node_id) {
+            None => vec![],
+            Some(connections) => connections.keys().collect(),
+        };
+
+        for (node_id, connections) in &self.connections {
+            if connections.contains_key(node_id) {
+                connected_nodes.push(node_id);
+            }
+        }
+
+        connected_nodes
+    }
+
+    pub fn outgoing_nodes(&self, node_id: &u64) -> Vec<&u64> {
+        match self.connections.get(node_id) {
+            None => vec![],
+            Some(outgoing_edges) => outgoing_edges.iter().collect(),
+        }
+    }
+
+    pub fn incoming_edges(&self, node_id: &u64) -> Vec<&u64> {
+        let mut result = vec![];
+        for (candidate, connections) in &self.connections {
+            if connections.contains_key(node_id) {
+                result.push(candidate);
+            }
+        }
+
+        result
+    }
+
     #[rustfmt::skip]
     pub fn to_default_graph(self) -> DefaultGraph {
         DefaultGraph {
