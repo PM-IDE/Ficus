@@ -57,6 +57,28 @@ class DiscoverPetriNetHeuristic2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_heuristic, config))
 
 
+class DiscoverFuzzyGraph(PipelinePart2):
+    def __init__(self,
+                 unary_frequency_threshold: float = 0.0,
+                 binary_significance_threshold: float = 0.0,
+                 preserve_threshold: float = 0.0,
+                 ratio_threshold: float = 0.0):
+        super().__init__()
+        self.unary_frequency_threshold = unary_frequency_threshold
+        self.binary_significance_threshold = binary_significance_threshold
+        self.preserve_threshold = preserve_threshold
+        self.ratio_threshold = ratio_threshold
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_float_value(config, const_unary_frequency_threshold, self.unary_frequency_threshold)
+        append_float_value(config, const_binary_frequency_significance_threshold, self.binary_significance_threshold)
+        append_float_value(config, const_preserve_threshold, self.preserve_threshold)
+        append_float_value(config, const_ratio_threshold, self.ratio_threshold)
+
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_graph_fuzzy, config))
+
+
 class SerializePetriNetToPNML2(PipelinePart2):
     def __init__(self, save_path, use_names_as_ids: bool = False):
         super().__init__()
