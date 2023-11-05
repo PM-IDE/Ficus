@@ -54,7 +54,8 @@ class DiscoverPetriNetHeuristic2(PipelinePart2):
         append_float_value(config, const_and_threshold, self.and_threshold)
         append_float_value(config, const_loop_length_two_threshold, self.loop_length_two_threshold)
 
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_petri_net_heuristic, config))
+        return GrpcPipelinePartBase(
+            defaultPart=_create_default_pipeline_part(const_discover_petri_net_heuristic, config))
 
 
 class DiscoverFuzzyGraph(PipelinePart2):
@@ -90,7 +91,8 @@ class SerializePetriNetToPNML2(PipelinePart2):
         append_string_value(config, const_path, self.save_path)
         append_bool_value(config, const_pnml_use_names_as_ids, self.use_names_as_ids)
 
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_serialize_petri_net_to_pnml, config))
+        return GrpcPipelinePartBase(
+            defaultPart=_create_default_pipeline_part(const_serialize_petri_net_to_pnml, config))
 
 
 class ViewGraphLikeFormalismPart2(PipelinePart2WithCallback):
@@ -106,6 +108,14 @@ class ViewGraphLikeFormalismPart2(PipelinePart2WithCallback):
         self.background_color = background_color
         self.engine = engine
         self.rankdir = rankdir
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        draw_graph(from_grpc_graph(context_value.graph),
+                   name=self.name,
+                   background_color=self.background_color,
+                   engine=self.engine,
+                   rankdir=self.rankdir,
+                   export_path=self.export_path)
 
 
 class ViewPetriNet2(ViewGraphLikeFormalismPart2):
@@ -133,7 +143,7 @@ class ViewPetriNet2(ViewGraphLikeFormalismPart2):
                        export_path=self.export_path)
 
 
-class ViewDirectlyFollowsGraph(ViewGraphLikeFormalismPart2):
+class ViewDirectlyFollowsGraph2(ViewGraphLikeFormalismPart2):
     def __init__(self,
                  name: str = 'dfg_graph',
                  background_color: str = 'white',
@@ -143,13 +153,20 @@ class ViewDirectlyFollowsGraph(ViewGraphLikeFormalismPart2):
         super().__init__(name, background_color, engine, export_path, rankdir)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        part = _create_complex_get_context_part(self.uuid, const_graph, const_discover_directly_follows_graph, GrpcPipelinePartConfiguration())
+        part = _create_complex_get_context_part(self.uuid, const_graph, const_discover_directly_follows_graph,
+                                                GrpcPipelinePartConfiguration())
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
-    def execute_callback(self, context_value: GrpcContextValue):
-        draw_graph(from_grpc_graph(context_value.graph),
-                   name=self.name,
-                   background_color=self.background_color,
-                   engine=self.engine,
-                   rankdir=self.rankdir,
-                   export_path=self.export_path)
+
+class ViewGraph2(ViewGraphLikeFormalismPart2):
+    def __init__(self,
+                 name: str = 'dfg_graph',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
+        super().__init__(name, background_color, engine, export_path, rankdir)
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_simple_get_context_value_part(self.uuid, const_graph)
+        return GrpcPipelinePartBase(simpleContextRequestPart=part)
