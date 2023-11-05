@@ -101,7 +101,7 @@ where
         }
     }
 
-    #[rustfmt:skip]
+    #[rustfmt::skip]
     pub fn to_default_graph(self) -> DefaultGraph {
         DefaultGraph {
             nodes: self.nodes.iter().map(|pair| {
