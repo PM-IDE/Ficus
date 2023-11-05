@@ -33,6 +33,8 @@ const_unary_frequency_threshold = 'unary_frequency_threshold'
 const_binary_frequency_significance_threshold = 'binary_frequency_significance_threshold'
 const_preserve_threshold = 'preserve_threshold'
 const_ratio_threshold = 'ratio_threshold'
+const_utility_rate = 'utility_rate'
+const_edge_cutoff_threshold = 'edge_cutoff_threshold'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

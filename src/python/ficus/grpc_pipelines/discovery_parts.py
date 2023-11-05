@@ -63,12 +63,16 @@ class DiscoverFuzzyGraph(PipelinePart2):
                  unary_frequency_threshold: float = 0.0,
                  binary_significance_threshold: float = 0.0,
                  preserve_threshold: float = 0.0,
-                 ratio_threshold: float = 0.0):
+                 ratio_threshold: float = 0.0,
+                 utility_rate: float = 0.0,
+                 edge_cutoff_threshold: float = 0.0):
         super().__init__()
         self.unary_frequency_threshold = unary_frequency_threshold
         self.binary_significance_threshold = binary_significance_threshold
         self.preserve_threshold = preserve_threshold
         self.ratio_threshold = ratio_threshold
+        self.utility_rate = utility_rate
+        self.edge_cutoff_threshold = edge_cutoff_threshold
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -76,6 +80,8 @@ class DiscoverFuzzyGraph(PipelinePart2):
         append_float_value(config, const_binary_frequency_significance_threshold, self.binary_significance_threshold)
         append_float_value(config, const_preserve_threshold, self.preserve_threshold)
         append_float_value(config, const_ratio_threshold, self.ratio_threshold)
+        append_float_value(config, const_utility_rate, self.utility_rate)
+        append_float_value(config, const_edge_cutoff_threshold, self.edge_cutoff_threshold)
 
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_discover_graph_fuzzy, config))
 
