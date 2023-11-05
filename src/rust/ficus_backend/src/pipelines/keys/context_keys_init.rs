@@ -1,20 +1,15 @@
 use std::{any::Any, borrow::Cow, collections::HashMap};
 
-use crate::features::analysis::patterns::activity_instances::{
-    ActivityInTraceFilterKind, ActivityNarrowingKind, UndefActivityHandlingStrategy,
-};
+use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
-    features::{
-        analysis::{
-            event_log_info::EventLogInfo,
-            patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
-        },
-        discovery::petri_net::petri_net::PetriNet,
+    features::analysis::{
+        event_log_info::EventLogInfo,
+        patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
     },
     pipelines::{aliases::*, pipelines::Pipeline},
     utils::colors::ColorsHolder,
@@ -92,6 +87,8 @@ impl ContextKeys {
     pub const BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD: &'static str = "binary_frequency_significance_threshold";
     pub const PRESERVE_THRESHOLD: &'static str = "preserve_threshold";
     pub const RATIO_THRESHOLD: &'static str = "ratio_threshold";
+    pub const UTILITY_RATE: &'static str = "utility_rate";
+    pub const EDGE_CUTOFF_THRESHOLD: &'static str = "edge_cutoff_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -140,6 +137,8 @@ impl ContextKeys {
         Self::insert_binary_significance_threshold(&mut context);
         Self::insert_preserve_threshold(&mut context);
         Self::insert_ratio_threshold(&mut context);
+        Self::insert_utitlity_rate(&mut context);
+        Self::insert_edge_cutoff_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -343,5 +342,13 @@ impl ContextKeys {
 
     fn insert_ratio_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::RATIO_THRESHOLD);
+    }
+
+    fn insert_utitlity_rate(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::UTILITY_RATE)
+    }
+
+    fn insert_edge_cutoff_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::EDGE_CUTOFF_THRESHOLD)
     }
 }

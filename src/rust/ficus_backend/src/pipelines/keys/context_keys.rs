@@ -404,4 +404,20 @@ impl ContextKeys {
     pub fn is_ratio_threshold(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.ratio_threshold(), key)
     }
+
+    pub fn utility_rate(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::UTILITY_RATE).unwrap()
+    }
+
+    pub fn is_utility_rate(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.utility_rate(), key)
+    }
+
+    pub fn edge_cutoff_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::EDGE_CUTOFF_THRESHOLD).unwrap()
+    }
+
+    pub fn is_edge_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.edge_cutoff_threshold(), key)
+    }
 }

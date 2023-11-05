@@ -45,6 +45,10 @@ where
         }
     }
 
+    pub fn node(&self, id: &u64) -> Option<&GraphNode<TNodeData>> {
+        self.nodes.get(id)
+    }
+
     pub fn all_nodes(&self) -> Vec<&GraphNode<TNodeData>> {
         (&self.nodes).values().into_iter().collect()
     }

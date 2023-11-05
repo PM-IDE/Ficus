@@ -7,11 +7,9 @@ use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::utils::graph::graph::DefaultGraph;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
-    features::{
-        analysis::{
-            event_log_info::EventLogInfo,
-            patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
-        },
+    features::analysis::{
+        event_log_info::EventLogInfo,
+        patterns::{activity_instances::AdjustingMode, contexts::PatternsDiscoveryStrategy},
     },
     pipelines::{
         aliases::{Activities, ActivitiesToLogs, ColorsEventLog, Patterns, RepeatSets, TracesActivities},

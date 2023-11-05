@@ -14,6 +14,8 @@ pub fn discover_graph_fuzzy(
     binary_frequency_significance_threshold: f64,
     preserve_threshold: f64,
     ratio_threshold: f64,
+    utility_rate: f64,
+    edge_cutoff_threshold: f64,
 ) -> FuzzyGraph {
     let mut graph = FuzzyGraph::empty();
 
@@ -30,14 +32,28 @@ pub fn discover_graph_fuzzy(
 
     for first_class in classes_to_ids.keys() {
         for second_class in classes_to_ids.keys() {
-            if provider.binary_frequency_significance(first_class, second_class) > binary_frequency_significance_threshold {
+            let bin_freq_sig = provider.binary_frequency_significance(first_class, second_class);
+            if bin_freq_sig > binary_frequency_significance_threshold {
                 let first_id = classes_to_ids.get(first_class).unwrap();
                 let second_id = classes_to_ids.get(second_class).unwrap();
-                graph.connect_nodes(first_id, second_id, None);
+                graph.connect_nodes(first_id, second_id, Some(bin_freq_sig));
             }
         }
     }
 
+    resolve_conflicts(&classes_to_ids, &provider, &mut graph, preserve_threshold, ratio_threshold);
+    filter_edges(&mut provider, &mut graph, utility_rate, edge_cutoff_threshold);
+
+    graph
+}
+
+fn resolve_conflicts<TLog: EventLog>(
+    classes_to_ids: &HashMap<String, u64>,
+    provider: &FuzzyMetricsProvider<TLog>,
+    graph: &mut FuzzyGraph,
+    preserve_threshold: f64,
+    ratio_threshold: f64,
+) {
     for first_name in classes_to_ids.keys() {
         for second_name in classes_to_ids.keys() {
             let first_id = classes_to_ids.get(first_name).unwrap();
@@ -64,8 +80,24 @@ pub fn discover_graph_fuzzy(
             }
         }
     }
+}
 
-    graph
+fn filter_edges<TLog: EventLog>(
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    graph: &mut FuzzyGraph,
+    utility_rate: f64,
+    edge_cutoff_threshold: f64,
+) {
+    let edges: Vec<(u64, u64)> = graph.all_edges().iter().map(|edge| (*edge.from_node(), *edge.to_node())).collect();
+    for (from_node_id, to_node_id) in edges {
+        let first_name = graph.node(&from_node_id).unwrap().data().unwrap();
+        let second_name = graph.node(&to_node_id).unwrap().data().unwrap();
+
+        let util_measure = provider.utlity_measure(first_name, second_name, utility_rate);
+        if util_measure < edge_cutoff_threshold {
+            graph.disconnect_nodes(&from_node_id, &to_node_id);
+        }
+    }
 }
 
 fn are_nodes_bi_connected(graph: &FuzzyGraph, first_node_id: &u64, second_node_id: &u64) -> bool {
@@ -165,5 +197,9 @@ where
         second_sig /= second_sum;
 
         first_sig + second_sig
+    }
+
+    pub fn utlity_measure(&mut self, first: &String, second: &String, utility_rate: f64) -> f64 {
+        utility_rate * self.binary_frequency_significance(first, second) + (1.0 - utility_rate) * self.proximity_correlation(first, second)
     }
 }

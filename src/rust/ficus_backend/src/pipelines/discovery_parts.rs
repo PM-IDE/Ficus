@@ -123,8 +123,18 @@ impl PipelineParts {
             let binary_sig_threshold = *Self::get_user_data(config, keys.binary_significance_threshold())?;
             let preserve_ratio = *Self::get_user_data(config, keys.preserve_threshold())?;
             let ratio_threshold = *Self::get_user_data(config, keys.ratio_threshold())?;
+            let utility_rate = *Self::get_user_data(config, keys.utility_rate())?;
+            let edge_cutoff_threshold = *Self::get_user_data(config, keys.edge_cutoff_threshold())?;
 
-            let graph = discover_graph_fuzzy(log, unary_freq_threshold, binary_sig_threshold, preserve_ratio, ratio_threshold);
+            let graph = discover_graph_fuzzy(
+                log,
+                unary_freq_threshold,
+                binary_sig_threshold,
+                preserve_ratio,
+                ratio_threshold,
+                utility_rate,
+                edge_cutoff_threshold,
+            );
 
             context.put_concrete(keys.graph().key(), graph.to_default_graph());
 
