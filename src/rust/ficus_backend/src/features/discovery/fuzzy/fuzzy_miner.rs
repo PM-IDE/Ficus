@@ -4,7 +4,11 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::relations_cache::RelationsCaches;
 use crate::utils::graph::graph::Graph;
+use crate::utils::sets::one_set::OneSet;
+use quick_xml::escape::unescape_with;
+use std::cell::{Ref, RefCell};
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 
 pub type FuzzyGraph = Graph<String, f64>;
 
@@ -16,6 +20,7 @@ pub fn discover_graph_fuzzy(
     ratio_threshold: f64,
     utility_rate: f64,
     edge_cutoff_threshold: f64,
+    node_cutoff_threshold: f64,
 ) -> FuzzyGraph {
     let mut graph = FuzzyGraph::empty();
 
@@ -127,6 +132,163 @@ fn filter_edges<TLog: EventLog>(
             }
         }
     }
+}
+
+fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, graph: &mut FuzzyGraph, node_cutoff_threshold: f64) {
+    let mut nodes_to_clusters: HashMap<u64, Rc<RefCell<OneSet<u64>>>> = HashMap::new();
+    let mut clusters = HashSet::new();
+
+    for node in graph.all_nodes() {
+        let this_node_name = node.data().unwrap();
+        if provider.unary_frequency_significance(this_node_name) >= node_cutoff_threshold {
+            continue;
+        }
+
+        let connected_nodes = graph.all_connected_nodes(node.id());
+        let mut max_corr = f64::NEG_INFINITY;
+        let mut max_corr_node_id = None;
+
+        for connected_node_id in connected_nodes {
+            if connected_node_id != node.id() {
+                let connected_node_name = graph.node(connected_node_id).unwrap().data().unwrap();
+                let correlation = provider.proximity_correlation(this_node_name, connected_node_name);
+                if correlation > max_corr {
+                    max_corr_node_id = Some(*connected_node_id);
+                    max_corr = correlation;
+                }
+            }
+        }
+
+        if let Some(max_corr_node_id) = max_corr_node_id {
+            if let Some(cluster) = nodes_to_clusters.get(&max_corr_node_id) {
+                cluster.borrow_mut().insert(*node.id())
+            } else {
+                let mut new_cluster = Rc::new(RefCell::new(OneSet::empty()));
+                new_cluster.borrow_mut().insert(*node.id());
+                nodes_to_clusters.insert(*node.id(), new_cluster.clone());
+                clusters.insert(new_cluster.clone());
+            }
+        }
+    }
+
+    'merging_clusters: loop {
+        let current_clusters: Vec<Rc<RefCell<OneSet<u64>>>> = clusters.iter().map(|c| c.clone()).collect();
+
+        for i in 0..current_clusters.len() {
+            let cluster = current_clusters.get(i).unwrap();
+            let outgoing_nodes: HashSet<&&u64> = cluster.set().iter().flat_map(|id| graph.outgoing_nodes(id)).collect();
+            let merged = try_merge_clusters(
+                provider,
+                graph,
+                &mut nodes_to_clusters,
+                &outgoing_nodes,
+                &mut clusters,
+                cluster.clone(),
+            );
+            if merged {
+                continue 'merging_clusters;
+            }
+
+            let incoming_nodes: HashSet<&&u64> = cluster.set().iter().flat_map(|id| graph.incoming_edges(id)).collect();
+            let merged = try_merge_clusters(
+                provider,
+                graph,
+                &mut nodes_to_clusters,
+                &incoming_nodes,
+                &mut clusters,
+                cluster.clone(),
+            );
+            if merged {
+                continue 'merging_clusters;
+            }
+        }
+
+        break;
+    }
+}
+
+fn try_merge_clusters<TLog>(
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    graph: &FuzzyGraph,
+    nodes_to_clusters: &mut HashMap<u64, Rc<RefCell<OneSet<u64>>>>,
+    nodes: &HashSet<&&u64>,
+    clusters: &mut HashSet<Rc<RefCell<OneSet<u64>>>>,
+    cluster: Rc<RefCell<OneSet<u64>>>,
+) -> bool {
+    let mut all_clusters = true;
+    let mut outgoing_clusters = HashSet::new();
+    for node_id in &nodes {
+        if !cluster.set().contains(node_id) && !nodes_to_clusters.contains_key(node_id) {
+            all_clusters = false;
+            break;
+        }
+
+        let cluster = nodes_to_clusters.get(node_id).unwrap();
+        outgoing_clusters.insert(cluster.clone())
+    }
+
+    if all_clusters {
+        if let Some(most_correlated_cluster) = find_most_correlated_cluster(provider, graph, &cluster.borrow(), &outgoing_clusters) {
+            let new_cluster = Rc::new(RefCell::new(cluster.borrow().merge(&most_correlated_cluster.borrow())));
+            for node in new_cluster.borrow().set() {
+                if let Some(value) = nodes_to_clusters.get_mut(node) {
+                    *value = new_cluster.clone();
+                } else {
+                    nodes_to_clusters.insert(*node, new_cluster.clone());
+                }
+            }
+
+            clusters.remove(&cluster);
+            clusters.remove(&most_correlated_cluster);
+            clusters.insert(new_cluster);
+            return true;
+        }
+    }
+
+    false
+}
+
+fn clusters_correlation<TLog: EventLog>(
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    graph: &FuzzyGraph,
+    first_cluster: &OneSet<u64>,
+    second_cluster: &OneSet<u64>,
+) -> f64 {
+    let mut corr = 0.0;
+    let mut count = 0.0;
+    for first_el in first_cluster.set() {
+        for second_el in second_cluster.set() {
+            let first_name = graph.node(first_el).unwrap().data().unwrap();
+            let second_name = graph.node(second_el).unwrap().data().unwrap();
+            corr += provider.proximity_correlation(first_name, second_name);
+            count += 1;
+        }
+    }
+
+    if count == 0 {
+        0.0
+    } else {
+        corr / count
+    }
+}
+
+fn find_most_correlated_cluster<TLog: EventLog>(
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    graph: &FuzzyGraph,
+    cluster: &OneSet<u64>,
+    candidates: &HashSet<Rc<RefCell<OneSet<u64>>>>,
+) -> Option<Rc<RefCell<OneSet<u64>>>> {
+    let mut max_corr = None;
+    let mut most_correlated_cluster = None;
+    for outgoing_cluster in &candidates {
+        let clusters_corr = clusters_correlation(provider, graph, cluster, &outgoing_cluster.borrow());
+        if max_corr.is_none() || clusters_corr > max_corr.unwrap() {
+            max_corr = Some(clusters_corr);
+            most_correlated_cluster = Some(outgoing_cluster.clone());
+        }
+    }
+
+    most_correlated_cluster
 }
 
 fn are_nodes_bi_connected(graph: &FuzzyGraph, first_node_id: &u64, second_node_id: &u64) -> bool {
