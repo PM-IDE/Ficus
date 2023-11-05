@@ -4,7 +4,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::providers::relations_cache::RelationsCaches;
 use crate::utils::graph::graph::Graph;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub type FuzzyGraph = Graph<String, f64>;
 
@@ -89,13 +89,42 @@ fn filter_edges<TLog: EventLog>(
     edge_cutoff_threshold: f64,
 ) {
     let edges: Vec<(u64, u64)> = graph.all_edges().iter().map(|edge| (*edge.from_node(), *edge.to_node())).collect();
+    let mut node_to_incoming_nodes: HashMap<u64, HashSet<u64>> = HashMap::new();
     for (from_node_id, to_node_id) in edges {
-        let first_name = graph.node(&from_node_id).unwrap().data().unwrap();
-        let second_name = graph.node(&to_node_id).unwrap().data().unwrap();
+        if let Some(set) = node_to_incoming_nodes.get_mut(&to_node_id) {
+            set.insert(from_node_id);
+        } else {
+            node_to_incoming_nodes.insert(to_node_id, HashSet::from_iter(vec![from_node_id]));
+        }
+    }
 
-        let util_measure = provider.utlity_measure(first_name, second_name, utility_rate);
-        if util_measure < edge_cutoff_threshold {
-            graph.disconnect_nodes(&from_node_id, &to_node_id);
+    for (node_id, incoming_nodes_ids) in node_to_incoming_nodes {
+        if incoming_nodes_ids.len() == 0 {
+            continue;
+        }
+
+        let incoming_nodes: Vec<u64> = incoming_nodes_ids.iter().map(|c| *c).collect();
+        let mut utility_measures = vec![0.0; incoming_nodes.len()];
+        let second = graph.node(&node_id).unwrap().data().unwrap();
+
+        for i in 0..incoming_nodes.len() {
+            let first = graph.node(incoming_nodes.get(i).unwrap()).unwrap().data().unwrap();
+            utility_measures[i] = provider.utility_measure(first, second, utility_rate);
+        }
+
+        let min = utility_measures.iter().fold(f64::INFINITY, |a, &b| a.min(b));
+        let max = utility_measures.iter().fold(f64::NEG_INFINITY, |a, &b| a.max(b));
+
+        for i in 0..utility_measures.len() {
+            let normalized_measure = if max != min {
+                (utility_measures[i] - min) / (max - min)
+            } else {
+                1.0
+            };
+
+            if normalized_measure < edge_cutoff_threshold {
+                graph.disconnect_nodes(&incoming_nodes[i], &node_id);
+            }
         }
     }
 }
@@ -171,11 +200,12 @@ where
             }
         }
 
-        result = result / (count as f64);
+        result = if count != 0 { result / (count as f64) } else { 0.0 };
 
         self.caches
             .cache_mut(PROXIMITY_CORRELATION)
             .put(first_class, second_class, result.clone());
+
         result
     }
 
@@ -199,7 +229,7 @@ where
         first_sig + second_sig
     }
 
-    pub fn utlity_measure(&mut self, first: &String, second: &String, utility_rate: f64) -> f64 {
+    pub fn utility_measure(&mut self, first: &String, second: &String, utility_rate: f64) -> f64 {
         utility_rate * self.binary_frequency_significance(first, second) + (1.0 - utility_rate) * self.proximity_correlation(first, second)
     }
 }
