@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fmt::Display;
 use std::{
     collections::HashMap,
@@ -123,7 +124,7 @@ where
     pub fn outgoing_nodes(&self, node_id: &u64) -> Vec<&u64> {
         match self.connections.get(node_id) {
             None => vec![],
-            Some(outgoing_edges) => outgoing_edges.iter().collect(),
+            Some(outgoing_edges) => outgoing_edges.keys().collect(),
         }
     }
 
@@ -136,6 +137,25 @@ where
         }
 
         result
+    }
+
+    pub fn merge_nodes_into_one(&mut self, nodes: &HashSet<u64>) {
+        let new_node_id = self.add_node(None);
+
+        for key in self.connections.keys().map(|key| *key).collect::<Vec<u64>>() {
+            let connections = self.connections.get_mut(&key).unwrap();
+
+            for node in nodes {
+                if connections.contains_key(node) {
+                    connections.remove(node);
+                    connections.insert(new_node_id.clone(), None);
+                }
+            }
+
+            if nodes.contains(&key) && connections.len() == 1 && connections.contains_key(&new_node_id) {
+                self.connections.remove(&key);
+            }
+        }
     }
 
     #[rustfmt::skip]
