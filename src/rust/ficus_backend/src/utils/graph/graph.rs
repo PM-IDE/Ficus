@@ -142,8 +142,17 @@ where
     pub fn merge_nodes_into_one(&mut self, nodes: &HashSet<u64>) {
         let new_node_id = self.add_node(None);
 
+        let mut output_connections = HashMap::new();
+
         for key in self.connections.keys().map(|key| *key).collect::<Vec<u64>>() {
             let connections = self.connections.get_mut(&key).unwrap();
+            if nodes.contains(&key) {
+                for connection in connections.keys() {
+                    if !nodes.contains(connection) {
+                        output_connections.insert(*connection, None);
+                    }
+                }
+            }
 
             for node in nodes {
                 if connections.contains_key(node) {
@@ -151,10 +160,13 @@ where
                     connections.insert(new_node_id.clone(), None);
                 }
             }
+        }
 
-            if nodes.contains(&key) && connections.len() == 1 && connections.contains_key(&new_node_id) {
-                self.connections.remove(&key);
-            }
+        self.connections.insert(new_node_id.clone(), output_connections);
+
+        for node_id in nodes {
+            self.nodes.remove(node_id);
+            self.connections.remove(node_id);
         }
     }
 
