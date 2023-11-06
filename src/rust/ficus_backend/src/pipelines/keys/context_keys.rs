@@ -420,4 +420,12 @@ impl ContextKeys {
     pub fn is_edge_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.edge_cutoff_threshold(), key)
     }
+
+    pub fn node_cutoff_threshold(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::NODE_CUTOFF_THRESHOLD).unwrap()
+    }
+
+    pub fn is_node_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.node_cutoff_threshold(), key)
+    }
 }

@@ -125,6 +125,7 @@ impl PipelineParts {
             let ratio_threshold = *Self::get_user_data(config, keys.ratio_threshold())?;
             let utility_rate = *Self::get_user_data(config, keys.utility_rate())?;
             let edge_cutoff_threshold = *Self::get_user_data(config, keys.edge_cutoff_threshold())?;
+            let node_cutoff_threshold = *Self::get_user_data(config, keys.node_cutoff_threshold())?;
 
             let graph = discover_graph_fuzzy(
                 log,
@@ -134,7 +135,7 @@ impl PipelineParts {
                 ratio_threshold,
                 utility_rate,
                 edge_cutoff_threshold,
-                0.0,
+                node_cutoff_threshold
             );
 
             context.put_concrete(keys.graph().key(), graph.to_default_graph());

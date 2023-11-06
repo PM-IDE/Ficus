@@ -89,6 +89,7 @@ impl ContextKeys {
     pub const RATIO_THRESHOLD: &'static str = "ratio_threshold";
     pub const UTILITY_RATE: &'static str = "utility_rate";
     pub const EDGE_CUTOFF_THRESHOLD: &'static str = "edge_cutoff_threshold";
+    pub const NODE_CUTOFF_THRESHOLD: &'static str = "node_cutoff_threshold";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -137,8 +138,9 @@ impl ContextKeys {
         Self::insert_binary_significance_threshold(&mut context);
         Self::insert_preserve_threshold(&mut context);
         Self::insert_ratio_threshold(&mut context);
-        Self::insert_utitlity_rate(&mut context);
+        Self::insert_utility_rate(&mut context);
         Self::insert_edge_cutoff_threshold(&mut context);
+        Self::insert_node_cutoff_threshold(&mut context);
 
         Self::insert_event_log(&mut context);
         Self::insert_activities(&mut context);
@@ -344,11 +346,15 @@ impl ContextKeys {
         Self::insert_key::<f64>(context, Self::RATIO_THRESHOLD);
     }
 
-    fn insert_utitlity_rate(context: &mut ContextKeysInitContext) {
+    fn insert_utility_rate(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::UTILITY_RATE)
     }
 
     fn insert_edge_cutoff_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::EDGE_CUTOFF_THRESHOLD)
+    }
+
+    fn insert_node_cutoff_threshold(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::NODE_CUTOFF_THRESHOLD)
     }
 }

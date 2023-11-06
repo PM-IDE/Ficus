@@ -35,6 +35,7 @@ const_preserve_threshold = 'preserve_threshold'
 const_ratio_threshold = 'ratio_threshold'
 const_utility_rate = 'utility_rate'
 const_edge_cutoff_threshold = 'edge_cutoff_threshold'
+const_node_cutoff_threshold = 'node_cutoff_threshold'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'
