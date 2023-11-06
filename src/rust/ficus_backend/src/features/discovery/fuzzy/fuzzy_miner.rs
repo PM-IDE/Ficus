@@ -47,6 +47,7 @@ pub fn discover_graph_fuzzy(
 
     resolve_conflicts(&classes_to_ids, &provider, &mut graph, preserve_threshold, ratio_threshold);
     filter_edges(&mut provider, &mut graph, utility_rate, edge_cutoff_threshold);
+    discover_clusters(&mut provider, &mut graph, node_cutoff_threshold);
 
     graph
 }
@@ -210,6 +211,11 @@ fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, 
 
         break;
     }
+
+    for cluster in clusters.values() {
+        let cluster = cluster.borrow();
+        graph.merge_nodes_into_one(&cluster.set().iter().map(|id| *id).collect());
+    }
 }
 
 fn try_merge_clusters<TLog: EventLog>(
@@ -233,9 +239,8 @@ fn try_merge_clusters<TLog: EventLog>(
     }
 
     if all_clusters {
-        if let Some(most_correlated_cluster) =
-            find_most_correlated_cluster(provider, graph, &cluster.borrow(), &outgoing_clusters, clusters)
-        {
+        let most_corr_cluster = find_most_correlated_cluster(provider, graph, &cluster.borrow(), &outgoing_clusters, clusters);
+        if let Some(most_correlated_cluster) = most_corr_cluster {
             let new_cluster = cluster.borrow().merge(&most_correlated_cluster.borrow());
             for node in new_cluster.set() {
                 if let Some(value) = nodes_to_clusters.get_mut(node) {
