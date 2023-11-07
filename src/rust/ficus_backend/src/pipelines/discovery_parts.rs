@@ -135,7 +135,7 @@ impl PipelineParts {
                 ratio_threshold,
                 utility_rate,
                 edge_cutoff_threshold,
-                node_cutoff_threshold
+                node_cutoff_threshold,
             );
 
             context.put_concrete(keys.graph().key(), graph.to_default_graph());

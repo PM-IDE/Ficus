@@ -139,8 +139,9 @@ where
         result
     }
 
-    pub fn merge_nodes_into_one(&mut self, nodes: &HashSet<u64>) {
-        let new_node_id = self.add_node(None);
+    pub fn merge_nodes_into_one(&mut self, nodes: &HashSet<u64>, node_data_merger: impl Fn(Vec<Option<&TNodeData>>) -> Option<TNodeData>) {
+        let nodes_data: Vec<Option<&TNodeData>> = nodes.iter().map(|id| self.node(id).unwrap().data.as_ref()).collect();
+        let new_node_id = self.add_node(node_data_merger(nodes_data));
 
         let mut output_connections = HashMap::new();
 

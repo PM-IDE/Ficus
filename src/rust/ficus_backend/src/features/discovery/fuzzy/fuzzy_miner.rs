@@ -214,7 +214,24 @@ fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, 
 
     for cluster in clusters.values() {
         let cluster = cluster.borrow();
-        graph.merge_nodes_into_one(&cluster.set().iter().map(|id| *id).collect());
+        graph.merge_nodes_into_one(&cluster.set().iter().map(|id| *id).collect(), |nodes_data| {
+            let mut cluster_data = String::new();
+            cluster_data.push_str("Cluster[");
+            for data in &nodes_data {
+                if let Some(data) = data {
+                    cluster_data.push_str(data);
+                    cluster_data.push(',');
+                }
+            }
+
+            if cluster_data.ends_with(',') {
+                cluster_data.remove(cluster_data.len() - 1);
+            }
+
+            cluster_data.push_str("]");
+
+            Some(cluster_data)
+        });
     }
 }
 
