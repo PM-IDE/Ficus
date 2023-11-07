@@ -160,7 +160,9 @@ where
                         }
                     }
 
-                    new_incoming_edges.insert(*node_id, edges);
+                    if edges.len() > 0 {
+                        new_incoming_edges.insert(*node_id, edges);
+                    }
                 }
             }
         }
