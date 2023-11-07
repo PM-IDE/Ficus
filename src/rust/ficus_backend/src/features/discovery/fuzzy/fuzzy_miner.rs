@@ -251,6 +251,10 @@ fn try_merge_clusters<TLog: EventLog>(
             break;
         }
 
+        if cluster.borrow().set().contains(node_id) {
+            continue;
+        }
+
         let cluster_id = nodes_to_clusters.get(node_id).unwrap();
         outgoing_clusters.insert(cluster_id);
     }
