@@ -231,6 +231,9 @@ fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, 
             cluster_data.push_str("]");
 
             Some(cluster_data)
+        },
+        |edges_data| {
+            edges_data.iter().fold(Some(0.0), |first, second| Some(first.unwrap_or(0.0) + second.unwrap_or(&0.0)))
         });
     }
 }
