@@ -148,6 +148,22 @@ where
         let nodes_data: Vec<Option<&TNodeData>> = cluster_nodes.iter().map(|id| self.node(id).unwrap().data.as_ref()).collect();
         let new_node_id = self.add_node(node_data_merger(nodes_data));
 
+        let new_incoming_edges_merged = self.find_incoming_edges(cluster_nodes, &edge_data_merger);
+        let new_outgoing_edges_merged = self.find_outgoing_edges(cluster_nodes, &edge_data_merger);
+
+        self.adjust_transitions_for_cluster(
+            cluster_nodes,
+            new_node_id.clone(),
+            new_incoming_edges_merged,
+            new_outgoing_edges_merged,
+        );
+    }
+
+    fn find_incoming_edges(
+        &self,
+        cluster_nodes: &HashSet<u64>,
+        edge_data_merger: &impl Fn(&Vec<Option<&TEdgeData>>) -> Option<TEdgeData>,
+    ) -> HashMap<u64, Option<TEdgeData>> {
         let mut new_incoming_edges = HashMap::new();
         for node in self.all_nodes() {
             let node_id = node.id();
@@ -172,6 +188,14 @@ where
             new_incoming_edges_merged.insert(id, edge_data_merger(&edges_data));
         }
 
+        new_incoming_edges_merged
+    }
+
+    fn find_outgoing_edges(
+        &self,
+        cluster_nodes: &HashSet<u64>,
+        edge_data_merger: &impl Fn(&Vec<Option<&TEdgeData>>) -> Option<TEdgeData>,
+    ) -> HashMap<u64, Option<TEdgeData>> {
         let mut new_outgoing_edges: HashMap<u64, Vec<Option<&TEdgeData>>> = HashMap::new();
         for cluster_node in cluster_nodes {
             if let Some(connections) = self.connections.get(cluster_node) {
@@ -193,6 +217,16 @@ where
             new_outgoing_edges_merged.insert(id, edge_data_merger(&edges_data));
         }
 
+        new_outgoing_edges_merged
+    }
+
+    fn adjust_transitions_for_cluster(
+        &mut self,
+        cluster_nodes: &HashSet<u64>,
+        new_node_id: u64,
+        new_incoming_edges_merged: HashMap<u64, Option<TEdgeData>>,
+        new_outgoing_edges_merged: HashMap<u64, Option<TEdgeData>>,
+    ) {
         for new_edge in new_incoming_edges_merged {
             if let Some(connections) = self.connections.get_mut(&new_edge.0) {
                 connections.insert(new_node_id.clone(), new_edge.1);
