@@ -81,6 +81,9 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<f64>(keys, ContextKeys::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::PRESERVE_THRESHOLD, &mut used);
         assert_existence::<f64>(keys, ContextKeys::RATIO_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::UTILITY_RATE, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::EDGE_CUTOFF_THRESHOLD, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::NODE_CUTOFF_THRESHOLD, &mut used);
 
         assert_existence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_existence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
@@ -142,6 +145,9 @@ fn get_all_keys_names() -> Vec<String> {
         "binary_frequency_significance_threshold",
         "preserve_threshold",
         "ratio_threshold",
+        "utility_rate",
+        "edge_cutoff_threshold",
+        "node_cutoff_threshold",
 
         "event_log",
         "activities",
@@ -211,6 +217,9 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<f64>(keys, ContextKeys::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::PRESERVE_THRESHOLD, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::RATIO_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::UTILITY_RATE, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::EDGE_CUTOFF_THRESHOLD, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::NODE_CUTOFF_THRESHOLD, &mut used);
 
         assert_keys_equivalence::<XesEventLogImpl>(keys, ContextKeys::EVENT_LOG, &mut used);
         assert_keys_equivalence::<Activities>(keys, ContextKeys::ACTIVITIES, &mut used);
