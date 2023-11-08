@@ -143,7 +143,7 @@ where
         &mut self,
         cluster_nodes: &HashSet<u64>,
         node_data_merger: impl Fn(Vec<Option<&TNodeData>>) -> Option<TNodeData>,
-        edge_data_merger: impl Fn(&Vec<Option<&TEdgeData>>) -> Option<TEdgeData>
+        edge_data_merger: impl Fn(&Vec<Option<&TEdgeData>>) -> Option<TEdgeData>,
     ) {
         let nodes_data: Vec<Option<&TNodeData>> = cluster_nodes.iter().map(|id| self.node(id).unwrap().data.as_ref()).collect();
         let new_node_id = self.add_node(node_data_merger(nodes_data));

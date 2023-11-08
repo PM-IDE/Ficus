@@ -25,9 +25,31 @@ pub fn discover_graph_fuzzy(
 
     let info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
     let mut provider = FuzzyMetricsProvider::new(log, &info);
-
     let mut classes_to_ids = HashMap::new();
-    for class in info.all_event_classes() {
+
+    initialize_fuzzy_graph(
+        &mut graph,
+        &provider,
+        &mut classes_to_ids,
+        unary_frequency_threshold,
+        binary_frequency_significance_threshold,
+    );
+
+    resolve_conflicts(&classes_to_ids, &provider, &mut graph, preserve_threshold, ratio_threshold);
+    filter_edges(&mut provider, &mut graph, utility_rate, edge_cutoff_threshold);
+    discover_clusters(&mut provider, &mut graph, node_cutoff_threshold);
+
+    graph
+}
+
+fn initialize_fuzzy_graph<TLog: EventLog>(
+    graph: &mut FuzzyGraph,
+    provider: &FuzzyMetricsProvider<TLog>,
+    classes_to_ids: &mut HashMap<String, u64>,
+    unary_frequency_threshold: f64,
+    binary_frequency_significance_threshold: f64,
+) {
+    for class in provider.log_info().all_event_classes() {
         if provider.unary_frequency_significance(class) > unary_frequency_threshold {
             let node_id = graph.add_node(Some(class.to_owned()));
             classes_to_ids.insert(class.to_owned(), node_id);
@@ -44,12 +66,6 @@ pub fn discover_graph_fuzzy(
             }
         }
     }
-
-    resolve_conflicts(&classes_to_ids, &provider, &mut graph, preserve_threshold, ratio_threshold);
-    filter_edges(&mut provider, &mut graph, utility_rate, edge_cutoff_threshold);
-    discover_clusters(&mut provider, &mut graph, node_cutoff_threshold);
-
-    graph
 }
 
 fn resolve_conflicts<TLog: EventLog>(
@@ -134,10 +150,24 @@ fn filter_edges<TLog: EventLog>(
     }
 }
 
+type ClustersMap = HashMap<u64, Rc<RefCell<OneSet<u64>>>>;
+
 fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, graph: &mut FuzzyGraph, node_cutoff_threshold: f64) {
     let mut nodes_to_clusters: HashMap<u64, u64> = HashMap::new();
-    let mut clusters: HashMap<u64, Rc<RefCell<OneSet<u64>>>> = HashMap::new();
+    let mut clusters = ClustersMap::new();
 
+    find_initial_clusters(graph, provider, node_cutoff_threshold, &mut clusters, &mut nodes_to_clusters);
+    merge_clusters(graph, provider, &mut nodes_to_clusters, &mut clusters);
+    merge_nodes(graph, &clusters);
+}
+
+fn find_initial_clusters<TLog: EventLog>(
+    graph: &mut FuzzyGraph,
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    node_cutoff_threshold: f64,
+    clusters: &mut ClustersMap,
+    nodes_to_clusters: &mut HashMap<u64, u64>,
+) {
     for node in graph.all_nodes() {
         let this_node_name = node.data().unwrap();
         if provider.unary_frequency_significance(this_node_name) >= node_cutoff_threshold {
@@ -171,7 +201,14 @@ fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, 
             }
         }
     }
+}
 
+fn merge_clusters<TLog: EventLog>(
+    graph: &mut FuzzyGraph,
+    provider: &mut FuzzyMetricsProvider<TLog>,
+    nodes_to_clusters: &mut HashMap<u64, u64>,
+    clusters: &mut ClustersMap,
+) {
     'merging_clusters: loop {
         let current_clusters: Vec<u64> = clusters.iter().map(|c| *c.0).collect();
 
@@ -180,61 +217,49 @@ fn discover_clusters<TLog: EventLog>(provider: &mut FuzzyMetricsProvider<TLog>, 
             let cluster = clusters.get(cluster_id).unwrap().clone();
 
             let outgoing_nodes: HashSet<&u64> = cluster.borrow().set().iter().flat_map(|id| graph.outgoing_nodes(id)).collect();
-
-            let merged = try_merge_clusters(
-                provider,
-                graph,
-                &mut nodes_to_clusters,
-                &outgoing_nodes,
-                &mut clusters,
-                cluster.clone(),
-            );
-
-            if merged {
+            if try_merge_clusters(provider, graph, nodes_to_clusters, &outgoing_nodes, clusters, cluster.clone()) {
                 continue 'merging_clusters;
             }
 
             let incoming_nodes: HashSet<&u64> = cluster.borrow().set().iter().flat_map(|id| graph.incoming_edges(id)).collect();
-            let merged = try_merge_clusters(
-                provider,
-                graph,
-                &mut nodes_to_clusters,
-                &incoming_nodes,
-                &mut clusters,
-                cluster.clone(),
-            );
-
-            if merged {
+            if try_merge_clusters(provider, graph, nodes_to_clusters, &incoming_nodes, clusters, cluster.clone()) {
                 continue 'merging_clusters;
             }
         }
 
         break;
     }
+}
 
+fn merge_nodes(graph: &mut FuzzyGraph, clusters: &ClustersMap) {
     for cluster in clusters.values() {
         let cluster = cluster.borrow();
-        graph.merge_nodes_into_one(&cluster.set().iter().map(|id| *id).collect(), |nodes_data| {
-            let mut cluster_data = String::new();
-            cluster_data.push_str("Cluster[");
-            for data in &nodes_data {
-                if let Some(data) = data {
-                    cluster_data.push_str(data);
-                    cluster_data.push(',');
+        graph.merge_nodes_into_one(
+            &cluster.set().iter().map(|id| *id).collect(),
+            |nodes_data| {
+                let mut cluster_data = String::new();
+                cluster_data.push_str("Cluster[");
+                for data in &nodes_data {
+                    if let Some(data) = data {
+                        cluster_data.push_str(data);
+                        cluster_data.push(',');
+                    }
                 }
-            }
 
-            if cluster_data.ends_with(',') {
-                cluster_data.remove(cluster_data.len() - 1);
-            }
+                if cluster_data.ends_with(',') {
+                    cluster_data.remove(cluster_data.len() - 1);
+                }
 
-            cluster_data.push_str("]");
+                cluster_data.push_str("]");
 
-            Some(cluster_data)
-        },
-        |edges_data| {
-            edges_data.iter().fold(Some(0.0), |first, second| Some(first.unwrap_or(0.0) + second.unwrap_or(&0.0)))
-        });
+                Some(cluster_data)
+            },
+            |edges_data| {
+                edges_data
+                    .iter()
+                    .fold(Some(0.0), |first, second| Some(first.unwrap_or(0.0) + second.unwrap_or(&0.0)))
+            },
+        );
     }
 }
 
@@ -354,6 +379,10 @@ where
             log_info,
             caches: RelationsCaches::new(&[PROXIMITY_CORRELATION]),
         }
+    }
+
+    pub fn log_info(&self) -> &EventLogInfo {
+        self.log_info
     }
 
     pub fn unary_frequency_significance(&self, event_class: &String) -> f64 {
