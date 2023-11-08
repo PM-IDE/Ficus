@@ -4,7 +4,6 @@ use std::{any::Any, str::FromStr};
 use nameof::name_of_type;
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
-use crate::features::analysis::patterns::activity_instances::ActivityInTraceFilterKind::NoFilter;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
@@ -17,7 +16,6 @@ use crate::ficus_proto::{
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
-use crate::utils::graph::graph::{DefaultGraph, Graph, GraphEdge, GraphNode};
 use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
@@ -43,6 +41,9 @@ use crate::{
         user_data::{keys::Key, user_data::UserData},
     },
 };
+use crate::utils::graph::graph::{DefaultGraph, Graph};
+use crate::utils::graph::graph_edge::GraphEdge;
+use crate::utils::graph::graph_node::GraphNode;
 
 pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
     let mut pipeline_context = PipelineContext::new_with_logging(context.parts());
