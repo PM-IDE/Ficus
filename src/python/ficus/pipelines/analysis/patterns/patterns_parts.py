@@ -476,3 +476,23 @@ class SaveAllActivitiesInstancesNames(InternalPipelinePart):
                     visited.add(node)
 
         return current_input
+
+
+class WriteActivitiesInstancesIndices(InternalPipelinePart):
+    def __init__(self, save_path: str):
+        self.save_path = save_path
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        instances = traces_activities(current_input)
+
+        with open(self.save_path, 'w') as fout:
+            trace_index = 0
+            for trace_activities in instances:
+                fout.write(f"Trace {trace_index}\n")
+                for instance in trace_activities:
+                    fout.write(f'({instance.node.unique_name()}, {instance.start_pos}, {instance.length})\n')
+
+                fout.write('\n')
+                trace_index += 1
+
+        return current_input
