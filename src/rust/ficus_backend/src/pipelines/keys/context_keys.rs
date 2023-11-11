@@ -7,17 +7,14 @@ use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
-    features::{
-        analysis::{
-            event_log_info::EventLogInfo,
-            patterns::{
-                activity_instances::{ActivityInTraceInfo, AdjustingMode},
-                contexts::PatternsDiscoveryStrategy,
-                repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
-                tandem_arrays::SubArrayInTraceInfo,
-            },
+    features::analysis::{
+        event_log_info::EventLogInfo,
+        patterns::{
+            activity_instances::{ActivityInTraceInfo, AdjustingMode},
+            contexts::PatternsDiscoveryStrategy,
+            repeat_sets::{ActivityNode, SubArrayWithTraceIndex},
+            tandem_arrays::SubArrayInTraceInfo,
         },
-        discovery::petri_net::petri_net::PetriNet,
     },
     pipelines::{aliases::*, pipelines::Pipeline},
     utils::colors::ColorsHolder,
@@ -53,7 +50,8 @@ impl ContextKeys {
     }
 
     pub fn path(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::PATH).unwrap()
+        self.find_concrete_key::<String>(Self::PATH)
+            .expect("PATH should be present in keys")
     }
 
     pub fn is_path(&self, key: &dyn ContextKey) -> bool {
@@ -65,7 +63,8 @@ impl ContextKeys {
     }
 
     pub fn event_log(&self) -> &DefaultContextKey<XesEventLogImpl> {
-        self.find_concrete_key::<XesEventLogImpl>(Self::EVENT_LOG).unwrap()
+        self.find_concrete_key::<XesEventLogImpl>(Self::EVENT_LOG)
+            .expect("EVENT_LOG should be present in keys")
     }
 
     pub fn is_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -73,7 +72,8 @@ impl ContextKeys {
     }
 
     pub fn activities(&self) -> &DefaultContextKey<Vec<Rc<RefCell<ActivityNode>>>> {
-        self.find_concrete_key::<Activities>(Self::ACTIVITIES).unwrap()
+        self.find_concrete_key::<Activities>(Self::ACTIVITIES)
+            .expect("ACTIVITIES should be present in keys")
     }
 
     pub fn is_activities(&self, key: &dyn ContextKey) -> bool {
@@ -81,7 +81,8 @@ impl ContextKeys {
     }
 
     pub fn repeat_sets(&self) -> &DefaultContextKey<Vec<SubArrayWithTraceIndex>> {
-        self.find_concrete_key::<RepeatSets>(Self::REPEAT_SETS).unwrap()
+        self.find_concrete_key::<RepeatSets>(Self::REPEAT_SETS)
+            .expect("REPEAT_SETS should be present in keys")
     }
 
     pub fn is_repeat_sets(&self, key: &dyn ContextKey) -> bool {
@@ -89,7 +90,8 @@ impl ContextKeys {
     }
 
     pub fn trace_activities(&self) -> &DefaultContextKey<Vec<Vec<ActivityInTraceInfo>>> {
-        self.find_concrete_key::<TracesActivities>(Self::TRACE_ACTIVITIES).unwrap()
+        self.find_concrete_key::<TracesActivities>(Self::TRACE_ACTIVITIES)
+            .expect("TRACE_ACTIVITIES should be present in keys")
     }
 
     pub fn is_trace_activities(&self, key: &dyn ContextKey) -> bool {
@@ -97,7 +99,8 @@ impl ContextKeys {
     }
 
     pub fn patterns(&self) -> &DefaultContextKey<Vec<Vec<SubArrayInTraceInfo>>> {
-        self.find_concrete_key::<Patterns>(Self::PATTERNS).unwrap()
+        self.find_concrete_key::<Patterns>(Self::PATTERNS)
+            .expect("PATTERNS should be present in keys")
     }
 
     pub fn is_patterns(&self, key: &dyn ContextKey) -> bool {
@@ -105,7 +108,8 @@ impl ContextKeys {
     }
 
     pub fn petri_net(&self) -> &DefaultContextKey<DefaultPetriNet> {
-        self.find_concrete_key::<DefaultPetriNet>(Self::PETRI_NET).unwrap()
+        self.find_concrete_key::<DefaultPetriNet>(Self::PETRI_NET)
+            .expect("PETRI_NET should be present in keys")
     }
 
     pub fn is_petri_net(&self, key: &dyn ContextKey) -> bool {
@@ -113,7 +117,8 @@ impl ContextKeys {
     }
 
     pub fn activities_to_logs(&self) -> &DefaultContextKey<HashMap<String, XesEventLogImpl>> {
-        self.find_concrete_key::<ActivitiesToLogs>(Self::ACTIVITIES_TO_LOGS).unwrap()
+        self.find_concrete_key::<ActivitiesToLogs>(Self::ACTIVITIES_TO_LOGS)
+            .expect("ACTIVITIES_TO_LOGS should be present in keys")
     }
 
     pub fn is_activities_to_logs(&self, key: &dyn ContextKey) -> bool {
@@ -121,7 +126,8 @@ impl ContextKeys {
     }
 
     pub fn activity_name(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::ACTIVITY_NAME).unwrap()
+        self.find_concrete_key::<String>(Self::ACTIVITY_NAME)
+            .expect("ACTIVITY_NAME should be present in keys")
     }
 
     pub fn is_activity_name(&self, key: &dyn ContextKey) -> bool {
@@ -129,7 +135,8 @@ impl ContextKeys {
     }
 
     pub fn hashes_event_log(&self) -> &DefaultContextKey<Vec<Vec<u64>>> {
-        self.find_concrete_key::<Vec<Vec<u64>>>(Self::HASHES_EVENT_LOG).unwrap()
+        self.find_concrete_key::<Vec<Vec<u64>>>(Self::HASHES_EVENT_LOG)
+            .expect("HASHES_EVENT_LOG should be present in keys")
     }
 
     pub fn is_hashes_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -137,7 +144,8 @@ impl ContextKeys {
     }
 
     pub fn names_event_log(&self) -> &DefaultContextKey<Vec<Vec<String>>> {
-        self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG).unwrap()
+        self.find_concrete_key::<Vec<Vec<String>>>(Self::NAMES_EVENT_LOG)
+            .expect("NAMES_EVENT_LOG should be present in keys")
     }
 
     pub fn is_names_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -145,7 +153,8 @@ impl ContextKeys {
     }
 
     pub fn tandem_array_length(&self) -> &DefaultContextKey<u32> {
-        self.find_concrete_key::<u32>(Self::TANDEM_ARRAY_LENGTH).unwrap()
+        self.find_concrete_key::<u32>(Self::TANDEM_ARRAY_LENGTH)
+            .expect("TANDEM_ARRAY_LENGTH should be present in keys")
     }
 
     pub fn is_tandem_array_length(&self, key: &dyn ContextKey) -> bool {
@@ -153,7 +162,8 @@ impl ContextKeys {
     }
 
     pub fn activity_level(&self) -> &DefaultContextKey<u32> {
-        self.find_concrete_key::<u32>(Self::ACTIVITY_LEVEL).unwrap()
+        self.find_concrete_key::<u32>(Self::ACTIVITY_LEVEL)
+            .expect("ACTIVITY_LEVEL should be present in keys")
     }
 
     pub fn is_activity_level(&self, key: &dyn ContextKey) -> bool {
@@ -161,7 +171,8 @@ impl ContextKeys {
     }
 
     pub fn narrow_activities(&self) -> &DefaultContextKey<ActivityNarrowingKind> {
-        self.find_concrete_key::<ActivityNarrowingKind>(Self::NARROW_ACTIVITIES).unwrap()
+        self.find_concrete_key::<ActivityNarrowingKind>(Self::NARROW_ACTIVITIES)
+            .expect("NARROW_ACTIVITIES should be present in keys")
     }
 
     pub fn is_narrow_activities(&self, key: &dyn ContextKey) -> bool {
@@ -169,7 +180,8 @@ impl ContextKeys {
     }
 
     pub fn event_name(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::EVENT_NAME).unwrap()
+        self.find_concrete_key::<String>(Self::EVENT_NAME)
+            .expect("EVENT_NAME should be present in keys")
     }
 
     pub fn is_event_name(&self, key: &dyn ContextKey) -> bool {
@@ -177,7 +189,8 @@ impl ContextKeys {
     }
 
     pub fn regex(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::REGEX).unwrap()
+        self.find_concrete_key::<String>(Self::REGEX)
+            .expect("REGEX should be present in keys")
     }
 
     pub fn is_regex(&self, key: &dyn ContextKey) -> bool {
@@ -185,7 +198,8 @@ impl ContextKeys {
     }
 
     pub fn colors_event_log(&self) -> &DefaultContextKey<ColorsEventLog> {
-        self.find_concrete_key::<ColorsEventLog>(Self::COLORS_EVENT_LOG).unwrap()
+        self.find_concrete_key::<ColorsEventLog>(Self::COLORS_EVENT_LOG)
+            .expect("COLORS_EVENT_LOG should be present in keys")
     }
 
     pub fn is_colors_event_log(&self, key: &dyn ContextKey) -> bool {
@@ -193,7 +207,8 @@ impl ContextKeys {
     }
 
     pub fn colors_holder(&self) -> &DefaultContextKey<ColorsHolder> {
-        self.find_concrete_key::<ColorsHolder>(Self::COLORS_HOLDER).unwrap()
+        self.find_concrete_key::<ColorsHolder>(Self::COLORS_HOLDER)
+            .expect("COLORS_HOLDER should be present in keys")
     }
 
     pub fn is_colors_holder(&self, key: &dyn ContextKey) -> bool {
@@ -202,7 +217,7 @@ impl ContextKeys {
 
     pub fn patterns_discovery_strategy(&self) -> &DefaultContextKey<PatternsDiscoveryStrategy> {
         self.find_concrete_key::<PatternsDiscoveryStrategy>(Self::PATTERNS_DISCOVERY_STRATEGY)
-            .unwrap()
+            .expect("PATTERNS_DISCOVERY_STRATEGY holder should be present in keys")
     }
 
     pub fn is_patterns_discovery_strategy(&self, key: &dyn ContextKey) -> bool {
@@ -210,7 +225,8 @@ impl ContextKeys {
     }
 
     pub fn output_string(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::OUTPUT_STRING).unwrap()
+        self.find_concrete_key::<String>(Self::OUTPUT_STRING)
+            .expect("OUTPUT_STRING should be present in keys")
     }
 
     pub fn is_output_string(&self, key: &dyn ContextKey) -> bool {
@@ -218,7 +234,8 @@ impl ContextKeys {
     }
 
     pub fn event_log_info(&self) -> &DefaultContextKey<EventLogInfo> {
-        self.find_concrete_key::<EventLogInfo>(Self::EVENT_LOG_INFO).unwrap()
+        self.find_concrete_key::<EventLogInfo>(Self::EVENT_LOG_INFO)
+            .expect("EVENT_LOG_INFO should be present in keys")
     }
 
     pub fn is_event_log_info(&self, key: &dyn ContextKey) -> bool {
@@ -226,7 +243,8 @@ impl ContextKeys {
     }
 
     pub fn underlying_events_count(&self) -> &DefaultContextKey<usize> {
-        self.find_concrete_key::<usize>(Self::UNDERLYING_EVENTS_COUNT).unwrap()
+        self.find_concrete_key::<usize>(Self::UNDERLYING_EVENTS_COUNT)
+            .expect("UNDERLYING_EVENTS_COUNT should be present in keys")
     }
 
     pub fn is_underlying_events_count(&self, key: &dyn ContextKey) -> bool {
@@ -234,7 +252,8 @@ impl ContextKeys {
     }
 
     pub fn events_count(&self) -> &DefaultContextKey<u32> {
-        self.find_concrete_key::<u32>(Self::EVENTS_COUNT).unwrap()
+        self.find_concrete_key::<u32>(Self::EVENTS_COUNT)
+            .expect("EVENTS_COUNT should be present in keys")
     }
 
     pub fn is_events_count(&self, key: &dyn ContextKey) -> bool {
@@ -242,7 +261,8 @@ impl ContextKeys {
     }
 
     pub fn event_classes_regexes(&self) -> &DefaultContextKey<Vec<String>> {
-        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES_REGEXES).unwrap()
+        self.find_concrete_key::<Vec<String>>(Self::EVENT_CLASSES_REGEXES)
+            .expect("EVENT_CLASSES_REGEXES should be present in keys")
     }
 
     pub fn is_event_classes_regexes(&self, key: &dyn ContextKey) -> bool {
@@ -250,7 +270,8 @@ impl ContextKeys {
     }
 
     pub fn adjusting_mode(&self) -> &DefaultContextKey<AdjustingMode> {
-        self.find_concrete_key::<AdjustingMode>(Self::ADJUSTING_MODE).unwrap()
+        self.find_concrete_key::<AdjustingMode>(Self::ADJUSTING_MODE)
+            .expect("ADJUSTING_MODE should be present in keys")
     }
 
     pub fn is_adjusting_mode(&self, key: &dyn ContextKey) -> bool {
@@ -258,7 +279,8 @@ impl ContextKeys {
     }
 
     pub fn event_class_regex(&self) -> &DefaultContextKey<String> {
-        self.find_concrete_key::<String>(Self::EVENT_CLASS_REGEX).unwrap()
+        self.find_concrete_key::<String>(Self::EVENT_CLASS_REGEX)
+            .expect("EVENT_CLASS_REGEX should be present in keys")
     }
 
     pub fn is_vent_class_regex(&self, key: &dyn ContextKey) -> bool {
@@ -266,7 +288,8 @@ impl ContextKeys {
     }
 
     pub fn patterns_kind(&self) -> &DefaultContextKey<PatternsKindDto> {
-        self.find_concrete_key::<PatternsKindDto>(Self::PATTERNS_KIND).unwrap()
+        self.find_concrete_key::<PatternsKindDto>(Self::PATTERNS_KIND)
+            .expect("PATTERNS_KIND should be present in keys")
     }
 
     pub fn is_patterns_kind(&self, key: &dyn ContextKey) -> bool {
@@ -274,7 +297,8 @@ impl ContextKeys {
     }
 
     pub fn pipeline(&self) -> &DefaultContextKey<Pipeline> {
-        self.find_concrete_key::<Pipeline>(Self::PIPELINE).unwrap()
+        self.find_concrete_key::<Pipeline>(Self::PIPELINE)
+            .expect("PIPELINE should be present in keys")
     }
 
     pub fn is_pipeline(&self, key: &dyn ContextKey) -> bool {
@@ -282,7 +306,8 @@ impl ContextKeys {
     }
 
     pub fn min_activity_length(&self) -> &DefaultContextKey<u32> {
-        self.find_concrete_key::<u32>(Self::MIN_ACTIVITY_LENGTH).unwrap()
+        self.find_concrete_key::<u32>(Self::MIN_ACTIVITY_LENGTH)
+            .expect("MIN_ACTIVITY_LENGTH kind should be present in keys")
     }
 
     pub fn is_min_activity_length(&self, key: &dyn ContextKey) -> bool {
@@ -291,7 +316,7 @@ impl ContextKeys {
 
     pub fn undef_activity_handling_strategy(&self) -> &DefaultContextKey<UndefActivityHandlingStrategyDto> {
         self.find_concrete_key::<UndefActivityHandlingStrategyDto>(Self::UNDEF_ACTIVITY_HANDLING_STRATEGY)
-            .unwrap()
+            .expect("UNDEF_ACTIVITY_HANDLING_STRATEGY should be present in keys")
     }
 
     pub fn is_undef_activity_handling_strategy(&self, key: &dyn ContextKey) -> bool {
@@ -300,7 +325,7 @@ impl ContextKeys {
 
     pub fn activity_filter_kind(&self) -> &DefaultContextKey<ActivityInTraceFilterKind> {
         self.find_concrete_key::<ActivityInTraceFilterKind>(Self::ACTIVITY_IN_TRACE_FILTER_KIND)
-            .unwrap()
+            .expect("ACTIVITY_IN_TRACE_FILTER_KIND should be present in keys")
     }
 
     pub fn is_activity_filter_kind(&self, key: &dyn ContextKey) -> bool {
@@ -309,7 +334,7 @@ impl ContextKeys {
 
     pub fn activities_logs_source(&self) -> &DefaultContextKey<ActivitiesLogsSourceDto> {
         self.find_concrete_key::<ActivitiesLogsSourceDto>(Self::ACTIVITIES_LOGS_SOURCE)
-            .unwrap()
+            .expect("ACTIVITIES_LOGS_SOURCE should be present in keys")
     }
 
     pub fn is_activities_logs_source(&self, key: &dyn ContextKey) -> bool {
@@ -317,7 +342,8 @@ impl ContextKeys {
     }
 
     pub fn pnml_use_names_as_ids(&self) -> &DefaultContextKey<bool> {
-        self.find_concrete_key::<bool>(Self::PNML_USE_NAMES_AS_IDS).unwrap()
+        self.find_concrete_key::<bool>(Self::PNML_USE_NAMES_AS_IDS)
+            .expect("PNML_USE_NAMES_AS_IDS should be present in keys")
     }
 
     pub fn is_pnml_use_names_as_ids(&self, key: &dyn ContextKey) -> bool {
@@ -325,7 +351,8 @@ impl ContextKeys {
     }
 
     pub fn graph(&self) -> &DefaultContextKey<DefaultGraph> {
-        self.find_concrete_key::<DefaultGraph>(Self::GRAPH).unwrap()
+        self.find_concrete_key::<DefaultGraph>(Self::GRAPH)
+            .expect("GRAPH should be present in keys")
     }
 
     pub fn is_graph(&self, key: &dyn ContextKey) -> bool {
@@ -333,7 +360,8 @@ impl ContextKeys {
     }
 
     pub fn dependency_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::DEPENDENCY_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::DEPENDENCY_THRESHOLD)
+            .expect("DEPENDENCY_THRESHOLD should be present in keys")
     }
 
     pub fn is_dependency_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -341,7 +369,8 @@ impl ContextKeys {
     }
 
     pub fn positive_observations_threshold(&self) -> &DefaultContextKey<u32> {
-        self.find_concrete_key::<u32>(Self::POSITIVE_OBSERVATIONS_THRESHOLD).unwrap()
+        self.find_concrete_key::<u32>(Self::POSITIVE_OBSERVATIONS_THRESHOLD)
+            .expect("POSITIVE_OBSERVATIONS_THRESHOLD should be present in keys")
     }
 
     pub fn is_positive_observations_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -349,7 +378,8 @@ impl ContextKeys {
     }
 
     pub fn relative_to_best_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::RELATIVE_TO_BEST_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::RELATIVE_TO_BEST_THRESHOLD)
+            .expect("RELATIVE_TO_BEST_THRESHOLD should be present in keys")
     }
 
     pub fn is_relative_to_best_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -357,7 +387,8 @@ impl ContextKeys {
     }
 
     pub fn and_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::AND_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::AND_THRESHOLD)
+            .expect("AND_THRESHOLD should be present in keys")
     }
 
     pub fn is_and_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -365,7 +396,8 @@ impl ContextKeys {
     }
 
     pub fn loop_length_two_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::LOOP_LENGTH_TWO_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::LOOP_LENGTH_TWO_THRESHOLD)
+            .expect("LOOP_LENGTH_TWO_THRESHOLD should be present in keys")
     }
 
     pub fn is_loop_length_two_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -373,7 +405,8 @@ impl ContextKeys {
     }
 
     pub fn unary_frequency_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::UNARY_FREQUENCY_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::UNARY_FREQUENCY_THRESHOLD)
+            .expect("UNARY_FREQUENCY_THRESHOLD should be present in keys")
     }
 
     pub fn is_unary_frequency_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -382,7 +415,7 @@ impl ContextKeys {
 
     pub fn binary_significance_threshold(&self) -> &DefaultContextKey<f64> {
         self.find_concrete_key::<f64>(Self::BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD)
-            .unwrap()
+            .expect("BINARY_FREQUENCY_SIGNIFICANCE_THRESHOLD should be present in keys")
     }
 
     pub fn is_binary_significance_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -390,7 +423,8 @@ impl ContextKeys {
     }
 
     pub fn preserve_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::PRESERVE_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::PRESERVE_THRESHOLD)
+            .expect("PRESERVE_THRESHOLD should be present in keys")
     }
 
     pub fn is_preserve_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -398,7 +432,8 @@ impl ContextKeys {
     }
 
     pub fn ratio_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::RATIO_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::RATIO_THRESHOLD)
+            .expect("RATIO_THRESHOLD should be present in keys")
     }
 
     pub fn is_ratio_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -406,7 +441,8 @@ impl ContextKeys {
     }
 
     pub fn utility_rate(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::UTILITY_RATE).unwrap()
+        self.find_concrete_key::<f64>(Self::UTILITY_RATE)
+            .expect("UTILITY_RATE should be present in keys")
     }
 
     pub fn is_utility_rate(&self, key: &dyn ContextKey) -> bool {
@@ -414,7 +450,8 @@ impl ContextKeys {
     }
 
     pub fn edge_cutoff_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::EDGE_CUTOFF_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::EDGE_CUTOFF_THRESHOLD)
+            .expect("EDGE_CUTOFF_THRESHOLD should be present in keys")
     }
 
     pub fn is_edge_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
@@ -422,7 +459,8 @@ impl ContextKeys {
     }
 
     pub fn node_cutoff_threshold(&self) -> &DefaultContextKey<f64> {
-        self.find_concrete_key::<f64>(Self::NODE_CUTOFF_THRESHOLD).unwrap()
+        self.find_concrete_key::<f64>(Self::NODE_CUTOFF_THRESHOLD)
+            .expect("NODE_CUTOFF_THRESHOLD should be present in keys")
     }
 
     pub fn is_node_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
