@@ -16,6 +16,9 @@ use crate::ficus_proto::{
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::graph::graph::{DefaultGraph, Graph};
+use crate::utils::graph::graph_edge::GraphEdge;
+use crate::utils::graph::graph_node::GraphNode;
 use crate::{
     features::analysis::{
         event_log_info::EventLogInfo,
@@ -41,9 +44,6 @@ use crate::{
         user_data::{keys::Key, user_data::UserData},
     },
 };
-use crate::utils::graph::graph::{DefaultGraph, Graph};
-use crate::utils::graph::graph_edge::GraphEdge;
-use crate::utils::graph::graph_node::GraphNode;
 
 pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
     let mut pipeline_context = PipelineContext::new_with_logging(context.parts());
@@ -223,9 +223,9 @@ fn try_convert_to_grpc_traces_sub_arrays(value: &dyn Any) -> Option<GrpcContextV
         }
 
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::TracesSubArrays(GrpcEventLogTraceSubArraysContextValue {
-                traces_sub_arrays: traces,
-            })),
+            context_value: Some(ContextValue::TracesSubArrays(
+                GrpcEventLogTraceSubArraysContextValue { traces_sub_arrays: traces }
+            )),
         })
     }
 }
@@ -248,9 +248,7 @@ fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcCont
         }
 
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::TraceIndexSubArrays(GrpcSubArraysWithTraceIndexContextValue {
-                sub_arrays,
-            })),
+            context_value: Some(ContextValue::TraceIndexSubArrays(GrpcSubArraysWithTraceIndexContextValue { sub_arrays })),
         })
     }
 }
@@ -376,13 +374,15 @@ fn convert_to_grpc_arc<TArcData>(arc: &Arc<TArcData>) -> GrpcPetriNetArc {
 fn try_convert_to_grpc_marking(marking: Option<&Marking>) -> Option<GrpcPetriNetMarking> {
     match marking {
         None => None,
-        Some(marking) => Some(GrpcPetriNetMarking {
-            markings: marking
-                .active_places()
-                .iter()
-                .map(|single_marking| convert_to_grpc_single_marking(single_marking))
-                .collect(),
-        }),
+        Some(marking) => {
+            Some(GrpcPetriNetMarking {
+                markings: marking
+                    .active_places()
+                    .iter()
+                    .map(|single_marking| convert_to_grpc_single_marking(single_marking))
+                    .collect(),
+            })
+        }
     }
 }
 

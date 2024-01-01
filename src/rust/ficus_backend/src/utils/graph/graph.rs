@@ -1,10 +1,7 @@
 use crate::utils::graph::graph_edge::GraphEdge;
 use crate::utils::graph::graph_node::GraphNode;
 use std::fmt::Display;
-use std::{
-    collections::HashMap,
-    sync::atomic::AtomicU64,
-};
+use std::{collections::HashMap, sync::atomic::AtomicU64};
 
 pub(crate) static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 pub type DefaultGraph = Graph<String, String>;
