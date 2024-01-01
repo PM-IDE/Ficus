@@ -4,7 +4,7 @@ use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::tr
 
 use super::{marking::Marking, petri_net::DefaultPetriNet};
 
-struct ReplayState {
+pub struct ReplayState {
     markings: HashMap<u64, usize>,
     fired_transitions: Vec<u64>
 }
@@ -71,12 +71,13 @@ impl ReplayState {
     }
 }
 
-pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> bool {
+pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Vec<ReplayState>> {
+    let mut result = vec![];
     for trace in log.traces() {
         let marking =
             match net.initial_marking() {
                 Some(marking) => marking.clone(),
-                None => return false,
+                None => return None,
             };
 
         let trace = trace.borrow();
@@ -85,12 +86,13 @@ pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> bool {
 
         loop {
             if stack.len() == 0 {
-                return false;
+                return None;
             }
 
             let current_state = stack.pop_back().unwrap();
             let events = trace.events();
             if current_state.0 >= events.len() {
+                result.push(current_state.1);
                 break;
             }
 
@@ -105,5 +107,5 @@ pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> bool {
         }
     }
 
-    true
+    Some(result)
 }
