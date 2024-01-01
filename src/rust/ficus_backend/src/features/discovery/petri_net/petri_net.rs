@@ -148,6 +148,21 @@ where
         None
     }
 
+    pub fn find_all_transitions_by_name(&self, name: &str) -> Option<Vec<&Transition<TTransitionData, TArcData>>> {
+        let mut result = vec![];
+        for transition in self.transitions.values() {
+            if transition.name() == name {
+                result.push(transition)
+            }
+        }
+
+        if result.is_empty() {
+            None
+        } else {
+            Some(result)
+        }
+    }
+
     pub fn get_incoming_transitions(&self, place_id: &u64) -> Vec<&Transition<TTransitionData, TArcData>> {
         self.map_transitions(&self.get_place_transitions(place_id).incoming_transitions)
     }

@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Marking {
     active_places: Vec<SingleMarking>,
 }
@@ -15,7 +15,7 @@ impl Marking {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SingleMarking {
     place_id: u64,
     tokens_count: usize,
