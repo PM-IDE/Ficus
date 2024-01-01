@@ -41,19 +41,20 @@ impl ReplayState {
                 for arc in candidate_transition.incoming_arcs() {
                     let place_id = &arc.place_id();
                     let count = new_markings[place_id];
-                    if count == 1 {
+                    let new_count = count - arc.tokens_count();
+                    if new_count <= 0 {
                         new_markings.remove(place_id);
                     } else {
-                        *new_markings.get_mut(place_id).unwrap() = count - 1;
+                        *new_markings.get_mut(place_id).unwrap() = new_count;
                     }
                 }
 
                 for arc in candidate_transition.outgoing_arcs() {
                     let place_id = &arc.place_id();
                     *new_markings.get_mut(place_id).unwrap() = if let Some(count) = new_markings.get(place_id) {
-                        count + 1
+                        count + arc.tokens_count()
                     } else {
-                        1
+                        *arc.tokens_count()
                     }
                 }
 
