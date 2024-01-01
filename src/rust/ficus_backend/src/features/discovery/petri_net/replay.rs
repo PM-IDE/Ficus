@@ -6,15 +6,17 @@ use super::{marking::Marking, petri_net::DefaultPetriNet};
 
 struct ReplayState {
     markings: HashMap<u64, usize>,
+    fired_transitions: Vec<u64>
 }
 
 impl ReplayState {
-    pub fn new_raw(markings: HashMap<u64, usize>) -> Self {
-        Self { markings }
+    pub fn new_raw(markings: HashMap<u64, usize>, fired_transitions: Vec<u64>) -> Self {
+        Self { markings, fired_transitions }
     }
 
     pub fn new(initial_marking: Marking) -> Self {
         Self {
+            fired_transitions: vec![],
             markings: initial_marking
                 .active_places()
                 .iter()
@@ -58,7 +60,10 @@ impl ReplayState {
                     }
                 }
 
-                new_states.push(ReplayState::new_raw(new_markings))
+                let mut new_fired_transitions = state.fired_transitions.clone();
+                new_fired_transitions.push(candidate_transition.id());
+
+                new_states.push(ReplayState::new_raw(new_markings, new_fired_transitions));
             }
         }
 
