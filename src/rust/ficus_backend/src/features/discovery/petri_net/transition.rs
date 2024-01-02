@@ -1,5 +1,6 @@
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::ids::next_id;
+use std::hash::{Hash, Hasher};
 
 #[derive(Debug)]
 pub struct Transition<TTransitionData, TArcData>
@@ -11,6 +12,23 @@ where
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
     data: Option<TTransitionData>,
+}
+
+impl<TTransitionData, TArcData> PartialEq for Transition<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl<TTransitionData, TArcData> Eq for Transition<TTransitionData, TArcData> where TTransitionData: ToString {}
+
+impl<TTransitionData, TArcData> Hash for Transition<TTransitionData, TArcData> where TTransitionData: ToString {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData>

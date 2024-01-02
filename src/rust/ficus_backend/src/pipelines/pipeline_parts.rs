@@ -70,6 +70,7 @@ impl PipelineParts {
             Self::discover_fuzzy_graph(),
             Self::annotate_petri_net_count(),
             Self::annotate_petri_net_frequency(),
+            Self::ensure_initial_marking()
         ];
 
         let mut names_to_parts = HashMap::new();
@@ -100,7 +101,9 @@ impl PipelineParts {
                 DefaultPipelinePart::new(
                     name.to_string(),
                     config,
-                    Box::new(|context, infra, keys, config| performance_cookie(name, infra, &mut || executor(context, infra, keys, config))),
+                    Box::new(|context, infra, keys, config| {
+                        performance_cookie(name, infra, &mut || executor(context, infra, keys, config))
+                    }),
                 )
             }),
         )
@@ -112,7 +115,9 @@ impl PipelineParts {
     ) -> Result<&'a T, PipelinePartExecutionError> {
         match context.concrete(key.key()) {
             Some(value) => Ok(value),
-            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(key.key().name().to_owned()))),
+            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                key.key().name().to_owned(),
+            ))),
         }
     }
 
@@ -122,7 +127,9 @@ impl PipelineParts {
     ) -> Result<&'a mut T, PipelinePartExecutionError> {
         match context.concrete_mut(key.key()) {
             Some(value) => Ok(value),
-            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(key.key().name().to_owned()))),
+            None => Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                key.key().name().to_owned(),
+            ))),
         }
     }
 

@@ -142,11 +142,9 @@ impl PipelineParts {
 
         let strategy = match undef_activity_strat {
             UndefActivityHandlingStrategyDto::DontInsert => UndefActivityHandlingStrategy::DontInsert,
-            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => {
-                UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
-                    Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
-                }))
-            }
+            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
+                Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
+            })),
             UndefActivityHandlingStrategyDto::InsertAllEvents => UndefActivityHandlingStrategy::InsertAllEvents,
         };
 
@@ -376,17 +374,18 @@ impl PipelineParts {
             let log = Self::get_user_data(context, keys.event_log())?;
             let dto = Self::get_user_data(config, keys.activities_logs_source())?;
 
-            let activities_to_logs =
-                match dto {
-                    ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
-                    ActivitiesLogsSourceDto::TracesActivities => {
-                        let activity_level = *Self::get_user_data(config, keys.activity_level())?;
-                        let activities = Self::get_user_data(context, keys.trace_activities())?;
-                        activity_instances::create_logs_for_activities(
-                            &ActivitiesLogSource::TracesActivities(log, activities, activity_level as usize)
-                        )
-                    }
-                };
+            let activities_to_logs = match dto {
+                ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
+                ActivitiesLogsSourceDto::TracesActivities => {
+                    let activity_level = *Self::get_user_data(config, keys.activity_level())?;
+                    let activities = Self::get_user_data(context, keys.trace_activities())?;
+                    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
+                        log,
+                        activities,
+                        activity_level as usize,
+                    ))
+                }
+            };
 
             for (_, activity_log) in activities_to_logs {
                 let mut temp_context = PipelineContext::empty_from(context);

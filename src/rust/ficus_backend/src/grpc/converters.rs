@@ -255,9 +255,9 @@ fn try_convert_to_grpc_traces_sub_arrays(value: &dyn Any) -> Option<GrpcContextV
         }
 
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::TracesSubArrays(
-                GrpcEventLogTraceSubArraysContextValue { traces_sub_arrays: traces }
-            )),
+            context_value: Some(ContextValue::TracesSubArrays(GrpcEventLogTraceSubArraysContextValue {
+                traces_sub_arrays: traces,
+            })),
         })
     }
 }
@@ -280,7 +280,9 @@ fn try_convert_to_grpc_sub_arrays_with_index(value: &dyn Any) -> Option<GrpcCont
         }
 
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::TraceIndexSubArrays(GrpcSubArraysWithTraceIndexContextValue { sub_arrays })),
+            context_value: Some(ContextValue::TraceIndexSubArrays(GrpcSubArraysWithTraceIndexContextValue {
+                sub_arrays,
+            })),
         })
     }
 }
@@ -408,15 +410,13 @@ fn convert_to_grpc_arc<TArcData>(arc: &Arc<TArcData>) -> GrpcPetriNetArc {
 fn try_convert_to_grpc_marking(marking: Option<&Marking>) -> Option<GrpcPetriNetMarking> {
     match marking {
         None => None,
-        Some(marking) => {
-            Some(GrpcPetriNetMarking {
-                markings: marking
-                    .active_places()
-                    .iter()
-                    .map(|single_marking| convert_to_grpc_single_marking(single_marking))
-                    .collect(),
-            })
-        }
+        Some(marking) => Some(GrpcPetriNetMarking {
+            markings: marking
+                .active_places()
+                .iter()
+                .map(|single_marking| convert_to_grpc_single_marking(single_marking))
+                .collect(),
+        }),
     }
 }
 
@@ -477,27 +477,25 @@ where
 }
 
 fn convert_to_grpc_count_annotation(annotation: &HashMap<u64, usize>) -> GrpcPetriNetCountAnnotation {
-    let annotations =
-        annotation
-            .iter()
-            .map(|pair| GrpcPetriNetArcCountAnnotation {
-                arc_id: *pair.0 as i64,
-                count: *pair.1 as i64,
-            })
-            .collect();
+    let annotations = annotation
+        .iter()
+        .map(|pair| GrpcPetriNetArcCountAnnotation {
+            arc_id: *pair.0 as i64,
+            count: *pair.1 as i64,
+        })
+        .collect();
 
     GrpcPetriNetCountAnnotation { annotations }
 }
 
 fn convert_to_grpc_frequency_annotation(annotation: &HashMap<u64, f64>) -> GrpcPetriNetFrequenciesAnnotation {
-    let annotations =
-        annotation
-            .iter()
-            .map(|pair| GrpcPetriNetArcFrequencyAnnotation {
-                arc_id: *pair.0 as i64,
-                frequency: *pair.1 as f32,
-            })
-            .collect();
+    let annotations = annotation
+        .iter()
+        .map(|pair| GrpcPetriNetArcFrequencyAnnotation {
+            arc_id: *pair.0 as i64,
+            frequency: *pair.1 as f32,
+        })
+        .collect();
 
     GrpcPetriNetFrequenciesAnnotation { annotations }
 }

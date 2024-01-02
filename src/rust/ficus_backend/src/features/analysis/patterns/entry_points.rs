@@ -113,7 +113,9 @@ where
 {
     let activity_instances = discover_activities_instances(&context);
 
-    activity_instances::create_logs_for_activities(
-        &ActivitiesLogSource::TracesActivities(&context.patterns_context.log.borrow(), &activity_instances, activity_level)
-    )
+    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
+        &context.patterns_context.log.borrow(),
+        &activity_instances,
+        activity_level,
+    ))
 }
