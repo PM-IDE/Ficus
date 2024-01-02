@@ -232,7 +232,7 @@ impl FicusService {
                     let key_name = part.key.as_ref().unwrap().name.clone();
                     let uuid = Uuid::from_str(&part.frontend_part_uuid.as_ref().unwrap().uuid).ok().unwrap();
 
-                    pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), None));
+                    pipeline.push(Self::create_get_context_part(vec![key_name], uuid, &context.sender(), None));
                 }
                 Part::ComplexContextRequestPart(part) => {
                     let grpc_default_part = part.before_pipeline_part.as_ref().unwrap();
@@ -240,8 +240,8 @@ impl FicusService {
 
                     match Self::find_default_part(grpc_default_part, context) {
                         Some(found_part) => {
-                            let key_name = part.key.as_ref().unwrap().name.clone();
-                            pipeline.push(Self::create_get_context_part(key_name, uuid, &context.sender(), Some(found_part)));
+                            let key_names = part.keys.iter().map(|x| x.name.to_owned()).collect();
+                            pipeline.push(Self::create_get_context_part(key_names, uuid, &context.sender(), Some(found_part)));
                         }
                         None => todo!(),
                     }
@@ -253,13 +253,13 @@ impl FicusService {
     }
 
     fn create_get_context_part(
-        key_name: String,
+        key_names: Vec<String>,
         uuid: Uuid,
         sender: &Arc<Box<GrpcSender>>,
         before_part: Option<Box<DefaultPipelinePart>>,
     ) -> Box<GetContextValuePipelinePart> {
         let sender = sender.clone();
-        GetContextValuePipelinePart::create_context_pipeline_part(key_name, uuid, sender, before_part)
+        GetContextValuePipelinePart::create_context_pipeline_part(key_names, uuid, sender, before_part)
     }
 
     fn find_default_part(
