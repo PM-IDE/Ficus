@@ -4,9 +4,16 @@ use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::tr
 
 use super::{marking::Marking, petri_net::DefaultPetriNet};
 
+#[derive(Debug)]
 pub struct ReplayState {
     markings: HashMap<u64, usize>,
     fired_transitions: Vec<u64>
+}
+
+impl ReplayState {
+    pub fn fired_transitions(&self) -> &Vec<u64> {
+        &self.fired_transitions
+    }
 }
 
 impl ReplayState {
@@ -53,10 +60,10 @@ impl ReplayState {
 
                 for arc in candidate_transition.outgoing_arcs() {
                     let place_id = &arc.place_id();
-                    *new_markings.get_mut(place_id).unwrap() = if let Some(count) = new_markings.get(place_id) {
-                        count + arc.tokens_count()
+                    if let Some(count) = new_markings.get(place_id) {
+                        *new_markings.get_mut(place_id).unwrap() = count + arc.tokens_count();
                     } else {
-                        *arc.tokens_count()
+                        new_markings.insert(*place_id, *arc.tokens_count());
                     }
                 }
 
