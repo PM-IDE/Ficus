@@ -162,10 +162,12 @@ impl FromFileXesEventLogReader {
 
                     map.as_mut().unwrap().insert(kv.key.unwrap(), kv.value.unwrap());
                 }
-                Ok(quick_xml::events::Event::End(tag)) => match tag.name().0 {
-                    GLOBAL_TAG_NAME => break,
-                    _ => continue,
-                },
+                Ok(quick_xml::events::Event::End(tag)) => {
+                    match tag.name().0 {
+                        GLOBAL_TAG_NAME => break,
+                        _ => continue,
+                    }
+                }
                 _ => continue,
             }
         }

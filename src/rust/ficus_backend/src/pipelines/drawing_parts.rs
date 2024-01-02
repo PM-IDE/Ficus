@@ -110,12 +110,7 @@ impl PipelineParts {
                         colors_trace.push(ColoredRectangle::new(color, activity.start_pos, activity.length, name));
                     }
                     SubTraceKind::Unattached(start_pos, length) => {
-                        colors_trace.push(ColoredRectangle::new(
-                            Color::black(),
-                            start_pos,
-                            length,
-                            UNDEF_ACTIVITY_NAME.to_string(),
-                        ));
+                        colors_trace.push(ColoredRectangle::new(Color::black(), start_pos, length, UNDEF_ACTIVITY_NAME.to_string()));
                     }
                 })?;
 

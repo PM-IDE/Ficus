@@ -25,7 +25,10 @@ where
 
 impl<TTransitionData, TArcData> Eq for Transition<TTransitionData, TArcData> where TTransitionData: ToString {}
 
-impl<TTransitionData, TArcData> Hash for Transition<TTransitionData, TArcData> where TTransitionData: ToString {
+impl<TTransitionData, TArcData> Hash for Transition<TTransitionData, TArcData>
+where
+    TTransitionData: ToString,
+{
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::ficus_proto::{GrpcUuid, GrpcContextValueWithKeyName};
+use crate::ficus_proto::{GrpcContextValueWithKeyName, GrpcUuid};
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::{
     ficus_proto::{GrpcPipelinePartExecutionResult, GrpcPipelinePartResult},
@@ -54,12 +54,14 @@ impl GetContextValuePipelinePart {
                             let value = convert_to_grpc_context_value(key.as_ref(), context_value, keys);
                             grpc_values.push(GrpcContextValueWithKeyName {
                                 key_name: key.key().name().to_owned(),
-                                value
+                                value,
                             });
                         }
-                        None => return Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
-                            key.key().name().clone(),
-                        ))),
+                        None => {
+                            return Err(PipelinePartExecutionError::MissingContext(
+                                MissingContextError::new(key.key().name().clone())
+                            ))
+                        }
                     }
                 }
 
@@ -89,9 +91,11 @@ impl PipelinePart for GetContextValuePipelinePart {
         for key_name in &self.keys {
             match keys.find_key(key_name) {
                 Some(key) => context_keys.push(key),
-                None => return Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
-                    key_name.clone(),
-                ))),
+                None => {
+                    return Err(PipelinePartExecutionError::MissingContext(
+                        MissingContextError::new(key_name.clone())
+                    ))
+                }
             }
         }
 

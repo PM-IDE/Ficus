@@ -196,7 +196,7 @@ impl PipelineParts {
             for trace in log.traces() {
                 let trace = trace.borrow();
                 let events = trace.events();
-                let first_event =  events.first().unwrap().borrow();
+                let first_event = events.first().unwrap().borrow();
                 let start_transition = first_event.name();
 
                 let second_event = events.last().unwrap().borrow();
