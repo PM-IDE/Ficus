@@ -209,3 +209,8 @@ class AnnotatePetriNetWithFrequency2(PipelinePart2WithCallback):
                                                 GrpcPipelinePartConfiguration())
 
         return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+
+class EnsureInitialMarking(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_ensure_initial_marking))

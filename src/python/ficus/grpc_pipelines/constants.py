@@ -81,6 +81,7 @@ const_discover_petri_net_heuristic = 'DiscoverPetriNetHeuristic'
 const_discover_graph_fuzzy = 'DiscoverFuzzyGraph'
 const_annotate_petri_net_count = 'AnnotatePetriNetWithCount'
 const_annotate_petri_net_frequency = 'AnnotatePetriNetWithFrequency'
+const_ensure_initial_marking = 'EnsureInitialMarking'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'
