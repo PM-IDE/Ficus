@@ -27,6 +27,8 @@ message GrpcContextValue {
         GrpcPetriNet petriNet = 14;
         GrpcGraph graph = 15;
         float float = 16;
+        GrpcPetriNetCountAnnotation petri_net_count_annotation = 17;
+        GrpcPetriNetFrequenciesAnnotation petri_net_frequency_annotation = 18;
     }
 }
 
