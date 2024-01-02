@@ -1,6 +1,7 @@
 from ficus.discovery.graph import draw_graph, from_grpc_graph
 from ficus.discovery.petri_net import draw_petri_net
-from ficus.grpc_pipelines.context_values import from_grpc_petri_net
+from ficus.grpc_pipelines.context_values import from_grpc_petri_net, from_grpc_count_annotation, \
+    from_grpc_frequency_annotation
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part, \
     _create_complex_get_context_part
@@ -134,9 +135,11 @@ class ViewPetriNet2(ViewGraphLikeFormalismPart2):
                  background_color: str = 'white',
                  engine='dot',
                  export_path: Optional[str] = None,
-                 rankdir: str = 'LR'):
+                 rankdir: str = 'LR',
+                 annotation: dict[int, str] = None):
         super().__init__(name, background_color, engine, export_path, rankdir)
         self.show_places_names = show_places_names
+        self.annotation = annotation
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_simple_get_context_value_part(self.uuid, const_petri_net)
@@ -149,7 +152,8 @@ class ViewPetriNet2(ViewGraphLikeFormalismPart2):
                        background_color=self.background_color,
                        engine=self.engine,
                        rankdir=self.rankdir,
-                       export_path=self.export_path)
+                       export_path=self.export_path,
+                       annotation=self.annotation)
 
 
 class ViewDirectlyFollowsGraph2(ViewGraphLikeFormalismPart2):
@@ -183,32 +187,64 @@ class ViewGraph2(ViewGraphLikeFormalismPart2):
         return GrpcPipelinePartBase(simpleContextRequestPart=part)
 
 
-class AnnotatePetriNetWithCount2(PipelinePart2WithCallback):
-    def __init__(self):
-        super().__init__()
+class AnnotatePetriNetWithCount2(ViewPetriNet2):
+    def __init__(self,
+                 show_places_names: bool = False,
+                 name: str = 'petri_net',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
+        super().__init__(show_places_names, name, background_color, engine, export_path, rankdir, None)
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
-        print(values[const_petri_net_count_annotation].petri_net_count_annotation)
+        petri_net = from_grpc_petri_net(values[const_petri_net].petriNet)
+        annotation = from_grpc_count_annotation(values[const_petri_net_count_annotation].petri_net_count_annotation)
+        draw_petri_net(petri_net,
+                       show_places_names=self.show_places_names,
+                       name=self.name,
+                       background_color=self.background_color,
+                       engine=self.engine,
+                       rankdir=self.rankdir,
+                       export_path=self.export_path,
+                       annotation=annotation)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_complex_get_context_part(self.uuid,
-                                                [const_petri_net_count_annotation],
+                                                [const_petri_net, const_petri_net_count_annotation],
                                                 const_annotate_petri_net_count,
                                                 GrpcPipelinePartConfiguration())
 
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class AnnotatePetriNetWithFrequency2(PipelinePart2WithCallback):
-    def __init__(self):
-        super().__init__()
+class AnnotatePetriNetWithFrequency2(ViewPetriNet2):
+    def __init__(self,
+                 show_places_names: bool = False,
+                 name: str = 'petri_net',
+                 background_color: str = 'white',
+                 engine='dot',
+                 export_path: Optional[str] = None,
+                 rankdir: str = 'LR'):
+        super().__init__(show_places_names, name, background_color, engine, export_path, rankdir, None)
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
-        print(values[const_petri_net_frequency_annotation].petri_net_frequency_annotation)
+        petri_net = from_grpc_petri_net(values[const_petri_net].petriNet)
+        annotation = from_grpc_frequency_annotation(
+            values[const_petri_net_frequency_annotation].petri_net_frequency_annotation)
+
+        draw_petri_net(petri_net,
+                       show_places_names=self.show_places_names,
+                       name=self.name,
+                       background_color=self.background_color,
+                       engine=self.engine,
+                       rankdir=self.rankdir,
+                       export_path=self.export_path,
+                       annotation=annotation)
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_complex_get_context_part(self.uuid,
-                                                [const_petri_net_frequency_annotation],
+                                                [const_petri_net, const_petri_net_frequency_annotation],
                                                 const_annotate_petri_net_frequency,
                                                 GrpcPipelinePartConfiguration())
 

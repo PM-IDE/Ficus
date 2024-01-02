@@ -30,8 +30,10 @@ class Transition:
 
 
 class Arc:
-    def __init__(self, place_id: int):
+    def __init__(self, id: int, place_id: int, tokens_count: int):
+        self.id = id
         self.place_id = place_id
+        self.tokens_count = tokens_count
 
 
 class Marking:
@@ -81,7 +83,8 @@ def draw_petri_net(net: PetriNet,
                    background_color: str = 'white',
                    engine='dot',
                    export_path: Optional[str] = None,
-                   rankdir: str = 'LR'):
+                   rankdir: str = 'LR',
+                   annotation: dict[int, str] = None):
     def draw_func(g: graphviz.Digraph):
         initial_marking_places = set()
         if net.initial_marking is not None:
@@ -107,10 +110,12 @@ def draw_petri_net(net: PetriNet,
 
         for transition in net.transitions.values():
             for arc in transition.incoming_arcs:
-                g.edge(str(arc.place_id), str(transition.id))
+                label = annotation[arc.id] if annotation is not None and arc.id in annotation else ''
+                g.edge(str(arc.place_id), str(transition.id), label)
 
             for arc in transition.outgoing_arcs:
-                g.edge(str(transition.id), str(arc.place_id))
+                label = annotation[arc.id] if annotation is not None and arc.id in annotation else ''
+                g.edge(str(transition.id), str(arc.place_id), label)
 
     _draw_graph_like_formalism(draw_func,
                                name=name,

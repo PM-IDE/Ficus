@@ -181,7 +181,7 @@ def from_grpc_transition(grpc_petri_net_transition: GrpcPetriNetTransition) -> '
 
 
 def from_grpc_arc(grpc_arc: GrpcPetriNetArc) -> 'Arc':
-    return Arc(grpc_arc.placeId)
+    return Arc(grpc_arc.id, grpc_arc.placeId, grpc_arc.tokens_count)
 
 
 def try_from_grpc_marking(grpc_marking: Optional[GrpcPetriNetMarking]) -> Optional[Marking]:
@@ -193,3 +193,19 @@ def try_from_grpc_marking(grpc_marking: Optional[GrpcPetriNetMarking]) -> Option
 
 def from_grpc_single_marking(grpc_marking: GrpcPetriNetSinglePlaceMarking) -> SinglePlaceMarking:
     return SinglePlaceMarking(grpc_marking.placeId, grpc_marking.tokensCount)
+
+
+def from_grpc_count_annotation(grpc_annotation: GrpcPetriNetCountAnnotation) -> dict[int, str]:
+    map = dict()
+    for annotation in grpc_annotation.annotations:
+        map[annotation.arcId] = str(annotation.count)
+
+    return map
+
+
+def from_grpc_frequency_annotation(grpc_annotation: GrpcPetriNetFrequenciesAnnotation) -> dict[int, str]:
+    map = dict()
+    for annotation in grpc_annotation.annotations:
+        map[annotation.arcId] = str(annotation.frequency)
+
+    return map
