@@ -41,12 +41,20 @@ class GrpcPipelinePartLogMessage(_message.Message):
     def __init__(self, message: _Optional[str] = ...) -> None: ...
 
 class GrpcPipelinePartResult(_message.Message):
-    __slots__ = ["contextValue", "uuid"]
-    CONTEXTVALUE_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ["contextValues", "uuid"]
+    CONTEXTVALUES_FIELD_NUMBER: _ClassVar[int]
     UUID_FIELD_NUMBER: _ClassVar[int]
-    contextValue: _pipelines_and_context_pb2.GrpcContextValue
+    contextValues: _containers.RepeatedCompositeFieldContainer[GrpcContextValueWithKeyName]
     uuid: _util_pb2.GrpcUuid
-    def __init__(self, contextValue: _Optional[_Union[_pipelines_and_context_pb2.GrpcContextValue, _Mapping]] = ..., uuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
+    def __init__(self, contextValues: _Optional[_Iterable[_Union[GrpcContextValueWithKeyName, _Mapping]]] = ..., uuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
+
+class GrpcContextValueWithKeyName(_message.Message):
+    __slots__ = ["key_name", "value"]
+    KEY_NAME_FIELD_NUMBER: _ClassVar[int]
+    VALUE_FIELD_NUMBER: _ClassVar[int]
+    key_name: str
+    value: _pipelines_and_context_pb2.GrpcContextValue
+    def __init__(self, key_name: _Optional[str] = ..., value: _Optional[_Union[_pipelines_and_context_pb2.GrpcContextValue, _Mapping]] = ...) -> None: ...
 
 class GrpcPipelineFinalResult(_message.Message):
     __slots__ = ["success", "error"]

@@ -208,14 +208,14 @@ class GrpcSimpleContextRequestPipelinePart(_message.Message):
     def __init__(self, key: _Optional[_Union[GrpcContextKey, _Mapping]] = ..., frontendPartUuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
 
 class GrpcComplexContextRequestPipelinePart(_message.Message):
-    __slots__ = ["key", "beforePipelinePart", "frontendPartUuid"]
-    KEY_FIELD_NUMBER: _ClassVar[int]
+    __slots__ = ["keys", "beforePipelinePart", "frontendPartUuid"]
+    KEYS_FIELD_NUMBER: _ClassVar[int]
     BEFOREPIPELINEPART_FIELD_NUMBER: _ClassVar[int]
     FRONTENDPARTUUID_FIELD_NUMBER: _ClassVar[int]
-    key: GrpcContextKey
+    keys: _containers.RepeatedCompositeFieldContainer[GrpcContextKey]
     beforePipelinePart: GrpcPipelinePart
     frontendPartUuid: _util_pb2.GrpcUuid
-    def __init__(self, key: _Optional[_Union[GrpcContextKey, _Mapping]] = ..., beforePipelinePart: _Optional[_Union[GrpcPipelinePart, _Mapping]] = ..., frontendPartUuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
+    def __init__(self, keys: _Optional[_Iterable[_Union[GrpcContextKey, _Mapping]]] = ..., beforePipelinePart: _Optional[_Union[GrpcPipelinePart, _Mapping]] = ..., frontendPartUuid: _Optional[_Union[_util_pb2.GrpcUuid, _Mapping]] = ...) -> None: ...
 
 class GrpcGraph(_message.Message):
     __slots__ = ["nodes", "edges"]

@@ -11,12 +11,12 @@ class AssertNamesLogTestPart(PipelinePart2WithCallback):
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(self.uuid, const_names_event_log, const_get_names_event_log, config)
+        part = _create_complex_get_context_part(self.uuid, [const_names_event_log], const_get_names_event_log, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
-    def execute_callback(self, context_value: GrpcContextValue):
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
         names_log = []
-        for trace in context_value.names_log.log.traces:
+        for trace in values[const_names_event_log].names_log.log.traces:
             names_log.append(list(trace.events))
 
         if names_log != self.expected_names_log:

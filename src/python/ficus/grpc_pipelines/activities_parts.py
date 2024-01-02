@@ -213,14 +213,14 @@ class ClearActivitiesRelatedStuff2(PipelinePart2):
 class PrintNumberOfUnderlyingEvents2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_complex_get_context_part(self.uuid,
-                                                const_underlying_events_count,
+                                                [const_underlying_events_count],
                                                 const_get_number_of_underlying_events,
                                                 GrpcPipelinePartConfiguration())
 
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
-    def execute_callback(self, context_value: GrpcContextValue):
-        print(f'Underlying events count: {context_value.uint32}')
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        print(f'Underlying events count: {values[const_underlying_events_count].uint32}')
 
 
 class ApplyClassExtractor2(PipelinePart2):

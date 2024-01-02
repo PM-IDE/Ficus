@@ -52,11 +52,14 @@ class Pipeline2:
                 if last_result.HasField('pipelinePartResult'):
                     issued_part_uuid = uuid.UUID(part_result.pipelinePartResult.uuid.uuid)
                     if issued_part_uuid in uuid_to_pipeline_with_callback:
-                        context_value = part_result.pipelinePartResult.contextValue
+                        map = dict()
+                        for context_value_with_name in part_result.pipelinePartResult.contextValues:
+                            map[context_value_with_name.key_name] = context_value_with_name.value
+
                         part = uuid_to_pipeline_with_callback[issued_part_uuid]
 
                         def action():
-                            part.execute_callback(context_value)
+                            part.execute_callback(map)
 
                         performance_cookie(f'{type(part).__name__}Callback', action)
 
@@ -120,7 +123,7 @@ class PipelinePart2:
 
 
 class PipelinePart2WithCallback(PipelinePart2):
-    def execute_callback(self, context_value: GrpcContextValue):
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
         raise NotImplementedError()
 
     def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
@@ -142,8 +145,8 @@ class PipelinePart2WithDrawColorsLogCallback(PipelinePart2WithCallback):
         self.height_scale = height_scale
         self.width_scale = width_scale
 
-    def execute_callback(self, context_value: GrpcContextValue):
-        colors_log = from_grpc_colors_log(context_value.colors_log)
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        colors_log = from_grpc_colors_log(values[const_colors_event_log].colors_log)
         draw_colors_event_log(colors_log,
                               title=self.title,
                               save_path=self.save_path,
@@ -166,8 +169,8 @@ class PipelinePart2WithCanvasCallback(PipelinePart2WithCallback):
         self.title = title
         self.plot_legend = plot_legend
 
-    def execute_callback(self, context_value: GrpcContextValue):
-        colors_log = from_grpc_colors_log(context_value.colors_log)
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        colors_log = from_grpc_colors_log(values['colors_event_log'].colors_log)
         draw_colors_event_log_canvas(colors_log,
                                      title=self.title,
                                      plot_legend=self.plot_legend,
@@ -179,11 +182,11 @@ class PipelinePart2WithCanvasCallback(PipelinePart2WithCallback):
 class PrintEventLogInfo2(PipelinePart2WithCallback):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
-        part = _create_complex_get_context_part(self.uuid, const_event_log_info, const_get_event_log_info, config)
+        part = _create_complex_get_context_part(self.uuid, [const_event_log_info], const_get_event_log_info, config)
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
-    def execute_callback(self, context_value: GrpcContextValue):
-        log_info = from_grpc_event_log_info(context_value.event_log_info)
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        log_info = from_grpc_event_log_info(values[const_event_log_info].event_log_info)
         print(log_info)
 
 
@@ -199,12 +202,12 @@ def _create_grpc_uuid(uuid: uuid.UUID) -> GrpcUuid:
 
 
 def _create_complex_get_context_part(frontend_part_uuid: uuid.UUID,
-                                     key_name: str,
+                                     key_names: list[str],
                                      before_part_name: str,
                                      config: GrpcPipelinePartConfiguration):
     return GrpcComplexContextRequestPipelinePart(
         frontendPartUuid=_create_grpc_uuid(frontend_part_uuid),
-        key=GrpcContextKey(name=key_name),
+        keys=list(map(lambda x: GrpcContextKey(name=x), key_names)),
         beforePipelinePart=GrpcPipelinePart(
             name=before_part_name,
             configuration=config
