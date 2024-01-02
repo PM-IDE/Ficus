@@ -45,7 +45,9 @@ fn get_test_parts_names() -> Vec<String> {
         "DiscoverPetriNetAlphaPlusPlusNfc",
         "DiscoverDirectlyFollowsGraph",
         "DiscoverPetriNetHeuristic",
-        "DiscoverFuzzyGraph"
+        "DiscoverFuzzyGraph",
+        "AnnotatePetriNetWithCount",
+        "AnnotatePetriNetWithFrequency"
     ]
 }
 

@@ -44,4 +44,7 @@ impl PipelineParts {
     pub const DISCOVER_DFG: &'static str = "DiscoverDirectlyFollowsGraph";
     pub const DISCOVER_PETRI_NET_HEURISTIC: &'static str = "DiscoverPetriNetHeuristic";
     pub const DISCOVER_FUZZY_GRAPH: &'static str = "DiscoverFuzzyGraph";
+
+    pub const ANNOTATE_PETRI_NET_COUNT: &'static str = "AnnotatePetriNetWithCount";
+    pub const ANNOTATE_PETRI_NET_FREQUENCY: &'static str = "AnnotatePetriNetWithFrequency";
 }

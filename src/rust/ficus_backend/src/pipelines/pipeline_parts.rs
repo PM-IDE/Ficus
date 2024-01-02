@@ -68,6 +68,8 @@ impl PipelineParts {
             Self::discover_directly_follows_graph(),
             Self::discover_petri_net_heuristic_miner(),
             Self::discover_fuzzy_graph(),
+            Self::annotate_petri_net_count(),
+            Self::annotate_petri_net_frequency(),
         ];
 
         let mut names_to_parts = HashMap::new();

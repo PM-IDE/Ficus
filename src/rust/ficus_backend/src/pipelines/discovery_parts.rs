@@ -6,6 +6,7 @@ use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlus
 use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
 use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
+use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies};
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};
@@ -16,7 +17,7 @@ use crate::utils::user_data::user_data::UserData;
 
 impl PipelineParts {
     pub(super) fn discover_petri_net_alpha() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA, &|context, infra, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA, &|context, _, keys, _| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let event_log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(log));
             let provider = DefaultAlphaRelationsProvider::new(&event_log_info);
@@ -29,7 +30,7 @@ impl PipelineParts {
     }
 
     pub(super) fn serialize_petri_net() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::SERIALIZE_PETRI_NET, &|context, infra, keys, config| {
+        Self::create_pipeline_part(Self::SERIALIZE_PETRI_NET, &|context, _, keys, config| {
             let petri_net = Self::get_user_data(context, keys.petri_net())?;
             let save_path = Self::get_user_data(config, keys.path())?;
             let use_names_as_ids = *Self::get_user_data(config, keys.pnml_use_names_as_ids())?;
@@ -42,7 +43,7 @@ impl PipelineParts {
     }
 
     pub(super) fn discover_petri_net_alpha_plus() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS, &|context, infra, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS, &|context, _, keys, _| {
             Self::do_discover_petri_net_alpha_plus(context, keys, false)
         })
     }
@@ -67,13 +68,13 @@ impl PipelineParts {
     }
 
     pub(super) fn discover_petri_net_alpha_plus_plus() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS, &|context, infra, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS, &|context, _, keys, _| {
             Self::do_discover_petri_net_alpha_plus(context, keys, true)
         })
     }
 
     pub(super) fn discover_petri_net_alpha_plus_plus_nfc() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS_NFC, &|context, _, keys, config| {
+        Self::create_pipeline_part(Self::DISCOVER_PETRI_NET_ALPHA_PLUS_PLUS_NFC, &|context, _, keys, _| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let discovered_petri_net = discover_petri_net_alpha_plus_plus_nfc(log);
             context.put_concrete(keys.petri_net().key(), discovered_petri_net);
@@ -141,6 +142,38 @@ impl PipelineParts {
             context.put_concrete(keys.graph().key(), graph.to_default_graph());
 
             Ok(())
+        })
+    }
+
+    pub(super) fn annotate_petri_net_count() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_COUNT, &|context, _, keys, _| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let petri_net = Self::get_user_data(context, keys.petri_net())?;
+
+            let annotation = annotate_with_counts(log, petri_net);
+            if let Some(annotation) = annotation {
+                context.put_concrete(keys.petri_net_count_annotation().key(), annotation);
+                Ok(())
+            } else {
+                let error = RawPartExecutionError::new("Failed to annotate petri net".to_owned());
+                Err(PipelinePartExecutionError::Raw(error))
+            }
+        })
+    }
+
+    pub(super) fn annotate_petri_net_frequency() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_FREQUENCY, &|context, _, keys, _| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let petri_net = Self::get_user_data(context, keys.petri_net())?;
+
+            let annotation = annotate_with_frequencies(log, petri_net);
+            if let Some(annotation) = annotation {
+                context.put_concrete(keys.petri_net_frequency_annotation().key(), annotation);
+                Ok(())
+            } else {
+                let error = RawPartExecutionError::new("Failed to annotate petri net".to_owned());
+                Err(PipelinePartExecutionError::Raw(error))
+            }
         })
     }
 }
