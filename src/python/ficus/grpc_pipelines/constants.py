@@ -36,6 +36,8 @@ const_ratio_threshold = 'ratio_threshold'
 const_utility_rate = 'utility_rate'
 const_edge_cutoff_threshold = 'edge_cutoff_threshold'
 const_node_cutoff_threshold = 'node_cutoff_threshold'
+const_petri_net_count_annotation = 'petri_net_count_annotation'
+const_petri_net_frequency_annotation = 'petri_net_frequency_annotation'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'
