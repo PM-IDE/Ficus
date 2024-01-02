@@ -498,6 +498,13 @@ class WriteActivitiesInstancesIndices(InternalPipelinePart):
         return current_input
 
 
-class SubstituteUnderlyingEventsWithHierarchy(InternalPipelinePart):
+class AddActivityNameToAllEvents(InternalPipelinePart):
     def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
-        pass
+        instances = traces_activities(current_input)
+        event_log = log(current_input)
+        for trace_activities, trace in zip(instances, event_log.traces):
+            for activity in trace_activities:
+                for i in range(activity.start_pos, activity.start_pos + activity.length):
+                    trace[i]['activity'] = activity.node.unique_name()
+
+        return current_input

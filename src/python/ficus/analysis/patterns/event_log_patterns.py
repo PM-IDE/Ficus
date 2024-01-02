@@ -685,6 +685,17 @@ def calculate_underlying_events_count(log: MyEventLog):
     return count
 
 
+def execute_with_underlying_events(top_level_event: MyEvent, action: Callable[[MyEvent], None]):
+    q = [top_level_event]
+    while len(q) != 0:
+        current_event = q.pop(0)
+        if underlying_events_key in current_event:
+            for underlying_event in current_event[underlying_events_key]:
+                q.append(underlying_event)
+        else:
+            action(current_event)
+
+
 def count_underlying_events(event: MyEvent):
     count = 0
     q = [event]
