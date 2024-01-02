@@ -91,10 +91,14 @@ class GrpcPetriNetTransition(_message.Message):
     def __init__(self, id: _Optional[int] = ..., incomingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., outgoingArcs: _Optional[_Iterable[_Union[GrpcPetriNetArc, _Mapping]]] = ..., data: _Optional[str] = ...) -> None: ...
 
 class GrpcPetriNetArc(_message.Message):
-    __slots__ = ["placeId"]
+    __slots__ = ["id", "placeId", "tokens_count"]
+    ID_FIELD_NUMBER: _ClassVar[int]
     PLACEID_FIELD_NUMBER: _ClassVar[int]
+    TOKENS_COUNT_FIELD_NUMBER: _ClassVar[int]
+    id: int
     placeId: int
-    def __init__(self, placeId: _Optional[int] = ...) -> None: ...
+    tokens_count: int
+    def __init__(self, id: _Optional[int] = ..., placeId: _Optional[int] = ..., tokens_count: _Optional[int] = ...) -> None: ...
 
 class GrpcPetriNetMarking(_message.Message):
     __slots__ = ["markings"]
@@ -109,3 +113,31 @@ class GrpcPetriNetSinglePlaceMarking(_message.Message):
     placeId: int
     tokensCount: int
     def __init__(self, placeId: _Optional[int] = ..., tokensCount: _Optional[int] = ...) -> None: ...
+
+class GrpcPetriNetCountAnnotation(_message.Message):
+    __slots__ = ["annotations"]
+    ANNOTATIONS_FIELD_NUMBER: _ClassVar[int]
+    annotations: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArcCountAnnotation]
+    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcPetriNetArcCountAnnotation, _Mapping]]] = ...) -> None: ...
+
+class GrpcPetriNetArcCountAnnotation(_message.Message):
+    __slots__ = ["arcId", "count"]
+    ARCID_FIELD_NUMBER: _ClassVar[int]
+    COUNT_FIELD_NUMBER: _ClassVar[int]
+    arcId: int
+    count: int
+    def __init__(self, arcId: _Optional[int] = ..., count: _Optional[int] = ...) -> None: ...
+
+class GrpcPetriNetFrequenciesAnnotation(_message.Message):
+    __slots__ = ["annotations"]
+    ANNOTATIONS_FIELD_NUMBER: _ClassVar[int]
+    annotations: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArcFrequencyAnnotation]
+    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcPetriNetArcFrequencyAnnotation, _Mapping]]] = ...) -> None: ...
+
+class GrpcPetriNetArcFrequencyAnnotation(_message.Message):
+    __slots__ = ["arcId", "frequency"]
+    ARCID_FIELD_NUMBER: _ClassVar[int]
+    FREQUENCY_FIELD_NUMBER: _ClassVar[int]
+    arcId: int
+    frequency: float
+    def __init__(self, arcId: _Optional[int] = ..., frequency: _Optional[float] = ...) -> None: ...
