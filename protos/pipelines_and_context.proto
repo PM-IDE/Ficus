@@ -134,7 +134,7 @@ message GrpcSimpleContextRequestPipelinePart {
 }
 
 message GrpcComplexContextRequestPipelinePart {
-    GrpcContextKey key = 1;
+    repeated GrpcContextKey keys = 1;
     GrpcPipelinePart beforePipelinePart = 2;
     GrpcUuid frontendPartUuid = 3;
 }
