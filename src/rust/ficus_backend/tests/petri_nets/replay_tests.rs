@@ -1,4 +1,13 @@
-use ficus_backend::features::{discovery::{alpha::{alpha::discover_petri_net_alpha, providers::alpha_provider::DefaultAlphaRelationsProvider}, petri_net::{replay::replay_petri_net, annotations::{annotate_with_counts, annotate_with_frequencies}}}, analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto}};
+use ficus_backend::features::{
+    analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto},
+    discovery::{
+        alpha::{alpha::discover_petri_net_alpha, providers::alpha_provider::DefaultAlphaRelationsProvider},
+        petri_net::{
+            annotations::{annotate_with_counts, annotate_with_frequencies},
+            replay::replay_petri_net,
+        },
+    },
+};
 
 use crate::test_core::simple_events_logs_provider::create_simple_event_log;
 

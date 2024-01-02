@@ -7,7 +7,7 @@ use super::{marking::Marking, petri_net::DefaultPetriNet};
 #[derive(Debug)]
 pub struct ReplayState {
     markings: HashMap<u64, usize>,
-    fired_transitions: Vec<u64>
+    fired_transitions: Vec<u64>,
 }
 
 impl ReplayState {
@@ -18,7 +18,10 @@ impl ReplayState {
 
 impl ReplayState {
     pub fn new_raw(markings: HashMap<u64, usize>, fired_transitions: Vec<u64>) -> Self {
-        Self { markings, fired_transitions }
+        Self {
+            markings,
+            fired_transitions,
+        }
     }
 
     pub fn new(initial_marking: Marking) -> Self {

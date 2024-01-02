@@ -1,5 +1,4 @@
 use ficus_backend::event_log::core::event::event::Event;
-use ficus_backend::features::analysis::patterns::activity_instances::SubTraceKind::Attached;
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use ficus_backend::{
     event_log::{
