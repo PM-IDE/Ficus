@@ -466,4 +466,22 @@ impl ContextKeys {
     pub fn is_node_cutoff_threshold(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.node_cutoff_threshold(), key)
     }
+
+    pub fn petri_net_count_annotation(&self) -> &DefaultContextKey<HashMap<u64, usize>> {
+        self.find_concrete_key::<HashMap<u64, usize>>(Self::PETRI_NET_COUNT_ANNOTATION)
+            .expect("PETRI_NET_COUNT_ANNOTATION should be present in keys")
+    }
+
+    pub fn is_petri_net_count_annotation(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.petri_net_count_annotation(), key)
+    }
+
+    pub fn petri_net_frequency_annotation(&self) -> &DefaultContextKey<HashMap<u64, f64>> {
+        self.find_concrete_key::<HashMap<u64, f64>>(Self::PETRI_NET_FREQUENCY_ANNOTATION)
+            .expect("PETRI_NET_FREQUENCY_ANNOTATION should be present in keys")
+    }
+
+    pub fn is_petri_net_frequency_annotation(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.petri_net_frequency_annotation(), key)
+    }
 }

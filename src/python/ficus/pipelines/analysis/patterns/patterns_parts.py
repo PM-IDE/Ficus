@@ -496,3 +496,8 @@ class WriteActivitiesInstancesIndices(InternalPipelinePart):
                 trace_index += 1
 
         return current_input
+
+
+class SubstituteUnderlyingEventsWithHierarchy(InternalPipelinePart):
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        pass

@@ -104,6 +104,8 @@ impl ContextKeys {
     pub const COLORS_EVENT_LOG: &'static str = "colors_event_log";
     pub const COLORS_HOLDER: &'static str = "colors_holder";
     pub const GRAPH: &'static str = "graph";
+    pub const PETRI_NET_COUNT_ANNOTATION: &'static str = "petri_net_count_annotation";
+    pub const PETRI_NET_FREQUENCY_ANNOTATION: &'static str = "petri_net_frequency_annotation";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -156,6 +158,9 @@ impl ContextKeys {
         Self::insert_colors_event_log(&mut context);
         Self::insert_colors_holder(&mut context);
         Self::insert_graph(&mut context);
+
+        Self::insert_petri_net_frequency_annotation(&mut context);
+        Self::insert_petri_net_count_annotation(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -356,5 +361,13 @@ impl ContextKeys {
 
     fn insert_node_cutoff_threshold(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::NODE_CUTOFF_THRESHOLD)
+    }
+
+    fn insert_petri_net_count_annotation(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<HashMap<u64, usize>>(context, Self::PETRI_NET_COUNT_ANNOTATION)
+    }
+
+    fn insert_petri_net_frequency_annotation(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<HashMap<u64, f64>>(context, Self::PETRI_NET_FREQUENCY_ANNOTATION)
     }
 }

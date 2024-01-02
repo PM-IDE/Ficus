@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::{collections::HashSet, sync::Arc};
 
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
@@ -99,6 +100,9 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<ColorsHolder>(keys, ContextKeys::COLORS_HOLDER, &mut used);
         assert_existence::<DefaultGraph>(keys, ContextKeys::GRAPH, &mut used);
 
+        assert_existence::<HashMap<u64, usize>>(keys, ContextKeys::PETRI_NET_COUNT_ANNOTATION, &mut used);
+        assert_existence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_FREQUENCY_ANNOTATION, &mut used);
+
         assert_eq!(used.len(), get_all_keys_names().len())
     })
 }
@@ -161,7 +165,9 @@ fn get_all_keys_names() -> Vec<String> {
         "names_event_log",
         "colors_event_log",
         "colors_holder",
-        "graph"
+        "graph",
+        "petri_net_count_annotation",
+        "petri_net_frequency_annotation"
     ]
 }
 
@@ -232,6 +238,9 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<RepeatSets>(keys, ContextKeys::REPEAT_SETS, &mut used);        
         assert_keys_equivalence::<TracesActivities>(keys, ContextKeys::TRACE_ACTIVITIES, &mut used);        
         assert_keys_equivalence::<DefaultGraph>(keys, ContextKeys::GRAPH, &mut used);
+
+        assert_keys_equivalence::<HashMap<u64, usize>>(keys, ContextKeys::PETRI_NET_COUNT_ANNOTATION, &mut used);
+        assert_keys_equivalence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_FREQUENCY_ANNOTATION, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
