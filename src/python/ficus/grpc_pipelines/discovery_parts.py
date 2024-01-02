@@ -179,3 +179,27 @@ class ViewGraph2(ViewGraphLikeFormalismPart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         part = _create_simple_get_context_value_part(self.uuid, const_graph)
         return GrpcPipelinePartBase(simpleContextRequestPart=part)
+
+
+class AnnotatePetriNetWithCount2(PipelinePart2WithCallback):
+    def __init__(self):
+        super().__init__()
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        print(context_value.petri_net_count_annotation)
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_simple_get_context_value_part(self.uuid, const_annotate_petri_net_count)
+        return GrpcPipelinePartBase(simpleContextRequestPart=part)
+
+
+class AnnotatePetriNetWithFrequency2(PipelinePart2WithCallback):
+    def __init__(self):
+        super().__init__()
+
+    def execute_callback(self, context_value: GrpcContextValue):
+        print(context_value.petri_net_frequency_annotation)
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        part = _create_simple_get_context_value_part(self.uuid, const_annotate_petri_net_frequency)
+        return GrpcPipelinePartBase(simpleContextRequestPart=part)
