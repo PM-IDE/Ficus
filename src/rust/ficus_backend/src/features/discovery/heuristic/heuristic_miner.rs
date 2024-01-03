@@ -1,6 +1,6 @@
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
-use crate::features::discovery::alpha::providers::alpha_provider::{AlphaRelationsProvider, DefaultAlphaRelationsProvider};
+use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
 use crate::features::discovery::alpha::utils::maximize;
 use crate::features::discovery::heuristic::relations_provider::{AndOrXorRelation, HeuristicMinerRelationsProvider};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
@@ -8,7 +8,6 @@ use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::sets::one_set::OneSet;
 use std::collections::{HashMap, HashSet};
-use std::hash::Hash;
 
 pub fn discover_petri_net_heuristic(
     log: &impl EventLog,
