@@ -90,6 +90,7 @@ impl ContextKeys {
     pub const UTILITY_RATE: &'static str = "utility_rate";
     pub const EDGE_CUTOFF_THRESHOLD: &'static str = "edge_cutoff_threshold";
     pub const NODE_CUTOFF_THRESHOLD: &'static str = "node_cutoff_threshold";
+    pub const TERMINATE_ON_UNREPLAYABLE_TRACES: &'static str = "terminate_on_unreplayable_traces";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -163,6 +164,7 @@ impl ContextKeys {
         Self::insert_petri_net_frequency_annotation(&mut context);
         Self::insert_petri_net_count_annotation(&mut context);
         Self::insert_petri_net_trace_frequency_annotation(&mut context);
+        Self::insert_terminate_on_unreplayable_traces(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -375,5 +377,9 @@ impl ContextKeys {
 
     fn insert_petri_net_trace_frequency_annotation(context: &mut ContextKeysInitContext) {
         Self::insert_key::<HashMap<u64, f64>>(context, Self::PETRI_NET_TRACE_FREQUENCY_ANNOTATION)
+    }
+
+    fn insert_terminate_on_unreplayable_traces(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<bool>(context, Self::TERMINATE_ON_UNREPLAYABLE_TRACES)
     }
 }

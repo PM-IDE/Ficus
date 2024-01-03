@@ -26,7 +26,7 @@ pub fn test_simple_count_annotation() {
     let log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(&log));
     let petri_net = discover_petri_net_alpha(&DefaultAlphaRelationsProvider::new(&log_info));
 
-    println!("{:?}", annotate_with_counts(&log, &petri_net));
+    println!("{:?}", annotate_with_counts(&log, &petri_net, true));
 }
 
 #[test]
@@ -35,5 +35,5 @@ pub fn test_simple_frequency_annotation() {
     let log_info = EventLogInfo::create_from(EventLogInfoCreationDto::default(&log));
     let petri_net = discover_petri_net_alpha(&DefaultAlphaRelationsProvider::new(&log_info));
 
-    println!("{:?}", annotate_with_frequencies(&log, &petri_net));
+    println!("{:?}", annotate_with_frequencies(&log, &petri_net, true));
 }

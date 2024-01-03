@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-use std::process::id;
 
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
@@ -23,7 +22,7 @@ use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawP
 use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::pipelines::pipelines::PipelinePartFactory;
-use crate::utils::user_data::user_data::UserData;
+use crate::utils::user_data::user_data::{UserData, UserDataImpl};
 
 use super::keys::context_key::DefaultContextKey;
 
@@ -158,10 +157,14 @@ impl PipelineParts {
     }
 
     pub(super) fn annotate_petri_net_count() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_COUNT, &|context, _, keys, _| {
-            Self::annotate_petri_net(keys.petri_net_count_annotation(), context, keys, |log, net| {
-                annotate_with_counts(log, net)
-            })
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_COUNT, &|context, _, keys, config| {
+            Self::annotate_petri_net(
+                keys.petri_net_count_annotation(),
+                context,
+                keys,
+                config,
+                |log, net, terminate_on_unreplayable_traces| annotate_with_counts(log, net, terminate_on_unreplayable_traces),
+            )
         })
     }
 
@@ -169,12 +172,14 @@ impl PipelineParts {
         annotation_key: &DefaultContextKey<HashMap<u64, T>>,
         context: &mut PipelineContext,
         keys: &ContextKeys,
-        annotator: impl Fn(&XesEventLogImpl, &DefaultPetriNet) -> Option<HashMap<u64, T>>,
+        config: &UserDataImpl,
+        annotator: impl Fn(&XesEventLogImpl, &DefaultPetriNet, bool) -> Option<HashMap<u64, T>>,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
         let petri_net = Self::get_user_data(context, keys.petri_net())?;
+        let terminate_on_unreplayable_traces = *Self::get_user_data(config, keys.terminate_on_unreplayable_traces())?;
 
-        let annotation = annotator(log, petri_net);
+        let annotation = annotator(log, petri_net, terminate_on_unreplayable_traces);
         if let Some(annotation) = annotation {
             context.put_concrete(annotation_key.key(), annotation);
             Ok(())
@@ -185,18 +190,26 @@ impl PipelineParts {
     }
 
     pub(super) fn annotate_petri_net_frequency() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_FREQUENCY, &|context, _, keys, _| {
-            Self::annotate_petri_net(keys.petri_net_frequency_annotation(), context, keys, |log, net| {
-                annotate_with_frequencies(log, net)
-            })
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_FREQUENCY, &|context, _, keys, config| {
+            Self::annotate_petri_net(
+                keys.petri_net_frequency_annotation(),
+                context,
+                keys,
+                config,
+                |log, net, terminate_on_unreplayable_traces| annotate_with_frequencies(log, net, terminate_on_unreplayable_traces),
+            )
         })
     }
 
     pub(super) fn annotate_petri_net_trace_frequency() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_TRACE_FREQUENCY, &|context, _, keys, _| {
-            Self::annotate_petri_net(keys.petri_net_trace_frequency_annotation(), context, keys, |log, net| {
-                annotate_with_trace_frequency(log, net)
-            })
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_TRACE_FREQUENCY, &|context, _, keys, config| {
+            Self::annotate_petri_net(
+                keys.petri_net_trace_frequency_annotation(),
+                context,
+                keys,
+                config,
+                |log, net, terminate_on_unreplayable_traces| annotate_with_trace_frequency(log, net, terminate_on_unreplayable_traces),
+            )
         })
     }
 

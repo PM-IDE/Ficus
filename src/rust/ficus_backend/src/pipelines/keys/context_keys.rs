@@ -493,4 +493,13 @@ impl ContextKeys {
     pub fn is_petri_net_trace_frequency_annotation(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.petri_net_trace_frequency_annotation(), key)
     }
+
+    pub fn terminate_on_unreplayable_traces(&self) -> &DefaultContextKey<bool> {
+        self.find_concrete_key::<bool>(Self::TERMINATE_ON_UNREPLAYABLE_TRACES)
+            .expect("TERMINATE_ON_UNREPLAYABLE_TRACES should be present in keys")
+    }
+
+    pub fn is_terminate_on_unreplayable_traces(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.terminate_on_unreplayable_traces(), key)
+    }
 }

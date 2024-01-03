@@ -98,7 +98,7 @@ impl ReplayState {
     }
 }
 
-pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Vec<ReplayState>> {
+pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Vec<Option<ReplayState>>> {
     let mut result = vec![];
     for trace in log.traces() {
         let marking =
@@ -113,13 +113,14 @@ pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Ve
 
         loop {
             if stack.len() == 0 {
-                return None;
+                result.push(None);
+                break;
             }
 
             let current_state = stack.pop_back().unwrap();
             let events = trace.events();
             if current_state.0 >= events.len() {
-                result.push(current_state.1);
+                result.push(Some(current_state.1));
                 break;
             }
 
