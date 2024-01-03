@@ -1,5 +1,5 @@
 use crate::features::discovery::petri_net::arc::Arc;
-use crate::features::discovery::petri_net::petri_net::{DefaultPetriNet, PetriNet};
+use crate::features::discovery::petri_net::petri_net::PetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::xml_utils::{StartEndElementCookie, XmlWriteError};

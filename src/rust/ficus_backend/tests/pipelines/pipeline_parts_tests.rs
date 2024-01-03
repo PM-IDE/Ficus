@@ -48,6 +48,7 @@ fn get_test_parts_names() -> Vec<String> {
         "DiscoverFuzzyGraph",
         "AnnotatePetriNetWithCount",
         "AnnotatePetriNetWithFrequency",
+        "AnnotatePetriNetWithTraceFrequency",
         "EnsureInitialMarking"
     ]
 }

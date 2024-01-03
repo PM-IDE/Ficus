@@ -484,4 +484,13 @@ impl ContextKeys {
     pub fn is_petri_net_frequency_annotation(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.petri_net_frequency_annotation(), key)
     }
+
+    pub fn petri_net_trace_frequency_annotation(&self) -> &DefaultContextKey<HashMap<u64, f64>> {
+        self.find_concrete_key::<HashMap<u64, f64>>(Self::PETRI_NET_TRACE_FREQUENCY_ANNOTATION)
+            .expect("PETRI_NET_TRACE_FREQUENCY_ANNOTATION should be present in keys")
+    }
+
+    pub fn is_petri_net_trace_frequency_annotation(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.petri_net_trace_frequency_annotation(), key)
+    }
 }

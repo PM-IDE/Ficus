@@ -106,6 +106,7 @@ impl ContextKeys {
     pub const GRAPH: &'static str = "graph";
     pub const PETRI_NET_COUNT_ANNOTATION: &'static str = "petri_net_count_annotation";
     pub const PETRI_NET_FREQUENCY_ANNOTATION: &'static str = "petri_net_frequency_annotation";
+    pub const PETRI_NET_TRACE_FREQUENCY_ANNOTATION: &'static str = "petri_net_trace_frequency_annotation";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -161,6 +162,7 @@ impl ContextKeys {
 
         Self::insert_petri_net_frequency_annotation(&mut context);
         Self::insert_petri_net_count_annotation(&mut context);
+        Self::insert_petri_net_trace_frequency_annotation(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -369,5 +371,9 @@ impl ContextKeys {
 
     fn insert_petri_net_frequency_annotation(context: &mut ContextKeysInitContext) {
         Self::insert_key::<HashMap<u64, f64>>(context, Self::PETRI_NET_FREQUENCY_ANNOTATION)
+    }
+
+    fn insert_petri_net_trace_frequency_annotation(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<HashMap<u64, f64>>(context, Self::PETRI_NET_TRACE_FREQUENCY_ANNOTATION)
     }
 }

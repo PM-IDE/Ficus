@@ -70,6 +70,7 @@ impl PipelineParts {
             Self::discover_fuzzy_graph(),
             Self::annotate_petri_net_count(),
             Self::annotate_petri_net_frequency(),
+            Self::annotate_petri_net_trace_frequency(),
             Self::ensure_initial_marking(),
         ];
 

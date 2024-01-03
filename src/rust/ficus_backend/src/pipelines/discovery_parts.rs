@@ -1,9 +1,10 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use std::process::id;
 
 use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::event_log::core::trace::trace::Trace;
+use crate::event_log::xes::xes_event_log::XesEventLogImpl;
 use crate::features::analysis::directly_follows_graph::construct_dfg;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop};
@@ -12,8 +13,9 @@ use crate::features::discovery::alpha::providers::alpha_plus_provider::AlphaPlus
 use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRelationsProvider;
 use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
-use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies};
+use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency};
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
+use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
@@ -22,6 +24,8 @@ use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::pipelines::pipelines::PipelinePartFactory;
 use crate::utils::user_data::user_data::UserData;
+
+use super::keys::context_key::DefaultContextKey;
 
 impl PipelineParts {
     pub(super) fn discover_petri_net_alpha() -> (String, PipelinePartFactory) {
@@ -155,33 +159,36 @@ impl PipelineParts {
 
     pub(super) fn annotate_petri_net_count() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_COUNT, &|context, _, keys, _| {
+            Self::annotate_petri_net(keys.petri_net_count_annotation(), context, keys, |log, net| annotate_with_counts(log, net))
+        })
+    }
+
+    fn annotate_petri_net<T>(annotation_key: &DefaultContextKey<HashMap<u64, T>>,
+        context: &mut PipelineContext,
+        keys: &ContextKeys,
+        annotator: impl Fn(&XesEventLogImpl, &DefaultPetriNet) -> Option<HashMap<u64, T>>) -> Result<(), PipelinePartExecutionError> {
             let log = Self::get_user_data(context, keys.event_log())?;
             let petri_net = Self::get_user_data(context, keys.petri_net())?;
 
-            let annotation = annotate_with_counts(log, petri_net);
+            let annotation = annotator(log, petri_net);
             if let Some(annotation) = annotation {
-                context.put_concrete(keys.petri_net_count_annotation().key(), annotation);
+                context.put_concrete(annotation_key.key(), annotation);
                 Ok(())
             } else {
                 let error = RawPartExecutionError::new("Failed to annotate petri net".to_owned());
                 Err(PipelinePartExecutionError::Raw(error))
             }
-        })
     }
 
     pub(super) fn annotate_petri_net_frequency() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_FREQUENCY, &|context, _, keys, _| {
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let petri_net = Self::get_user_data(context, keys.petri_net())?;
+            Self::annotate_petri_net(keys.petri_net_frequency_annotation(), context, keys, |log, net| annotate_with_frequencies(log, net))
+        })
+    }
 
-            let annotation = annotate_with_frequencies(log, petri_net);
-            if let Some(annotation) = annotation {
-                context.put_concrete(keys.petri_net_frequency_annotation().key(), annotation);
-                Ok(())
-            } else {
-                let error = RawPartExecutionError::new("Failed to annotate petri net".to_owned());
-                Err(PipelinePartExecutionError::Raw(error))
-            }
+    pub(super) fn annotate_petri_net_trace_frequency() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::ANNOTATE_PETRI_NET_TRACE_FREQUENCY, &|context, _, keys, _| {
+            Self::annotate_petri_net(keys.petri_net_trace_frequency_annotation(), context, keys, |log, net| annotate_with_trace_frequency(log, net))
         })
     }
 

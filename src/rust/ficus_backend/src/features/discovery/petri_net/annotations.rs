@@ -42,3 +42,8 @@ pub fn annotate_with_frequencies(log: &impl EventLog, net: &DefaultPetriNet) -> 
 
     Some(freq_annotations)
 }
+
+pub fn annotate_with_trace_frequency(log: &impl EventLog, net: &DefaultPetriNet) -> Option<HashMap<u64, f64>> {
+    let count_annotations = annotate_with_counts(log, net)?;
+    Some(count_annotations.into_iter().map(|pair| (pair.0, pair.1 as f64 / log.traces().len() as f64)).collect())
+}
