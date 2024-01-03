@@ -2,7 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
 
-use super::{marking::Marking, petri_net::DefaultPetriNet};
+use super::{marking::Marking, petri_net::DefaultPetriNet, transition::Transition};
 
 #[derive(Debug)]
 pub struct ReplayState {
@@ -36,7 +36,7 @@ impl ReplayState {
     }
 
     pub fn handle_transition(state: &ReplayState, net: &DefaultPetriNet, transition: &str) -> Option<Vec<ReplayState>> {
-        let candidates = net.find_all_transitions_by_name(transition)?;
+        let candidates = Self::find_transitions_to_fire(net, transition);
 
         let mut new_states = vec![];
         for candidate_transition in candidates {
@@ -78,6 +78,23 @@ impl ReplayState {
         }
 
         Some(new_states)
+    }
+
+    fn find_transitions_to_fire<'a>(net: &'a DefaultPetriNet, symbol: &'a str) -> Vec<&'a Transition<String, ()>> {
+        let mut result = vec![];
+        for transition in net.all_transitions() {
+            if transition.name() == symbol {
+                result.push(transition);
+            }
+        }
+
+        for transition in net.all_transitions() {
+            if *transition.is_silent() {
+                result.push(transition);
+            }
+        }
+
+        result
     }
 }
 
