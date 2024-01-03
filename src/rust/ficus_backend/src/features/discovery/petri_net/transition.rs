@@ -9,6 +9,7 @@ where
 {
     id: u64,
     name: String,
+    silent_transition: bool,
     incoming_arcs: Vec<Arc<TArcData>>,
     outgoing_arcs: Vec<Arc<TArcData>>,
     data: Option<TTransitionData>,
@@ -38,10 +39,11 @@ impl<TTransitionData, TArcData> Transition<TTransitionData, TArcData>
 where
     TTransitionData: ToString,
 {
-    pub fn empty(name: String, data: Option<TTransitionData>) -> Self {
+    pub fn empty(name: String, silent_transition: bool, data: Option<TTransitionData>) -> Self {
         Self {
             id: next_id(),
             name,
+            silent_transition,
             incoming_arcs: Vec::new(),
             outgoing_arcs: Vec::new(),
             data,
@@ -82,5 +84,9 @@ where
 
     pub fn name(&self) -> &String {
         &self.name
+    }
+
+    pub fn is_silent(&self) -> &bool {
+        &self.silent_transition
     }
 }

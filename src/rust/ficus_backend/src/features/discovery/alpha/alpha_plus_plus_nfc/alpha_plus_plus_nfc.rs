@@ -1,4 +1,3 @@
-use crate::event_log::core::event::event::Event;
 use crate::event_log::core::event_log::EventLog;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
 use crate::features::discovery::alpha::alpha::{
@@ -15,7 +14,7 @@ use crate::features::discovery::petri_net::transition::Transition;
 use crate::utils::sets::two_sets::TwoSets;
 use crate::utils::user_data::user_data::UserData;
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::hash::Hash;
+
 
 pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> DefaultPetriNet {
     let one_length_loop_transitions = find_transitions_one_length_loop(log);
@@ -196,7 +195,7 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         .map(|c| *c)
         .chain(one_length_loop_transitions.iter())
     {
-        let id = resulting_net.add_transition(Transition::empty((*transition).to_owned(), Some((*transition).to_owned())));
+        let id = resulting_net.add_transition(Transition::empty((*transition).to_owned(), false, Some((*transition).to_owned())));
         transitions_to_ids.insert(transition, id);
     }
 
