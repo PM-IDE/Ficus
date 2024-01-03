@@ -3,6 +3,8 @@ use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use std::collections::HashMap;
 
+use super::arc::Arc;
+
 pub type DefaultPetriNet = PetriNet<String, ()>;
 
 #[derive(Debug)]
@@ -161,6 +163,24 @@ where
         } else {
             Some(result)
         }
+    }
+
+    pub fn arc(&self, id: &u64) -> Option<(&Arc<TArcData>, &Transition<TTransitionData, TArcData>)> {
+        for transition in self.transitions.values() {
+            for arc in transition.outgoing_arcs() {
+                if arc.id() == *id {
+                    return Some((arc, transition));
+                }
+            }
+
+            for arc in transition.incoming_arcs() {
+                if arc.id() == *id {
+                    return Some((arc, transition));
+                }
+            }
+        }
+
+        None
     }
 
     pub fn get_incoming_transitions(&self, place_id: &u64) -> Vec<&Transition<TTransitionData, TArcData>> {
