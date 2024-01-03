@@ -151,6 +151,8 @@ pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys
         try_convert_to_grpc_petri_net_count_annotation(value)
     } else if keys.is_petri_net_frequency_annotation(key) {
         try_convert_to_grpc_petri_net_frequency_annotation(value)
+    } else if keys.is_petri_net_trace_frequency_annotation(key) {
+        try_convert_to_grpc_petri_net_frequency_annotation(value)
     } else {
         None
     }
