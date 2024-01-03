@@ -35,7 +35,7 @@ impl ReplayState {
         }
     }
 
-    pub fn handle_transition(state: &ReplayState, net: &DefaultPetriNet, transition: &str) -> Option<Vec<ReplayState>> {
+    pub fn handle_transition(state: &ReplayState, net: &DefaultPetriNet, transition: &str) -> Option<Vec<(bool, ReplayState)>> {
         let candidates = Self::find_transitions_to_fire(net, transition);
 
         let mut new_states = vec![];
@@ -73,7 +73,8 @@ impl ReplayState {
                 let mut new_fired_transitions = state.fired_transitions.clone();
                 new_fired_transitions.push(candidate_transition.id());
 
-                new_states.push(ReplayState::new_raw(new_markings, new_fired_transitions));
+                let new_state = ReplayState::new_raw(new_markings, new_fired_transitions);
+                new_states.push((!candidate_transition.is_silent(), new_state));
             }
         }
 
@@ -101,11 +102,10 @@ impl ReplayState {
 pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Vec<Option<ReplayState>>> {
     let mut result = vec![];
     for trace in log.traces() {
-        let marking =
-            match net.initial_marking() {
-                Some(marking) => marking.clone(),
-                None => return None,
-            };
+        let marking = match net.initial_marking() {
+            Some(marking) => marking.clone(),
+            None => return None,
+        };
 
         let trace = trace.borrow();
         let mut stack = VecDeque::new();
@@ -129,7 +129,9 @@ pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Ve
 
             if let Some(new_states) = new_states {
                 for new_state in new_states {
-                    stack.push_back((current_state.0 + 1, new_state));
+                    //if we fired silent transition dont consume symbol from trace
+                    let new_index = current_state.0 + if new_state.0 { 1 } else { 0 };
+                    stack.push_back((new_index, new_state.1));
                 }
             }
         }
