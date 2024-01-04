@@ -107,19 +107,18 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
         }
     }
 
-    let y_w =
-        maximize(x_w, |first, second| {
-            if !first.alpha_set().eq(second.alpha_set()) {
-                return None;
-            }
+    let y_w = maximize(x_w, |first, second| {
+        if !first.alpha_set().eq(second.alpha_set()) {
+            return None;
+        }
 
-            let new = first.merge(second);
-            if new.valid(&mut provider, &w1_relations, &w2_relations) {
-                Some(new)
-            } else {
-                None
-            }
-        });
+        let new = first.merge(second);
+        if new.valid(&mut provider, &w1_relations, &w2_relations) {
+            Some(new)
+        } else {
+            None
+        }
+    });
 
     for w2_relation in &w2_relations {
         provider.add_additional_causal_relation(w2_relation.0, w2_relation.1);
@@ -158,16 +157,15 @@ pub fn discover_petri_net_alpha_plus_plus_nfc<TLog: EventLog>(log: &TLog) -> Def
     });
 
     let mut p_w = HashSet::new();
-    let check_should_add_to_pw =
-        |two_sets: &TwoSets<&String>| {
-            for l_w_item in &l_w {
-                if l_w_item.a_classes().eq(&two_sets.first_set()) && l_w_item.b_classes().eq(&two_sets.second_set()) {
-                    return false;
-                }
+    let check_should_add_to_pw = |two_sets: &TwoSets<&String>| {
+        for l_w_item in &l_w {
+            if l_w_item.a_classes().eq(&two_sets.first_set()) && l_w_item.b_classes().eq(&two_sets.second_set()) {
+                return false;
             }
+        }
 
-            true
-        };
+        true
+    };
 
     for item in &z_w {
         if check_should_add_to_pw(&item.two_sets()) {

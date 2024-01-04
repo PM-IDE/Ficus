@@ -13,7 +13,7 @@ use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRe
 use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
 use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency};
-use crate::features::discovery::petri_net::marking::{Marking, SingleMarking, ensure_initial_marking};
+use crate::features::discovery::petri_net::marking::{ensure_initial_marking, Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;

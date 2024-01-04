@@ -5,18 +5,25 @@ use ficus_backend::{
     features::{
         analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto},
         discovery::{
-            alpha::{alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop}, providers::{alpha_provider::DefaultAlphaRelationsProvider, alpha_plus_provider::AlphaPlusRelationsProviderImpl}},
+            alpha::{
+                alpha::{discover_petri_net_alpha, discover_petri_net_alpha_plus, find_transitions_one_length_loop},
+                providers::{alpha_plus_provider::AlphaPlusRelationsProviderImpl, alpha_provider::DefaultAlphaRelationsProvider},
+            },
+            heuristic::heuristic_miner::discover_petri_net_heuristic,
             petri_net::{
                 annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency},
+                marking::ensure_initial_marking,
                 petri_net::DefaultPetriNet,
-                replay::replay_petri_net, marking::ensure_initial_marking,
-            }, heuristic::heuristic_miner::discover_petri_net_heuristic,
+                replay::replay_petri_net,
+            },
         },
     },
     vecs,
 };
 
-use crate::test_core::simple_events_logs_provider::{create_simple_event_log, create_heuristic_miner_replay_test_log, create_alpha_plus_miner_replay_test_log};
+use crate::test_core::simple_events_logs_provider::{
+    create_alpha_plus_miner_replay_test_log, create_heuristic_miner_replay_test_log, create_simple_event_log,
+};
 
 #[test]
 pub fn test_simple_replay() {
@@ -35,7 +42,10 @@ pub fn test_silent_transitions_replay() {
     let mut petri_net = discover_petri_net_heuristic(&log, 0.0, 0, 1.0, 0.1, 0.5);
     ensure_initial_marking(&log, &mut petri_net);
 
-    let expected_transitions = vec![Some(vecs!["A", "silent_start_A", "B", "C", "D"]), Some(vecs!["A", "silent_start_A", "C", "B", "D"])];
+    let expected_transitions = vec![
+        Some(vecs!["A", "silent_start_A", "B", "C", "D"]),
+        Some(vecs!["A", "silent_start_A", "C", "B", "D"]),
+    ];
 
     execute_test_with_replay(&petri_net, &log, expected_transitions);
 }
@@ -49,8 +59,12 @@ pub fn test_alpha_plus_log_replay() {
     let provider = AlphaPlusRelationsProviderImpl::new(&event_log_info, &log, &one_length_loop_transitions);
 
     let petri_net = discover_petri_net_alpha_plus(&log, &provider, false);
-    
-    let expected_transitions = vec![Some(vecs!["A", "B", "C", "D"]), Some(vecs!["A", "C", "B", "D"]), Some(vecs!["E", "F"])];
+
+    let expected_transitions = vec![
+        Some(vecs!["A", "B", "C", "D"]),
+        Some(vecs!["A", "C", "B", "D"]),
+        Some(vecs!["E", "F"]),
+    ];
 
     execute_test_with_replay(&petri_net, &log, expected_transitions);
 }
@@ -108,19 +122,18 @@ pub fn execute_test_with_annotation<T>(net: &DefaultPetriNet, annotation: HashMa
 where
     T: ToString + PartialEq + Debug + Copy,
 {
-    let mut processed_annotations: Vec<(String, T)> =
-        annotation
-            .iter()
-            .map(|pair| {
-                if let Some((arc, transition)) = net.arc(pair.0) {
-                    let place = net.place(&arc.place_id());
-                    let name = format!("{}--{}", place.name(), transition.name());
-                    return (name, *pair.1);
-                }
+    let mut processed_annotations: Vec<(String, T)> = annotation
+        .iter()
+        .map(|pair| {
+            if let Some((arc, transition)) = net.arc(pair.0) {
+                let place = net.place(&arc.place_id());
+                let name = format!("{}--{}", place.name(), transition.name());
+                return (name, *pair.1);
+            }
 
-                panic!();
-            })
-            .collect();
+            panic!();
+        })
+        .collect();
 
     processed_annotations.sort_by(|first, second| first.0.cmp(&second.0));
     expected.sort_by(|first, second| first.0.cmp(&second.0));
