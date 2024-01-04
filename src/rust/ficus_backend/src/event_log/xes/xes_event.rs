@@ -22,12 +22,12 @@ impl XesEventImpl {
         name: String,
         timestamp: DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
-        payload: HashMap<String, EventPayloadValue>,
+        payload: Option<HashMap<String, EventPayloadValue>>,
     ) -> Self {
         Self {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
-            payload: Some(payload),
+            payload: payload,
         }
     }
 }
