@@ -13,7 +13,7 @@ use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRe
 use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
 use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency};
-use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
+use crate::features::discovery::petri_net::marking::{Marking, SingleMarking, ensure_initial_marking};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
@@ -217,40 +217,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::ENSURE_INITIAL_MARKING, &|context, _, keys, _| {
             let petri_net = Self::get_user_data_mut(context, keys.petri_net())?;
             let log = Self::get_user_data(context, keys.event_log())?;
-
-            let mut start_transitions = HashSet::new();
-            let mut end_transitions = HashSet::new();
-
-            for trace in log.traces() {
-                let trace = trace.borrow();
-                let events = trace.events();
-                let first_event = events.first().unwrap().borrow();
-                let start_transition = first_event.name();
-
-                let second_event = events.last().unwrap().borrow();
-                let end_transition = second_event.name();
-
-                if let Some(start_transition) = petri_net.find_transition_by_name(start_transition) {
-                    start_transitions.insert(start_transition.id());
-                }
-
-                if let Some(end_transition) = petri_net.find_transition_by_name(end_transition) {
-                    end_transitions.insert(end_transition.id());
-                }
-            }
-
-            let start_place_id = petri_net.add_place(Place::with_name("Start".to_owned()));
-            let end_place_id = petri_net.add_place(Place::with_name("End".to_owned()));
-
-            for transition_id in start_transitions {
-                petri_net.connect_place_to_transition(&start_place_id, &transition_id, None);
-            }
-
-            for transition_id in end_transitions {
-                petri_net.connect_transition_to_place(&transition_id, &end_place_id, None);
-            }
-
-            petri_net.set_initial_marking(Marking::new(vec![SingleMarking::new(start_place_id, 1)]));
+            ensure_initial_marking(log, petri_net);
 
             Ok(())
         })

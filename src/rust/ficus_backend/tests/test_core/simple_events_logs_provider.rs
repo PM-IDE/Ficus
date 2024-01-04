@@ -232,3 +232,18 @@ pub fn create_alpha_plus_plus_nfc_test_log8() -> SimpleEventLog {
 pub fn create_alpha_plus_plus_nfc_test_log9() -> SimpleEventLog {
     SimpleEventLog::new(&vec![vec!["A", "C", "E", "B", "C", "D"]])
 }
+
+pub fn create_heuristic_miner_replay_test_log() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "B", "C", "D"],
+        vec!["A", "C", "B", "D"],
+    ])
+}
+
+pub fn create_alpha_plus_miner_replay_test_log() -> SimpleEventLog {
+    SimpleEventLog::new(&vec![
+        vec!["A", "B", "C", "D"],
+        vec!["A", "C", "B", "D"],
+        vec!["E", "F"],
+    ])
+}
