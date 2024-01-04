@@ -1,6 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
-use uuid::fmt::Simple;
 
 use crate::{
     event_log::core::{
