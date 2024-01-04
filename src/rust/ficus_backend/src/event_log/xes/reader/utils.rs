@@ -74,18 +74,22 @@ pub fn extract_payload_value(name: &[u8], value: &str) -> Option<EventPayloadVal
             Err(_) => None,
             Ok(date) => Some(EventPayloadValue::Date(date.with_timezone(&Utc))),
         },
-        INT_TAG_NAME => match value.parse::<i32>() {
+        INT_TAG_NAME => match value.parse::<i64>() {
             Err(_) => None,
-            Ok(int_value) => Some(EventPayloadValue::Int(int_value)),
+            Ok(int_value) => Some(EventPayloadValue::Int64(int_value)),
         },
-        FLOAT_TAG_NAME => match value.parse::<f32>() {
+        FLOAT_TAG_NAME => match value.parse::<f64>() {
             Err(_) => None,
-            Ok(float_value) => Some(EventPayloadValue::Float(float_value)),
+            Ok(float_value) => Some(EventPayloadValue::Float64(float_value)),
         },
         STRING_TAG_NAME => Some(EventPayloadValue::String(value.to_owned())),
         BOOLEAN_TAG_NAME => match value.parse::<bool>() {
             Err(_) => None,
             Ok(bool_value) => Some(EventPayloadValue::Boolean(bool_value)),
+        },
+        ID_TAG_NAME => match uuid::Uuid::parse_str(value) {
+            Ok(guid) => Some(EventPayloadValue::Guid(guid)),
+            Err(_) => None,
         },
         _ => None,
     }

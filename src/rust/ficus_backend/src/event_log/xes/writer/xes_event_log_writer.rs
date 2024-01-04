@@ -1,6 +1,5 @@
 use std::{
     cell::RefCell,
-    fmt::{Debug, Display},
     fs,
     io::Cursor,
 };
@@ -118,8 +117,14 @@ fn write_payload_tag(writer: &RefCell<Writer<Cursor<Vec<u8>>>>, key: &str, value
         EventPayloadValue::Date(_) => DATE_TAG_NAME_STR,
         EventPayloadValue::String(_) => STRING_TAG_NAME_STR,
         EventPayloadValue::Boolean(_) => BOOLEAN_TAG_NAME_STR,
-        EventPayloadValue::Int(_) => INT_TAG_NAME_STR,
-        EventPayloadValue::Float(_) => FLOAT_TAG_NAME_STR,
+        EventPayloadValue::Int32(_) => INT_TAG_NAME_STR,
+        EventPayloadValue::Int64(_) => INT_TAG_NAME_STR,
+        EventPayloadValue::Float32(_) => FLOAT_TAG_NAME_STR,
+        EventPayloadValue::Float64(_) => FLOAT_TAG_NAME_STR,
+        EventPayloadValue::Uint32(_) => INT_TAG_NAME_STR,
+        EventPayloadValue::Uint64(_) => INT_TAG_NAME_STR,
+        EventPayloadValue::Guid(_) => ID_TAG_NAME_STR,
+        EventPayloadValue::Timestamp(_) => DATE_TAG_NAME_STR,
     };
 
     let string_value = value.to_string();

@@ -17,6 +17,7 @@ pub const BOOLEAN_TAG_NAME_STR: &str = "boolean";
 pub const INT_TAG_NAME_STR: &str = "int";
 pub const FLOAT_TAG_NAME_STR: &str = "float";
 pub const DATE_TAG_NAME_STR: &str = "date";
+pub const ID_TAG_NAME_STR: &str = "id";
 
 pub const LOG_TAG_NAME: &[u8] = LOG_TAG_NAME_STR.as_bytes();
 pub const EVENT_TAG_NAME: &[u8] = EVENT_TAG_NAME_STR.as_bytes();
@@ -36,6 +37,7 @@ pub const STRING_TAG_NAME: &[u8] = STRING_TAG_NAME_STR.as_bytes();
 pub const BOOLEAN_TAG_NAME: &[u8] = BOOLEAN_TAG_NAME_STR.as_bytes();
 pub const INT_TAG_NAME: &[u8] = INT_TAG_NAME_STR.as_bytes();
 pub const FLOAT_TAG_NAME: &[u8] = FLOAT_TAG_NAME_STR.as_bytes();
+pub const ID_TAG_NAME: &[u8] = ID_TAG_NAME_STR.as_bytes();
 
 pub const KEY_ATTR_NAME: &[u8] = KEY_ATTR_NAME_STR.as_bytes();
 pub const VALUE_ATTR_NAME: &[u8] = VALUE_ATTR_NAME_STR.as_bytes();

@@ -36,12 +36,12 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                     };
 
                     let paylaod_value = match value.as_ref().as_ref() {
-                        BxesValue::Int32(int) => EventPayloadValue::Int(*int),
-                        BxesValue::Int64(_) => todo!(),
-                        BxesValue::Uint32(_) => todo!(),
-                        BxesValue::Uint64(_) => todo!(),
-                        BxesValue::Float32(f32) => EventPayloadValue::Float(*f32),
-                        BxesValue::Float64(_) => todo!(),
+                        BxesValue::Int32(value) => EventPayloadValue::Int32(*value),
+                        BxesValue::Int64(value) => EventPayloadValue::Int64(*value),
+                        BxesValue::Uint32(value) => EventPayloadValue::Uint32(*value),
+                        BxesValue::Uint64(value) => EventPayloadValue::Uint64(*value),
+                        BxesValue::Float32(value) => EventPayloadValue::Float32(*value),
+                        BxesValue::Float64(value) => EventPayloadValue::Float64(*value),
                         BxesValue::String(string) => EventPayloadValue::String(string.as_ref().as_ref().to_owned()),
                         BxesValue::Bool(bool) => EventPayloadValue::Boolean(*bool),
                         BxesValue::Timestamp(stamp) => EventPayloadValue::Date(Utc.timestamp_nanos(*stamp)),
@@ -49,7 +49,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                         BxesValue::StandardLifecycle(_) => todo!(),
                         BxesValue::Artifact(_) => todo!(),
                         BxesValue::Drivers(_) => todo!(),
-                        BxesValue::Guid(_) => todo!(),
+                        BxesValue::Guid(value) => EventPayloadValue::Guid(*value),
                         BxesValue::SoftwareEventType(_) => todo!(),
                     };
 
