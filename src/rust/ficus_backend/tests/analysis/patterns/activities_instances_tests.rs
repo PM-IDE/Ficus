@@ -33,7 +33,7 @@ fn test_activity_instances() {
         0,
         ActivityNarrowingKind::NarrowDown,
         ActivityInTraceFilterKind::DefaultFilter,
-        |sub_array| create_activity_name(log.borrow().deref(), sub_array),
+        |sub_array| create_activity_name(log.borrow().deref(), sub_array, None),
     );
 
     let activities = discover_activities_instances(&context);
@@ -66,7 +66,7 @@ fn test_activity_instances1() {
         0,
         ActivityNarrowingKind::NarrowDown,
         ActivityInTraceFilterKind::DefaultFilter,
-        |sub_array| create_activity_name(log.borrow().deref(), sub_array),
+        |sub_array| create_activity_name(log.borrow().deref(), sub_array, None),
     );
 
     let activities = discover_activities_instances(&context);
@@ -109,7 +109,7 @@ fn execute_activities_discovery_test(log: SimpleEventLog, strategy: UndefActivit
         0,
         ActivityNarrowingKind::NarrowDown,
         ActivityInTraceFilterKind::DefaultFilter,
-        |sub_array| create_activity_name(log.borrow().deref(), sub_array),
+        |sub_array| create_activity_name(log.borrow().deref(), sub_array, None),
     );
 
     let context = ActivitiesInstancesDiscoveryContext::new(context, strategy, |info| {
@@ -258,7 +258,7 @@ fn execute_activities_logs_creation_test(log: SimpleEventLog, pattern_kind: Patt
         0,
         ActivityNarrowingKind::NarrowDown,
         ActivityInTraceFilterKind::DefaultFilter,
-        |sub_array| create_activity_name(log.borrow().deref(), sub_array),
+        |sub_array| create_activity_name(log.borrow().deref(), sub_array, None),
     );
 
     let activities_logs = create_logs_for_activities(&context, 0);

@@ -1,3 +1,4 @@
+use fancy_regex::Regex;
 use once_cell::unsync::Lazy;
 use std::any::{Any, TypeId};
 use std::sync::Mutex;
@@ -555,7 +556,7 @@ fn create_log_from_traces_activities<TLog: EventLog>(
     activities_to_logs
 }
 
-pub fn create_activity_name<TLog>(log: &TLog, sub_array: &SubArrayWithTraceIndex) -> String
+pub fn create_activity_name<TLog>(log: &TLog, sub_array: &SubArrayWithTraceIndex, class_extractor: Option<&String>) -> String
 where
     TLog: EventLog,
 {
@@ -565,9 +566,32 @@ where
     let right = left + sub_array.sub_array.length;
     let trace = log.traces().get(sub_array.trace_index).unwrap().borrow();
     let events = trace.events();
+
+    let regex = match class_extractor {
+        Some(extractor) => Some(Regex::new(&extractor).unwrap()),
+        None => None
+    };
+
     for index in left..right {
         name.push('(');
-        name.push_str(events[index].borrow().name());
+
+        let event_name = events[index].borrow();
+        let event_name = event_name.name();
+        let event_name = match regex.as_ref() {
+            Some(regex) => match regex.find(event_name) {
+                Ok(Some(m)) => {
+                    if m.start() == 0 {
+                        &event_name[0..m.end()]
+                    } else {
+                        event_name.as_str()
+                    }
+                }
+                _ => event_name
+            },
+            None => event_name
+        };
+
+        name.push_str(&event_name);
         name.push(')');
 
         if index != right - 1 {

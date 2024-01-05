@@ -131,7 +131,7 @@ impl PipelineParts {
         };
 
         let activity_level = Self::get_user_data(config, keys.activity_level())?;
-        Self::do_discover_activities(context, keys, *activity_level)?;
+        Self::do_discover_activities(context, keys, *activity_level, config)?;
 
         Ok(())
     }

@@ -72,7 +72,7 @@ impl PipelineParts {
     pub(super) fn discover_activities() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES, &|context, _, keys, config| {
             let activity_level = Self::get_user_data(config, keys.activity_level())?;
-            Self::do_discover_activities(context, keys, *activity_level)
+            Self::do_discover_activities(context, keys, *activity_level, config)
         })
     }
 
@@ -80,14 +80,20 @@ impl PipelineParts {
         context: &mut PipelineContext,
         keys: &ContextKeys,
         activity_level: u32,
+        config: &UserDataImpl,
     ) -> Result<(), PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
         let patterns = Self::get_user_data(context, keys.patterns())?;
         let hashed_log = Self::get_user_data(context, keys.hashes_event_log())?;
+        let event_class_regex = match Self::get_user_data(config, keys.event_class_regex()) {
+            Ok(regex) => Some(regex),
+            Err(_) => None
+        };
+
         let repeat_sets = build_repeat_sets(&hashed_log, patterns);
 
         let tree = build_repeat_set_tree_from_repeats(&hashed_log, &repeat_sets, activity_level as usize, |sub_array| {
-            create_activity_name(log, sub_array)
+            create_activity_name(log, sub_array, event_class_regex)
         });
 
         context.put_concrete(&keys.activities().key(), tree);
@@ -340,7 +346,7 @@ impl PipelineParts {
 
                 Self::do_clear_activities_related_stuff(context, keys);
                 Self::find_patterns(context, keys, config)?;
-                Self::do_discover_activities(context, keys, activity_level)?;
+                Self::do_discover_activities(context, keys, activity_level, config)?;
                 Self::do_discover_activities_instances(context, keys, config)?;
 
                 let activities_instances = Self::get_user_data(context, keys.trace_activities())?;
