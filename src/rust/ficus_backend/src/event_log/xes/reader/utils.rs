@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use chrono::{DateTime, Utc};
 
 use crate::event_log::{core::event::event::EventPayloadValue, xes::constants::*};
@@ -82,7 +84,7 @@ pub fn extract_payload_value(name: &[u8], value: &str) -> Option<EventPayloadVal
             Err(_) => None,
             Ok(float_value) => Some(EventPayloadValue::Float64(float_value)),
         },
-        STRING_TAG_NAME => Some(EventPayloadValue::String(value.to_owned())),
+        STRING_TAG_NAME => Some(EventPayloadValue::String(Rc::new(Box::new(value.to_owned())))),
         BOOLEAN_TAG_NAME => match value.parse::<bool>() {
             Err(_) => None,
             Ok(bool_value) => Some(EventPayloadValue::Boolean(bool_value)),

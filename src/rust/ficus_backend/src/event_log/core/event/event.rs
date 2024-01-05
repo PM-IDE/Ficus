@@ -2,12 +2,12 @@ use crate::utils::user_data::user_data::UserDataImpl;
 
 use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone)]
 pub enum EventPayloadValue {
     Date(DateTime<Utc>),
-    String(String),
+    String(Rc<Box<String>>),
     Boolean(bool),
     Int32(i32),
     Int64(i64),
@@ -23,7 +23,7 @@ impl ToString for EventPayloadValue {
     fn to_string(&self) -> String {
         match self {
             EventPayloadValue::Date(date) => date.to_rfc3339(),
-            EventPayloadValue::String(string) => string.to_owned(),
+            EventPayloadValue::String(string) => string.as_ref().as_ref().to_owned(),
             EventPayloadValue::Boolean(bool) => bool.to_string(),
             EventPayloadValue::Int32(int) => int.to_string(),
             EventPayloadValue::Float32(float) => float.to_string(),

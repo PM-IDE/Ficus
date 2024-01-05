@@ -16,7 +16,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
         let mut xes_trace = XesTraceImpl::empty();
         for event in &variant.events {
             let name = if let BxesValue::String(string) = event.name.as_ref().as_ref() {
-                string.as_ref().as_ref().to_owned()
+                string.clone()
             } else {
                 panic!("Name is not a string")
             };
@@ -42,7 +42,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                         BxesValue::Uint64(value) => EventPayloadValue::Uint64(*value),
                         BxesValue::Float32(value) => EventPayloadValue::Float32(*value),
                         BxesValue::Float64(value) => EventPayloadValue::Float64(*value),
-                        BxesValue::String(string) => EventPayloadValue::String(string.as_ref().as_ref().to_owned()),
+                        BxesValue::String(string) => EventPayloadValue::String(string.clone()),
                         BxesValue::Bool(bool) => EventPayloadValue::Boolean(*bool),
                         BxesValue::Timestamp(stamp) => EventPayloadValue::Date(Utc.timestamp_nanos(*stamp)),
                         BxesValue::BrafLifecycle(_) => todo!(),

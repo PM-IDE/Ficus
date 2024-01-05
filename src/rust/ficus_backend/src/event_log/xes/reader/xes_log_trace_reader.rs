@@ -98,7 +98,7 @@ impl TraceXesEventLogIterator {
 
     fn set_defaults_value(
         &self,
-        name: &mut Option<String>,
+        name: &mut Option<Rc<Box<String>>>,
         date: &mut Option<DateTime<Utc>>,
         lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
@@ -117,7 +117,7 @@ impl TraceXesEventLogIterator {
         payload_type: &[u8],
         key: &str,
         value: &str,
-        name: &mut Option<String>,
+        name: &mut Option<Rc<Box<String>>>,
         date: &mut Option<DateTime<Utc>>,
         lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
@@ -135,7 +135,7 @@ impl TraceXesEventLogIterator {
         key: &str,
         payload_value: EventPayloadValue,
         date: &mut Option<DateTime<Utc>>,
-        name: &mut Option<String>,
+        name: &mut Option<Rc<Box<String>>>,
         lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
     ) {
@@ -147,7 +147,7 @@ impl TraceXesEventLogIterator {
             }
             CONCEPT_NAME_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
-                    *name = Some(parsed_string);
+                    *name = Some(parsed_string.clone());
                 }
             }
             LIFECYCLE_TRANSITION_STR => {
