@@ -107,7 +107,7 @@ pub fn extract_activities_instances(
             let event_hash = trace[index.unwrap()];
             if current_activity.is_none() {
                 let mut found_activity = false;
-                for activities in activities_by_size.borrow().iter() {
+                for activities in activities_by_size.iter() {
                     for activity in activities {
                         if activity.borrow().event_classes.contains(&event_hash) {
                             current_activity = Some(Rc::clone(activity));
@@ -132,7 +132,7 @@ pub fn extract_activities_instances(
                 new_set.insert(event_hash);
 
                 let mut found_new_set = false;
-                for activities_set in activities_by_size.borrow().iter() {
+                for activities_set in activities_by_size.iter() {
                     if activities_set.len() == 0 || activities_set[0].borrow().len() < current_activity.as_ref().unwrap().borrow().len() {
                         continue;
                     }
@@ -213,15 +213,14 @@ fn is_suitable_activity_instance(
     }
 }
 
-fn split_activities_nodes_by_size(activities: &mut Vec<Rc<RefCell<ActivityNode>>>) -> Rc<RefCell<Vec<Vec<Rc<RefCell<ActivityNode>>>>>> {
+fn split_activities_nodes_by_size(activities: &mut Vec<Rc<RefCell<ActivityNode>>>) -> Vec<Vec<Rc<RefCell<ActivityNode>>>> {
     if activities.is_empty() {
-        return Rc::new(RefCell::new(vec![]));
+        return vec![];
     }
 
     activities.sort_by(|first, second| first.borrow().len().cmp(&second.borrow().len()));
     let mut current_length = activities[0].borrow().len();
-    let result_ptr = Rc::new(RefCell::new(vec![vec![Rc::clone(activities.get(0).unwrap())]]));
-    let result = &mut result_ptr.borrow_mut();
+    let mut result = vec![vec![Rc::clone(activities.get(0).unwrap())]];
 
     for activity in activities.iter() {
         if activity.borrow().len() != current_length {
@@ -232,7 +231,11 @@ fn split_activities_nodes_by_size(activities: &mut Vec<Rc<RefCell<ActivityNode>>
         result.last_mut().unwrap().push(Rc::clone(activity));
     }
 
-    Rc::clone(&result_ptr)
+    for i in 0..result.len() {
+        result.get_mut(i).unwrap().sort_by(|first, second| first.borrow().name.cmp(&second.borrow().name));
+    }
+
+    result
 }
 
 fn narrow_activity(
