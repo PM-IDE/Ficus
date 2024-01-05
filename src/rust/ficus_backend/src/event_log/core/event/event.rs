@@ -2,25 +2,37 @@ use crate::utils::user_data::user_data::UserDataImpl;
 
 use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 #[derive(Debug, Clone)]
 pub enum EventPayloadValue {
     Date(DateTime<Utc>),
-    String(String),
+    String(Rc<Box<String>>),
     Boolean(bool),
-    Int(i32),
-    Float(f32),
+    Int32(i32),
+    Int64(i64),
+    Float32(f32),
+    Float64(f64),
+    Uint32(u32),
+    Uint64(u64),
+    Guid(uuid::Uuid),
+    Timestamp(i64),
 }
 
 impl ToString for EventPayloadValue {
     fn to_string(&self) -> String {
         match self {
             EventPayloadValue::Date(date) => date.to_rfc3339(),
-            EventPayloadValue::String(string) => string.to_owned(),
+            EventPayloadValue::String(string) => string.as_ref().as_ref().to_owned(),
             EventPayloadValue::Boolean(bool) => bool.to_string(),
-            EventPayloadValue::Int(int) => int.to_string(),
-            EventPayloadValue::Float(float) => float.to_string(),
+            EventPayloadValue::Int32(int) => int.to_string(),
+            EventPayloadValue::Float32(float) => float.to_string(),
+            EventPayloadValue::Int64(value) => value.to_string(),
+            EventPayloadValue::Float64(value) => value.to_string(),
+            EventPayloadValue::Uint32(value) => value.to_string(),
+            EventPayloadValue::Uint64(value) => value.to_string(),
+            EventPayloadValue::Guid(value) => value.to_string(),
+            EventPayloadValue::Timestamp(value) => value.to_string(),
         }
     }
 }

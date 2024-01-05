@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use chrono::{DateTime, Utc};
 
@@ -19,15 +19,15 @@ pub struct XesEventImpl {
 
 impl XesEventImpl {
     pub fn new_all_fields(
-        name: String,
+        name: Rc<Box<String>>,
         timestamp: DateTime<Utc>,
         lifecycle: Option<Lifecycle>,
-        payload: HashMap<String, EventPayloadValue>,
+        payload: Option<HashMap<String, EventPayloadValue>>,
     ) -> Self {
         Self {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
-            payload: Some(payload),
+            payload: payload,
         }
     }
 }
@@ -71,7 +71,7 @@ impl Event for XesEventImpl {
     }
 
     fn set_name(&mut self, new_name: String) {
-        self.event_base.name = new_name;
+        self.event_base.name = Rc::new(Box::new(new_name));
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
@@ -92,7 +92,7 @@ impl Event for XesEventImpl {
 
     fn new(name: String, timestamp: DateTime<Utc>) -> Self {
         Self {
-            event_base: EventBase::new(name.to_owned(), timestamp),
+            event_base: EventBase::new(Rc::new(Box::new(name)), timestamp),
             lifecycle: None,
             payload: None,
         }

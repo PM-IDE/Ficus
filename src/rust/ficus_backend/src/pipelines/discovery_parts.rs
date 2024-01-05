@@ -1,8 +1,5 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::event_log::core::event::event::Event;
-use crate::event_log::core::event_log::EventLog;
-use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_event_log::XesEventLogImpl;
 use crate::features::analysis::directly_follows_graph::construct_dfg;
 use crate::features::analysis::event_log_info::{EventLogInfo, EventLogInfoCreationDto};
@@ -13,9 +10,8 @@ use crate::features::discovery::alpha::providers::alpha_provider::DefaultAlphaRe
 use crate::features::discovery::fuzzy::fuzzy_miner::discover_graph_fuzzy;
 use crate::features::discovery::heuristic::heuristic_miner::discover_petri_net_heuristic;
 use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency};
-use crate::features::discovery::petri_net::marking::{ensure_initial_marking, Marking, SingleMarking};
+use crate::features::discovery::petri_net::marking::ensure_initial_marking;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
-use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::pnml_serialization::serialize_to_pnml_file;
 use crate::pipelines::context::PipelineContext;
 use crate::pipelines::errors::pipeline_errors::{PipelinePartExecutionError, RawPartExecutionError};

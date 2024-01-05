@@ -40,6 +40,7 @@ const_petri_net_count_annotation = 'petri_net_count_annotation'
 const_petri_net_frequency_annotation = 'petri_net_frequency_annotation'
 const_petri_net_trace_frequency_annotation = 'petri_net_trace_frequency_annotation'
 const_terminate_on_unreplayable_trace = 'terminate_on_unreplayable_traces'
+const_read_log_from_bxes = 'ReadLogFromBxes'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

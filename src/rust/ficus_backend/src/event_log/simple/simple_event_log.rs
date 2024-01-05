@@ -1,6 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
-use uuid::fmt::Simple;
 
 use crate::{
     event_log::core::{
@@ -217,7 +216,7 @@ impl Event for SimpleEvent {
     }
 
     fn set_name(&mut self, new_name: String) {
-        self.event_base.name = new_name;
+        self.event_base.name = Rc::new(Box::new(new_name));
     }
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
@@ -234,7 +233,7 @@ impl Event for SimpleEvent {
 
     fn new(name: String, timestamp: DateTime<Utc>) -> Self {
         Self {
-            event_base: EventBase::new(name, timestamp),
+            event_base: EventBase::new(Rc::new(Box::new(name)), timestamp),
         }
     }
 

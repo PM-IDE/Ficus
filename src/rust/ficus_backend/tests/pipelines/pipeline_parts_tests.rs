@@ -49,7 +49,8 @@ fn get_test_parts_names() -> Vec<String> {
         "AnnotatePetriNetWithCount",
         "AnnotatePetriNetWithFrequency",
         "AnnotatePetriNetWithTraceFrequency",
-        "EnsureInitialMarking"
+        "EnsureInitialMarking",
+        "ReadLogFromBxes"
     ]
 }
 

@@ -72,6 +72,7 @@ impl PipelineParts {
             Self::annotate_petri_net_frequency(),
             Self::annotate_petri_net_trace_frequency(),
             Self::ensure_initial_marking(),
+            Self::read_log_from_bxes(),
         ];
 
         let mut names_to_parts = HashMap::new();
