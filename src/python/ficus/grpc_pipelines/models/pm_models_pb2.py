@@ -30,7 +30,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpm_models.proto\x12\x05\x66icus\x1a\x1fgoogle/protobuf/timestamp.proto\"<\n\x12GrpcSimpleEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcSimpleTrace\"3\n\x0fGrpcSimpleTrace\x12 \n\x06\x65vents\x18\x01 \x03(\x0b\x32\x10.ficus.GrpcEvent\"?\n\tGrpcEvent\x12\x0c\n\x04name\x18\x01 \x01(\t\x12$\n\x05stamp\x18\x02 \x01(\x0b\x32\x15.ficus.GrpcEventStamp\"V\n\x0eGrpcEventStamp\x12*\n\x04\x64\x61te\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x0f\n\x05order\x18\x02 \x01(\x04H\x00\x42\x07\n\x05stamp\"?\n\x12GrpcHashesEventLog\x12)\n\x06traces\x18\x02 \x03(\x0b\x32\x19.ficus.GrpcHashesLogTrace\"$\n\x12GrpcHashesLogTrace\x12\x0e\n\x06\x65vents\x18\x01 \x03(\x04\":\n\x11GrpcNamesEventLog\x12%\n\x06traces\x18\x01 \x03(\x0b\x32\x15.ficus.GrpcNamesTrace\" \n\x0eGrpcNamesTrace\x12\x0e\n\x06\x65vents\x18\x01 \x03(\t\"\xd4\x01\n\x0cGrpcPetriNet\x12(\n\x06places\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcPetriNetPlace\x12\x32\n\x0btransitions\x18\x02 \x03(\x0b\x32\x1d.ficus.GrpcPetriNetTransition\x12\x33\n\x0finitial_marking\x18\x03 \x01(\x0b\x32\x1a.ficus.GrpcPetriNetMarking\x12\x31\n\rfinal_marking\x18\x04 \x01(\x0b\x32\x1a.ficus.GrpcPetriNetMarking\"-\n\x11GrpcPetriNetPlace\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x8e\x01\n\x16GrpcPetriNetTransition\x12\n\n\x02id\x18\x01 \x01(\x03\x12,\n\x0cincomingArcs\x18\x02 \x03(\x0b\x32\x16.ficus.GrpcPetriNetArc\x12,\n\x0coutgoingArcs\x18\x03 \x03(\x0b\x32\x16.ficus.GrpcPetriNetArc\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\"D\n\x0fGrpcPetriNetArc\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0f\n\x07placeId\x18\x02 \x01(\x03\x12\x14\n\x0ctokens_count\x18\x03 \x01(\x03\"N\n\x13GrpcPetriNetMarking\x12\x37\n\x08markings\x18\x01 \x03(\x0b\x32%.ficus.GrpcPetriNetSinglePlaceMarking\"F\n\x1eGrpcPetriNetSinglePlaceMarking\x12\x0f\n\x07placeId\x18\x01 \x01(\x03\x12\x13\n\x0btokensCount\x18\x02 \x01(\x03\"Y\n\x1bGrpcPetriNetCountAnnotation\x12:\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32%.ficus.GrpcPetriNetArcCountAnnotation\">\n\x1eGrpcPetriNetArcCountAnnotation\x12\r\n\x05\x61rcId\x18\x01 \x01(\x03\x12\r\n\x05\x63ount\x18\x02 \x01(\x03\"c\n!GrpcPetriNetFrequenciesAnnotation\x12>\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32).ficus.GrpcPetriNetArcFrequencyAnnotation\"F\n\"GrpcPetriNetArcFrequencyAnnotation\x12\r\n\x05\x61rcId\x18\x01 \x01(\x03\x12\x11\n\tfrequency\x18\x02 \x01(\x02\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpm_models.proto\x12\x05\x66icus\x1a\x1fgoogle/protobuf/timestamp.proto\"<\n\x12GrpcSimpleEventLog\x12&\n\x06traces\x18\x01 \x03(\x0b\x32\x16.ficus.GrpcSimpleTrace\"3\n\x0fGrpcSimpleTrace\x12 \n\x06\x65vents\x18\x01 \x03(\x0b\x32\x10.ficus.GrpcEvent\"?\n\tGrpcEvent\x12\x0c\n\x04name\x18\x01 \x01(\t\x12$\n\x05stamp\x18\x02 \x01(\x0b\x32\x15.ficus.GrpcEventStamp\"V\n\x0eGrpcEventStamp\x12*\n\x04\x64\x61te\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x0f\n\x05order\x18\x02 \x01(\x04H\x00\x42\x07\n\x05stamp\"?\n\x12GrpcHashesEventLog\x12)\n\x06traces\x18\x02 \x03(\x0b\x32\x19.ficus.GrpcHashesLogTrace\"$\n\x12GrpcHashesLogTrace\x12\x0e\n\x06\x65vents\x18\x01 \x03(\x04\":\n\x11GrpcNamesEventLog\x12%\n\x06traces\x18\x01 \x03(\x0b\x32\x15.ficus.GrpcNamesTrace\" \n\x0eGrpcNamesTrace\x12\x0e\n\x06\x65vents\x18\x01 \x03(\t\"\xd4\x01\n\x0cGrpcPetriNet\x12(\n\x06places\x18\x01 \x03(\x0b\x32\x18.ficus.GrpcPetriNetPlace\x12\x32\n\x0btransitions\x18\x02 \x03(\x0b\x32\x1d.ficus.GrpcPetriNetTransition\x12\x33\n\x0finitial_marking\x18\x03 \x01(\x0b\x32\x1a.ficus.GrpcPetriNetMarking\x12\x31\n\rfinal_marking\x18\x04 \x01(\x0b\x32\x1a.ficus.GrpcPetriNetMarking\"-\n\x11GrpcPetriNetPlace\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\"\x8e\x01\n\x16GrpcPetriNetTransition\x12\n\n\x02id\x18\x01 \x01(\x03\x12,\n\x0cincomingArcs\x18\x02 \x03(\x0b\x32\x16.ficus.GrpcPetriNetArc\x12,\n\x0coutgoingArcs\x18\x03 \x03(\x0b\x32\x16.ficus.GrpcPetriNetArc\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\"D\n\x0fGrpcPetriNetArc\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0f\n\x07placeId\x18\x02 \x01(\x03\x12\x14\n\x0ctokens_count\x18\x03 \x01(\x03\"N\n\x13GrpcPetriNetMarking\x12\x37\n\x08markings\x18\x01 \x03(\x0b\x32%.ficus.GrpcPetriNetSinglePlaceMarking\"F\n\x1eGrpcPetriNetSinglePlaceMarking\x12\x0f\n\x07placeId\x18\x01 \x01(\x03\x12\x13\n\x0btokensCount\x18\x02 \x01(\x03\"L\n\x13GrpcCountAnnotation\x12\x35\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32 .ficus.GrpcEntityCountAnnotation\"<\n\x19GrpcEntityCountAnnotation\x12\x10\n\x08\x65ntityId\x18\x01 \x01(\x03\x12\r\n\x05\x63ount\x18\x02 \x01(\x03\"V\n\x19GrpcFrequenciesAnnotation\x12\x39\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32$.ficus.GrpcEntityFrequencyAnnotation\"D\n\x1dGrpcEntityFrequencyAnnotation\x12\x10\n\x08\x65ntityId\x18\x01 \x01(\x03\x12\x11\n\tfrequency\x18\x02 \x01(\x02\x62\x06proto3')
 
 
 
@@ -100,20 +100,20 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   _globals['_GRPCPETRINETSINGLEPLACEMARKING']._serialized_end=1151
 
-  _globals['_GRPCPETRINETCOUNTANNOTATION']._serialized_start=1153
+  _globals['_GRPCCOUNTANNOTATION']._serialized_start=1153
 
-  _globals['_GRPCPETRINETCOUNTANNOTATION']._serialized_end=1242
+  _globals['_GRPCCOUNTANNOTATION']._serialized_end=1229
 
-  _globals['_GRPCPETRINETARCCOUNTANNOTATION']._serialized_start=1244
+  _globals['_GRPCENTITYCOUNTANNOTATION']._serialized_start=1231
 
-  _globals['_GRPCPETRINETARCCOUNTANNOTATION']._serialized_end=1306
+  _globals['_GRPCENTITYCOUNTANNOTATION']._serialized_end=1291
 
-  _globals['_GRPCPETRINETFREQUENCIESANNOTATION']._serialized_start=1308
+  _globals['_GRPCFREQUENCIESANNOTATION']._serialized_start=1293
 
-  _globals['_GRPCPETRINETFREQUENCIESANNOTATION']._serialized_end=1407
+  _globals['_GRPCFREQUENCIESANNOTATION']._serialized_end=1379
 
-  _globals['_GRPCPETRINETARCFREQUENCYANNOTATION']._serialized_start=1409
+  _globals['_GRPCENTITYFREQUENCYANNOTATION']._serialized_start=1381
 
-  _globals['_GRPCPETRINETARCFREQUENCYANNOTATION']._serialized_end=1479
+  _globals['_GRPCENTITYFREQUENCYANNOTATION']._serialized_end=1449
 
 # @@protoc_insertion_point(module_scope)

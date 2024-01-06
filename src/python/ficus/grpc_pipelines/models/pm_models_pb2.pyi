@@ -114,30 +114,30 @@ class GrpcPetriNetSinglePlaceMarking(_message.Message):
     tokensCount: int
     def __init__(self, placeId: _Optional[int] = ..., tokensCount: _Optional[int] = ...) -> None: ...
 
-class GrpcPetriNetCountAnnotation(_message.Message):
+class GrpcCountAnnotation(_message.Message):
     __slots__ = ["annotations"]
     ANNOTATIONS_FIELD_NUMBER: _ClassVar[int]
-    annotations: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArcCountAnnotation]
-    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcPetriNetArcCountAnnotation, _Mapping]]] = ...) -> None: ...
+    annotations: _containers.RepeatedCompositeFieldContainer[GrpcEntityCountAnnotation]
+    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcEntityCountAnnotation, _Mapping]]] = ...) -> None: ...
 
-class GrpcPetriNetArcCountAnnotation(_message.Message):
-    __slots__ = ["arcId", "count"]
-    ARCID_FIELD_NUMBER: _ClassVar[int]
+class GrpcEntityCountAnnotation(_message.Message):
+    __slots__ = ["entityId", "count"]
+    ENTITYID_FIELD_NUMBER: _ClassVar[int]
     COUNT_FIELD_NUMBER: _ClassVar[int]
-    arcId: int
+    entityId: int
     count: int
-    def __init__(self, arcId: _Optional[int] = ..., count: _Optional[int] = ...) -> None: ...
+    def __init__(self, entityId: _Optional[int] = ..., count: _Optional[int] = ...) -> None: ...
 
-class GrpcPetriNetFrequenciesAnnotation(_message.Message):
+class GrpcFrequenciesAnnotation(_message.Message):
     __slots__ = ["annotations"]
     ANNOTATIONS_FIELD_NUMBER: _ClassVar[int]
-    annotations: _containers.RepeatedCompositeFieldContainer[GrpcPetriNetArcFrequencyAnnotation]
-    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcPetriNetArcFrequencyAnnotation, _Mapping]]] = ...) -> None: ...
+    annotations: _containers.RepeatedCompositeFieldContainer[GrpcEntityFrequencyAnnotation]
+    def __init__(self, annotations: _Optional[_Iterable[_Union[GrpcEntityFrequencyAnnotation, _Mapping]]] = ...) -> None: ...
 
-class GrpcPetriNetArcFrequencyAnnotation(_message.Message):
-    __slots__ = ["arcId", "frequency"]
-    ARCID_FIELD_NUMBER: _ClassVar[int]
+class GrpcEntityFrequencyAnnotation(_message.Message):
+    __slots__ = ["entityId", "frequency"]
+    ENTITYID_FIELD_NUMBER: _ClassVar[int]
     FREQUENCY_FIELD_NUMBER: _ClassVar[int]
-    arcId: int
+    entityId: int
     frequency: float
-    def __init__(self, arcId: _Optional[int] = ..., frequency: _Optional[float] = ...) -> None: ...
+    def __init__(self, entityId: _Optional[int] = ..., frequency: _Optional[float] = ...) -> None: ...

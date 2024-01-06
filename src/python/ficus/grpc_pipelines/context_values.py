@@ -195,17 +195,17 @@ def from_grpc_single_marking(grpc_marking: GrpcPetriNetSinglePlaceMarking) -> Si
     return SinglePlaceMarking(grpc_marking.placeId, grpc_marking.tokensCount)
 
 
-def from_grpc_count_annotation(grpc_annotation: GrpcPetriNetCountAnnotation) -> dict[int, str]:
+def from_grpc_count_annotation(grpc_annotation: GrpcCountAnnotation) -> dict[int, str]:
     map = dict()
     for annotation in grpc_annotation.annotations:
-        map[annotation.arcId] = str(annotation.count)
+        map[annotation.entityId] = str(annotation.count)
 
     return map
 
 
-def from_grpc_frequency_annotation(grpc_annotation: GrpcPetriNetFrequenciesAnnotation) -> dict[int, str]:
+def from_grpc_frequency_annotation(grpc_annotation: GrpcFrequenciesAnnotation) -> dict[int, str]:
     map = dict()
     for annotation in grpc_annotation.annotations:
-        map[annotation.arcId] = str(annotation.frequency)
+        map[annotation.entityId] = str(annotation.frequency)
 
     return map
