@@ -11,7 +11,7 @@ pub fn construct_dfg(info: &EventLogInfo) -> DefaultGraph {
     }
 
     for class in info.all_event_classes() {
-        for followers in info.dfg_info().get_followed_events(class) {
+        if let Some(followers) = info.dfg_info().get_followed_events(class) {
             for (follower, count) in followers.iter() {
                 let first_id = nodes_to_ids.get(class).unwrap();
                 let second_id = nodes_to_ids.get(follower).unwrap();

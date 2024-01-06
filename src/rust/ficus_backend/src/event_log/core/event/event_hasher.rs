@@ -74,4 +74,17 @@ impl RegexEventHasher {
             Err(error) => Err(error),
         }
     }
+
+    pub fn transform<'a>(&self, name: &'a str) -> &'a str {
+        match self.regex.find(name) {
+            Ok(Some(m)) => {
+                if m.start() == 0 {
+                    &name[0..m.end()]
+                } else {
+                    name
+                }
+            }
+            _ => name,
+        }
+    }
 }
