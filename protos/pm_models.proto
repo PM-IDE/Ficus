@@ -42,7 +42,6 @@ message GrpcNamesTrace {
     repeated string events = 1;
 }
 
-
 message GrpcPetriNet {
     repeated GrpcPetriNetPlace places = 1;
     repeated GrpcPetriNetTransition transitions = 2;
@@ -77,20 +76,20 @@ message GrpcPetriNetSinglePlaceMarking {
     int64 tokensCount = 2;
 }
 
-message GrpcPetriNetCountAnnotation {
-    repeated GrpcPetriNetArcCountAnnotation annotations = 1;
+message GrpcCountAnnotation {
+    repeated GrpcEntityCountAnnotation annotations = 1;
 }
 
-message GrpcPetriNetArcCountAnnotation {
-    int64 arcId = 1;
+message GrpcEntityCountAnnotation {
+    int64 entityId = 1;
     int64 count = 2;
 }
 
-message GrpcPetriNetFrequenciesAnnotation {
-    repeated GrpcPetriNetArcFrequencyAnnotation annotations = 2;
+message GrpcFrequenciesAnnotation {
+    repeated GrpcEntityFrequencyAnnotation annotations = 2;
 }
 
-message GrpcPetriNetArcFrequencyAnnotation {
-    int64 arcId = 1;
+message GrpcEntityFrequencyAnnotation {
+    int64 entityId = 1;
     float frequency = 2;
 }
