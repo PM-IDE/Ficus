@@ -120,7 +120,7 @@ def _split_activity_nodes_by_size(activities_nodes: list[ActivityNode]) -> list[
         return []
 
     activities_nodes = sorted(activities_nodes, key=lambda x: x.length)
-    current_length = activities_nodes[0]
+    current_length = activities_nodes[0].length
     activities_sets_by_size = [[activities_nodes[0]]]
     for i in range(1, len(activities_nodes)):
         if activities_nodes[i].length != current_length:
@@ -128,6 +128,9 @@ def _split_activity_nodes_by_size(activities_nodes: list[ActivityNode]) -> list[
             current_length = activities_nodes[i].length
 
         activities_sets_by_size[-1].append(activities_nodes[i])
+
+    for i in range(len(activities_sets_by_size)):
+        activities_sets_by_size[i] = sorted(activities_sets_by_size[i], key=lambda x: x.name)
 
     return activities_sets_by_size
 
