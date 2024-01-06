@@ -236,3 +236,8 @@ class ApplyClassExtractor2(PipelinePart2):
 
         part = _create_default_pipeline_part(const_apply_class_extractor, config)
         return GrpcPipelinePartBase(defaultPart=part)
+
+
+class ClusterizeActivitiesFromTraces(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_clusterize_activities_from_traces))

@@ -86,6 +86,7 @@ const_annotate_petri_net_count = 'AnnotatePetriNetWithCount'
 const_annotate_petri_net_frequency = 'AnnotatePetriNetWithFrequency'
 const_annotate_petri_net_trace_frequency = 'AnnotatePetriNetWithTraceFrequency'
 const_ensure_initial_marking = 'EnsureInitialMarking'
+const_clusterize_activities_from_traces = 'ClusterizeActivitiesFromTraces'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

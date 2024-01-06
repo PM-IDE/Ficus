@@ -50,4 +50,6 @@ impl PipelineParts {
     pub const ANNOTATE_PETRI_NET_FREQUENCY: &'static str = "AnnotatePetriNetWithFrequency";
     pub const ANNOTATE_PETRI_NET_TRACE_FREQUENCY: &'static str = "AnnotatePetriNetWithTraceFrequency";
     pub const ENSURE_INITIAL_MARKING: &'static str = "EnsureInitialMarking";
+
+    pub const CLUSTERIZE_ACTIVITIES_FROM_TRACES: &'static str = "ClusterizeActivitiesFromTraces";
 }

@@ -2,6 +2,7 @@ use crate::event_log::core::event::event::Event;
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
+use crate::features::analysis::patterns::activities_clustering::{clusterize_activities};
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
 use crate::pipelines::context::PipelineInfrastructure;
@@ -457,6 +458,15 @@ impl PipelineParts {
                     }
                 }
             }
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn clusterize_activities_from_traces() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES, &|context, _, keys, _| {
+            let traces_activities = Self::get_user_data(context, keys.trace_activities())?;
+            clusterize_activities(traces_activities);
 
             Ok(())
         })
