@@ -12,6 +12,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
     };
 
     let mut xes_log = XesEventLogImpl::empty();
+    println!("{}", log.variants.len());
     for variant in &log.variants {
         let mut xes_trace = XesTraceImpl::empty();
         for event in &variant.events {

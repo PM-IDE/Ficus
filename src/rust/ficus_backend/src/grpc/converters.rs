@@ -12,9 +12,8 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
-    GrpcGraph, GrpcGraphEdge, GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetArcCountAnnotation,
-    GrpcPetriNetArcFrequencyAnnotation, GrpcPetriNetCountAnnotation, GrpcPetriNetFrequenciesAnnotation, GrpcPetriNetMarking,
-    GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
+    GrpcGraph, GrpcGraphEdge, GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking,
+    GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition, GrpcCountAnnotation, GrpcEntityCountAnnotation, GrpcFrequenciesAnnotation, GrpcEntityFrequencyAnnotation,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -102,8 +101,8 @@ pub(super) fn put_into_user_data(
         ContextValue::PetriNet(_) => todo!(),
         ContextValue::Graph(_) => todo!(),
         ContextValue::Float(value) => user_data.put_any::<f64>(key, *value as f64),
-        ContextValue::PetriNetCountAnnotation(_) => todo!(),
-        ContextValue::PetriNetFrequencyAnnotation(_) => todo!(),
+        ContextValue::CountAnnotation(_) => todo!(),
+        ContextValue::FrequencyAnnotation(_) => todo!(),
     }
 }
 
@@ -164,7 +163,7 @@ fn try_convert_to_grpc_petri_net_count_annotation(value: &dyn Any) -> Option<Grp
     } else {
         let value = value.downcast_ref::<HashMap<u64, usize>>().unwrap();
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::PetriNetCountAnnotation(convert_to_grpc_count_annotation(value))),
+            context_value: Some(ContextValue::CountAnnotation(convert_to_grpc_count_annotation(value))),
         })
     }
 }
@@ -175,7 +174,7 @@ fn try_convert_to_grpc_petri_net_frequency_annotation(value: &dyn Any) -> Option
     } else {
         let value = value.downcast_ref::<HashMap<u64, f64>>().unwrap();
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::PetriNetFrequencyAnnotation(convert_to_grpc_frequency_annotation(
+            context_value: Some(ContextValue::FrequencyAnnotation(convert_to_grpc_frequency_annotation(
                 value,
             ))),
         })
@@ -478,26 +477,26 @@ where
     }
 }
 
-fn convert_to_grpc_count_annotation(annotation: &HashMap<u64, usize>) -> GrpcPetriNetCountAnnotation {
+fn convert_to_grpc_count_annotation(annotation: &HashMap<u64, usize>) -> GrpcCountAnnotation {
     let annotations = annotation
         .iter()
-        .map(|pair| GrpcPetriNetArcCountAnnotation {
-            arc_id: *pair.0 as i64,
+        .map(|pair| GrpcEntityCountAnnotation {
+            entity_id: *pair.0 as i64,
             count: *pair.1 as i64,
         })
         .collect();
 
-    GrpcPetriNetCountAnnotation { annotations }
+    GrpcCountAnnotation { annotations }
 }
 
-fn convert_to_grpc_frequency_annotation(annotation: &HashMap<u64, f64>) -> GrpcPetriNetFrequenciesAnnotation {
+fn convert_to_grpc_frequency_annotation(annotation: &HashMap<u64, f64>) -> GrpcFrequenciesAnnotation {
     let annotations = annotation
         .iter()
-        .map(|pair| GrpcPetriNetArcFrequencyAnnotation {
-            arc_id: *pair.0 as i64,
+        .map(|pair| GrpcEntityFrequencyAnnotation {
+            entity_id: *pair.0 as i64,
             frequency: *pair.1 as f32,
         })
         .collect();
 
-    GrpcPetriNetFrequenciesAnnotation { annotations }
+    GrpcFrequenciesAnnotation { annotations }
 }
