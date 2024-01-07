@@ -464,7 +464,7 @@ impl PipelineParts {
     }
 
     pub(super) fn clusterize_activities_from_traces() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES, &|context, _, keys, config| {
+        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
             let clusters_count = *Self::get_user_data(config, keys.clusters_count())?;

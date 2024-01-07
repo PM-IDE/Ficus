@@ -238,7 +238,7 @@ class ApplyClassExtractor2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=part)
 
 
-class ClusterizeActivitiesFromTraces(PipelinePart2):
+class ClusterizeActivitiesFromTracesKMeans(PipelinePart2):
     def __init__(self, clusters_count: int = 10, learning_iterations_count: int = 200, tolerance: float = 1e-5):
         super().__init__()
         self.clusters_count = clusters_count
