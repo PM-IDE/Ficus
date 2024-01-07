@@ -51,7 +51,8 @@ fn get_test_parts_names() -> Vec<String> {
         "AnnotatePetriNetWithTraceFrequency",
         "EnsureInitialMarking",
         "ReadLogFromBxes",
-        "ClusterizeActivitiesFromTraces"
+        "ClusterizeActivitiesFromTracesKMeans",
+        "ClusterizeActivitiesFromTracesKMeansGridSearch"
     ]
 }
 

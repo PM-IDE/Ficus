@@ -4,8 +4,9 @@ use std::{collections::{HashSet, HashMap}, rc::Rc, cell::RefCell};
 
 use linfa::{traits::Fit, DatasetBase};
 use linfa_clustering::KMeans;
+use linfa::metrics::SilhouetteScore;
 use linfa_nn::distance::Distance;
-use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Dim};
+use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Dim, Array1};
 use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode, event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}};
 
 use super::activity_instances::ActivityInTraceInfo;
@@ -17,6 +18,50 @@ pub fn clusterize_activities_k_means(
     iterations_count: usize,
     tolerance: f64,
 ) {
+    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities);
+
+    let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
+        .max_n_iterations(iterations_count as u64)
+        .tolerance(tolerance)
+        .fit(&dataset)
+        .expect("KMeans fitted");
+
+    let clustered_dataset = model.predict(dataset);
+    merge_activities(log, traces_activities, &processed, &clustered_dataset.targets);
+}
+
+pub fn clusterize_activities_k_means_grid_search(
+    log: &impl EventLog, 
+    traces_activities: &mut TracesActivities,
+    iterations_count: usize,
+    tolerance: f64
+) {
+    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities);
+    let mut best_metric = -1f64;
+    let mut best_labels = None;
+
+    for clusters_count in 2..processed.len() {
+        let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
+            .max_n_iterations(iterations_count as u64)
+            .tolerance(tolerance)
+            .fit(&dataset)
+            .expect("KMeans fitted");
+
+        let clustered_dataset = model.predict(dataset.clone());
+        let score = clustered_dataset.silhouette_score().ok().unwrap();
+        if score > best_metric {
+            best_labels = Some(clustered_dataset.targets);
+            best_metric = score;
+        }
+    }
+
+    if let Some(best_labels) = best_labels.as_ref() {
+        merge_activities(log, traces_activities, &processed, best_labels)
+    }
+}
+
+type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<()>, Dim<[usize; 1]>>>;
+fn create_dataset_from_traces_activities(traces_activities: &TracesActivities) -> (MyDataset, Vec<Rc<RefCell<ActivityNode>>>) {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
     for trace_activities in traces_activities.iter() {
@@ -53,21 +98,14 @@ pub fn clusterize_activities_k_means(
     let array = Array2::from_shape_vec(shape, vector).ok().unwrap();
     let dataset = DatasetBase::from(array);
 
-    let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
-        .max_n_iterations(iterations_count as u64)
-        .tolerance(tolerance)
-        .fit(&dataset)
-        .expect("KMeans fitted");
-
-    let dataset = model.predict(dataset);
-    merge_activities(log, traces_activities, &processed, &dataset.targets);
+    (dataset, processed)
 }
 
 fn merge_activities(
     log: &impl EventLog,
     traces_activities: &mut TracesActivities, 
     processed: &Vec<Rc<RefCell<ActivityNode>>>, 
-    labels: &ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>
+    labels: &Array1<usize>
 ) {
     let mut activity_names_to_clusters = HashMap::new();
     let mut clusters_to_activities: HashMap<usize, Vec<Rc<RefCell<ActivityNode>>>> = HashMap::new();

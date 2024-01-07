@@ -2,7 +2,7 @@ use crate::event_log::core::event::event::Event;
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
-use crate::features::analysis::patterns::activities_clustering::clusterize_activities_k_means;
+use crate::features::analysis::patterns::activities_clustering::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
 use crate::pipelines::context::PipelineInfrastructure;
@@ -463,7 +463,7 @@ impl PipelineParts {
         })
     }
 
-    pub(super) fn clusterize_activities_from_traces() -> (String, PipelinePartFactory) {
+    pub(super) fn clusterize_activities_from_traces_k_means() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
@@ -472,6 +472,19 @@ impl PipelineParts {
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
 
             clusterize_activities_k_means(log, traces_activities, clusters_count as usize, learning_iterations_count as usize, tolerance);
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn clusterize_activities_from_traces_k_means_grid_search() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH, &|context, _, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())?;
+            let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+
+            clusterize_activities_k_means_grid_search(log, traces_activities, learning_iterations_count as usize, tolerance);
 
             Ok(())
         })

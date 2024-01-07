@@ -52,4 +52,5 @@ impl PipelineParts {
     pub const ENSURE_INITIAL_MARKING: &'static str = "EnsureInitialMarking";
 
     pub const CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS: &'static str = "ClusterizeActivitiesFromTracesKMeans";
+    pub const CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH: &'static str = "ClusterizeActivitiesFromTracesKMeansGridSearch";
 }
