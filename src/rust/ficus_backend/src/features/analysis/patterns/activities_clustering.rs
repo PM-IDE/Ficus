@@ -6,7 +6,7 @@ use linfa::{traits::Fit, DatasetBase, Dataset};
 use linfa_clustering::KMeans;
 use linfa::metrics::SilhouetteScore;
 use linfa_nn::distance::Distance;
-use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Dim, Array1};
+use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Array1, Dim};
 use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode, event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}};
 
 use super::activity_instances::ActivityInTraceInfo;
@@ -19,16 +19,20 @@ pub fn clusterize_activities_k_means(
     iterations_count: usize,
     tolerance: f64,
 ) {
-    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities, activity_level);
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(traces_activities, activity_level) {
+        let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
-    let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
-        .max_n_iterations(iterations_count as u64)
+        let clustered_dataset = model.predict(dataset);
+        merge_activities(log, traces_activities, &processed, &clustered_dataset.targets);
+    }
+}
+
+fn create_k_means_model(clusters_count: usize, iterations_count: u64, tolerance: f64, dataset: &MyDataset) -> KMeans<f64, CosineDistance> {
+    KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
+        .max_n_iterations(iterations_count)
         .tolerance(tolerance)
         .fit(&dataset)
-        .expect("KMeans fitted");
-
-    let clustered_dataset = model.predict(dataset);
-    merge_activities(log, traces_activities, &processed, &clustered_dataset.targets);
+        .expect("KMeans fitted")
 }
 
 pub fn clusterize_activities_k_means_grid_search(
@@ -38,27 +42,28 @@ pub fn clusterize_activities_k_means_grid_search(
     iterations_count: usize,
     tolerance: f64
 ) {
-    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities, activity_level);
-    let mut best_metric = -1f64;
-    let mut best_labels = None;
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(traces_activities, activity_level) {
+        let mut best_metric = -1f64;
+        let mut best_labels = None;
 
-    for clusters_count in 2..processed.len() {
-        let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
-            .max_n_iterations(iterations_count as u64)
-            .tolerance(tolerance)
-            .fit(&dataset)
-            .expect("KMeans fitted");
+        for clusters_count in 2..processed.len() {
+            let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
-        let clustered_dataset = model.predict(dataset.clone());
-        let score = clustered_dataset.silhouette_score().ok().unwrap();
-        if score > best_metric {
-            best_labels = Some(clustered_dataset.targets);
-            best_metric = score;
+            let clustered_dataset = model.predict(dataset.clone());
+            let score = match clustered_dataset.silhouette_score() {
+                Ok(score) => score,
+                Err(_) => return
+            };
+
+            if score > best_metric {
+                best_labels = Some(clustered_dataset.targets);
+                best_metric = score;
+            }
         }
-    }
 
-    if let Some(best_labels) = best_labels.as_ref() {
-        merge_activities(log, traces_activities, &processed, best_labels)
+        if let Some(best_labels) = best_labels.as_ref() {
+            merge_activities(log, traces_activities, &processed, best_labels)
+        }
     }
 }
 
@@ -66,7 +71,7 @@ type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<
 fn create_dataset_from_traces_activities(
     traces_activities: &TracesActivities,
     activity_level: usize
-) -> (MyDataset, Vec<Rc<RefCell<ActivityNode>>>) {
+) -> Option<(MyDataset, Vec<Rc<RefCell<ActivityNode>>>)> {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
 
@@ -105,10 +110,12 @@ fn create_dataset_from_traces_activities(
 
     let shape = (processed.len(), all_event_classes.len());
 
-    let array = Array2::from_shape_vec(shape, vector).ok().unwrap();
-    let dataset = DatasetBase::from(array);
+    let array = match Array2::from_shape_vec(shape, vector) {
+        Ok(score) => score,
+        Err(_) => return None
+    };
 
-    (dataset, processed)
+    Some((DatasetBase::from(array), processed))
 }
 
 fn merge_activities(
