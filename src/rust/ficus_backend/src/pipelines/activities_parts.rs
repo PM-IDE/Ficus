@@ -467,11 +467,12 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-            let clusters_count = *Self::get_user_data(config, keys.clusters_count())?;
-            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())?;
+            let clusters_count = *Self::get_user_data(config, keys.clusters_count())? as usize;
+            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
 
-            clusterize_activities_k_means(log, traces_activities, clusters_count as usize, learning_iterations_count as usize, tolerance);
+            clusterize_activities_k_means(log, traces_activities, activity_level, clusters_count, learning_iterations_count, tolerance);
 
             Ok(())
         })
@@ -481,10 +482,11 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH, &|context, _, keys, config| {
             let log = Self::get_user_data(context, keys.event_log())?;
             let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())?;
+            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
 
-            clusterize_activities_k_means_grid_search(log, traces_activities, learning_iterations_count as usize, tolerance);
+            clusterize_activities_k_means_grid_search(log, traces_activities, activity_level, learning_iterations_count, tolerance);
 
             Ok(())
         })

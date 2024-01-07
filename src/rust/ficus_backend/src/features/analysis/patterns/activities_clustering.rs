@@ -2,7 +2,7 @@ use linfa::prelude::Predict;
 
 use std::{collections::{HashSet, HashMap}, rc::Rc, cell::RefCell};
 
-use linfa::{traits::Fit, DatasetBase};
+use linfa::{traits::Fit, DatasetBase, Dataset};
 use linfa_clustering::KMeans;
 use linfa::metrics::SilhouetteScore;
 use linfa_nn::distance::Distance;
@@ -14,11 +14,12 @@ use super::activity_instances::ActivityInTraceInfo;
 pub fn clusterize_activities_k_means(
     log: &impl EventLog, 
     traces_activities: &mut TracesActivities,
+    activity_level: usize,
     clusters_count: usize,
     iterations_count: usize,
     tolerance: f64,
 ) {
-    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities);
+    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities, activity_level);
 
     let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
         .max_n_iterations(iterations_count as u64)
@@ -33,10 +34,11 @@ pub fn clusterize_activities_k_means(
 pub fn clusterize_activities_k_means_grid_search(
     log: &impl EventLog, 
     traces_activities: &mut TracesActivities,
+    activity_level: usize,
     iterations_count: usize,
     tolerance: f64
 ) {
-    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities);
+    let (dataset, processed) = create_dataset_from_traces_activities(traces_activities, activity_level);
     let mut best_metric = -1f64;
     let mut best_labels = None;
 
@@ -60,14 +62,22 @@ pub fn clusterize_activities_k_means_grid_search(
     }
 }
 
-type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<()>, Dim<[usize; 1]>>>;
-fn create_dataset_from_traces_activities(traces_activities: &TracesActivities) -> (MyDataset, Vec<Rc<RefCell<ActivityNode>>>) {
+type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
+fn create_dataset_from_traces_activities(
+    traces_activities: &TracesActivities,
+    activity_level: usize
+) -> (MyDataset, Vec<Rc<RefCell<ActivityNode>>>) {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
+
     for trace_activities in traces_activities.iter() {
         for activity in trace_activities {
             if processed.contains_key(&activity.node.borrow().name) {
                 continue;
+            }
+
+            if activity.node.borrow().level != activity_level {
+                continue
             }
 
             for event_class in &activity.node.borrow().event_classes {
@@ -171,11 +181,14 @@ fn merge_activities(
     for trace_activities in traces_activities {
         for i in 0..trace_activities.len() {
             let activity = trace_activities.get(i).unwrap();
-            let cluster_label = activity_names_to_clusters.get(&activity.node.borrow().name).unwrap();
+            if !activity_names_to_clusters.contains_key(&activity.node.borrow().name) {
+                continue;
+            }
 
+            let cluster_label = activity_names_to_clusters.get(&activity.node.borrow().name).unwrap();
             if let Some(new_activity_node) = new_cluster_activities.get(cluster_label) {
                 let current_activity_in_trace = trace_activities.get(i).unwrap();
-    
+
                 *trace_activities.get_mut(i).unwrap() = ActivityInTraceInfo {
                     node: new_activity_node.clone(),
                     start_pos: current_activity_in_trace.start_pos,

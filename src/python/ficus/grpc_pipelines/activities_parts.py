@@ -239,14 +239,20 @@ class ApplyClassExtractor2(PipelinePart2):
 
 
 class ClusterizeActivitiesFromTracesKMeans(PipelinePart2):
-    def __init__(self, clusters_count: int = 10, learning_iterations_count: int = 200, tolerance: float = 1e-5):
+    def __init__(self,
+                 activity_level: int = 0,
+                 clusters_count: int = 10,
+                 learning_iterations_count: int = 200,
+                 tolerance: float = 1e-5):
         super().__init__()
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
+        self.activity_level = activity_level
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_clusters_count, self.clusters_count)
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
         append_float_value(config, const_tolerance, self.tolerance)
@@ -256,13 +262,15 @@ class ClusterizeActivitiesFromTracesKMeans(PipelinePart2):
 
 
 class ClusterizeActivitiesFromTracesKMeansGridSearch(PipelinePart2):
-    def __init__(self, learning_iterations_count: int = 200, tolerance: float = 1e-5):
+    def __init__(self, activity_level: int = 0, learning_iterations_count: int = 200, tolerance: float = 1e-5):
         super().__init__()
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
+        self.activity_level = activity_level
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
         append_float_value(config, const_tolerance, self.tolerance)
 
