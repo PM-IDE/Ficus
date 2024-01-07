@@ -104,6 +104,9 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_FREQUENCY_ANNOTATION, &mut used);
         assert_existence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_TRACE_FREQUENCY_ANNOTATION, &mut used);
         assert_existence::<bool>(keys, ContextKeys::TERMINATE_ON_UNREPLAYABLE_TRACES, &mut used);
+        assert_existence::<u32>(keys, ContextKeys::CLUSTERS_COUNT, &mut used);
+        assert_existence::<u32>(keys, ContextKeys::LEARNING_ITERATIONS_COUNT, &mut used);
+        assert_existence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -171,7 +174,10 @@ fn get_all_keys_names() -> Vec<String> {
         "petri_net_count_annotation",
         "petri_net_frequency_annotation",
         "petri_net_trace_frequency_annotation",
-        "terminate_on_unreplayable_traces"
+        "terminate_on_unreplayable_traces",
+        "clusters_count",
+        "learning_iterations_count",
+        "tolerance"
     ]
 }
 
@@ -247,6 +253,9 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_FREQUENCY_ANNOTATION, &mut used);
         assert_keys_equivalence::<HashMap<u64, f64>>(keys, ContextKeys::PETRI_NET_TRACE_FREQUENCY_ANNOTATION, &mut used);
         assert_keys_equivalence::<bool>(keys, ContextKeys::TERMINATE_ON_UNREPLAYABLE_TRACES, &mut used);
+        assert_keys_equivalence::<u32>(keys, ContextKeys::CLUSTERS_COUNT, &mut used);
+        assert_keys_equivalence::<u32>(keys, ContextKeys::LEARNING_ITERATIONS_COUNT, &mut used);
+        assert_keys_equivalence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })

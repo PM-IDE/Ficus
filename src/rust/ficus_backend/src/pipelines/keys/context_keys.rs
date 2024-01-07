@@ -502,4 +502,31 @@ impl ContextKeys {
     pub fn is_terminate_on_unreplayable_traces(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.terminate_on_unreplayable_traces(), key)
     }
+
+    pub fn clusters_count(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::CLUSTERS_COUNT)
+            .expect("CLUSTERS_COUNT should be present in keys")
+    }
+
+    pub fn is_clusters_count(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.clusters_count(), key)
+    }
+
+    pub fn learning_iterations_count(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::LEARNING_ITERATIONS_COUNT)
+            .expect("LEARNING_ITERATIONS_COUNT should be present in keys")
+    }
+
+    pub fn is_learning_iterations_count(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.learning_iterations_count(), key)
+    }
+
+    pub fn tolerance(&self) -> &DefaultContextKey<f64> {
+        self.find_concrete_key::<f64>(Self::TOLERANCE)
+            .expect("TOLERANCE should be present in keys")
+    }
+
+    pub fn is_tolerance(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.tolerance(), key)
+    }
 }

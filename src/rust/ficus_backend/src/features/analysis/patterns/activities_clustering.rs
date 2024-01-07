@@ -10,7 +10,13 @@ use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::
 
 use super::activity_instances::ActivityInTraceInfo;
 
-pub fn clusterize_activities(log: &impl EventLog, traces_activities: &mut TracesActivities) {
+pub fn clusterize_activities_k_means(
+    log: &impl EventLog, 
+    traces_activities: &mut TracesActivities,
+    clusters_count: usize,
+    iterations_count: usize,
+    tolerance: f64,
+) {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
     for trace_activities in traces_activities.iter() {
@@ -47,18 +53,14 @@ pub fn clusterize_activities(log: &impl EventLog, traces_activities: &mut Traces
     let array = Array2::from_shape_vec(shape, vector).ok().unwrap();
     let dataset = DatasetBase::from(array);
 
-    let model = KMeans::params_with(processed.len() - 1, rand::thread_rng(), CosineDistance {})
-        .max_n_iterations(200)
-        .tolerance(1e-5)
+    let model = KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
+        .max_n_iterations(iterations_count as u64)
+        .tolerance(tolerance)
         .fit(&dataset)
         .expect("KMeans fitted");
 
     let dataset = model.predict(dataset);
-    let DatasetBase {
-        records, targets, ..
-    } = dataset;
-
-    merge_activities(log, traces_activities, &processed, &targets);
+    merge_activities(log, traces_activities, &processed, &dataset.targets);
 }
 
 fn merge_activities(

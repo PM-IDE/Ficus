@@ -91,6 +91,9 @@ impl ContextKeys {
     pub const EDGE_CUTOFF_THRESHOLD: &'static str = "edge_cutoff_threshold";
     pub const NODE_CUTOFF_THRESHOLD: &'static str = "node_cutoff_threshold";
     pub const TERMINATE_ON_UNREPLAYABLE_TRACES: &'static str = "terminate_on_unreplayable_traces";
+    pub const CLUSTERS_COUNT: &'static str = "clusters_count";
+    pub const LEARNING_ITERATIONS_COUNT: &'static str = "learning_iterations_count";
+    pub const TOLERANCE: &'static str = "tolerance";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -165,6 +168,9 @@ impl ContextKeys {
         Self::insert_petri_net_count_annotation(&mut context);
         Self::insert_petri_net_trace_frequency_annotation(&mut context);
         Self::insert_terminate_on_unreplayable_traces(&mut context);
+        Self::insert_clusters_count(&mut context);
+        Self::insert_learning_iterations_count(&mut context);
+        Self::insert_tolerance(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -381,5 +387,17 @@ impl ContextKeys {
 
     fn insert_terminate_on_unreplayable_traces(context: &mut ContextKeysInitContext) {
         Self::insert_key::<bool>(context, Self::TERMINATE_ON_UNREPLAYABLE_TRACES)
+    }
+
+    fn insert_clusters_count(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::CLUSTERS_COUNT)
+    }
+
+    fn insert_learning_iterations_count(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::LEARNING_ITERATIONS_COUNT)
+    }
+
+    fn insert_tolerance(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<f64>(context, Self::TOLERANCE)
     }
 }

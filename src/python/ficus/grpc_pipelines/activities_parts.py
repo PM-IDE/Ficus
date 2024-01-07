@@ -239,5 +239,17 @@ class ApplyClassExtractor2(PipelinePart2):
 
 
 class ClusterizeActivitiesFromTraces(PipelinePart2):
+    def __init__(self, clusters_count: int = 10, learning_iterations_count: int = 200, tolerance: float = 1e-5):
+        super().__init__()
+        self.clusters_count = clusters_count
+        self.learning_iterations_count = learning_iterations_count
+        self.tolerance = tolerance
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_clusterize_activities_from_traces))
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_clusters_count, self.clusters_count)
+        append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
+        append_float_value(config, const_tolerance, self.tolerance)
+
+        part = _create_default_pipeline_part(const_clusterize_activities_from_traces, config)
+        return GrpcPipelinePartBase(defaultPart=part)
