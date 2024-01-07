@@ -2,7 +2,9 @@ use crate::event_log::core::event::event::Event;
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
-use crate::features::analysis::patterns::activities_clustering::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
+use crate::features::analysis::patterns::activities_clustering::{
+    clusterize_activities_k_means, clusterize_activities_k_means_grid_search,
+};
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
 use crate::pipelines::context::PipelineInfrastructure;
@@ -88,7 +90,7 @@ impl PipelineParts {
         let hashed_log = Self::get_user_data(context, keys.hashes_event_log())?;
         let event_class_regex = match Self::get_user_data(config, keys.event_class_regex()) {
             Ok(regex) => Some(regex),
-            Err(_) => None
+            Err(_) => None,
         };
 
         let repeat_sets = build_repeat_sets(&hashed_log, patterns);
@@ -149,9 +151,11 @@ impl PipelineParts {
 
         let strategy = match undef_activity_strat {
             UndefActivityHandlingStrategyDto::DontInsert => UndefActivityHandlingStrategy::DontInsert,
-            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
-                Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
-            })),
+            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => {
+                UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
+                    Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
+                }))
+            }
             UndefActivityHandlingStrategyDto::InsertAllEvents => UndefActivityHandlingStrategy::InsertAllEvents,
         };
 
@@ -381,18 +385,17 @@ impl PipelineParts {
             let log = Self::get_user_data(context, keys.event_log())?;
             let dto = Self::get_user_data(config, keys.activities_logs_source())?;
 
-            let activities_to_logs = match dto {
-                ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
-                ActivitiesLogsSourceDto::TracesActivities => {
-                    let activity_level = *Self::get_user_data(config, keys.activity_level())?;
-                    let activities = Self::get_user_data(context, keys.trace_activities())?;
-                    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
-                        log,
-                        activities,
-                        activity_level as usize,
-                    ))
-                }
-            };
+            let activities_to_logs =
+                match dto {
+                    ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
+                    ActivitiesLogsSourceDto::TracesActivities => {
+                        let activity_level = *Self::get_user_data(config, keys.activity_level())?;
+                        let activities = Self::get_user_data(context, keys.trace_activities())?;
+                        activity_instances::create_logs_for_activities(
+                            &ActivitiesLogSource::TracesActivities(log, activities, activity_level as usize)
+                        )
+                    }
+                };
 
             for (_, activity_log) in activities_to_logs {
                 let mut temp_context = PipelineContext::empty_from(context);
@@ -472,23 +475,33 @@ impl PipelineParts {
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
             let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
 
-            clusterize_activities_k_means(log, traces_activities, activity_level, clusters_count, learning_iterations_count, tolerance);
+            clusterize_activities_k_means(
+                log,
+                traces_activities,
+                activity_level,
+                clusters_count,
+                learning_iterations_count,
+                tolerance,
+            );
 
             Ok(())
         })
     }
 
     pub(super) fn clusterize_activities_from_traces_k_means_grid_search() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH, &|context, _, keys, config| {
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
-            let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
-            let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+        Self::create_pipeline_part(
+            Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH,
+            &|context, _, keys, config| {
+                let log = Self::get_user_data(context, keys.event_log())?;
+                let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+                let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+                let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
+                let tolerance = *Self::get_user_data(config, keys.tolerance())?;
 
-            clusterize_activities_k_means_grid_search(log, traces_activities, activity_level, learning_iterations_count, tolerance);
+                clusterize_activities_k_means_grid_search(log, traces_activities, activity_level, learning_iterations_count, tolerance);
 
-            Ok(())
-        })
+                Ok(())
+            },
+        )
     }
 }

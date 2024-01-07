@@ -34,10 +34,12 @@ impl Iterator for TraceXesEventLogIterator {
                     },
                     _ => continue,
                 },
-                Ok(quick_xml::events::Event::End(e)) => match e.name().0 {
-                    TRACE_TAG_NAME => return None,
-                    _ => continue,
-                },
+                Ok(quick_xml::events::Event::End(e)) => {
+                    match e.name().0 {
+                        TRACE_TAG_NAME => return None,
+                        _ => continue,
+                    }
+                }
                 Err(_) => return None,
                 _ => continue,
             }

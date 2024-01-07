@@ -89,13 +89,14 @@ impl XesEventLogImpl {
             }
         }
 
-        let log = XesEventLogImpl {
-            traces_holder: TracesHolder::new(traces),
-            globals,
-            extensions,
-            classifiers,
-            properties,
-        };
+        let log =
+            XesEventLogImpl {
+                traces_holder: TracesHolder::new(traces),
+                globals,
+                extensions,
+                classifiers,
+                properties,
+            };
 
         Some(log)
     }

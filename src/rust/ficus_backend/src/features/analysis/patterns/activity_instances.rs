@@ -233,7 +233,10 @@ fn split_activities_nodes_by_size(activities: &mut Vec<Rc<RefCell<ActivityNode>>
     }
 
     for i in 0..result.len() {
-        result.get_mut(i).unwrap().sort_by(|first, second| first.borrow().name.cmp(&second.borrow().name));
+        result
+            .get_mut(i)
+            .unwrap()
+            .sort_by(|first, second| first.borrow().name.cmp(&second.borrow().name));
     }
 
     result
@@ -567,10 +570,11 @@ where
     let trace = log.traces().get(sub_array.trace_index).unwrap().borrow();
     let events = trace.events();
 
-    let regex = match class_extractor {
-        Some(extractor) => Some(Regex::new(&extractor).unwrap()),
-        None => None
-    };
+    let regex =
+        match class_extractor {
+            Some(extractor) => Some(Regex::new(&extractor).unwrap()),
+            None => None,
+        };
 
     for index in left..right {
         name.push('(');
@@ -586,9 +590,9 @@ where
                         event_name.as_str()
                     }
                 }
-                _ => event_name
+                _ => event_name,
             },
-            None => event_name
+            None => event_name,
         };
 
         name.push_str(&event_name);

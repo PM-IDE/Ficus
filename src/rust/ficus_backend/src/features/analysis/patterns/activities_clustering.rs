@@ -1,18 +1,26 @@
 use linfa::prelude::Predict;
 
-use std::{collections::{HashSet, HashMap}, rc::Rc, cell::RefCell};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
-use linfa::{traits::Fit, DatasetBase, Dataset};
-use linfa_clustering::KMeans;
+use crate::{
+    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    features::analysis::patterns::repeat_sets::ActivityNode,
+    pipelines::aliases::TracesActivities,
+};
 use linfa::metrics::SilhouetteScore;
+use linfa::{traits::Fit, Dataset, DatasetBase};
+use linfa_clustering::KMeans;
 use linfa_nn::distance::Distance;
-use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Array1, Dim};
-use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode, event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}};
+use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
 
 use super::activity_instances::ActivityInTraceInfo;
 
 pub fn clusterize_activities_k_means(
-    log: &impl EventLog, 
+    log: &impl EventLog,
     traces_activities: &mut TracesActivities,
     activity_level: usize,
     clusters_count: usize,
@@ -36,11 +44,11 @@ fn create_k_means_model(clusters_count: usize, iterations_count: u64, tolerance:
 }
 
 pub fn clusterize_activities_k_means_grid_search(
-    log: &impl EventLog, 
+    log: &impl EventLog,
     traces_activities: &mut TracesActivities,
     activity_level: usize,
     iterations_count: usize,
-    tolerance: f64
+    tolerance: f64,
 ) {
     if let Some((dataset, processed)) = create_dataset_from_traces_activities(traces_activities, activity_level) {
         let mut best_metric = -1f64;
@@ -52,7 +60,7 @@ pub fn clusterize_activities_k_means_grid_search(
             let clustered_dataset = model.predict(dataset.clone());
             let score = match clustered_dataset.silhouette_score() {
                 Ok(score) => score,
-                Err(_) => return
+                Err(_) => return,
             };
 
             if score > best_metric {
@@ -70,7 +78,7 @@ pub fn clusterize_activities_k_means_grid_search(
 type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 fn create_dataset_from_traces_activities(
     traces_activities: &TracesActivities,
-    activity_level: usize
+    activity_level: usize,
 ) -> Option<(MyDataset, Vec<Rc<RefCell<ActivityNode>>>)> {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
@@ -82,7 +90,7 @@ fn create_dataset_from_traces_activities(
             }
 
             if activity.node.borrow().level != activity_level {
-                continue
+                continue;
             }
 
             for event_class in &activity.node.borrow().event_classes {
@@ -112,7 +120,7 @@ fn create_dataset_from_traces_activities(
 
     let array = match Array2::from_shape_vec(shape, vector) {
         Ok(score) => score,
-        Err(_) => return None
+        Err(_) => return None,
     };
 
     Some((DatasetBase::from(array), processed))
@@ -120,9 +128,9 @@ fn create_dataset_from_traces_activities(
 
 fn merge_activities(
     log: &impl EventLog,
-    traces_activities: &mut TracesActivities, 
-    processed: &Vec<Rc<RefCell<ActivityNode>>>, 
-    labels: &Array1<usize>
+    traces_activities: &mut TracesActivities,
+    processed: &Vec<Rc<RefCell<ActivityNode>>>,
+    labels: &Array1<usize>,
 ) {
     let mut activity_names_to_clusters = HashMap::new();
     let mut clusters_to_activities: HashMap<usize, Vec<Rc<RefCell<ActivityNode>>>> = HashMap::new();
@@ -179,7 +187,7 @@ fn merge_activities(
             event_classes: new_event_classes_set,
             children: vec![],
             level: cluster_activities[0].borrow().level,
-            name: new_activity_name
+            name: new_activity_name,
         };
 
         new_cluster_activities.insert(*cluster, Rc::new(RefCell::new(new_node)));
@@ -199,7 +207,7 @@ fn merge_activities(
                 *trace_activities.get_mut(i).unwrap() = ActivityInTraceInfo {
                     node: new_activity_node.clone(),
                     start_pos: current_activity_in_trace.start_pos,
-                    length: current_activity_in_trace.length
+                    length: current_activity_in_trace.length,
                 };
             }
         }

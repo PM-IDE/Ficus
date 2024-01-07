@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    fs,
-    io::Cursor,
-};
+use std::{cell::RefCell, fs, io::Cursor};
 
 use quick_xml::Writer;
 

@@ -114,17 +114,18 @@ impl<'a> AlphaSharpTuple<'a> {
 
 impl<'a> Hash for AlphaSharpTuple<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let mut write_tuple = |tuple: &AlphaSharpSet| {
-            for set in tuple {
-                for class in &set.0 {
-                    state.write(class.as_bytes());
-                }
+        let mut write_tuple =
+            |tuple: &AlphaSharpSet| {
+                for set in tuple {
+                    for class in &set.0 {
+                        state.write(class.as_bytes());
+                    }
 
-                for class in &set.1 {
-                    state.write(class.as_bytes());
+                    for class in &set.1 {
+                        state.write(class.as_bytes());
+                    }
                 }
-            }
-        };
+            };
 
         write_tuple(&self.p_in);
         write_tuple(&self.p_out);
@@ -144,41 +145,42 @@ impl<'a> ToString for AlphaSharpTuple<'a> {
         let mut string = String::new();
         string.push('(');
 
-        let mut push_p = |set: &AlphaSharpSet| {
-            string.push('{');
-            for tuple in set {
-                string.push('(');
+        let mut push_p =
+            |set: &AlphaSharpSet| {
                 string.push('{');
-                for class in &tuple.0 {
-                    string.push_str(class.as_str());
-                    string.push_str(",")
+                for tuple in set {
+                    string.push('(');
+                    string.push('{');
+                    for class in &tuple.0 {
+                        string.push_str(class.as_str());
+                        string.push_str(",")
+                    }
+
+                    if tuple.0.len() > 0 {
+                        string.remove(string.len() - 1);
+                    }
+
+                    string.push_str("}, {");
+
+                    for class in &tuple.1 {
+                        string.push_str(class.as_str());
+                        string.push_str(",")
+                    }
+
+                    if tuple.1.len() > 0 {
+                        string.remove(string.len() - 1);
+                    }
+
+                    string.push_str("}");
+                    string.push_str("),");
                 }
 
-                if tuple.0.len() > 0 {
+                if set.len() > 0 {
                     string.remove(string.len() - 1);
                 }
 
-                string.push_str("}, {");
-
-                for class in &tuple.1 {
-                    string.push_str(class.as_str());
-                    string.push_str(",")
-                }
-
-                if tuple.1.len() > 0 {
-                    string.remove(string.len() - 1);
-                }
-
-                string.push_str("}");
-                string.push_str("),");
-            }
-
-            if set.len() > 0 {
-                string.remove(string.len() - 1);
-            }
-
-            string.push_str("}, ");
-        };
+                string.push_str("}, ");
+            };
 
         push_p(&self.p_in);
         push_p(&self.p_out);

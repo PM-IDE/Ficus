@@ -102,10 +102,11 @@ impl ReplayState {
 pub fn replay_petri_net(log: &impl EventLog, net: &DefaultPetriNet) -> Option<Vec<Option<ReplayState>>> {
     let mut result = vec![];
     for trace in log.traces() {
-        let marking = match net.initial_marking() {
-            Some(marking) => marking.clone(),
-            None => return None,
-        };
+        let marking =
+            match net.initial_marking() {
+                Some(marking) => marking.clone(),
+                None => return None,
+            };
 
         let trace = trace.borrow();
         let mut stack = VecDeque::new();

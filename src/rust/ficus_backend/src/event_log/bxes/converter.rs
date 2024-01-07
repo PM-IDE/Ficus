@@ -1,15 +1,26 @@
-use std::{rc::Rc, cell::RefCell, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use bxes::models::BxesValue;
-use chrono::{Utc, TimeZone};
+use chrono::{TimeZone, Utc};
 
-use crate::event_log::{xes::{xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl, xes_event::XesEventImpl}, core::{event_log::EventLog, trace::trace::Trace, event::{event::{Event, EventPayloadValue}, lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle}}}};
+use crate::event_log::{
+    core::{
+        event::{
+            event::{Event, EventPayloadValue},
+            lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
+        },
+        event_log::EventLog,
+        trace::trace::Trace,
+    },
+    xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+};
 
 pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
-    let log = match bxes::read::single_file_bxes_reader::read_bxes(path) {
-        Ok(log) => log,
-        Err(_) => return None
-    };
+    let log =
+        match bxes::read::single_file_bxes_reader::read_bxes(path) {
+            Ok(log) => log,
+            Err(_) => return None,
+        };
 
     let mut xes_log = XesEventLogImpl::empty();
     println!("{}", log.variants.len());
@@ -25,8 +36,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
             let timestamp = Utc.timestamp_nanos(event.timestamp);
             let lifecycle = convert_lifecycle(&event.lifecycle);
 
-            let payload = 
-            if let Some(attributes) = event.attributes.as_ref() {
+            let payload = if let Some(attributes) = event.attributes.as_ref() {
                 let mut payload = HashMap::new();
 
                 for (key, value) in attributes {
@@ -58,7 +68,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                 }
 
                 Some(payload)
-            } else { 
+            } else {
                 None
             };
 
