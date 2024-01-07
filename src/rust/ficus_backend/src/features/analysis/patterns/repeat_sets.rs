@@ -76,7 +76,7 @@ pub fn build_repeat_sets(log: &Vec<Vec<u64>>, patterns: &Vec<Vec<SubArrayInTrace
 
 #[derive(Debug)]
 pub struct ActivityNode {
-    pub repeat_set: SubArrayWithTraceIndex,
+    pub repeat_set: Option<SubArrayWithTraceIndex>,
     pub event_classes: HashSet<u64>,
     pub children: Vec<Rc<RefCell<ActivityNode>>>,
     pub level: usize,
@@ -120,7 +120,7 @@ where
     let create_activity_node = |repeat_set: &SubArrayWithTraceIndex| {
         let events_set = extract_events_set(repeat_set);
         Rc::new(RefCell::new(ActivityNode {
-            repeat_set: *repeat_set,
+            repeat_set: Some(*repeat_set),
             event_classes: events_set,
             children: vec![],
             level: activity_level,

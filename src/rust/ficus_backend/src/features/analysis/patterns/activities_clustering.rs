@@ -5,13 +5,15 @@ use std::{collections::{HashSet, HashMap}, rc::Rc, cell::RefCell};
 use linfa::{traits::Fit, DatasetBase};
 use linfa_clustering::KMeans;
 use linfa_nn::distance::Distance;
-use ndarray::{Array2, ArrayView, Dimension};
-use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode};
+use ndarray::{Array2, ArrayView, Dimension, ArrayBase, OwnedRepr, Dim};
+use crate::{pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode, event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}};
 
-pub fn clusterize_activities(traces_activities: &TracesActivities) {
+use super::activity_instances::ActivityInTraceInfo;
+
+pub fn clusterize_activities(log: &impl EventLog, traces_activities: &mut TracesActivities) {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
-    for trace_activities in traces_activities {
+    for trace_activities in traces_activities.iter() {
         for activity in trace_activities {
             if processed.contains_key(&activity.node.borrow().name) {
                 continue;
@@ -42,7 +44,6 @@ pub fn clusterize_activities(traces_activities: &TracesActivities) {
 
     let shape = (processed.len(), all_event_classes.len());
 
-    println!("{:?}, {}", &shape, vector.len());
     let array = Array2::from_shape_vec(shape, vector).ok().unwrap();
     let dataset = DatasetBase::from(array);
 
@@ -57,11 +58,92 @@ pub fn clusterize_activities(traces_activities: &TracesActivities) {
         records, targets, ..
     } = dataset;
 
-    for i in 0..targets.len() {
-        println!("{}, {}", targets[i], &processed[i].borrow().name);
+    merge_activities(log, traces_activities, &processed, &targets);
+}
+
+fn merge_activities(
+    log: &impl EventLog,
+    traces_activities: &mut TracesActivities, 
+    processed: &Vec<Rc<RefCell<ActivityNode>>>, 
+    labels: &ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>
+) {
+    let mut activity_names_to_clusters = HashMap::new();
+    let mut clusters_to_activities: HashMap<usize, Vec<Rc<RefCell<ActivityNode>>>> = HashMap::new();
+
+    for (activity, label) in processed.iter().zip(labels.iter()) {
+        activity_names_to_clusters.insert(activity.borrow().name.to_owned(), *label);
+
+        if let Some(cluster_activities) = clusters_to_activities.get_mut(label) {
+            cluster_activities.push(activity.clone());
+        } else {
+            clusters_to_activities.insert(*label, vec![activity.clone()]);
+        }
     }
 
-    println!("{:?}", targets);
+    let mut new_activity_name_parts = HashSet::new();
+    let mut new_cluster_activities = HashMap::new();
+
+    for (cluster, cluster_activities) in &clusters_to_activities {
+        if cluster_activities.len() < 2 {
+            continue;
+        }
+
+        let mut new_event_classes_set = HashSet::new();
+
+        for activity in cluster_activities {
+            for event_class in &activity.borrow().event_classes {
+                new_event_classes_set.insert(*event_class);
+            }
+
+            if let Some(repeat_set) = activity.borrow().repeat_set.as_ref() {
+                let trace = log.traces().get(repeat_set.trace_index).unwrap();
+                let events = trace.borrow();
+                let events = events.events();
+                let sub_array = repeat_set.sub_array;
+                for event in &events[sub_array.start_index..(sub_array.start_index + sub_array.length)] {
+                    new_activity_name_parts.insert(event.borrow().name().to_owned());
+                }
+            }
+        }
+
+        let mut new_activity_name_parts = new_activity_name_parts.iter().map(|x| x.to_owned()).collect::<Vec<String>>();
+        new_activity_name_parts.sort_by(|first, second| first.cmp(second));
+
+        let mut new_activity_name = String::new();
+        new_activity_name.push_str("CLUSTER_");
+
+        for name in new_activity_name_parts {
+            new_activity_name.push_str(name.as_str());
+            new_activity_name.push_str("::");
+        }
+
+        let new_node = ActivityNode {
+            repeat_set: None,
+            event_classes: new_event_classes_set,
+            children: vec![],
+            level: cluster_activities[0].borrow().level,
+            name: new_activity_name
+        };
+
+        new_cluster_activities.insert(*cluster, Rc::new(RefCell::new(new_node)));
+    }
+
+    for trace_activities in traces_activities {
+        for i in 0..trace_activities.len() {
+            let activity = trace_activities.get(i).unwrap();
+            let cluster_label = activity_names_to_clusters.get(&activity.node.borrow().name).unwrap();
+
+            if let Some(new_activity_node) = new_cluster_activities.get(cluster_label) {
+                let current_activity_in_trace = trace_activities.get(i).unwrap();
+    
+                *trace_activities.get_mut(i).unwrap() = ActivityInTraceInfo {
+                    node: new_activity_node.clone(),
+                    start_pos: current_activity_in_trace.start_pos,
+                    length: current_activity_in_trace.length
+                };
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
