@@ -291,3 +291,28 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(PipelinePart2):
 
         part = _create_default_pipeline_part(const_clusterize_activities_from_traces_k_means_grid_search, config)
         return GrpcPipelinePartBase(defaultPart=part)
+
+
+class ClusterizeActivitiesFromTracesDbscan(PipelinePart2):
+    def __init__(self,
+                 activity_level: int = 0,
+                 min_events_count_in_cluster: int = 1,
+                 tolerance: float = 1e-5,
+                 class_extractor: Optional[str] = None):
+        super().__init__()
+        self.min_events_count_in_cluster = min_events_count_in_cluster
+        self.tolerance = tolerance
+        self.activity_level = activity_level
+        self.class_extractor = class_extractor
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_activity_level, self.activity_level)
+        append_uint32_value(config, const_min_events_in_cluster_count, self.min_events_count_in_cluster)
+        append_float_value(config, const_tolerance, self.tolerance)
+
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
+
+        part = _create_default_pipeline_part(const_clusterize_activities_from_traces_dbscan, config)
+        return GrpcPipelinePartBase(defaultPart=part)
