@@ -343,7 +343,8 @@ impl PipelineParts {
 
     pub(super) fn discover_activities_until_no_more() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_UNTIL_NO_MORE, &|context, infra, keys, config| {
-            let mut activity_level = *Self::get_user_data(config, keys.activity_level())?;
+            let activity_level = *Self::get_user_data(config, keys.activity_level())?;
+            let after_activities_extraction_pipeline = Self::get_user_data(config, keys.pipeline());
 
             loop {
                 let log = Self::get_user_data(context, keys.event_log())?;
@@ -365,6 +366,10 @@ impl PipelineParts {
                     return Ok(());
                 }
 
+                if let Ok(pipeline) = after_activities_extraction_pipeline {
+                    pipeline.execute(context, infra, keys)?;
+                }
+
                 Self::do_create_log_from_activities(context, keys, config)?;
 
                 let new_events_count = count_events(Self::get_user_data(context, keys.event_log())?);
@@ -372,8 +377,6 @@ impl PipelineParts {
                     Self::do_clear_activities_related_stuff(context, keys);
                     return Ok(());
                 }
-
-                activity_level += 1;
             }
         })
     }

@@ -26,9 +26,9 @@ pub fn clusterize_activities_k_means(
     clusters_count: usize,
     iterations_count: usize,
     tolerance: f64,
-    class_extarctor: Option<String>,
+    class_extractor: Option<String>,
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extarctor) {
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset);

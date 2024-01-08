@@ -1,4 +1,3 @@
-from ficus.grpc_pipelines.data_models import ActivitiesLogsSource
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -145,7 +144,8 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
                  adjusting_mode: AdjustingMode = AdjustingMode.FromAllLog,
                  min_events_in_unattached_subtrace_count: int = 0,
                  min_events_in_activity_count: int = 0,
-                 activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter):
+                 activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter,
+                 after_activities_extraction_pipeline: Optional[Pipeline2] = None):
         super().__init__()
         self.event_class = event_class
         self.narrow_activities = narrow_activities
@@ -158,6 +158,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         self.min_events_count = min_events_in_unattached_subtrace_count
         self.min_events_in_activity_count = min_events_in_activity_count
         self.activity_filter_kind = activity_filter_kind
+        self.after_activities_extraction_pipeline = after_activities_extraction_pipeline
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -174,6 +175,9 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
 
         if self.event_class is not None:
             append_string_value(config, const_event_class_regex, self.event_class)
+
+        if self.after_activities_extraction_pipeline is not None:
+            append_pipeline_value(config, const_pipeline, self.after_activities_extraction_pipeline)
 
         default_part = _create_default_pipeline_part(const_discover_activities_until_no_more, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
