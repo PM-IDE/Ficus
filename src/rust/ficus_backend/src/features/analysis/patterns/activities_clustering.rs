@@ -6,6 +6,8 @@ use std::{
     rc::Rc,
 };
 
+use super::activity_instances::ActivityInTraceInfo;
+use crate::event_log::core::event::event_hasher::RegexEventHasher;
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     features::analysis::patterns::repeat_sets::ActivityNode,
@@ -16,8 +18,6 @@ use linfa::{traits::Fit, DatasetBase};
 use linfa_clustering::KMeans;
 use linfa_nn::distance::Distance;
 use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
-use crate::event_log::core::event::event_hasher::RegexEventHasher;
-use super::activity_instances::ActivityInTraceInfo;
 
 pub fn clusterize_activities_k_means(
     log: &impl EventLog,
@@ -26,13 +26,18 @@ pub fn clusterize_activities_k_means(
     clusters_count: usize,
     iterations_count: usize,
     tolerance: f64,
-    class_extarctor: Option<String>
+    class_extarctor: Option<String>,
 ) {
     if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extarctor) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset);
-        merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clustered_dataset.targets);
+        merge_activities(
+            log,
+            traces_activities,
+            &processed.iter().map(|x| x.0.clone()).collect(),
+            &clustered_dataset.targets,
+        );
     }
 }
 
@@ -50,7 +55,7 @@ pub fn clusterize_activities_k_means_grid_search(
     activity_level: usize,
     iterations_count: usize,
     tolerance: f64,
-    class_extractor: Option<String>
+    class_extractor: Option<String>,
 ) {
     if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
         let mut best_metric = -1f64;
@@ -72,7 +77,12 @@ pub fn clusterize_activities_k_means_grid_search(
         }
 
         if let Some(best_labels) = best_labels.as_ref() {
-            merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), best_labels)
+            merge_activities(
+                log,
+                traces_activities,
+                &processed.iter().map(|x| x.0.clone()).collect(),
+                best_labels,
+            )
         }
     }
 }
@@ -83,7 +93,7 @@ fn create_dataset_from_traces_activities(
     log: &impl EventLog,
     traces_activities: &TracesActivities,
     activity_level: usize,
-    class_extractor: Option<String>
+    class_extractor: Option<String>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords)> {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
@@ -131,7 +141,10 @@ fn create_dataset_from_traces_activities(
                 activity.node.borrow().event_classes.iter().map(|x| *x).collect()
             };
 
-            processed.insert(activity.node.borrow().name.to_owned(), (activity.node.clone(), activity_event_classes));
+            processed.insert(
+                activity.node.borrow().name.to_owned(),
+                (activity.node.clone(), activity_event_classes),
+            );
         }
     }
 
@@ -142,11 +155,7 @@ fn create_dataset_from_traces_activities(
     let mut vector = vec![];
     for activity in &processed {
         for i in 0..all_event_classes.len() {
-            vector.push(if activity.1.contains(&all_event_classes[i]) {
-                1.0
-            } else {
-                0.0
-            });
+            vector.push(if activity.1.contains(&all_event_classes[i]) { 1.0 } else { 0.0 });
         }
     }
 

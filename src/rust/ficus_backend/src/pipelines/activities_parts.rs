@@ -486,7 +486,7 @@ impl PipelineParts {
                 clusters_count,
                 learning_iterations_count,
                 tolerance,
-                class_extractor
+                class_extractor,
             );
 
             Ok(())
