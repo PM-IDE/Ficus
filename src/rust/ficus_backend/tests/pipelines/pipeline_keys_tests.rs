@@ -107,6 +107,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<u32>(keys, ContextKeys::CLUSTERS_COUNT, &mut used);
         assert_existence::<u32>(keys, ContextKeys::LEARNING_ITERATIONS_COUNT, &mut used);
         assert_existence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
+        assert_existence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -177,7 +178,8 @@ fn get_all_keys_names() -> Vec<String> {
         "terminate_on_unreplayable_traces",
         "clusters_count",
         "learning_iterations_count",
-        "tolerance"
+        "tolerance",
+        "min_events_in_cluster_count"
     ]
 }
 
@@ -256,6 +258,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<u32>(keys, ContextKeys::CLUSTERS_COUNT, &mut used);
         assert_keys_equivalence::<u32>(keys, ContextKeys::LEARNING_ITERATIONS_COUNT, &mut used);
         assert_keys_equivalence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
+        assert_keys_equivalence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
