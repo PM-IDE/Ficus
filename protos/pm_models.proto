@@ -93,3 +93,17 @@ message GrpcEntityFrequencyAnnotation {
     int64 entityId = 1;
     float frequency = 2;
 }
+
+message GrpcMatrix {
+    repeated GrpcMatixRow rows = 1;
+}
+
+message GrpcMatixRow {
+    repeated float values = 1;
+}
+
+message GrpcDataset {
+    GrpcMatrix matrix = 1;
+    repeated string columnsNames = 2;
+    repeated string rowNames = 3;
+}
