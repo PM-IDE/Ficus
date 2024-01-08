@@ -15,7 +15,7 @@ use crate::{
 };
 use linfa::metrics::SilhouetteScore;
 use linfa::{traits::Fit, DatasetBase};
-use linfa_clustering::{KMeans, Dbscan};
+use linfa_clustering::{Dbscan, KMeans};
 use linfa_nn::{distance::Distance, KdTree};
 use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
 
@@ -28,17 +28,12 @@ pub fn clusterize_activities_dbscan(
     class_extractor: Option<String>,
 ) {
     if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
-        let clusters = Dbscan::params_with(min_points, CosineDistance{}, KdTree)
+        let clusters = Dbscan::params_with(min_points, CosineDistance {}, KdTree)
             .tolerance(tolerance)
             .transform(dataset.records())
             .unwrap();
 
-        merge_activities(
-            log,
-            traces_activities,
-            &processed.iter().map(|x| x.0.clone()).collect(),
-            &clusters,
-        );
+        merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
     }
 }
 

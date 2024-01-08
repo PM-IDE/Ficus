@@ -3,7 +3,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activities_clustering::{
-    clusterize_activities_k_means, clusterize_activities_k_means_grid_search, clusterize_activities_dbscan,
+    clusterize_activities_dbscan, clusterize_activities_k_means, clusterize_activities_k_means_grid_search,
 };
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
