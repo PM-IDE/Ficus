@@ -529,4 +529,13 @@ impl ContextKeys {
     pub fn is_tolerance(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.tolerance(), key)
     }
+
+    pub fn min_events_in_clusters_count(&self) -> &DefaultContextKey<u32> {
+        self.find_concrete_key::<u32>(Self::MIN_EVENTS_IN_CLUSTERS_COUNT)
+            .expect("MIN_EVENTS_IN_CLUSTERS_COUNT should be present in keys")
+    }
+
+    pub fn is_min_clusters_count(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.min_events_in_clusters_count(), key)
+    }
 }

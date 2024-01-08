@@ -3,7 +3,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activities_clustering::{
-    clusterize_activities_k_means, clusterize_activities_k_means_grid_search,
+    clusterize_activities_k_means, clusterize_activities_k_means_grid_search, clusterize_activities_dbscan,
 };
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
@@ -522,5 +522,30 @@ impl PipelineParts {
                 Ok(())
             },
         )
+    }
+
+    pub(super) fn clusterize_activities_from_traces_dbscan() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_DBSCAN, &|context, _, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+            let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
+            let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+                Ok(extractor) => Some(extractor.to_owned()),
+                Err(_) => None,
+            };
+
+            clusterize_activities_dbscan(
+                log,
+                traces_activities,
+                activity_level,
+                min_points_in_cluster,
+                tolerance,
+                class_extractor,
+            );
+
+            Ok(())
+        })
     }
 }

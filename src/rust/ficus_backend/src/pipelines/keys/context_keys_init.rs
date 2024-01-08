@@ -94,6 +94,7 @@ impl ContextKeys {
     pub const CLUSTERS_COUNT: &'static str = "clusters_count";
     pub const LEARNING_ITERATIONS_COUNT: &'static str = "learning_iterations_count";
     pub const TOLERANCE: &'static str = "tolerance";
+    pub const MIN_EVENTS_IN_CLUSTERS_COUNT: &'static str = "min_events_in_cluster_count";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -171,6 +172,7 @@ impl ContextKeys {
         Self::insert_clusters_count(&mut context);
         Self::insert_learning_iterations_count(&mut context);
         Self::insert_tolerance(&mut context);
+        Self::insert_min_clusters_count(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -399,5 +401,9 @@ impl ContextKeys {
 
     fn insert_tolerance(context: &mut ContextKeysInitContext) {
         Self::insert_key::<f64>(context, Self::TOLERANCE)
+    }
+
+    fn insert_min_clusters_count(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<u32>(context, Self::MIN_EVENTS_IN_CLUSTERS_COUNT)
     }
 }

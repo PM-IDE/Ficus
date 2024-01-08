@@ -1,4 +1,4 @@
-use linfa::prelude::Predict;
+use linfa::{prelude::Predict, traits::Transformer};
 
 use std::{
     cell::RefCell,
@@ -15,9 +15,32 @@ use crate::{
 };
 use linfa::metrics::SilhouetteScore;
 use linfa::{traits::Fit, DatasetBase};
-use linfa_clustering::KMeans;
-use linfa_nn::distance::Distance;
+use linfa_clustering::{KMeans, Dbscan};
+use linfa_nn::{distance::Distance, KdTree};
 use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
+
+pub fn clusterize_activities_dbscan(
+    log: &impl EventLog,
+    traces_activities: &mut TracesActivities,
+    activity_level: usize,
+    min_points: usize,
+    tolerance: f64,
+    class_extractor: Option<String>,
+) {
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+        let clusters = Dbscan::params_with(min_points, CosineDistance{}, KdTree)
+            .tolerance(tolerance)
+            .transform(dataset.records())
+            .unwrap();
+
+        merge_activities(
+            log,
+            traces_activities,
+            &processed.iter().map(|x| x.0.clone()).collect(),
+            &clusters,
+        );
+    }
+}
 
 pub fn clusterize_activities_k_means(
     log: &impl EventLog,
@@ -36,7 +59,7 @@ pub fn clusterize_activities_k_means(
             log,
             traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
-            &clustered_dataset.targets,
+            &clustered_dataset.targets.map(|x| Some(*x)),
         );
     }
 }
@@ -81,7 +104,7 @@ pub fn clusterize_activities_k_means_grid_search(
                 log,
                 traces_activities,
                 &processed.iter().map(|x| x.0.clone()).collect(),
-                best_labels,
+                &best_labels.map(|x| Some(*x)),
             )
         }
     }
@@ -173,18 +196,20 @@ fn merge_activities(
     log: &impl EventLog,
     traces_activities: &mut TracesActivities,
     processed: &Vec<Rc<RefCell<ActivityNode>>>,
-    labels: &Array1<usize>,
+    labels: &Array1<Option<usize>>,
 ) {
     let mut activity_names_to_clusters = HashMap::new();
     let mut clusters_to_activities: HashMap<usize, Vec<Rc<RefCell<ActivityNode>>>> = HashMap::new();
 
     for (activity, label) in processed.iter().zip(labels.iter()) {
-        activity_names_to_clusters.insert(activity.borrow().name.to_owned(), *label);
+        if let Some(label) = label {
+            activity_names_to_clusters.insert(activity.borrow().name.to_owned(), *label);
 
-        if let Some(cluster_activities) = clusters_to_activities.get_mut(label) {
-            cluster_activities.push(activity.clone());
-        } else {
-            clusters_to_activities.insert(*label, vec![activity.clone()]);
+            if let Some(cluster_activities) = clusters_to_activities.get_mut(label) {
+                cluster_activities.push(activity.clone());
+            } else {
+                clusters_to_activities.insert(*label, vec![activity.clone()]);
+            }
         }
     }
 
