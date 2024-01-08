@@ -4,6 +4,7 @@ use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFil
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::dataset::dataset::FicusDataset;
 use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -537,5 +538,14 @@ impl ContextKeys {
 
     pub fn is_min_clusters_count(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.min_events_in_clusters_count(), key)
+    }
+
+    pub fn traces_activities_dataset(&self) -> &DefaultContextKey<FicusDataset> {
+        self.find_concrete_key::<FicusDataset>(Self::TRACES_ACTIVITIES_DATASET)
+            .expect("TRACES_ACTIVITIES_DATASET should be present in keys")
+    }
+
+    pub fn is_traces_activities_dataset(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.traces_activities_dataset(), key)
     }
 }

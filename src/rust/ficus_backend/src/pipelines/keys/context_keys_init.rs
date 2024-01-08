@@ -4,6 +4,7 @@ use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFil
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::dataset::dataset::FicusDataset;
 use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,
@@ -112,6 +113,7 @@ impl ContextKeys {
     pub const PETRI_NET_COUNT_ANNOTATION: &'static str = "petri_net_count_annotation";
     pub const PETRI_NET_FREQUENCY_ANNOTATION: &'static str = "petri_net_frequency_annotation";
     pub const PETRI_NET_TRACE_FREQUENCY_ANNOTATION: &'static str = "petri_net_trace_frequency_annotation";
+    pub const TRACES_ACTIVITIES_DATASET: &'static str = "traces_activities_dataset";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -173,6 +175,7 @@ impl ContextKeys {
         Self::insert_learning_iterations_count(&mut context);
         Self::insert_tolerance(&mut context);
         Self::insert_min_clusters_count(&mut context);
+        Self::insert_traces_activities_dataset(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -405,5 +408,9 @@ impl ContextKeys {
 
     fn insert_min_clusters_count(context: &mut ContextKeysInitContext) {
         Self::insert_key::<u32>(context, Self::MIN_EVENTS_IN_CLUSTERS_COUNT)
+    }
+
+    fn insert_traces_activities_dataset(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<FicusDataset>(context, Self::TRACES_ACTIVITIES_DATASET)
     }
 }

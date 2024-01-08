@@ -7,7 +7,7 @@ use std::{
 };
 
 use super::activity_instances::ActivityInTraceInfo;
-use crate::event_log::core::event::event_hasher::RegexEventHasher;
+use crate::{event_log::core::event::event_hasher::RegexEventHasher, utils::dataset::dataset::FicusDataset};
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     features::analysis::patterns::repeat_sets::ActivityNode,
@@ -294,4 +294,31 @@ impl Distance<f64> for CosineDistance {
 
         1.0 - sum / (a_square.sqrt() * b_square.sqrt())
     }
+}
+
+pub fn create_traces_activities_dataset(
+    log: &impl EventLog,
+    traces_activities: &mut TracesActivities,
+    activity_level: usize,
+    class_extractor: Option<String>
+) -> Option<FicusDataset> {
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+        let rows_count = dataset.records().shape()[0];
+        let cols_count = dataset.records.shape()[1];
+
+        let mut matrix = vec![];
+        for i in 0..rows_count {
+            let mut vec = vec![];
+            for j in 0..cols_count {
+                vec.push(*dataset.records.get([i, j]).unwrap());
+            }
+
+            matrix.push(vec);
+        }
+
+        let columns_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
+        return Some(FicusDataset::new(matrix, columns_names, vec![]));
+    }
+    
+    None
 }

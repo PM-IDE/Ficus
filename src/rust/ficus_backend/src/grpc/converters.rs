@@ -3,7 +3,6 @@ use std::fmt::Display;
 use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
-
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::discovery::petri_net::arc::Arc;
@@ -14,10 +13,11 @@ use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
     GrpcCountAnnotation, GrpcEntityCountAnnotation, GrpcEntityFrequencyAnnotation, GrpcFrequenciesAnnotation, GrpcGraph, GrpcGraphEdge,
     GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking,
-    GrpcPetriNetTransition,
+    GrpcPetriNetTransition, GrpcDataset, GrpcMatixRow, GrpcMatrix,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
+use crate::utils::dataset::dataset::FicusDataset;
 use crate::utils::graph::graph::{DefaultGraph, Graph};
 use crate::utils::graph::graph_edge::GraphEdge;
 use crate::utils::graph::graph_node::GraphNode;
@@ -104,6 +104,7 @@ pub(super) fn put_into_user_data(
         ContextValue::Float(value) => user_data.put_any::<f64>(key, *value as f64),
         ContextValue::CountAnnotation(_) => todo!(),
         ContextValue::FrequencyAnnotation(_) => todo!(),
+        ContextValue::Dataset(_) => todo!(),
     }
 }
 
@@ -153,6 +154,8 @@ pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys
         try_convert_to_grpc_petri_net_frequency_annotation(value)
     } else if keys.is_petri_net_trace_frequency_annotation(key) {
         try_convert_to_grpc_petri_net_frequency_annotation(value)
+    } else if keys.is_traces_activities_dataset(key) {
+        try_convert_to_grpc_dataset(value)
     } else {
         None
     }
@@ -500,4 +503,32 @@ fn convert_to_grpc_frequency_annotation(annotation: &HashMap<u64, f64>) -> GrpcF
             .collect();
 
     GrpcFrequenciesAnnotation { annotations }
+}
+
+fn try_convert_to_grpc_dataset(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<FicusDataset>() {
+        None
+    } else {
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::Dataset(convert_to_grpc_dataset(value.downcast_ref::<FicusDataset>().unwrap())))
+        })
+    }
+}
+
+fn convert_to_grpc_dataset(dataset: &FicusDataset) -> GrpcDataset {
+    let rows = dataset.values().iter().map(|x| {
+        GrpcMatixRow {
+            values: x.iter().map(|x| *x as f32).collect()
+        }
+    }).collect();
+
+    let matrix = GrpcMatrix {
+        rows
+    };
+
+    GrpcDataset {
+        matrix: Some(matrix),
+        columns_names: dataset.columns_names().clone(),
+        row_names: dataset.row_names().clone()
+    }
 }

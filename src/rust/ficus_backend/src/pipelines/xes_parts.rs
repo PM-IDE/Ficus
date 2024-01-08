@@ -1,6 +1,5 @@
 use crate::event_log::bxes::converter::read_bxes_into_xes_log;
 use crate::pipelines::pipeline_parts::PipelineParts;
-use crate::utils::performance::performance_cookie::performance_cookie;
 use crate::{
     event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
     utils::user_data::user_data::UserData,

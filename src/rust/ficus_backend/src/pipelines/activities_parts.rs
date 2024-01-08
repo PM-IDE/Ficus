@@ -3,7 +3,7 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activities_clustering::{
-    clusterize_activities_dbscan, clusterize_activities_k_means, clusterize_activities_k_means_grid_search,
+    clusterize_activities_dbscan, clusterize_activities_k_means, clusterize_activities_k_means_grid_search, create_traces_activities_dataset,
 };
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
@@ -544,6 +544,24 @@ impl PipelineParts {
                 tolerance,
                 class_extractor,
             );
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn create_traces_activities_dataset() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CREATE_TRACES_ACTIVITIES_DATASET, &|context, _, keys, config| {
+            let log = Self::get_user_data(context, keys.event_log())?;
+            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+                Ok(extractor) => Some(extractor.to_owned()),
+                Err(_) => None,
+            };
+
+            if let Some(dataset) = create_traces_activities_dataset(log, traces_activities, activity_level, class_extractor) {
+                context.put_concrete(keys.traces_activities_dataset().key(), dataset);
+            }
 
             Ok(())
         })
