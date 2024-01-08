@@ -12,11 +12,11 @@ use crate::{
     pipelines::aliases::TracesActivities,
 };
 use linfa::metrics::SilhouetteScore;
-use linfa::{traits::Fit, Dataset, DatasetBase};
+use linfa::{traits::Fit, DatasetBase};
 use linfa_clustering::KMeans;
 use linfa_nn::distance::Distance;
 use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
-
+use crate::event_log::core::event::event_hasher::RegexEventHasher;
 use super::activity_instances::ActivityInTraceInfo;
 
 pub fn clusterize_activities_k_means(
@@ -26,12 +26,13 @@ pub fn clusterize_activities_k_means(
     clusters_count: usize,
     iterations_count: usize,
     tolerance: f64,
+    class_extarctor: Option<String>
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(traces_activities, activity_level) {
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extarctor) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset);
-        merge_activities(log, traces_activities, &processed, &clustered_dataset.targets);
+        merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clustered_dataset.targets);
     }
 }
 
@@ -49,8 +50,9 @@ pub fn clusterize_activities_k_means_grid_search(
     activity_level: usize,
     iterations_count: usize,
     tolerance: f64,
+    class_extractor: Option<String>
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(traces_activities, activity_level) {
+    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 
@@ -70,18 +72,25 @@ pub fn clusterize_activities_k_means_grid_search(
         }
 
         if let Some(best_labels) = best_labels.as_ref() {
-            merge_activities(log, traces_activities, &processed, best_labels)
+            merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), best_labels)
         }
     }
 }
 
+type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>;
 type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 fn create_dataset_from_traces_activities(
+    log: &impl EventLog,
     traces_activities: &TracesActivities,
     activity_level: usize,
-) -> Option<(MyDataset, Vec<Rc<RefCell<ActivityNode>>>)> {
+    class_extractor: Option<String>
+) -> Option<(MyDataset, ActivityNodeWithCoords)> {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
+    let regex_hasher = match class_extractor.as_ref() {
+        Some(class_extractor) => Some(RegexEventHasher::new(class_extractor).ok().unwrap()),
+        None => None,
+    };
 
     for trace_activities in traces_activities.iter() {
         for activity in trace_activities {
@@ -93,22 +102,47 @@ fn create_dataset_from_traces_activities(
                 continue;
             }
 
-            for event_class in &activity.node.borrow().event_classes {
-                all_event_classes.insert(event_class.to_owned());
-            }
+            let activity_event_classes = if let Some(regex_hasher) = regex_hasher.as_ref() {
+                if let Some(repeat_set) = activity.node.borrow().repeat_set.as_ref() {
+                    let trace = log.traces().get(repeat_set.trace_index).unwrap();
+                    let trace = trace.borrow();
+                    let events = trace.events();
+                    let array = &repeat_set.sub_array;
 
-            processed.insert(activity.node.borrow().name.to_owned(), activity.node.clone());
+                    let mut abstracted_event_classes = HashSet::new();
+                    for event in &events[array.start_index..(array.start_index + array.length)] {
+                        abstracted_event_classes.insert(regex_hasher.hash_name(event.borrow().name()));
+                    }
+
+                    let abstracted_event_classes = abstracted_event_classes.into_iter().collect::<Vec<u64>>();
+                    for class in &abstracted_event_classes {
+                        all_event_classes.insert(*class);
+                    }
+
+                    abstracted_event_classes
+                } else {
+                    panic!();
+                }
+            } else {
+                for event_class in &activity.node.borrow().event_classes {
+                    all_event_classes.insert(event_class.to_owned());
+                }
+
+                activity.node.borrow().event_classes.iter().map(|x| *x).collect()
+            };
+
+            processed.insert(activity.node.borrow().name.to_owned(), (activity.node.clone(), activity_event_classes));
         }
     }
 
     let all_event_classes = all_event_classes.into_iter().collect::<Vec<u64>>();
-    let mut processed = processed.iter().map(|x| x.1.clone()).collect::<Vec<Rc<RefCell<ActivityNode>>>>();
-    processed.sort_by(|first, second| first.borrow().name.cmp(&second.borrow().name));
+    let mut processed = processed.iter().map(|x| x.1.clone()).collect::<ActivityNodeWithCoords>();
+    processed.sort_by(|first, second| first.0.borrow().name.cmp(&second.0.borrow().name));
 
     let mut vector = vec![];
     for activity in &processed {
         for i in 0..all_event_classes.len() {
-            vector.push(if activity.borrow().event_classes.contains(&all_event_classes[i]) {
+            vector.push(if activity.1.contains(&all_event_classes[i]) {
                 1.0
             } else {
                 0.0

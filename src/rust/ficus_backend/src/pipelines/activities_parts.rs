@@ -474,6 +474,10 @@ impl PipelineParts {
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
             let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+                Ok(extractor) => Some(extractor.to_owned()),
+                Err(_) => None,
+            };
 
             clusterize_activities_k_means(
                 log,
@@ -482,6 +486,7 @@ impl PipelineParts {
                 clusters_count,
                 learning_iterations_count,
                 tolerance,
+                class_extractor
             );
 
             Ok(())
@@ -497,8 +502,19 @@ impl PipelineParts {
                 let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
                 let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+                let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+                    Ok(extractor) => Some(extractor.to_owned()),
+                    Err(_) => None,
+                };
 
-                clusterize_activities_k_means_grid_search(log, traces_activities, activity_level, learning_iterations_count, tolerance);
+                clusterize_activities_k_means_grid_search(
+                    log,
+                    traces_activities,
+                    activity_level,
+                    learning_iterations_count,
+                    tolerance,
+                    class_extractor,
+                );
 
                 Ok(())
             },

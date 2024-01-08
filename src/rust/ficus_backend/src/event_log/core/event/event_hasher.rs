@@ -35,8 +35,12 @@ pub fn default_class_extractor<TEvent>(event: &TEvent) -> u64
 where
     TEvent: Event,
 {
+    default_class_extractor_name(event.name())
+}
+
+pub fn default_class_extractor_name(name: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
-    event.name().hash(&mut hasher);
+    name.hash(&mut hasher);
 
     hasher.finish()
 }
@@ -50,20 +54,7 @@ where
     TEvent: Event,
 {
     fn hash(&self, event: &TEvent) -> u64 {
-        let name = event.name();
-        match self.regex.find(name) {
-            Ok(Some(m)) => {
-                if m.start() == 0 {
-                    let mut hasher = DefaultHasher::new();
-                    name[0..m.end()].hash(&mut hasher);
-
-                    hasher.finish()
-                } else {
-                    default_class_extractor(event)
-                }
-            }
-            _ => default_class_extractor(event),
-        }
+        self.hash_name(event.name())
     }
 }
 
@@ -72,6 +63,22 @@ impl RegexEventHasher {
         match Regex::new(regex) {
             Ok(regex) => Ok(RegexEventHasher { regex }),
             Err(error) => Err(error),
+        }
+    }
+
+    pub fn hash_name(&self, name: &str) -> u64 {
+        match self.regex.find(name) {
+            Ok(Some(m)) => {
+                if m.start() == 0 {
+                    let mut hasher = DefaultHasher::new();
+                    name[0..m.end()].hash(&mut hasher);
+
+                    hasher.finish()
+                } else {
+                    default_class_extractor_name(name)
+                }
+            }
+            _ => default_class_extractor_name(name),
         }
     }
 
