@@ -186,6 +186,10 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         default_part = _create_default_pipeline_part(const_discover_activities_until_no_more, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
 
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        super().append_parts_with_callbacks(parts)
+        self.after_activities_extraction_pipeline.append_parts_with_callbacks(parts)
+
 
 class ExecuteWithEachActivityLog2(PipelinePart2):
     def __init__(self, activities_logs_source: ActivitiesLogsSource, activity_level: int,
