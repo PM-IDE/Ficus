@@ -163,3 +163,11 @@ class GrpcDataset(_message.Message):
     columnsNames: _containers.RepeatedScalarFieldContainer[str]
     rowNames: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, matrix: _Optional[_Union[GrpcMatrix, _Mapping]] = ..., columnsNames: _Optional[_Iterable[str]] = ..., rowNames: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class GrpcLabeledDataset(_message.Message):
+    __slots__ = ["dataset", "labels"]
+    DATASET_FIELD_NUMBER: _ClassVar[int]
+    LABELS_FIELD_NUMBER: _ClassVar[int]
+    dataset: GrpcDataset
+    labels: _containers.RepeatedScalarFieldContainer[int]
+    def __init__(self, dataset: _Optional[_Union[GrpcDataset, _Mapping]] = ..., labels: _Optional[_Iterable[int]] = ...) -> None: ...

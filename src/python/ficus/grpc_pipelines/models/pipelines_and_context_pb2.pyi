@@ -14,7 +14,7 @@ class GrpcContextKey(_message.Message):
     def __init__(self, name: _Optional[str] = ...) -> None: ...
 
 class GrpcContextValue(_message.Message):
-    __slots__ = ["string", "hashes_log", "names_log", "uint32", "traces_sub_arrays", "trace_index_sub_arrays", "bool", "xes_event_log", "colors_log", "enum", "event_log_info", "strings", "pipeline", "petriNet", "graph", "float", "count_annotation", "frequency_annotation", "dataset"]
+    __slots__ = ["string", "hashes_log", "names_log", "uint32", "traces_sub_arrays", "trace_index_sub_arrays", "bool", "xes_event_log", "colors_log", "enum", "event_log_info", "strings", "pipeline", "petriNet", "graph", "float", "count_annotation", "frequency_annotation", "dataset", "labeled_dataset"]
     STRING_FIELD_NUMBER: _ClassVar[int]
     HASHES_LOG_FIELD_NUMBER: _ClassVar[int]
     NAMES_LOG_FIELD_NUMBER: _ClassVar[int]
@@ -34,6 +34,7 @@ class GrpcContextValue(_message.Message):
     COUNT_ANNOTATION_FIELD_NUMBER: _ClassVar[int]
     FREQUENCY_ANNOTATION_FIELD_NUMBER: _ClassVar[int]
     DATASET_FIELD_NUMBER: _ClassVar[int]
+    LABELED_DATASET_FIELD_NUMBER: _ClassVar[int]
     string: str
     hashes_log: GrpcHashesEventLogContextValue
     names_log: GrpcNamesEventLogContextValue
@@ -53,7 +54,8 @@ class GrpcContextValue(_message.Message):
     count_annotation: _pm_models_pb2.GrpcCountAnnotation
     frequency_annotation: _pm_models_pb2.GrpcFrequenciesAnnotation
     dataset: _pm_models_pb2.GrpcDataset
-    def __init__(self, string: _Optional[str] = ..., hashes_log: _Optional[_Union[GrpcHashesEventLogContextValue, _Mapping]] = ..., names_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., uint32: _Optional[int] = ..., traces_sub_arrays: _Optional[_Union[GrpcEventLogTraceSubArraysContextValue, _Mapping]] = ..., trace_index_sub_arrays: _Optional[_Union[GrpcSubArraysWithTraceIndexContextValue, _Mapping]] = ..., bool: bool = ..., xes_event_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., colors_log: _Optional[_Union[GrpcColorsEventLog, _Mapping]] = ..., enum: _Optional[_Union[GrpcEnum, _Mapping]] = ..., event_log_info: _Optional[_Union[GrpcEventLogInfo, _Mapping]] = ..., strings: _Optional[_Union[GrpcStrings, _Mapping]] = ..., pipeline: _Optional[_Union[GrpcPipeline, _Mapping]] = ..., petriNet: _Optional[_Union[_pm_models_pb2.GrpcPetriNet, _Mapping]] = ..., graph: _Optional[_Union[GrpcGraph, _Mapping]] = ..., float: _Optional[float] = ..., count_annotation: _Optional[_Union[_pm_models_pb2.GrpcCountAnnotation, _Mapping]] = ..., frequency_annotation: _Optional[_Union[_pm_models_pb2.GrpcFrequenciesAnnotation, _Mapping]] = ..., dataset: _Optional[_Union[_pm_models_pb2.GrpcDataset, _Mapping]] = ...) -> None: ...
+    labeled_dataset: _pm_models_pb2.GrpcLabeledDataset
+    def __init__(self, string: _Optional[str] = ..., hashes_log: _Optional[_Union[GrpcHashesEventLogContextValue, _Mapping]] = ..., names_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., uint32: _Optional[int] = ..., traces_sub_arrays: _Optional[_Union[GrpcEventLogTraceSubArraysContextValue, _Mapping]] = ..., trace_index_sub_arrays: _Optional[_Union[GrpcSubArraysWithTraceIndexContextValue, _Mapping]] = ..., bool: bool = ..., xes_event_log: _Optional[_Union[GrpcNamesEventLogContextValue, _Mapping]] = ..., colors_log: _Optional[_Union[GrpcColorsEventLog, _Mapping]] = ..., enum: _Optional[_Union[GrpcEnum, _Mapping]] = ..., event_log_info: _Optional[_Union[GrpcEventLogInfo, _Mapping]] = ..., strings: _Optional[_Union[GrpcStrings, _Mapping]] = ..., pipeline: _Optional[_Union[GrpcPipeline, _Mapping]] = ..., petriNet: _Optional[_Union[_pm_models_pb2.GrpcPetriNet, _Mapping]] = ..., graph: _Optional[_Union[GrpcGraph, _Mapping]] = ..., float: _Optional[float] = ..., count_annotation: _Optional[_Union[_pm_models_pb2.GrpcCountAnnotation, _Mapping]] = ..., frequency_annotation: _Optional[_Union[_pm_models_pb2.GrpcFrequenciesAnnotation, _Mapping]] = ..., dataset: _Optional[_Union[_pm_models_pb2.GrpcDataset, _Mapping]] = ..., labeled_dataset: _Optional[_Union[_pm_models_pb2.GrpcLabeledDataset, _Mapping]] = ...) -> None: ...
 
 class GrpcContextKeyValue(_message.Message):
     __slots__ = ["key", "value"]
