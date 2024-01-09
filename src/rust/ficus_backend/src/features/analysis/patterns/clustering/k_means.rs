@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, collections::HashMap};
 
 use linfa::{
     metrics::SilhouetteScore,
@@ -42,7 +42,7 @@ pub fn clusterize_activities_k_means(
 fn create_labeled_dataset_from_k_means(
     dataset: &MyDataset,
     clustered_dataset: &ClusteredDataset,
-    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>,
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
     classes_names: Vec<String>,
 ) -> LabeledDataset {
     let ficus_dataset = transform_to_ficus_dataset(dataset, processed, classes_names);

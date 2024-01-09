@@ -19,7 +19,7 @@ use crate::{
     utils::dataset::dataset::FicusDataset,
 };
 
-pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>;
+pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
@@ -70,7 +70,7 @@ pub(super) fn create_dataset_from_activities_traces(
         }
 
         processed.into_iter().map(|x| {
-            (x.0, (x.1.0, x.1.1.keys().map(|x| *x).collect::<Vec<u64>>()))
+            (x.0, (x.1.0, x.1.1.into_iter().map(|x| (x.0, x.1)).collect()))
         }).collect()
     })
 }
@@ -78,7 +78,7 @@ pub(super) fn create_dataset_from_activities_traces(
 fn create_dataset_internal(
     traces_activities: &TracesActivities,
     class_extractor: Option<String>,
-    activities_repr_fullfiller: impl Fn(&Vec<Vec<ActivityInTraceInfo>>, Option<&RegexEventHasher>, &mut HashSet<u64>) -> HashMap<String, (Rc<RefCell<ActivityNode>>, Vec<u64>)>
+    activities_repr_fullfiller: impl Fn(&Vec<Vec<ActivityInTraceInfo>>, Option<&RegexEventHasher>, &mut HashSet<u64>) -> HashMap<String, (Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     let mut all_event_classes = HashSet::new();
     let regex_hasher = match class_extractor.as_ref() {
@@ -93,10 +93,19 @@ fn create_dataset_internal(
     processed.sort_by(|first, second| first.0.borrow().name.cmp(&second.0.borrow().name));
 
     let mut vector = vec![];
+    let mut max = usize::MIN;
+    let mut min = usize::MAX;
     for activity in &processed {
         for i in 0..all_event_classes.len() {
-            vector.push(if activity.1.contains(&all_event_classes[i]) { 1.0 } else { 0.0 });
+            let count = if let Some(count) = activity.1.get(&all_event_classes[i]) { *count } else { 0 };
+            vector.push(count as f64);
+            max = max.max(count);
+            min = min.min(count);
         }
+    }
+
+    for i in 0..vector.len() {
+        vector[i] = (max as f64 - vector[i]) / (max as f64 - min as f64);
     }
 
     let shape = (processed.len(), all_event_classes.len());
@@ -162,7 +171,7 @@ pub(super) fn create_dataset_from_activities_classes(
 
                 processed.insert(
                     activity.node.borrow().name.to_owned(),
-                    (activity.node.clone(), activity_event_classes),
+                    (activity.node.clone(), activity_event_classes.into_iter().map(|x| (x, 1)).collect()),
                 );
             }
         }
@@ -295,7 +304,7 @@ pub fn create_traces_activities_dataset(
 
 pub(super) fn transform_to_ficus_dataset(
     dataset: &MyDataset,
-    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>,
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
     classes_names: Vec<String>,
 ) -> FicusDataset {
     let rows_count = dataset.records().shape()[0];
