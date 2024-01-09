@@ -5,7 +5,7 @@ use ficus_backend::features::analysis::patterns::activity_instances::{ActivityIn
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
-use ficus_backend::utils::dataset::dataset::FicusDataset;
+use ficus_backend::utils::dataset::dataset::{FicusDataset, LabeledDataset};
 use ficus_backend::utils::graph::graph::DefaultGraph;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},
@@ -110,6 +110,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
         assert_existence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
         assert_existence::<FicusDataset>(keys, ContextKeys::TRACES_ACTIVITIES_DATASET, &mut used);
+        assert_existence::<LabeledDataset>(keys, ContextKeys::LABELED_TRACES_ACTIVITIES_DATASET, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -182,7 +183,8 @@ fn get_all_keys_names() -> Vec<String> {
         "learning_iterations_count",
         "tolerance",
         "min_events_in_cluster_count",
-        "traces_activities_dataset"
+        "traces_activities_dataset",
+        "labeled_traces_activities_dataset"
     ]
 }
 
@@ -263,6 +265,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<f64>(keys, ContextKeys::TOLERANCE, &mut used);
         assert_keys_equivalence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
         assert_keys_equivalence::<FicusDataset>(keys, ContextKeys::TRACES_ACTIVITIES_DATASET, &mut used);
+        assert_keys_equivalence::<LabeledDataset>(keys, ContextKeys::LABELED_TRACES_ACTIVITIES_DATASET, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })

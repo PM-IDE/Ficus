@@ -482,7 +482,7 @@ impl PipelineParts {
                 Err(_) => None,
             };
 
-            clusterize_activities_k_means(
+            let labeled_dataset = clusterize_activities_k_means(
                 log,
                 traces_activities,
                 activity_level,
@@ -491,6 +491,10 @@ impl PipelineParts {
                 tolerance,
                 class_extractor,
             );
+
+            if let Some(labeled_dataset) = labeled_dataset {
+                context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
+            }
 
             Ok(())
         })
@@ -510,7 +514,7 @@ impl PipelineParts {
                     Err(_) => None,
                 };
 
-                clusterize_activities_k_means_grid_search(
+                let labeled_dataset = clusterize_activities_k_means_grid_search(
                     log,
                     traces_activities,
                     activity_level,
@@ -518,6 +522,10 @@ impl PipelineParts {
                     tolerance,
                     class_extractor,
                 );
+
+                if let Some(labeled_dataset) = labeled_dataset {
+                    context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
+                }
 
                 Ok(())
             },
@@ -536,7 +544,7 @@ impl PipelineParts {
                 Err(_) => None,
             };
 
-            clusterize_activities_dbscan(
+            let labeled_dataset = clusterize_activities_dbscan(
                 log,
                 traces_activities,
                 activity_level,
@@ -544,6 +552,10 @@ impl PipelineParts {
                 tolerance,
                 class_extractor,
             );
+
+            if let Some(labeled_dataset) = labeled_dataset {
+                context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
+            }
 
             Ok(())
         })

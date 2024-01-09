@@ -25,3 +25,25 @@ impl FicusDataset {
         &self.row_names
     }
 }
+
+pub struct LabeledDataset {
+    dataset: FicusDataset,
+    labels: Vec<usize>
+}
+
+impl LabeledDataset {
+    pub fn new(dataset: FicusDataset, labels: Vec<usize>) -> Self {
+        Self {
+            dataset,
+            labels
+        }
+    }
+
+    pub fn dataset(&self) -> &FicusDataset {
+        &self.dataset
+    }
+
+    pub fn labels(&self) -> &Vec<usize> {
+        &self.labels
+    }
+}

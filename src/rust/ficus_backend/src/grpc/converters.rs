@@ -4,6 +4,7 @@ use std::{any::Any, str::FromStr};
 
 use nameof::name_of_type;
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
+use super::get_context_pipeline;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
@@ -13,11 +14,11 @@ use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
     GrpcCountAnnotation, GrpcEntityCountAnnotation, GrpcEntityFrequencyAnnotation, GrpcFrequenciesAnnotation, GrpcGraph, GrpcGraphEdge,
     GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking,
-    GrpcPetriNetTransition, GrpcDataset, GrpcMatixRow, GrpcMatrix,
+    GrpcPetriNetTransition, GrpcDataset, GrpcMatixRow, GrpcMatrix, GrpcLabeledDataset,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
-use crate::utils::dataset::dataset::FicusDataset;
+use crate::utils::dataset::dataset::{FicusDataset, LabeledDataset};
 use crate::utils::graph::graph::{DefaultGraph, Graph};
 use crate::utils::graph::graph_edge::GraphEdge;
 use crate::utils::graph::graph_node::GraphNode;
@@ -105,6 +106,7 @@ pub(super) fn put_into_user_data(
         ContextValue::CountAnnotation(_) => todo!(),
         ContextValue::FrequencyAnnotation(_) => todo!(),
         ContextValue::Dataset(_) => todo!(),
+        ContextValue::LabeledDataset(_) => todo!(),
     }
 }
 
@@ -156,6 +158,8 @@ pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys
         try_convert_to_grpc_petri_net_frequency_annotation(value)
     } else if keys.is_traces_activities_dataset(key) {
         try_convert_to_grpc_dataset(value)
+    } else if keys.is_labeled_traces_activities_dataset(key) {
+        try_convert_to_grpc_labeled_dataset(value)
     } else {
         None
     }
@@ -168,6 +172,17 @@ fn try_convert_to_grpc_petri_net_count_annotation(value: &dyn Any) -> Option<Grp
         let value = value.downcast_ref::<HashMap<u64, usize>>().unwrap();
         Some(GrpcContextValue {
             context_value: Some(ContextValue::CountAnnotation(convert_to_grpc_count_annotation(value))),
+        })
+    }
+}
+
+fn try_convert_to_grpc_labeled_dataset(value: &dyn Any) -> Option<GrpcContextValue> {
+    if !value.is::<LabeledDataset>() {
+        None
+    } else {
+        let value = value.downcast_ref::<LabeledDataset>().unwrap();
+        Some(GrpcContextValue {
+            context_value: Some(ContextValue::LabeledDataset(convert_to_labeled_grpc_dataset(value))),
         })
     }
 }
@@ -530,5 +545,15 @@ fn convert_to_grpc_dataset(dataset: &FicusDataset) -> GrpcDataset {
         matrix: Some(matrix),
         columns_names: dataset.columns_names().clone(),
         row_names: dataset.row_names().clone()
+    }
+}
+
+fn convert_to_labeled_grpc_dataset(dataset: &LabeledDataset) -> GrpcLabeledDataset {
+    let grpc_dataset = convert_to_grpc_dataset(dataset.dataset());
+    let labels = dataset.labels().iter().map(|x| *x as i32).collect();
+
+    GrpcLabeledDataset {
+        dataset: Some(grpc_dataset),
+        labels
     }
 }

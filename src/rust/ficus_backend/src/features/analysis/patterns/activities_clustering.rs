@@ -7,7 +7,7 @@ use std::{
 };
 
 use super::activity_instances::ActivityInTraceInfo;
-use crate::{event_log::core::event::event_hasher::RegexEventHasher, utils::dataset::dataset::FicusDataset};
+use crate::{event_log::core::event::event_hasher::RegexEventHasher, utils::dataset::dataset::{FicusDataset, LabeledDataset}};
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
     features::analysis::patterns::repeat_sets::ActivityNode,
@@ -26,14 +26,20 @@ pub fn clusterize_activities_dbscan(
     min_points: usize,
     tolerance: f64,
     class_extractor: Option<String>,
-) {
-    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
+) -> Option<LabeledDataset> {
+    if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let clusters = Dbscan::params_with(min_points, CosineDistance {}, KdTree)
             .tolerance(tolerance)
             .transform(dataset.records())
             .unwrap();
 
         merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
+        let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
+        let labels = clusters.into_raw_vec().iter().map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 }).collect();
+
+        Some(LabeledDataset::new(ficus_dataset, labels))
+    } else {
+        None
     }
 }
 
@@ -45,18 +51,33 @@ pub fn clusterize_activities_k_means(
     iterations_count: usize,
     tolerance: f64,
     class_extractor: Option<String>,
-) {
-    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
+) -> Option<LabeledDataset> {
+    if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
-        let clustered_dataset = model.predict(dataset);
+        let clustered_dataset = model.predict(dataset.clone());
         merge_activities(
             log,
             traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clustered_dataset.targets.map(|x| Some(*x)),
         );
+
+        Some(create_labeled_dataset_from_k_means(&dataset, &clustered_dataset, &processed, classes_names))
+    } else {
+        None
     }
+}
+
+type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
+fn create_labeled_dataset_from_k_means(
+    dataset: &MyDataset,
+    clustered_dataset: &ClusteredDataset, 
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>, 
+    classes_names: Vec<String>,
+) -> LabeledDataset {
+    let ficus_dataset = transform_to_ficus_dataset(dataset, processed, classes_names);
+    LabeledDataset::new(ficus_dataset, clustered_dataset.targets.clone().into_raw_vec())
 }
 
 fn create_k_means_model(clusters_count: usize, iterations_count: u64, tolerance: f64, dataset: &MyDataset) -> KMeans<f64, CosineDistance> {
@@ -74,8 +95,8 @@ pub fn clusterize_activities_k_means_grid_search(
     iterations_count: usize,
     tolerance: f64,
     class_extractor: Option<String>,
-) {
-    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
+) -> Option<LabeledDataset> {
+    if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 
@@ -85,7 +106,7 @@ pub fn clusterize_activities_k_means_grid_search(
             let clustered_dataset = model.predict(dataset.clone());
             let score = match clustered_dataset.silhouette_score() {
                 Ok(score) => score,
-                Err(_) => return,
+                Err(_) => return None,
             };
 
             if score > best_metric {
@@ -100,8 +121,15 @@ pub fn clusterize_activities_k_means_grid_search(
                 traces_activities,
                 &processed.iter().map(|x| x.0.clone()).collect(),
                 &best_labels.map(|x| Some(*x)),
-            )
+            );
+
+            let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
+            Some(LabeledDataset::new(ficus_dataset, best_labels.clone().into_raw_vec()))
+        } else {
+            None
         }
+    } else { 
+        None
     }
 }
 
@@ -303,22 +331,30 @@ pub fn create_traces_activities_dataset(
     class_extractor: Option<String>
 ) -> Option<FicusDataset> {
     if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
-        let rows_count = dataset.records().shape()[0];
-        let cols_count = dataset.records.shape()[1];
+        Some(transform_to_ficus_dataset(&dataset, &processed, classes_names))
+    } else {
+        None
+    }
+}
 
-        let mut matrix = vec![];
-        for i in 0..rows_count {
-            let mut vec = vec![];
-            for j in 0..cols_count {
-                vec.push(*dataset.records.get([i, j]).unwrap());
-            }
+fn transform_to_ficus_dataset(
+    dataset: &MyDataset, 
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>,
+    classes_names: Vec<String>
+) -> FicusDataset {
+    let rows_count = dataset.records().shape()[0];
+    let cols_count = dataset.records().shape()[1];
 
-            matrix.push(vec);
+    let mut matrix = vec![];
+    for i in 0..rows_count {
+        let mut vec = vec![];
+        for j in 0..cols_count {
+            vec.push(*dataset.records.get([i, j]).unwrap());
         }
 
-        let row_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
-        return Some(FicusDataset::new(matrix, classes_names, row_names));
+        matrix.push(vec);
     }
-    
-    None
+
+    let row_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
+    FicusDataset::new(matrix, classes_names, row_names)
 }

@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::event_log::xes::xes_event_log::XesEventLogImpl;
 use crate::features::analysis::directly_follows_graph::construct_dfg;
