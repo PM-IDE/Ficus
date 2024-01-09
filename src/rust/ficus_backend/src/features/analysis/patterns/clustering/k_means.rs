@@ -11,7 +11,7 @@ use crate::{
     utils::dataset::dataset::LabeledDataset,
 };
 
-use super::common::{create_dataset_from_activities_classes, merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset};
+use super::common::{merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset, create_dataset};
 
 pub fn clusterize_activities_k_means(
     log: &impl EventLog,
@@ -21,8 +21,10 @@ pub fn clusterize_activities_k_means(
     iterations_count: usize,
     tolerance: f64,
     class_extractor: Option<String>,
+    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor) {
+    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
+    if let Some((dataset, processed, classes_names)) = dataset {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset.clone());
@@ -64,8 +66,11 @@ pub fn clusterize_activities_k_means_grid_search(
     iterations_count: usize,
     tolerance: f64,
     class_extractor: Option<String>,
+    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor) {
+    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
+
+    if let Some((dataset, processed, classes_names)) = dataset {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 

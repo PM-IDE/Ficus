@@ -557,4 +557,13 @@ impl ContextKeys {
     pub fn is_labeled_traces_activities_dataset(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.labeled_traces_activities_dataset(), key)
     }
+
+    pub fn obtain_activities_repr_from_sub_traces(&self) -> &DefaultContextKey<bool> {
+        self.find_concrete_key::<bool>(Self::OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES)
+            .expect("OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES should be present in keys")
+    }
+
+    pub fn is_obtain_activities_repr_from_sub_traces(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.obtain_activities_repr_from_sub_traces(), key)
+    }
 }

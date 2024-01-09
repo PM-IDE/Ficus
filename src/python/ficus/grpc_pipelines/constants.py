@@ -46,6 +46,7 @@ const_tolerance = 'tolerance'
 const_min_events_in_cluster_count = 'min_events_in_cluster_count'
 const_traces_activities_dataset = 'traces_activities_dataset'
 const_labeled_traces_activities_dataset = 'labeled_traces_activities_dataset'
+const_obtain_activities_repr_from_sub_traces = 'obtain_activities_repr_from_sub_traces'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

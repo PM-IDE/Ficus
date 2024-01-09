@@ -477,6 +477,7 @@ impl PipelineParts {
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
             let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+            let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
             let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
                 Ok(extractor) => Some(extractor.to_owned()),
                 Err(_) => None,
@@ -490,6 +491,7 @@ impl PipelineParts {
                 learning_iterations_count,
                 tolerance,
                 class_extractor,
+                obtain_repr_from_traces,
             );
 
             if let Some(labeled_dataset) = labeled_dataset {
@@ -509,6 +511,7 @@ impl PipelineParts {
                 let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
                 let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+                let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
                 let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
                     Ok(extractor) => Some(extractor.to_owned()),
                     Err(_) => None,
@@ -521,6 +524,7 @@ impl PipelineParts {
                     learning_iterations_count,
                     tolerance,
                     class_extractor,
+                    obtain_repr_from_traces,
                 );
 
                 if let Some(labeled_dataset) = labeled_dataset {
@@ -539,6 +543,7 @@ impl PipelineParts {
             let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
             let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+            let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
             let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
                 Ok(extractor) => Some(extractor.to_owned()),
                 Err(_) => None,
@@ -551,6 +556,7 @@ impl PipelineParts {
                 min_points_in_cluster,
                 tolerance,
                 class_extractor,
+                obtain_repr_from_traces
             );
 
             if let Some(labeled_dataset) = labeled_dataset {

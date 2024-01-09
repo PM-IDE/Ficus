@@ -4,7 +4,7 @@ use linfa_nn::KdTree;
 
 use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::dataset::dataset::LabeledDataset};
 
-use super::common::{create_dataset_from_activities_classes, merge_activities, transform_to_ficus_dataset, CosineDistance};
+use super::common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance};
 
 pub fn clusterize_activities_dbscan(
     log: &impl EventLog,
@@ -13,8 +13,11 @@ pub fn clusterize_activities_dbscan(
     min_points: usize,
     tolerance: f64,
     class_extractor: Option<String>,
+    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor) {
+    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
+
+    if let Some((dataset, processed, classes_names)) = dataset {
         let clusters = Dbscan::params_with(min_points, CosineDistance {}, KdTree)
             .tolerance(tolerance)
             .transform(dataset.records())

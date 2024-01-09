@@ -23,6 +23,20 @@ pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
+pub(super) fn create_dataset(
+    log: &impl EventLog,
+    traces_activities: &mut TracesActivities,
+    activity_level: usize,
+    class_extractor: Option<String>,
+    obtain_repr_from_traces: bool
+) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+    if obtain_repr_from_traces {
+        create_dataset_from_activities_traces(log, traces_activities, activity_level, class_extractor)
+    } else {
+        create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor)
+    }
+}
+
 pub(super) fn create_dataset_from_activities_traces(
     log: &impl EventLog,
     traces_activities: &TracesActivities,
@@ -52,7 +66,7 @@ pub(super) fn create_dataset_from_activities_traces(
                     let trace = log.traces().get(repeat_set.trace_index).unwrap();
                     let events = trace.borrow();
                     let events = events.events();
-        
+
                     let start = array.start_index;
                     let end = start + array.length;
                     for event in &events[start..end] {
