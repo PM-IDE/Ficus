@@ -1,4 +1,3 @@
-pub mod activities_clustering;
 pub mod activity_instances;
 pub mod clustering;
 pub mod contexts;
