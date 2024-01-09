@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 
 from ficus.analysis.event_log_analysis import draw_pca_results
-from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset
+from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -247,14 +247,42 @@ class ApplyClassExtractor2(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=part)
 
 
-class ClusterizeActivitiesFromTracesKMeans(PipelinePart2):
+class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
+    def __init__(self,
+                 show_visualization: bool,
+                 fig_size: (int, int),
+                 font_size: int,
+                 save_path: Optional[str]):
+        super().__init__()
+        self.show_visualization = show_visualization
+        self.fig_size = fig_size
+        self.font_size = font_size
+        self.save_path = save_path
+
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        if not self.show_visualization:
+            return
+
+        dataset = values[const_labeled_traces_activities_dataset].labeled_dataset
+        df = from_grpc_labeled_dataset(dataset)
+        pca = PCA(n_components=3)
+        pca_result = pca.fit_transform(df.loc[:, df.columns != const_cluster_labels].values)
+
+        draw_pca_results(df, pca_result, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+
+
+class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualization2):
     def __init__(self,
                  activity_level: int = 0,
                  clusters_count: int = 10,
                  learning_iterations_count: int = 200,
                  tolerance: float = 1e-5,
-                 class_extractor: Optional[str] = None):
-        super().__init__()
+                 class_extractor: Optional[str] = None,
+                 show_visualization: bool = True,
+                 fig_size: (int, int) = (7, 9),
+                 font_size: int = 14,
+                 save_path: Optional[str] = None):
+        super().__init__(show_visualization, fig_size, font_size, save_path)
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
@@ -270,17 +298,25 @@ class ClusterizeActivitiesFromTracesKMeans(PipelinePart2):
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
 
-        part = _create_default_pipeline_part(const_clusterize_activities_from_traces_k_means, config)
-        return GrpcPipelinePartBase(defaultPart=part)
+        part = _create_complex_get_context_part(self.uuid,
+                                                [const_labeled_traces_activities_dataset],
+                                                const_clusterize_activities_from_traces_k_means,
+                                                config)
+
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class ClusterizeActivitiesFromTracesKMeansGridSearch(PipelinePart2):
+class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPartWithPCAVisualization2):
     def __init__(self,
                  activity_level: int = 0,
                  learning_iterations_count: int = 200,
                  tolerance: float = 1e-5,
-                 class_extractor: Optional[str] = None):
-        super().__init__()
+                 class_extractor: Optional[str] = None,
+                 show_visualization: bool = True,
+                 fig_size: (int, int) = (7, 9),
+                 font_size: int = 14,
+                 save_path: Optional[str] = None):
+        super().__init__(show_visualization, fig_size, font_size, save_path)
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
         self.activity_level = activity_level
@@ -294,17 +330,25 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(PipelinePart2):
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
 
-        part = _create_default_pipeline_part(const_clusterize_activities_from_traces_k_means_grid_search, config)
-        return GrpcPipelinePartBase(defaultPart=part)
+        part = _create_complex_get_context_part(self.uuid,
+                                                [const_labeled_traces_activities_dataset],
+                                                const_clusterize_activities_from_traces_k_means_grid_search,
+                                                config)
+
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class ClusterizeActivitiesFromTracesDbscan(PipelinePart2):
+class ClusterizeActivitiesFromTracesDbscan(ClusterizationPartWithPCAVisualization2):
     def __init__(self,
                  activity_level: int = 0,
                  min_events_count_in_cluster: int = 1,
                  tolerance: float = 1e-5,
-                 class_extractor: Optional[str] = None):
-        super().__init__()
+                 class_extractor: Optional[str] = None,
+                 show_visualization: bool = True,
+                 fig_size: (int, int) = (7, 9),
+                 font_size: int = 14,
+                 save_path: Optional[str] = None):
+        super().__init__(show_visualization, fig_size, font_size, save_path)
         self.min_events_count_in_cluster = min_events_count_in_cluster
         self.tolerance = tolerance
         self.activity_level = activity_level
@@ -319,8 +363,12 @@ class ClusterizeActivitiesFromTracesDbscan(PipelinePart2):
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
 
-        part = _create_default_pipeline_part(const_clusterize_activities_from_traces_dbscan, config)
-        return GrpcPipelinePartBase(defaultPart=part)
+        part = _create_complex_get_context_part(self.uuid,
+                                                [const_labeled_traces_activities_dataset],
+                                                const_clusterize_activities_from_traces_dbscan,
+                                                config)
+
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
 class VisualizeTracesActivities2(PipelinePart2WithCallback):
@@ -357,4 +405,4 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
 
         pca = PCA(n_components=3)
         pca_result = pca.fit_transform(df.values)
-        draw_pca_results(pca_result, self.fig_size, self.font_size, self.save_path)
+        draw_pca_results(df, pca_result, self.fig_size, self.font_size, save_path=self.save_path)

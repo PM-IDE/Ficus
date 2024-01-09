@@ -2,6 +2,9 @@ import math
 import os
 from typing import List, Union, Callable, Optional
 from dataclasses import dataclass
+
+import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt, axes
 from matplotlib.collections import PatchCollection
 
@@ -361,17 +364,32 @@ def draw_events_entropy_histogram(log: MyEventLog,
         plt.close(current_figure)
 
 
-def draw_pca_results(pca_result,
+def draw_pca_results(df: pd.DataFrame,
+                     pca_result,
                      fig_size: (int, int),
                      font_size: int,
-                     save_path: Optional[str] = None):
+                     save_path: Optional[str] = None,
+                     label_column: Optional[str] = None):
     fig = plt.figure(figsize=fig_size)
     ax = fig.add_subplot(projection='3d')
 
     Xax = pca_result[:, 0]
     Yax = pca_result[:, 1]
     Zax = pca_result[:, 2]
-    ax.scatter(Xax, Yax, Zax)
+
+    if label_column is None:
+        ax.scatter(Xax, Yax, Zax)
+    else:
+        y = df[label_column].to_numpy()
+        provider = RandomUniqueColorsProvider()
+        labels_to_columns = dict()
+
+        for label in np.unique(y):
+            ix = np.where(y == label)
+            color = labels_to_columns[label] if label in labels_to_columns else provider.next()
+            labels_to_columns[label] = color
+
+            ax.scatter(Xax[ix], Yax[ix], Zax[ix], c=color, s=40)
 
     ax.set_xlabel("First Component", fontsize=font_size)
     ax.set_ylabel("Second Component", fontsize=font_size)

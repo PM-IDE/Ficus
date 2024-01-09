@@ -45,6 +45,7 @@ const_learning_iterations_count = 'learning_iterations_count'
 const_tolerance = 'tolerance'
 const_min_events_in_cluster_count = 'min_events_in_cluster_count'
 const_traces_activities_dataset = 'traces_activities_dataset'
+const_labeled_traces_activities_dataset = 'labeled_traces_activities_dataset'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'
@@ -103,3 +104,5 @@ const_undef_activity_handling_strat_name = 'UndefActivityHandlingStrategyDto'
 const_narrow_activities_kind_enum_name = 'ActivityNarrowingKind'
 const_activity_filter_kind_enum_name = 'ActivityInTraceFilterKind'
 const_activities_logs_source_enum_name = 'ActivitiesLogsSourceDto'
+
+const_cluster_labels = 'cluster_labels'

@@ -5,6 +5,7 @@ import pandas as pd
 
 from ficus.analysis.event_log_analysis import ColoredRectangle, Color
 from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
+from ficus.grpc_pipelines.constants import const_cluster_labels
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ficus.grpc_pipelines.models.pm_models_pb2 import *
 from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
@@ -227,3 +228,13 @@ def from_grpc_ficus_dataset(grpc_dataset: GrpcDataset) -> pd.DataFrame:
         columns.append(column_name)
 
     return pd.DataFrame(data, columns=columns)
+
+
+def from_grpc_labeled_dataset(grpc_dataset: GrpcLabeledDataset):
+    df = from_grpc_ficus_dataset(grpc_dataset.dataset)
+    labels = []
+    for label in grpc_dataset.labels:
+        labels.append(label)
+
+    df[const_cluster_labels] = labels
+    return df
