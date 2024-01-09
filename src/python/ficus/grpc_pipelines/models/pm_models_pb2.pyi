@@ -141,3 +141,25 @@ class GrpcEntityFrequencyAnnotation(_message.Message):
     entityId: int
     frequency: float
     def __init__(self, entityId: _Optional[int] = ..., frequency: _Optional[float] = ...) -> None: ...
+
+class GrpcMatrix(_message.Message):
+    __slots__ = ["rows"]
+    ROWS_FIELD_NUMBER: _ClassVar[int]
+    rows: _containers.RepeatedCompositeFieldContainer[GrpcMatixRow]
+    def __init__(self, rows: _Optional[_Iterable[_Union[GrpcMatixRow, _Mapping]]] = ...) -> None: ...
+
+class GrpcMatixRow(_message.Message):
+    __slots__ = ["values"]
+    VALUES_FIELD_NUMBER: _ClassVar[int]
+    values: _containers.RepeatedScalarFieldContainer[float]
+    def __init__(self, values: _Optional[_Iterable[float]] = ...) -> None: ...
+
+class GrpcDataset(_message.Message):
+    __slots__ = ["matrix", "columnsNames", "rowNames"]
+    MATRIX_FIELD_NUMBER: _ClassVar[int]
+    COLUMNSNAMES_FIELD_NUMBER: _ClassVar[int]
+    ROWNAMES_FIELD_NUMBER: _ClassVar[int]
+    matrix: GrpcMatrix
+    columnsNames: _containers.RepeatedScalarFieldContainer[str]
+    rowNames: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, matrix: _Optional[_Union[GrpcMatrix, _Mapping]] = ..., columnsNames: _Optional[_Iterable[str]] = ..., rowNames: _Optional[_Iterable[str]] = ...) -> None: ...
