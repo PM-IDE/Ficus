@@ -2,11 +2,11 @@ use crate::event_log::core::event::event::Event;
 use crate::event_log::core::trace::trace::Trace;
 use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
-use crate::features::analysis::patterns::activities_clustering::{
-    clusterize_activities_dbscan, clusterize_activities_k_means, clusterize_activities_k_means_grid_search, create_traces_activities_dataset,
-};
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
+use crate::features::analysis::patterns::clustering::common::create_traces_activities_dataset;
+use crate::features::analysis::patterns::clustering::dbscan::clusterize_activities_dbscan;
+use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
