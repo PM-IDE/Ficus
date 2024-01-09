@@ -1,3 +1,8 @@
+import pandas as pd
+from IPython.core.display_functions import display
+from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA
+import plotly.express as px
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -184,7 +189,8 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
 
 
 class ExecuteWithEachActivityLog2(PipelinePart2):
-    def __init__(self, activities_logs_source: ActivitiesLogsSource, activity_level: int, activity_log_pipeline: Pipeline2):
+    def __init__(self, activities_logs_source: ActivitiesLogsSource, activity_level: int,
+                 activity_log_pipeline: Pipeline2):
         super().__init__()
         self.activity_level = activity_level
         self.activity_log_pipeline = activity_log_pipeline
@@ -316,3 +322,58 @@ class ClusterizeActivitiesFromTracesDbscan(PipelinePart2):
 
         part = _create_default_pipeline_part(const_clusterize_activities_from_traces_dbscan, config)
         return GrpcPipelinePartBase(defaultPart=part)
+
+
+class VisualizeTracesActivities(PipelinePart2WithCallback):
+    def __init__(self,
+                 activity_level: int = 0,
+                 class_extractor: Optional[str] = None):
+        super().__init__()
+        self.activity_level = activity_level
+        self.class_extractor = class_extractor
+
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_activity_level, self.activity_level)
+
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
+
+        part = _create_complex_get_context_part(self.uuid,
+                                                [const_traces_activities_dataset],
+                                                const_create_traces_activities_dataset,
+                                                config)
+
+        return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def execute_callback(self, values: dict[str, GrpcContextValue]):
+        dataset = values[const_traces_activities_dataset].dataset
+
+        data = []
+        for row in dataset.matrix.rows:
+            row_vec = []
+            for value in row.values:
+                row_vec.append(value)
+
+            data.append(row_vec)
+
+        columns = []
+        for column_name in dataset.columnsNames:
+            columns.append(column_name)
+
+        df = pd.DataFrame(data, columns=columns)
+        pca = PCA(n_components=3)
+        pca_result = pca.fit_transform(df.values)
+
+        labels = {
+            str(i): f"PC {i + 1} ({var:.1f}%)"
+            for i, var in enumerate(pca.explained_variance_ratio_ * 100)
+        }
+
+        fig = px.scatter_matrix(
+            pca_result,
+            labels=labels,
+        )
+
+        fig.update_traces(diagonal_visible=False)
+        fig.show()
