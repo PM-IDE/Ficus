@@ -1,8 +1,7 @@
-import pandas as pd
-from IPython.core.display_functions import display
-from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
-import plotly.express as px
+
+from ficus.analysis.event_log_analysis import draw_pca_results
+from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -324,13 +323,19 @@ class ClusterizeActivitiesFromTracesDbscan(PipelinePart2):
         return GrpcPipelinePartBase(defaultPart=part)
 
 
-class VisualizeTracesActivities(PipelinePart2WithCallback):
+class VisualizeTracesActivities2(PipelinePart2WithCallback):
     def __init__(self,
                  activity_level: int = 0,
-                 class_extractor: Optional[str] = None):
+                 class_extractor: Optional[str] = None,
+                 fig_size: (int, int) = (7, 9),
+                 font_size: int = 14,
+                 save_path: Optional[str] = None):
         super().__init__()
         self.activity_level = activity_level
         self.class_extractor = class_extractor
+        self.fig_size = fig_size
+        self.font_size = font_size
+        self.save_path = save_path
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -348,32 +353,8 @@ class VisualizeTracesActivities(PipelinePart2WithCallback):
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
         dataset = values[const_traces_activities_dataset].dataset
+        df = from_grpc_ficus_dataset(dataset)
 
-        data = []
-        for row in dataset.matrix.rows:
-            row_vec = []
-            for value in row.values:
-                row_vec.append(value)
-
-            data.append(row_vec)
-
-        columns = []
-        for column_name in dataset.columnsNames:
-            columns.append(column_name)
-
-        df = pd.DataFrame(data, columns=columns)
         pca = PCA(n_components=3)
         pca_result = pca.fit_transform(df.values)
-
-        labels = {
-            str(i): f"PC {i + 1} ({var:.1f}%)"
-            for i, var in enumerate(pca.explained_variance_ratio_ * 100)
-        }
-
-        fig = px.scatter_matrix(
-            pca_result,
-            labels=labels,
-        )
-
-        fig.update_traces(diagonal_visible=False)
-        fig.show()
+        draw_pca_results(pca_result, self.fig_size, self.font_size, self.save_path)

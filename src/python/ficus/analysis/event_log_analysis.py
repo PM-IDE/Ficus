@@ -1,6 +1,6 @@
 import math
 import os
-from typing import List, Union, Callable
+from typing import List, Union, Callable, Optional
 from dataclasses import dataclass
 from matplotlib import pyplot as plt, axes
 from matplotlib.collections import PatchCollection
@@ -359,3 +359,27 @@ def draw_events_entropy_histogram(log: MyEventLog,
     else:
         current_figure.savefig(save_path, bbox_inches='tight', dpi=150)
         plt.close(current_figure)
+
+
+def draw_pca_results(pca_result,
+                     fig_size: (int, int),
+                     font_size: int,
+                     save_path: Optional[str] = None):
+    fig = plt.figure(figsize=fig_size)
+    ax = fig.add_subplot(projection='3d')
+
+    Xax = pca_result[:, 0]
+    Yax = pca_result[:, 1]
+    Zax = pca_result[:, 2]
+    ax.scatter(Xax, Yax, Zax)
+
+    ax.set_xlabel("First Component", fontsize=font_size)
+    ax.set_ylabel("Second Component", fontsize=font_size)
+    ax.set_zlabel("Third Component", fontsize=font_size)
+
+    ax.legend()
+    if save_path is None:
+        fig.show()
+    else:
+        fig.savefig(save_path, bbox_inches='tight', dpi=150)
+        plt.close(fig)

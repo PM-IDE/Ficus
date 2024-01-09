@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+import pandas as pd
+
 from ficus.analysis.event_log_analysis import ColoredRectangle, Color
 from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
@@ -209,3 +211,19 @@ def from_grpc_frequency_annotation(grpc_annotation: GrpcFrequenciesAnnotation) -
         map[annotation.entityId] = str(annotation.frequency)
 
     return map
+
+
+def from_grpc_ficus_dataset(grpc_dataset: GrpcDataset) -> pd.DataFrame:
+    data = []
+    for row in grpc_dataset.matrix.rows:
+        row_vec = []
+        for value in row.values:
+            row_vec.append(value)
+
+        data.append(row_vec)
+
+    columns = []
+    for column_name in grpc_dataset.columnsNames:
+        columns.append(column_name)
+
+    return pd.DataFrame(data, columns=columns)
