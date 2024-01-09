@@ -27,7 +27,7 @@ pub fn clusterize_activities_dbscan(
     tolerance: f64,
     class_extractor: Option<String>,
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let clusters = Dbscan::params_with(min_points, CosineDistance {}, KdTree)
             .tolerance(tolerance)
             .transform(dataset.records())
@@ -46,7 +46,7 @@ pub fn clusterize_activities_k_means(
     tolerance: f64,
     class_extractor: Option<String>,
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset);
@@ -75,7 +75,7 @@ pub fn clusterize_activities_k_means_grid_search(
     tolerance: f64,
     class_extractor: Option<String>,
 ) {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+    if let Some((dataset, processed, _)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 
@@ -107,12 +107,12 @@ pub fn clusterize_activities_k_means_grid_search(
 
 type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>;
 type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
-fn create_dataset_from_traces_activities(
+fn create_dataset(
     log: &impl EventLog,
     traces_activities: &TracesActivities,
     activity_level: usize,
     class_extractor: Option<String>,
-) -> Option<(MyDataset, ActivityNodeWithCoords)> {
+) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     let mut all_event_classes = HashSet::new();
     let mut processed = HashMap::new();
     let regex_hasher = match class_extractor.as_ref() {
@@ -184,7 +184,7 @@ fn create_dataset_from_traces_activities(
         Err(_) => return None,
     };
 
-    Some((DatasetBase::from(array), processed))
+    Some((DatasetBase::from(array), processed, all_event_classes.iter().map(|x| x.to_string()).collect()))
 }
 
 fn merge_activities(
@@ -302,7 +302,7 @@ pub fn create_traces_activities_dataset(
     activity_level: usize,
     class_extractor: Option<String>
 ) -> Option<FicusDataset> {
-    if let Some((dataset, processed)) = create_dataset_from_traces_activities(log, traces_activities, activity_level, class_extractor) {
+    if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         let rows_count = dataset.records().shape()[0];
         let cols_count = dataset.records.shape()[1];
 
@@ -316,8 +316,8 @@ pub fn create_traces_activities_dataset(
             matrix.push(vec);
         }
 
-        let columns_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
-        return Some(FicusDataset::new(matrix, columns_names, vec![]));
+        let row_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
+        return Some(FicusDataset::new(matrix, classes_names, row_names));
     }
     
     None
