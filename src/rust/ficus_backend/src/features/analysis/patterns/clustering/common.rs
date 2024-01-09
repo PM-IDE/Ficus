@@ -105,7 +105,7 @@ fn create_dataset_internal(
     }
 
     for i in 0..vector.len() {
-        vector[i] = (max as f64 - vector[i]) / (max as f64 - min as f64);
+        vector[i] = (vector[i] - min as f64) / (max as f64 - min as f64);
     }
 
     let shape = (processed.len(), all_event_classes.len());
