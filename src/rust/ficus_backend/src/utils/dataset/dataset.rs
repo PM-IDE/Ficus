@@ -1,7 +1,7 @@
 pub struct FicusDataset {
     values: Vec<Vec<f64>>,
     columns_names: Vec<String>,
-    row_names: Vec<String>
+    row_names: Vec<String>,
 }
 
 impl FicusDataset {
@@ -9,7 +9,7 @@ impl FicusDataset {
         Self {
             values,
             columns_names,
-            row_names
+            row_names,
         }
     }
 
@@ -28,15 +28,12 @@ impl FicusDataset {
 
 pub struct LabeledDataset {
     dataset: FicusDataset,
-    labels: Vec<usize>
+    labels: Vec<usize>,
 }
 
 impl LabeledDataset {
     pub fn new(dataset: FicusDataset, labels: Vec<usize>) -> Self {
-        Self {
-            dataset,
-            labels
-        }
+        Self { dataset, labels }
     }
 
     pub fn dataset(&self) -> &FicusDataset {

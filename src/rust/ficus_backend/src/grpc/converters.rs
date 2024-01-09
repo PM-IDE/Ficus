@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::{any::Any, str::FromStr};
 
-use nameof::name_of_type;
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use super::get_context_pipeline;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
@@ -12,9 +11,9 @@ use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::features::discovery::petri_net::place::Place;
 use crate::features::discovery::petri_net::transition::Transition;
 use crate::ficus_proto::{
-    GrpcCountAnnotation, GrpcEntityCountAnnotation, GrpcEntityFrequencyAnnotation, GrpcFrequenciesAnnotation, GrpcGraph, GrpcGraphEdge,
-    GrpcGraphNode, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking, GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking,
-    GrpcPetriNetTransition, GrpcDataset, GrpcMatixRow, GrpcMatrix, GrpcLabeledDataset,
+    GrpcCountAnnotation, GrpcDataset, GrpcEntityCountAnnotation, GrpcEntityFrequencyAnnotation, GrpcFrequenciesAnnotation, GrpcGraph,
+    GrpcGraphEdge, GrpcGraphNode, GrpcLabeledDataset, GrpcMatixRow, GrpcMatrix, GrpcPetriNet, GrpcPetriNetArc, GrpcPetriNetMarking,
+    GrpcPetriNetPlace, GrpcPetriNetSinglePlaceMarking, GrpcPetriNetTransition,
 };
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -47,6 +46,7 @@ use crate::{
         user_data::{keys::Key, user_data::UserData},
     },
 };
+use nameof::name_of_type;
 
 pub(super) fn create_initial_context<'a>(context: &'a ServicePipelineExecutionContext) -> PipelineContext<'a> {
     let mut pipeline_context = PipelineContext::new_with_logging(context.parts());
@@ -525,26 +525,26 @@ fn try_convert_to_grpc_dataset(value: &dyn Any) -> Option<GrpcContextValue> {
         None
     } else {
         Some(GrpcContextValue {
-            context_value: Some(ContextValue::Dataset(convert_to_grpc_dataset(value.downcast_ref::<FicusDataset>().unwrap())))
+            context_value: Some(ContextValue::Dataset(convert_to_grpc_dataset(value.downcast_ref::<FicusDataset>().unwrap()))),
         })
     }
 }
 
 fn convert_to_grpc_dataset(dataset: &FicusDataset) -> GrpcDataset {
-    let rows = dataset.values().iter().map(|x| {
-        GrpcMatixRow {
-            values: x.iter().map(|x| *x as f32).collect()
-        }
-    }).collect();
+    let rows = dataset
+        .values()
+        .iter()
+        .map(|x| GrpcMatixRow {
+            values: x.iter().map(|x| *x as f32).collect(),
+        })
+        .collect();
 
-    let matrix = GrpcMatrix {
-        rows
-    };
+    let matrix = GrpcMatrix { rows };
 
     GrpcDataset {
         matrix: Some(matrix),
         columns_names: dataset.columns_names().clone(),
-        row_names: dataset.row_names().clone()
+        row_names: dataset.row_names().clone(),
     }
 }
 
@@ -554,6 +554,6 @@ fn convert_to_labeled_grpc_dataset(dataset: &LabeledDataset) -> GrpcLabeledDatas
 
     GrpcLabeledDataset {
         dataset: Some(grpc_dataset),
-        labels
+        labels,
     }
 }

@@ -1,10 +1,23 @@
-use std::{rc::Rc, cell::RefCell, collections::{HashSet, HashMap}};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use linfa::DatasetBase;
 use linfa_nn::distance::Distance;
-use ndarray::{ArrayBase, OwnedRepr, Dim, Array1, Array2, Dimension, ArrayView};
+use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
 
-use crate::{features::analysis::patterns::{repeat_sets::ActivityNode, activity_instances::ActivityInTraceInfo}, event_log::core::{event_log::EventLog, event::{event_hasher::RegexEventHasher, event::Event}, trace::trace::Trace}, pipelines::aliases::TracesActivities, utils::dataset::dataset::FicusDataset};
+use crate::{
+    event_log::core::{
+        event::{event::Event, event_hasher::RegexEventHasher},
+        event_log::EventLog,
+        trace::trace::Trace,
+    },
+    features::analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode},
+    pipelines::aliases::TracesActivities,
+    utils::dataset::dataset::FicusDataset,
+};
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
@@ -87,7 +100,11 @@ pub(super) fn create_dataset(
         Err(_) => return None,
     };
 
-    Some((DatasetBase::from(array), processed, all_event_classes.iter().map(|x| x.to_string()).collect()))
+    Some((
+        DatasetBase::from(array),
+        processed,
+        all_event_classes.iter().map(|x| x.to_string()).collect(),
+    ))
 }
 
 pub(super) fn merge_activities(
@@ -203,7 +220,7 @@ pub fn create_traces_activities_dataset(
     log: &impl EventLog,
     traces_activities: &mut TracesActivities,
     activity_level: usize,
-    class_extractor: Option<String>
+    class_extractor: Option<String>,
 ) -> Option<FicusDataset> {
     if let Some((dataset, processed, classes_names)) = create_dataset(log, traces_activities, activity_level, class_extractor) {
         Some(transform_to_ficus_dataset(&dataset, &processed, classes_names))
@@ -213,9 +230,9 @@ pub fn create_traces_activities_dataset(
 }
 
 pub(super) fn transform_to_ficus_dataset(
-    dataset: &MyDataset, 
+    dataset: &MyDataset,
     processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>,
-    classes_names: Vec<String>
+    classes_names: Vec<String>,
 ) -> FicusDataset {
     let rows_count = dataset.records().shape()[0];
     let cols_count = dataset.records().shape()[1];

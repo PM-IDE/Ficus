@@ -2,9 +2,9 @@ use linfa::traits::Transformer;
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;
 
-use crate::{pipelines::aliases::TracesActivities, event_log::core::event_log::EventLog, utils::dataset::dataset::LabeledDataset};
+use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::dataset::dataset::LabeledDataset};
 
-use super::common::{CosineDistance, transform_to_ficus_dataset, create_dataset, merge_activities};
+use super::common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance};
 
 pub fn clusterize_activities_dbscan(
     log: &impl EventLog,
@@ -22,7 +22,11 @@ pub fn clusterize_activities_dbscan(
 
         merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
         let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
-        let labels = clusters.into_raw_vec().iter().map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 }).collect();
+        let labels = clusters
+            .into_raw_vec()
+            .iter()
+            .map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 })
+            .collect();
 
         Some(LabeledDataset::new(ficus_dataset, labels))
     } else {

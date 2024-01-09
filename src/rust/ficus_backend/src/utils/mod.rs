@@ -1,4 +1,5 @@
 pub mod colors;
+pub mod dataset;
 pub mod graph;
 pub mod hash_map_utils;
 pub mod hash_utils;
@@ -10,4 +11,3 @@ pub mod suffix_tree;
 pub mod user_data;
 pub mod vec_utils;
 pub mod xml_utils;
-pub mod dataset;

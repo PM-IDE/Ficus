@@ -1,11 +1,17 @@
 use std::{cell::RefCell, rc::Rc};
 
-use linfa::{traits::{Fit, Predict}, metrics::SilhouetteScore};
+use linfa::{
+    metrics::SilhouetteScore,
+    traits::{Fit, Predict},
+};
 use linfa_clustering::KMeans;
 
-use crate::{utils::dataset::dataset::LabeledDataset, event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, features::analysis::patterns::repeat_sets::ActivityNode};
+use crate::{
+    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, pipelines::aliases::TracesActivities,
+    utils::dataset::dataset::LabeledDataset,
+};
 
-use super::common::{MyDataset, ClusteredDataset, transform_to_ficus_dataset, CosineDistance, create_dataset, merge_activities};
+use super::common::{create_dataset, merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset};
 
 pub fn clusterize_activities_k_means(
     log: &impl EventLog,
@@ -35,8 +41,8 @@ pub fn clusterize_activities_k_means(
 
 fn create_labeled_dataset_from_k_means(
     dataset: &MyDataset,
-    clustered_dataset: &ClusteredDataset, 
-    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>, 
+    clustered_dataset: &ClusteredDataset,
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, Vec<u64>)>,
     classes_names: Vec<String>,
 ) -> LabeledDataset {
     let ficus_dataset = transform_to_ficus_dataset(dataset, processed, classes_names);
@@ -91,7 +97,7 @@ pub fn clusterize_activities_k_means_grid_search(
         } else {
             None
         }
-    } else { 
+    } else {
         None
     }
 }
