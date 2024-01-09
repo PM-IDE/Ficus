@@ -107,3 +107,8 @@ message GrpcDataset {
     repeated string columnsNames = 2;
     repeated string rowNames = 3;
 }
+
+message GrpcLabeledDataset {
+    GrpcDataset dataset = 1;
+    repeated int32 labels = 2;
+}

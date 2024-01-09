@@ -30,6 +30,7 @@ message GrpcContextValue {
         GrpcCountAnnotation count_annotation = 17;
         GrpcFrequenciesAnnotation frequency_annotation = 18;
         GrpcDataset dataset = 19;
+        GrpcLabeledDataset labeled_dataset = 20;
     }
 }
 
