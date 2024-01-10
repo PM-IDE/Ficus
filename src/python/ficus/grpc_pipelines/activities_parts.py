@@ -276,7 +276,45 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
         draw_pca_results(df, pca_result, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
 
 
-class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualization2):
+class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
+    def __init__(self,
+                 activity_level: int,
+                 tolerance: float,
+                 class_extractor: Optional[str],
+                 show_visualization: bool,
+                 fig_size: (int, int),
+                 font_size: int,
+                 save_path: Optional[str],
+                 activities_repr_source: ActivitiesRepresentationSource,
+                 distance: Distance):
+        super().__init__(show_visualization, fig_size, font_size, save_path)
+        self.tolerance = tolerance
+        self.activity_level = activity_level
+        self.class_extractor = class_extractor
+        self.activities_repr_source = activities_repr_source
+        self.distance = distance
+
+    def create_common_config(self) -> GrpcPipelinePartConfiguration:
+        config = GrpcPipelinePartConfiguration()
+        append_uint32_value(config, const_activity_level, self.activity_level)
+        append_float_value(config, const_tolerance, self.tolerance)
+
+        append_enum_value(config,
+                          const_activities_representation_source,
+                          const_activities_repr_source_enum_name,
+                          self.activities_repr_source.name)
+
+        append_enum_value(config,
+                          const_distance,
+                          const_distance_enum_name,
+                          self.distance.name)
+
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
+
+        return config
+
+class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
     def __init__(self,
                  activity_level: int = 0,
                  clusters_count: int = 10,
@@ -289,34 +327,16 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualizatio
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  distance: Distance = Distance.Cosine):
-        super().__init__(show_visualization, fig_size, font_size, save_path)
+        super().__init__(activity_level, tolerance, class_extractor, show_visualization,
+                         fig_size, font_size, save_path, activities_repr_source, distance)
+
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
-        self.tolerance = tolerance
-        self.activity_level = activity_level
-        self.class_extractor = class_extractor
-        self.activities_repr_source = activities_repr_source
-        self.distance = distance
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        append_uint32_value(config, const_activity_level, self.activity_level)
+        config = self.create_common_config()
         append_uint32_value(config, const_clusters_count, self.clusters_count)
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
-        append_float_value(config, const_tolerance, self.tolerance)
-
-        append_enum_value(config,
-                          const_activities_representation_source,
-                          const_activities_repr_source_enum_name,
-                          self.activities_repr_source.name)
-
-        append_enum_value(config,
-                          const_distance,
-                          const_distance_enum_name,
-                          self.distance.name)
-
-        if self.class_extractor is not None:
-            append_string_value(config, const_event_class_regex, self.class_extractor)
 
         part = _create_complex_get_context_part(self.uuid,
                                                 [const_labeled_traces_activities_dataset],
@@ -326,7 +346,7 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualizatio
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPartWithPCAVisualization2):
+class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
     def __init__(self,
                  activity_level: int = 0,
                  learning_iterations_count: int = 200,
@@ -338,32 +358,14 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPartWithPCAVi
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine):
-        super().__init__(show_visualization, fig_size, font_size, save_path)
+        super().__init__(activity_level, tolerance, class_extractor, show_visualization,
+                         fig_size, font_size, save_path, activities_repr_source, distance)
+
         self.learning_iterations_count = learning_iterations_count
-        self.tolerance = tolerance
-        self.activity_level = activity_level
-        self.class_extractor = class_extractor
-        self.activities_repr_source = activities_repr_source
-        self.distance = distance
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        append_uint32_value(config, const_activity_level, self.activity_level)
+        config = self.create_common_config()
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
-        append_float_value(config, const_tolerance, self.tolerance)
-
-        append_enum_value(config,
-                          const_activities_representation_source,
-                          const_activities_repr_source_enum_name,
-                          self.activities_repr_source.name)
-
-        append_enum_value(config,
-                          const_distance,
-                          const_distance_enum_name,
-                          self.distance.name)
-
-        if self.class_extractor is not None:
-            append_string_value(config, const_event_class_regex, self.class_extractor)
 
         part = _create_complex_get_context_part(self.uuid,
                                                 [const_labeled_traces_activities_dataset],
@@ -373,7 +375,7 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPartWithPCAVi
         return GrpcPipelinePartBase(complexContextRequestPart=part)
 
 
-class ClusterizeActivitiesFromTracesDbscan(ClusterizationPartWithPCAVisualization2):
+class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
     def __init__(self,
                  activity_level: int = 0,
                  min_events_count_in_cluster: int = 1,
@@ -385,32 +387,15 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPartWithPCAVisualizatio
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine):
-        super().__init__(show_visualization, fig_size, font_size, save_path)
+        super().__init__(activity_level, tolerance, class_extractor, show_visualization,
+                         fig_size, font_size, save_path, activities_repr_source, distance)
+
         self.min_events_count_in_cluster = min_events_count_in_cluster
-        self.tolerance = tolerance
-        self.activity_level = activity_level
-        self.class_extractor = class_extractor
-        self.activities_repr_source = activities_repr_source
-        self.distance = distance
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        config = GrpcPipelinePartConfiguration()
-        append_uint32_value(config, const_activity_level, self.activity_level)
+        config = self.create_common_config()
+
         append_uint32_value(config, const_min_events_in_cluster_count, self.min_events_count_in_cluster)
-        append_float_value(config, const_tolerance, self.tolerance)
-
-        append_enum_value(config,
-                          const_activities_representation_source,
-                          const_activities_repr_source_enum_name,
-                          self.activities_repr_source.name)
-
-        append_enum_value(config,
-                          const_distance,
-                          const_distance_enum_name,
-                          self.distance.name)
-
-        if self.class_extractor is not None:
-            append_string_value(config, const_event_class_regex, self.class_extractor)
 
         part = _create_complex_get_context_part(self.uuid,
                                                 [const_labeled_traces_activities_dataset],
