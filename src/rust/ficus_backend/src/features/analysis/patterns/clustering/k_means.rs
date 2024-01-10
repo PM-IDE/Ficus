@@ -7,13 +7,13 @@ use linfa::{
 use linfa_clustering::KMeans;
 
 use crate::{
-    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, pipelines::aliases::TracesActivities,
+    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode,
     utils::dataset::dataset::LabeledDataset,
 };
 
 use super::{
-    common::{create_dataset, merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset},
-    params::ClusteringCommonParams,
+    common::{create_dataset, merge_activities, transform_to_ficus_dataset, ClusteredDataset, MyDataset},
+    params::{ClusteringCommonParams, FicusDistance, DistanceWrapper},
 };
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
@@ -22,7 +22,7 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
     iterations_count: usize,
 ) -> Option<LabeledDataset> {
     if let Some((dataset, processed, classes_names)) = create_dataset(params) {
-        let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset);
+        let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset, params.distance);
 
         let clustered_dataset = model.predict(dataset.clone());
         merge_activities(
@@ -48,8 +48,14 @@ fn create_labeled_dataset_from_k_means(
     LabeledDataset::new(ficus_dataset, clustered_dataset.targets.clone().into_raw_vec())
 }
 
-fn create_k_means_model(clusters_count: usize, iterations_count: u64, tolerance: f64, dataset: &MyDataset) -> KMeans<f64, CosineDistance> {
-    KMeans::params_with(clusters_count, rand::thread_rng(), CosineDistance {})
+fn create_k_means_model(
+    clusters_count: usize, 
+    iterations_count: u64, 
+    tolerance: f64, 
+    dataset: &MyDataset, 
+    distance: FicusDistance
+) -> KMeans<f64, DistanceWrapper> {
+    KMeans::params_with(clusters_count, rand::thread_rng(), DistanceWrapper::new(distance))
         .max_n_iterations(iterations_count)
         .tolerance(tolerance)
         .fit(&dataset)
@@ -65,7 +71,7 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
         let mut best_labels = None;
 
         for clusters_count in 2..processed.len() {
-            let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset);
+            let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset, params.distance);
 
             let clustered_dataset = model.predict(dataset.clone());
             let score = match clustered_dataset.silhouette_score() {

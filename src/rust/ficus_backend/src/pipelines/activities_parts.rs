@@ -496,6 +496,7 @@ impl PipelineParts {
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
         let activities_repr_source = *Self::get_user_data(config, keys.activities_repr_source())?;
+        let distance = *Self::get_user_data(config, keys.distance())?;
         let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
             Ok(extractor) => Some(extractor.to_owned()),
             Err(_) => None,
@@ -508,6 +509,7 @@ impl PipelineParts {
             activity_level,
             class_extractor,
             activities_repr_source,
+            distance
         })
     }
 

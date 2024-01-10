@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::features::analysis::patterns::clustering::params::ActivityRepresentationSource;
+use crate::features::analysis::patterns::clustering::params::{ActivityRepresentationSource, FicusDistance};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -566,5 +566,14 @@ impl ContextKeys {
 
     pub fn is_activities_repr_source(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.activities_repr_source(), key)
+    }
+
+    pub fn distance(&self) -> &DefaultContextKey<FicusDistance> {
+        self.find_concrete_key::<FicusDistance>(Self::DISTANCE)
+            .expect("FicusDistance should be present in keys")
+    }
+
+    pub fn is_distance(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.distance(), key)
     }
 }
