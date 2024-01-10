@@ -337,7 +337,7 @@ pub(super) fn merge_activities(
         new_cluster_activities.insert(*cluster, Rc::new(RefCell::new(new_node)));
     }
 
-    for trace_activities in traces_activities {
+    for trace_activities in traces_activities.iter_mut() {
         for i in 0..trace_activities.len() {
             let activity = trace_activities.get(i).unwrap();
             if !activity_names_to_clusters.contains_key(&activity.node.borrow().name) {
@@ -354,6 +354,41 @@ pub(super) fn merge_activities(
                     length: current_activity_in_trace.length,
                 };
             }
+        }
+    }
+
+    for trace_activities in traces_activities.iter_mut() {
+        if trace_activities.len() < 2 {
+            continue;
+        }
+
+        let mut index = 1;
+        let mut last_seen_activity = trace_activities.first().unwrap().node.borrow().name.to_owned();
+
+        loop {
+            if index >= trace_activities.len() {
+                break;
+            }
+
+            let activity_name = trace_activities.get(index).unwrap().node.borrow().name.to_owned();
+            if last_seen_activity == activity_name {
+                let start_index = trace_activities.get(index).unwrap().start_pos;
+                let length = trace_activities.get(index).unwrap().length;
+                let prev_start_pos = trace_activities.get(index - 1).unwrap().start_pos;
+                let prev_length = trace_activities.get(index - 1).unwrap().length;
+
+                if prev_start_pos + prev_length == start_index {
+                    trace_activities.remove(index);
+                    let prev_activity = trace_activities.get_mut(index - 1).unwrap();
+                    prev_activity.length += length;
+                } else {
+                    index += 1;
+                }
+            } else {
+                index += 1;
+            }
+
+            last_seen_activity = activity_name;
         }
     }
 }
