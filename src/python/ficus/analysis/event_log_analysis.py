@@ -1,5 +1,6 @@
 import math
 import os
+from enum import Enum
 from typing import List, Union, Callable, Optional
 from dataclasses import dataclass
 
@@ -363,22 +364,29 @@ def draw_events_entropy_histogram(log: MyEventLog,
         current_figure.savefig(save_path, bbox_inches='tight', dpi=150)
         plt.close(current_figure)
 
+class PcaNComponents(Enum):
+    One = 1
+    Two = 2
+    Three = 3
 
 def draw_pca_results(df: pd.DataFrame,
                      pca_result,
+                     n_components: PcaNComponents,
                      fig_size: (int, int),
                      font_size: int,
                      save_path: Optional[str] = None,
                      label_column: Optional[str] = None):
     fig = plt.figure(figsize=fig_size)
-    ax = fig.add_subplot(projection='3d')
+    if n_components == PcaNComponents.Three:
+        ax = fig.add_subplot(projection='3d')
+    else:
+        ax = fig.add_subplot()
 
-    Xax = pca_result[:, 0]
-    Yax = pca_result[:, 1]
-    Zax = pca_result[:, 2]
+    components_count = n_components.value
+    components = [pca_result[:, i] for i in range(components_count)]
 
     if label_column is None:
-        ax.scatter(Xax, Yax, Zax)
+        ax.scatter(*components)
     else:
         y = df[label_column].to_numpy()
         provider = RandomUniqueColorsProvider()
@@ -389,11 +397,16 @@ def draw_pca_results(df: pd.DataFrame,
             color = labels_to_columns[label] if label in labels_to_columns else provider.next()
             labels_to_columns[label] = color
 
-            ax.scatter(Xax[ix], Yax[ix], Zax[ix], c=color, s=40)
+            selected_components = [components[i][ix] for i in range(len(components))]
+            ax.scatter(*selected_components, c=color, s=40)
 
-    ax.set_xlabel("First Component", fontsize=font_size)
-    ax.set_ylabel("Second Component", fontsize=font_size)
-    ax.set_zlabel("Third Component", fontsize=font_size)
+    for i in range(components_count):
+        if i == 0:
+            ax.set_xlabel(f"Component 1", fontsize=font_size)
+        elif i == 1:
+            ax.set_ylabel(f"Component 2", fontsize=font_size)
+        elif i == 2:
+            ax.set_zlabel(f"Component 3", fontsize=font_size)
 
     ax.legend()
     if save_path is None:

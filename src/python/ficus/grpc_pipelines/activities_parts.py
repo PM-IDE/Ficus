@@ -1,6 +1,6 @@
 from sklearn.decomposition import PCA
 
-from ficus.analysis.event_log_analysis import draw_pca_results
+from ficus.analysis.event_log_analysis import draw_pca_results, PcaNComponents
 from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
 from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance
 from ficus.grpc_pipelines.grpc_pipelines import *
@@ -257,12 +257,15 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
                  show_visualization: bool,
                  fig_size: (int, int),
                  font_size: int,
-                 save_path: Optional[str]):
+                 save_path: Optional[str],
+                 n_components: PcaNComponents = PcaNComponents.Three):
         super().__init__()
         self.show_visualization = show_visualization
         self.fig_size = fig_size
         self.font_size = font_size
         self.save_path = save_path
+        self.n_components = n_components
+        self.n_components = n_components
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
         if not self.show_visualization:
@@ -270,10 +273,11 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
 
         dataset = values[const_labeled_traces_activities_dataset].labeled_dataset
         df = from_grpc_labeled_dataset(dataset)
-        pca = PCA(n_components=3)
+        pca = PCA(n_components=self.n_components.value)
         pca_result = pca.fit_transform(df.loc[:, df.columns != const_cluster_labels].values)
 
-        draw_pca_results(df, pca_result, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+        draw_pca_results(df, pca_result, self.n_components,
+                         self.fig_size, self.font_size, self.save_path, const_cluster_labels)
 
 
 class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
@@ -286,8 +290,9 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
                  font_size: int,
                  save_path: Optional[str],
                  activities_repr_source: ActivitiesRepresentationSource,
-                 distance: Distance):
-        super().__init__(show_visualization, fig_size, font_size, save_path)
+                 distance: Distance,
+                 n_components: PcaNComponents):
+        super().__init__(show_visualization, fig_size, font_size, save_path, n_components)
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
@@ -326,9 +331,10 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  font_size: int = 14,
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
-                 distance: Distance = Distance.Cosine):
+                 distance: Distance = Distance.Cosine,
+                 n_components: PcaNComponents = PcaNComponents.Three):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
 
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
@@ -357,9 +363,10 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  font_size: int = 14,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
-                 distance: Distance = Distance.Cosine):
+                 distance: Distance = Distance.Cosine,
+                 n_components: PcaNComponents = PcaNComponents.Three):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
 
         self.learning_iterations_count = learning_iterations_count
 
@@ -386,9 +393,10 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  font_size: int = 14,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
-                 distance: Distance = Distance.Cosine):
+                 distance: Distance = Distance.Cosine,
+                 n_components: PcaNComponents = PcaNComponents.Three):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
 
         self.min_events_count_in_cluster = min_events_count_in_cluster
 
