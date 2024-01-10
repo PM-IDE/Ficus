@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, collections::HashMap};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use linfa::{
     metrics::SilhouetteScore,
@@ -11,7 +11,10 @@ use crate::{
     utils::dataset::dataset::LabeledDataset,
 };
 
-use super::{common::{merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset, create_dataset}, params::ClusteringCommonParams};
+use super::{
+    common::{create_dataset, merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset},
+    params::ClusteringCommonParams,
+};
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
     params: &mut ClusteringCommonParams<TLog>,

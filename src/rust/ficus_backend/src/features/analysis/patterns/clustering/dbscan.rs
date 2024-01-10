@@ -4,7 +4,10 @@ use linfa_nn::KdTree;
 
 use crate::{event_log::core::event_log::EventLog, utils::dataset::dataset::LabeledDataset};
 
-use super::{common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance}, params::ClusteringCommonParams};
+use super::{
+    common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance},
+    params::ClusteringCommonParams,
+};
 
 pub fn clusterize_activities_dbscan<TLog: EventLog>(
     params: &mut ClusteringCommonParams<TLog>,
@@ -16,7 +19,12 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
             .transform(dataset.records())
             .unwrap();
 
-        merge_activities(params.log, params.traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
+        merge_activities(
+            params.log,
+            params.traces_activities,
+            &processed.iter().map(|x| x.0.clone()).collect(),
+            &clusters,
+        );
         let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
         let labels = clusters
             .into_raw_vec()

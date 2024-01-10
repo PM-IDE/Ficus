@@ -476,11 +476,7 @@ impl PipelineParts {
             let clusters_count = *Self::get_user_data(config, keys.clusters_count())? as usize;
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
 
-            let labeled_dataset = clusterize_activities_k_means(
-                &mut params,
-                clusters_count,
-                learning_iterations_count,
-            );
+            let labeled_dataset = clusterize_activities_k_means(&mut params, clusters_count, learning_iterations_count);
 
             if let Some(labeled_dataset) = labeled_dataset {
                 context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
@@ -490,7 +486,11 @@ impl PipelineParts {
         })
     }
 
-    fn create_common_clustering_params<'a>(context: &'a mut PipelineContext, config: &'a UserDataImpl, keys: &ContextKeys) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+    fn create_common_clustering_params<'a>(
+        context: &'a mut PipelineContext,
+        config: &'a UserDataImpl,
+        keys: &ContextKeys,
+    ) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
         let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
@@ -500,14 +500,14 @@ impl PipelineParts {
             Ok(extractor) => Some(extractor.to_owned()),
             Err(_) => None,
         };
-        
+
         Ok(ClusteringCommonParams {
             log,
             traces_activities,
             tolerance,
             activity_level,
             class_extractor,
-            obtain_repr_from_traces
+            obtain_repr_from_traces,
         })
     }
 
@@ -518,10 +518,7 @@ impl PipelineParts {
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
                 let mut params = Self::create_common_clustering_params(context, config, keys)?;
 
-                let labeled_dataset = clusterize_activities_k_means_grid_search(
-                    &mut params,
-                    learning_iterations_count,
-                );
+                let labeled_dataset = clusterize_activities_k_means_grid_search(&mut params, learning_iterations_count);
 
                 if let Some(labeled_dataset) = labeled_dataset {
                     context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
@@ -537,10 +534,7 @@ impl PipelineParts {
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
             let mut params = Self::create_common_clustering_params(context, config, keys)?;
 
-            let labeled_dataset = clusterize_activities_dbscan(
-                &mut params,
-                min_points_in_cluster,
-            );
+            let labeled_dataset = clusterize_activities_dbscan(&mut params, min_points_in_cluster);
 
             if let Some(labeled_dataset) = labeled_dataset {
                 context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
