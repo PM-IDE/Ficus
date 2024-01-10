@@ -35,3 +35,9 @@ class ActivitiesRepresentationSource(Enum):
     EventClasses = 0,
     SubTraces = 1
     SubTracesUnderlyingEvents = 2
+
+
+class Distance(Enum):
+    Cosine = 0
+    L1 = 1
+    L2 = 2
