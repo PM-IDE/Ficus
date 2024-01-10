@@ -94,7 +94,6 @@ pub(super) fn put_into_user_data(
             } else if enum_name == name_of_type!(ActivitiesLogsSourceDto) {
                 parse_grpc_enum::<ActivitiesLogsSourceDto>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(ActivityRepresentationSource) {
-                println!("{}", key.name());
                 parse_grpc_enum::<ActivityRepresentationSource>(user_data, key, &grpc_enum.value);
             }
         }
