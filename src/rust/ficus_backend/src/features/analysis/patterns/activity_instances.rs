@@ -679,3 +679,25 @@ where
         trace.push(event.clone());
     }
 }
+
+pub fn create_vector_of_underlying_events<TLog: EventLog>(event: &Rc<RefCell<TLog::TEvent>>) -> Vec<Rc<RefCell<TLog::TEvent>>> {
+    let mut result = vec![];
+    create_vector_of_underlying_events_intenral::<TLog>(event, &mut result);
+
+    result
+}
+
+fn create_vector_of_underlying_events_intenral<TLog: EventLog>(
+    event: &Rc<RefCell<TLog::TEvent>>,
+    result: &mut Vec<Rc<RefCell<TLog::TEvent>>>
+) {
+    let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };
+
+    if let Some(underlying_events) = event.borrow_mut().user_data().get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key) {
+        for underlying_event in underlying_events {
+            create_vector_of_underlying_events_intenral::<TLog>(underlying_event, result);
+        }
+    } else {
+        result.push(event.clone());
+    }
+}

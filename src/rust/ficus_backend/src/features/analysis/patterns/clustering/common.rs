@@ -17,7 +17,7 @@ use crate::{
         event_log::EventLog,
         trace::trace::Trace,
     },
-    features::analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode},
+    features::analysis::patterns::{activity_instances::{ActivityInTraceInfo, create_vector_of_underlying_events}, repeat_sets::ActivityNode},
     pipelines::aliases::TracesActivities,
     utils::dataset::dataset::FicusDataset,
 };
@@ -31,11 +31,36 @@ pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[us
 pub(super) fn create_dataset<TLog: EventLog>(
     params: &ClusteringCommonParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
-    if params.activities_repr_source == ActivityRepresentationSource::EventClasses {
-        create_dataset_from_activities_traces(params)
-    } else {
-        create_dataset_from_activities_classes(params)
+    match params.activities_repr_source {
+        ActivityRepresentationSource::EventClasses => create_dataset_from_activities_classes(params),
+        ActivityRepresentationSource::SubTraces =>  create_dataset_from_activities_traces(params),
+        ActivityRepresentationSource::SubTracesUnderlyingEvents => create_dataset_from_activities_traces_underlying_events(params),
     }
+}
+
+pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: EventLog>(
+    params: &ClusteringCommonParams<TLog>
+) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+    create_dataset_internal(
+        params.traces_activities, 
+        params.class_extractor.clone(), 
+        |traces_activities, regex_hasher, all_event_classes| {
+            create_activities_repr_from_subtraces(
+                traces_activities,
+                regex_hasher,
+                all_event_classes,
+                params,
+                |events, map, all_event_classes| {
+                    let mut sub_trace_events = vec![];
+                    for event in events {
+                        for underlying_event in create_vector_of_underlying_events::<TLog>(event) {
+                            sub_trace_events.push(underlying_event);
+                        }
+                    }
+
+                    update_event_classes::<TLog>(sub_trace_events.as_slice(), regex_hasher, all_event_classes, map)
+                })
+        })
 }
 
 pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
@@ -45,51 +70,77 @@ pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
         params.traces_activities,
         params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
-            let mut processed = HashMap::new();
-            for trace_activities in traces_activities.iter() {
-                for activity in trace_activities {
-                    if processed.contains_key(&activity.node.borrow().name) {
-                        continue;
-                    }
-
-                    if activity.node.borrow().level != params.activity_level {
-                        continue;
-                    }
-
-                    let node = activity.node.borrow();
-                    if !processed.contains_key(&node.name) {
-                        processed.insert(node.name.to_owned(), (activity.node.clone(), HashMap::new()));
-                    }
-
-                    let map: &mut HashMap<u64, usize> = &mut processed.get_mut(&node.name).unwrap().1;
-                    if let Some(repeat_set) = node.repeat_set.as_ref() {
-                        let array = repeat_set.sub_array;
-                        let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
-                        let events = trace.borrow();
-                        let events = events.events();
-
-                        let start = array.start_index;
-                        let end = start + array.length;
-                        for event in &events[start..end] {
-                            let hash = if let Some(hasher) = regex_hasher {
-                                hasher.hash_name(event.borrow().name())
-                            } else {
-                                default_class_extractor_name(event.borrow().name())
-                            };
-
-                            all_event_classes.insert(hash);
-                            *map.entry(hash).or_default() += 1;
-                        }
-                    }
-                }
-            }
-
-            processed
-                .into_iter()
-                .map(|x| (x.0, (x.1 .0, x.1 .1.into_iter().map(|x| (x.0, x.1)).collect())))
-                .collect()
+            create_activities_repr_from_subtraces(
+                traces_activities, 
+                regex_hasher, 
+                all_event_classes, 
+                params,
+                |events, map, all_event_classes| {
+                    update_event_classes::<TLog>(events, regex_hasher, all_event_classes, map)
+                })
         },
     )
+}
+
+fn update_event_classes<TLog: EventLog>(
+    events: &[Rc<RefCell<<TLog as EventLog>::TEvent>>], 
+    regex_hasher: Option<&RegexEventHasher>, 
+    all_event_classes: &mut HashSet<u64>,
+    map: &mut HashMap<u64, usize>
+) {
+    for event in events {
+        let hash = if let Some(hasher) = regex_hasher {
+            hasher.hash_name(event.borrow().name())
+        } else {
+            default_class_extractor_name(event.borrow().name())
+        };
+
+        all_event_classes.insert(hash);
+        *map.entry(hash).or_default() += 1;
+    }
+}
+
+fn create_activities_repr_from_subtraces<TLog: EventLog>(
+    traces_activities: &TracesActivities, 
+    regex_hasher: Option<&RegexEventHasher>,
+    all_event_classes: &mut HashSet<u64>,
+    params: &ClusteringCommonParams<TLog>,
+    event_classes_updater: impl Fn(&[Rc<RefCell<TLog::TEvent>>], &mut HashMap<u64, usize>, &mut HashSet<u64>) -> (),
+) -> HashMap<String, (Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)> {
+    let mut processed = HashMap::new();
+    for trace_activities in traces_activities.iter() {
+        for activity in trace_activities {
+            if processed.contains_key(&activity.node.borrow().name) {
+                continue;
+            }
+
+            if activity.node.borrow().level != params.activity_level {
+                continue;
+            }
+
+            let node = activity.node.borrow();
+            if !processed.contains_key(&node.name) {
+                processed.insert(node.name.to_owned(), (activity.node.clone(), HashMap::new()));
+            }
+
+            let map: &mut HashMap<u64, usize> = &mut processed.get_mut(&node.name).unwrap().1;
+            if let Some(repeat_set) = node.repeat_set.as_ref() {
+                let array = repeat_set.sub_array;
+                let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
+                let events = trace.borrow();
+                let events = events.events();
+
+                let start = array.start_index;
+                let end = start + array.length;
+                event_classes_updater(&events[start..end], map, all_event_classes);
+            }
+        }
+    }
+
+    processed
+        .into_iter()
+        .map(|x| (x.0, (x.1 .0, x.1 .1.into_iter().map(|x| (x.0, x.1)).collect())))
+        .collect()
 }
 
 fn create_dataset_internal(
