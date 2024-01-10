@@ -495,7 +495,7 @@ impl PipelineParts {
         let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
-        let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
+        let activities_repr_source = *Self::get_user_data(config, keys.activities_repr_source())?;
         let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
             Ok(extractor) => Some(extractor.to_owned()),
             Err(_) => None,
@@ -507,7 +507,7 @@ impl PipelineParts {
             tolerance,
             activity_level,
             class_extractor,
-            obtain_repr_from_traces,
+            activities_repr_source,
         })
     }
 

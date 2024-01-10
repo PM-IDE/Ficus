@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::{collections::HashSet, sync::Arc};
 
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use ficus_backend::features::analysis::patterns::clustering::params::ActivityRepresentationSource;
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
@@ -111,7 +112,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
         assert_existence::<FicusDataset>(keys, ContextKeys::TRACES_ACTIVITIES_DATASET, &mut used);
         assert_existence::<LabeledDataset>(keys, ContextKeys::LABELED_TRACES_ACTIVITIES_DATASET, &mut used);
-        assert_existence::<bool>(keys, ContextKeys::OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES, &mut used);
+        assert_existence::<ActivityRepresentationSource>(keys, ContextKeys::ACTIVITIES_REPR_SOURCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -186,7 +187,7 @@ fn get_all_keys_names() -> Vec<String> {
         "min_events_in_cluster_count",
         "traces_activities_dataset",
         "labeled_traces_activities_dataset",
-        "obtain_activities_repr_from_sub_traces"
+        "activities_repr_source"
     ]
 }
 
@@ -268,7 +269,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<u32>(keys, ContextKeys::MIN_EVENTS_IN_CLUSTERS_COUNT, &mut used);
         assert_keys_equivalence::<FicusDataset>(keys, ContextKeys::TRACES_ACTIVITIES_DATASET, &mut used);
         assert_keys_equivalence::<LabeledDataset>(keys, ContextKeys::LABELED_TRACES_ACTIVITIES_DATASET, &mut used);
-        assert_keys_equivalence::<bool>(keys, ContextKeys::OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES, &mut used);
+        assert_keys_equivalence::<ActivityRepresentationSource>(keys, ContextKeys::ACTIVITIES_REPR_SOURCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })

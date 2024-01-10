@@ -1,6 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use crate::features::analysis::patterns::clustering::params::ActivityRepresentationSource;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -558,12 +559,12 @@ impl ContextKeys {
         Self::are_keys_equal(self.labeled_traces_activities_dataset(), key)
     }
 
-    pub fn obtain_activities_repr_from_sub_traces(&self) -> &DefaultContextKey<bool> {
-        self.find_concrete_key::<bool>(Self::OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES)
-            .expect("OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES should be present in keys")
+    pub fn activities_repr_source(&self) -> &DefaultContextKey<ActivityRepresentationSource> {
+        self.find_concrete_key::<ActivityRepresentationSource>(Self::ACTIVITIES_REPR_SOURCE)
+            .expect("ACTIVITIES_REPR_SOURCE should be present in keys")
     }
 
-    pub fn is_obtain_activities_repr_from_sub_traces(&self, key: &dyn ContextKey) -> bool {
-        Self::are_keys_equal(self.obtain_activities_repr_from_sub_traces(), key)
+    pub fn is_activities_repr_source(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.activities_repr_source(), key)
     }
 }

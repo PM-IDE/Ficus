@@ -22,7 +22,7 @@ use crate::{
     utils::dataset::dataset::FicusDataset,
 };
 
-use super::params::ClusteringCommonParams;
+use super::params::{ClusteringCommonParams, ActivityRepresentationSource};
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
@@ -31,7 +31,7 @@ pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[us
 pub(super) fn create_dataset<TLog: EventLog>(
     params: &ClusteringCommonParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
-    if params.obtain_repr_from_traces {
+    if params.activities_repr_source == ActivityRepresentationSource::EventClasses {
         create_dataset_from_activities_traces(params)
     } else {
         create_dataset_from_activities_classes(params)

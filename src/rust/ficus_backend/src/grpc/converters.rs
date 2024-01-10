@@ -5,6 +5,7 @@ use std::{any::Any, str::FromStr};
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use super::get_context_pipeline;
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use crate::features::analysis::patterns::clustering::params::ActivityRepresentationSource;
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
@@ -92,6 +93,9 @@ pub(super) fn put_into_user_data(
                 parse_grpc_enum::<ActivityInTraceFilterKind>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(ActivitiesLogsSourceDto) {
                 parse_grpc_enum::<ActivitiesLogsSourceDto>(user_data, key, &grpc_enum.value);
+            } else if enum_name == name_of_type!(ActivityRepresentationSource) {
+                println!("{}", key.name());
+                parse_grpc_enum::<ActivityRepresentationSource>(user_data, key, &grpc_enum.value);
             }
         }
         ContextValue::EventLogInfo(_) => todo!(),

@@ -29,3 +29,9 @@ class ActivityFilterKind(Enum):
 class ActivitiesLogsSource(Enum):
     Log = 0,
     TracesActivities = 1,
+
+
+class ActivitiesRepresentationSource(Enum):
+    EventClasses = 0,
+    SubTraces = 1
+    SubTracesUnderlyingEvents = 2

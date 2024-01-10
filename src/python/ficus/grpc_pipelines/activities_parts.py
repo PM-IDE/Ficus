@@ -2,6 +2,7 @@ from sklearn.decomposition import PCA
 
 from ficus.analysis.event_log_analysis import draw_pca_results
 from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
+from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
@@ -286,14 +287,14 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualizatio
                  fig_size: (int, int) = (7, 9),
                  font_size: int = 14,
                  save_path: Optional[str] = None,
-                 obtain_activities_repr_from_sub_traces: bool = False):
+                 activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses):
         super().__init__(show_visualization, fig_size, font_size, save_path)
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
-        self.obtain_activities_repr_from_sub_traces = obtain_activities_repr_from_sub_traces
+        self.activities_repr_source = activities_repr_source
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -301,8 +302,11 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPartWithPCAVisualizatio
         append_uint32_value(config, const_clusters_count, self.clusters_count)
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
         append_float_value(config, const_tolerance, self.tolerance)
-        append_bool_value(config, const_obtain_activities_repr_from_sub_traces,
-                          self.obtain_activities_repr_from_sub_traces)
+
+        append_enum_value(config,
+                          const_activities_representation_source,
+                          const_activities_repr_source_enum_name,
+                          self.activities_repr_source.name)
 
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
@@ -324,22 +328,25 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPartWithPCAVi
                  show_visualization: bool = True,
                  fig_size: (int, int) = (7, 9),
                  font_size: int = 14,
-                 obtain_activities_repr_from_sub_traces: bool = False,
+                 activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None):
         super().__init__(show_visualization, fig_size, font_size, save_path)
         self.learning_iterations_count = learning_iterations_count
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
-        self.obtain_activities_repr_from_sub_traces = obtain_activities_repr_from_sub_traces
+        self.activities_repr_source = activities_repr_source
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_learning_iterations_count, self.learning_iterations_count)
         append_float_value(config, const_tolerance, self.tolerance)
-        append_bool_value(config, const_obtain_activities_repr_from_sub_traces,
-                          self.obtain_activities_repr_from_sub_traces)
+
+        append_enum_value(config,
+                          const_activities_representation_source,
+                          const_activities_repr_source_enum_name,
+                          self.activities_repr_source.name)
 
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
@@ -361,22 +368,25 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPartWithPCAVisualizatio
                  show_visualization: bool = True,
                  fig_size: (int, int) = (7, 9),
                  font_size: int = 14,
-                 obtain_activities_repr_from_sub_traces: bool = False,
+                 activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None):
         super().__init__(show_visualization, fig_size, font_size, save_path)
         self.min_events_count_in_cluster = min_events_count_in_cluster
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
-        self.obtain_activities_repr_from_sub_traces = obtain_activities_repr_from_sub_traces
+        self.activities_repr_source = activities_repr_source
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
         append_uint32_value(config, const_activity_level, self.activity_level)
         append_uint32_value(config, const_min_events_in_cluster_count, self.min_events_count_in_cluster)
         append_float_value(config, const_tolerance, self.tolerance)
-        append_bool_value(config, const_obtain_activities_repr_from_sub_traces,
-                          self.obtain_activities_repr_from_sub_traces)
+
+        append_enum_value(config,
+                          const_activities_representation_source,
+                          const_activities_repr_source_enum_name,
+                          self.activities_repr_source.name)
 
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)

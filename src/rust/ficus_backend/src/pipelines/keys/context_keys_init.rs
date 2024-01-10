@@ -1,6 +1,7 @@
 use std::{any::Any, borrow::Cow, collections::HashMap};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
+use crate::features::analysis::patterns::clustering::params::ActivityRepresentationSource;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -115,7 +116,7 @@ impl ContextKeys {
     pub const PETRI_NET_TRACE_FREQUENCY_ANNOTATION: &'static str = "petri_net_trace_frequency_annotation";
     pub const TRACES_ACTIVITIES_DATASET: &'static str = "traces_activities_dataset";
     pub const LABELED_TRACES_ACTIVITIES_DATASET: &'static str = "labeled_traces_activities_dataset";
-    pub const OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES: &'static str = "obtain_activities_repr_from_sub_traces";
+    pub const ACTIVITIES_REPR_SOURCE: &'static str = "activities_repr_source";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -423,6 +424,6 @@ impl ContextKeys {
     }
 
     fn insert_obtain_activities_repr_from_traces(context: &mut ContextKeysInitContext) {
-        Self::insert_key::<bool>(context, Self::OBTAIN_ACTIVITIES_REPR_FROM_SUB_TRACES)
+        Self::insert_key::<ActivityRepresentationSource>(context, Self::ACTIVITIES_REPR_SOURCE)
     }
 }
