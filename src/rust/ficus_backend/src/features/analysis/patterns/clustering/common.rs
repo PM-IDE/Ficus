@@ -102,7 +102,9 @@ fn create_dataset_internal(
 
     let processed = activities_repr_fullfiller(traces_activities, regex_hasher.as_ref(), &mut all_event_classes);
 
-    let all_event_classes = all_event_classes.into_iter().collect::<Vec<u64>>();
+    let mut all_event_classes = all_event_classes.into_iter().collect::<Vec<u64>>();
+    all_event_classes.sort();
+
     let mut processed = processed.iter().map(|x| x.1.clone()).collect::<ActivityNodeWithCoords>();
     processed.sort_by(|first, second| first.0.borrow().name.cmp(&second.0.borrow().name));
 
