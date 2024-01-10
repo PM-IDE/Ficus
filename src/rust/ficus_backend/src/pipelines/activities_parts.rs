@@ -7,6 +7,7 @@ use crate::features::analysis::patterns::activity_instances::{substitute_underly
 use crate::features::analysis::patterns::clustering::common::create_traces_activities_dataset;
 use crate::features::analysis::patterns::clustering::dbscan::clusterize_activities_dbscan;
 use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
+use crate::features::analysis::patterns::clustering::params::ClusteringCommonParams;
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
@@ -471,27 +472,14 @@ impl PipelineParts {
 
     pub(super) fn clusterize_activities_from_traces_k_means() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS, &|context, _, keys, config| {
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+            let mut params = Self::create_common_clustering_params(context, config, keys)?;
             let clusters_count = *Self::get_user_data(config, keys.clusters_count())? as usize;
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
-            let tolerance = *Self::get_user_data(config, keys.tolerance())?;
-            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
-            let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
-            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
-                Ok(extractor) => Some(extractor.to_owned()),
-                Err(_) => None,
-            };
 
             let labeled_dataset = clusterize_activities_k_means(
-                log,
-                traces_activities,
-                activity_level,
+                &mut params,
                 clusters_count,
                 learning_iterations_count,
-                tolerance,
-                class_extractor,
-                obtain_repr_from_traces,
             );
 
             if let Some(labeled_dataset) = labeled_dataset {
@@ -502,29 +490,37 @@ impl PipelineParts {
         })
     }
 
+    fn create_common_clustering_params<'a>(context: &'a mut PipelineContext, config: &'a UserDataImpl, keys: &ContextKeys) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+        let log = Self::get_user_data(context, keys.event_log())?;
+        let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
+        let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+        let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
+        let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
+        let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+            Ok(extractor) => Some(extractor.to_owned()),
+            Err(_) => None,
+        };
+        
+        Ok(ClusteringCommonParams {
+            log,
+            traces_activities,
+            tolerance,
+            activity_level,
+            class_extractor,
+            obtain_repr_from_traces
+        })
+    }
+
     pub(super) fn clusterize_activities_from_traces_k_means_grid_search() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(
             Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH,
             &|context, _, keys, config| {
-                let log = Self::get_user_data(context, keys.event_log())?;
-                let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-                let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
-                let tolerance = *Self::get_user_data(config, keys.tolerance())?;
-                let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
-                let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
-                    Ok(extractor) => Some(extractor.to_owned()),
-                    Err(_) => None,
-                };
+                let mut params = Self::create_common_clustering_params(context, config, keys)?;
 
                 let labeled_dataset = clusterize_activities_k_means_grid_search(
-                    log,
-                    traces_activities,
-                    activity_level,
+                    &mut params,
                     learning_iterations_count,
-                    tolerance,
-                    class_extractor,
-                    obtain_repr_from_traces,
                 );
 
                 if let Some(labeled_dataset) = labeled_dataset {
@@ -538,25 +534,12 @@ impl PipelineParts {
 
     pub(super) fn clusterize_activities_from_traces_dbscan() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_DBSCAN, &|context, _, keys, config| {
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
-            let tolerance = *Self::get_user_data(config, keys.tolerance())?;
-            let obtain_repr_from_traces = *Self::get_user_data(config, keys.obtain_activities_repr_from_sub_traces())?;
-            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
-                Ok(extractor) => Some(extractor.to_owned()),
-                Err(_) => None,
-            };
+            let mut params = Self::create_common_clustering_params(context, config, keys)?;
 
             let labeled_dataset = clusterize_activities_dbscan(
-                log,
-                traces_activities,
-                activity_level,
+                &mut params,
                 min_points_in_cluster,
-                tolerance,
-                class_extractor,
-                obtain_repr_from_traces
             );
 
             if let Some(labeled_dataset) = labeled_dataset {
@@ -569,15 +552,9 @@ impl PipelineParts {
 
     pub(super) fn create_traces_activities_dataset() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CREATE_TRACES_ACTIVITIES_DATASET, &|context, _, keys, config| {
-            let log = Self::get_user_data(context, keys.event_log())?;
-            let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-            let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
-            let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
-                Ok(extractor) => Some(extractor.to_owned()),
-                Err(_) => None,
-            };
+            let params = Self::create_common_clustering_params(context, config, keys)?;
 
-            if let Some(dataset) = create_traces_activities_dataset(log, traces_activities, activity_level, class_extractor) {
+            if let Some(dataset) = create_traces_activities_dataset(&params) {
                 context.put_concrete(keys.traces_activities_dataset().key(), dataset);
             }
 

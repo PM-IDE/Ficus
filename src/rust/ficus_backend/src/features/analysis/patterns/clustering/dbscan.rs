@@ -2,28 +2,21 @@ use linfa::traits::Transformer;
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;
 
-use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::dataset::dataset::LabeledDataset};
+use crate::{event_log::core::event_log::EventLog, utils::dataset::dataset::LabeledDataset};
 
-use super::common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance};
+use super::{common::{create_dataset, merge_activities, transform_to_ficus_dataset, CosineDistance}, params::ClusteringCommonParams};
 
-pub fn clusterize_activities_dbscan(
-    log: &impl EventLog,
-    traces_activities: &mut TracesActivities,
-    activity_level: usize,
+pub fn clusterize_activities_dbscan<TLog: EventLog>(
+    params: &mut ClusteringCommonParams<TLog>,
     min_points: usize,
-    tolerance: f64,
-    class_extractor: Option<String>,
-    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
-
-    if let Some((dataset, processed, classes_names)) = dataset {
+    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
         let clusters = Dbscan::params_with(min_points, CosineDistance {}, KdTree)
-            .tolerance(tolerance)
+            .tolerance(params.tolerance)
             .transform(dataset.records())
             .unwrap();
 
-        merge_activities(log, traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
+        merge_activities(params.log, params.traces_activities, &processed.iter().map(|x| x.0.clone()).collect(), &clusters);
         let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
         let labels = clusters
             .into_raw_vec()

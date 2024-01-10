@@ -19,31 +19,27 @@ use crate::{
     utils::dataset::dataset::FicusDataset,
 };
 
+use super::params::ClusteringCommonParams;
+
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
-pub(super) fn create_dataset(
-    log: &impl EventLog,
-    traces_activities: &mut TracesActivities,
-    activity_level: usize,
-    class_extractor: Option<String>,
-    obtain_repr_from_traces: bool
+pub(super) fn create_dataset<TLog: EventLog>(
+    params: &ClusteringCommonParams<TLog>
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
-    if obtain_repr_from_traces {
-        create_dataset_from_activities_traces(log, traces_activities, activity_level, class_extractor)
+    if params.obtain_repr_from_traces {
+        create_dataset_from_activities_traces(params)
     } else {
-        create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor)
+        create_dataset_from_activities_classes(params)
     }
 }
 
-pub(super) fn create_dataset_from_activities_traces(
-    log: &impl EventLog,
-    traces_activities: &TracesActivities,
-    activity_level: usize,
-    class_extractor: Option<String>,
+pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
+    params: &ClusteringCommonParams<TLog>
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
-    create_dataset_internal(traces_activities, class_extractor, |traces_activities, regex_hasher, all_event_classes| {
+    create_dataset_internal(params.traces_activities, params.class_extractor.clone(), 
+        |traces_activities, regex_hasher, all_event_classes| {
         let mut processed = HashMap::new();
         for trace_activities in traces_activities.iter() {
             for activity in trace_activities {
@@ -51,7 +47,7 @@ pub(super) fn create_dataset_from_activities_traces(
                     continue;
                 }
     
-                if activity.node.borrow().level != activity_level {
+                if activity.node.borrow().level != params.activity_level {
                     continue;
                 }
 
@@ -63,7 +59,7 @@ pub(super) fn create_dataset_from_activities_traces(
                 let map: &mut HashMap<u64, usize> = &mut processed.get_mut(&node.name).unwrap().1;
                 if let Some(repeat_set) = node.repeat_set.as_ref() {
                     let array = repeat_set.sub_array;
-                    let trace = log.traces().get(repeat_set.trace_index).unwrap();
+                    let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
                     let events = trace.borrow();
                     let events = events.events();
 
@@ -138,13 +134,10 @@ fn create_dataset_internal(
     ))
 }
 
-pub(super) fn create_dataset_from_activities_classes(
-    log: &impl EventLog,
-    traces_activities: &TracesActivities,
-    activity_level: usize,
-    class_extractor: Option<String>,
+pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
+    params: &ClusteringCommonParams<TLog>
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
-    create_dataset_internal(traces_activities, class_extractor, |traces_activities, regex_hasher, all_event_classes| {
+    create_dataset_internal(params.traces_activities, params.class_extractor.clone(), |traces_activities, regex_hasher, all_event_classes| {
         let mut processed = HashMap::new();
         for trace_activities in traces_activities.iter() {
             for activity in trace_activities {
@@ -152,13 +145,13 @@ pub(super) fn create_dataset_from_activities_classes(
                     continue;
                 }
     
-                if activity.node.borrow().level != activity_level {
+                if activity.node.borrow().level != params.activity_level {
                     continue;
                 }
     
                 let activity_event_classes = if let Some(regex_hasher) = regex_hasher.as_ref() {
                     if let Some(repeat_set) = activity.node.borrow().repeat_set.as_ref() {
-                        let trace = log.traces().get(repeat_set.trace_index).unwrap();
+                        let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
                         let trace = trace.borrow();
                         let events = trace.events();
                         let array = &repeat_set.sub_array;
@@ -305,13 +298,10 @@ impl Distance<f64> for CosineDistance {
     }
 }
 
-pub fn create_traces_activities_dataset(
-    log: &impl EventLog,
-    traces_activities: &mut TracesActivities,
-    activity_level: usize,
-    class_extractor: Option<String>,
+pub fn create_traces_activities_dataset<TLog: EventLog>(
+    params: &ClusteringCommonParams<TLog>
 ) -> Option<FicusDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(log, traces_activities, activity_level, class_extractor) {
+    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(params) {
         Some(transform_to_ficus_dataset(&dataset, &processed, classes_names))
     } else {
         None

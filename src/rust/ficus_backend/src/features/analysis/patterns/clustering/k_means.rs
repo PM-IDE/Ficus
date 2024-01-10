@@ -11,26 +11,20 @@ use crate::{
     utils::dataset::dataset::LabeledDataset,
 };
 
-use super::common::{merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset, create_dataset};
+use super::{common::{merge_activities, transform_to_ficus_dataset, ClusteredDataset, CosineDistance, MyDataset, create_dataset}, params::ClusteringCommonParams};
 
-pub fn clusterize_activities_k_means(
-    log: &impl EventLog,
-    traces_activities: &mut TracesActivities,
-    activity_level: usize,
+pub fn clusterize_activities_k_means<TLog: EventLog>(
+    params: &mut ClusteringCommonParams<TLog>,
     clusters_count: usize,
     iterations_count: usize,
-    tolerance: f64,
-    class_extractor: Option<String>,
-    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
-    if let Some((dataset, processed, classes_names)) = dataset {
-        let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
+    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
+        let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset);
 
         let clustered_dataset = model.predict(dataset.clone());
         merge_activities(
-            log,
-            traces_activities,
+            params.log,
+            params.traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clustered_dataset.targets.map(|x| Some(*x)),
         );
@@ -59,23 +53,16 @@ fn create_k_means_model(clusters_count: usize, iterations_count: u64, tolerance:
         .expect("KMeans fitted")
 }
 
-pub fn clusterize_activities_k_means_grid_search(
-    log: &impl EventLog,
-    traces_activities: &mut TracesActivities,
-    activity_level: usize,
+pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
+    params: &mut ClusteringCommonParams<TLog>,
     iterations_count: usize,
-    tolerance: f64,
-    class_extractor: Option<String>,
-    obtain_repr_from_traces: bool,
 ) -> Option<LabeledDataset> {
-    let dataset = create_dataset(log, traces_activities, activity_level, class_extractor, obtain_repr_from_traces);
-
-    if let Some((dataset, processed, classes_names)) = dataset {
+    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 
         for clusters_count in 2..processed.len() {
-            let model = create_k_means_model(clusters_count, iterations_count as u64, tolerance, &dataset);
+            let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset);
 
             let clustered_dataset = model.predict(dataset.clone());
             let score = match clustered_dataset.silhouette_score() {
@@ -91,8 +78,8 @@ pub fn clusterize_activities_k_means_grid_search(
 
         if let Some(best_labels) = best_labels.as_ref() {
             merge_activities(
-                log,
-                traces_activities,
+                params.log,
+                params.traces_activities,
                 &processed.iter().map(|x| x.0.clone()).collect(),
                 &best_labels.map(|x| Some(*x)),
             );
