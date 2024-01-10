@@ -179,18 +179,18 @@ fn create_dataset_internal(
         }
     }
 
-    for i in 0..processed.len() {
+    for i in 0..all_event_classes.len() {
         let mut max = f64::MIN;
         let mut min = f64::MAX;
 
-        for j in 0..all_event_classes.len() {
-            let index = i * all_event_classes.len() + j;
+        for j in 0..processed.len() {
+            let index = i + j * all_event_classes.len();
             max = max.max(vector[index]);
             min = min.min(vector[index]);
         }
 
-        for j in 0..all_event_classes.len() {
-            let index = i * all_event_classes.len() + j;
+        for j in 0..processed.len() {
+            let index = i + j * all_event_classes.len();
             vector[index] = (vector[index] - min) / (max - min);
         }
     }
