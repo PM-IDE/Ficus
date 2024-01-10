@@ -1,7 +1,7 @@
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
-    rc::Rc,
+    rc::Rc, vec,
 };
 
 use linfa::DatasetBase;
@@ -167,8 +167,6 @@ fn create_dataset_internal(
     processed.sort_by(|first, second| first.0.borrow().name.cmp(&second.0.borrow().name));
 
     let mut vector = vec![];
-    let mut max = usize::MIN;
-    let mut min = usize::MAX;
     for activity in &processed {
         for i in 0..all_event_classes.len() {
             let count = if let Some(count) = activity.1.get(&all_event_classes[i]) {
@@ -176,14 +174,25 @@ fn create_dataset_internal(
             } else {
                 0
             };
+
             vector.push(count as f64);
-            max = max.max(count);
-            min = min.min(count);
         }
     }
 
-    for i in 0..vector.len() {
-        vector[i] = (vector[i] - min as f64) / (max as f64 - min as f64);
+    for i in 0..processed.len() {
+        let mut max = f64::MIN;
+        let mut min = f64::MAX;
+
+        for j in 0..all_event_classes.len() {
+            let index = i * all_event_classes.len() + j;
+            max = max.max(vector[index]);
+            min = min.min(vector[index]);
+        }
+
+        for j in 0..all_event_classes.len() {
+            let index = i * all_event_classes.len() + j;
+            vector[index] = (vector[index] - min) / (max - min);
+        }
     }
 
     let shape = (processed.len(), all_event_classes.len());
