@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt, axes
 from matplotlib.collections import PatchCollection
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
@@ -364,10 +366,56 @@ def draw_events_entropy_histogram(log: MyEventLog,
         current_figure.savefig(save_path, bbox_inches='tight', dpi=150)
         plt.close(current_figure)
 
+
 class PcaNComponents(Enum):
     One = 1
     Two = 2
     Three = 3
+
+
+class DatasetVisualizationMethod(Enum):
+    Pca = 0,
+    Isomap = 1
+
+
+def visualize_dataset(num_components: PcaNComponents,
+                      fig_size: (int, int),
+                      save_path: Optional[str],
+                      draw_func):
+    fig = plt.figure(figsize=fig_size)
+    if num_components == PcaNComponents.Three:
+        ax = fig.add_subplot(projection='3d')
+    else:
+        ax = fig.add_subplot()
+
+    draw_func(ax)
+
+    ax.legend()
+    if save_path is None:
+        fig.show()
+    else:
+        fig.savefig(save_path, bbox_inches='tight', dpi=150)
+        plt.close(fig)
+
+
+def visualize_dataset_pca(df: pd.DataFrame,
+                          n_components: PcaNComponents,
+                          fig_size: (int, int),
+                          font_size: int,
+                          save_path: Optional[str] = None,
+                          label_column: Optional[str] = None):
+    pca = PCA(n_components=n_components.value)
+    pca_result = pca.fit_transform(get_values_to_visualize(df, label_column))
+
+    draw_pca_results(df, pca_result, n_components, fig_size, font_size, save_path, label_column)
+
+
+def get_values_to_visualize(df: pd.DataFrame, label_column: Optional[str]):
+    if label_column is not None:
+        return df.loc[:, df.columns != label_column].values
+
+    return df.values
+
 
 def draw_pca_results(df: pd.DataFrame,
                      pca_result,
@@ -376,15 +424,20 @@ def draw_pca_results(df: pd.DataFrame,
                      font_size: int,
                      save_path: Optional[str] = None,
                      label_column: Optional[str] = None):
-    fig = plt.figure(figsize=fig_size)
-    if n_components == PcaNComponents.Three:
-        ax = fig.add_subplot(projection='3d')
-    else:
-        ax = fig.add_subplot()
+    def draw(ax):
+        components_count = n_components.value
+        components = [pca_result[:, i] for i in range(components_count)]
 
-    components_count = n_components.value
-    components = [pca_result[:, i] for i in range(components_count)]
+        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size)
 
+    visualize_dataset(n_components, fig_size, save_path, draw)
+
+
+def draw_scatter_plot_for_dataset_visualization(ax,
+                                                df: pd.DataFrame,
+                                                components,
+                                                label_column: Optional[str],
+                                                font_size: int):
     if label_column is None:
         ax.scatter(*components)
     else:
@@ -400,7 +453,7 @@ def draw_pca_results(df: pd.DataFrame,
             selected_components = [components[i][ix] for i in range(len(components))]
             ax.scatter(*selected_components, c=color, s=40)
 
-    for i in range(components_count):
+    for i in range(len(components)):
         if i == 0:
             ax.set_xlabel(f"Component 1", fontsize=font_size)
         elif i == 1:
@@ -408,9 +461,22 @@ def draw_pca_results(df: pd.DataFrame,
         elif i == 2:
             ax.set_zlabel(f"Component 3", fontsize=font_size)
 
-    ax.legend()
-    if save_path is None:
-        fig.show()
-    else:
-        fig.savefig(save_path, bbox_inches='tight', dpi=150)
-        plt.close(fig)
+
+def visualize_dataset_isomap(df: pd.DataFrame,
+                             n_components: PcaNComponents,
+                             fig_size: (int, int),
+                             font_size: int,
+                             save_path: Optional[str] = None,
+                             label_column: Optional[str] = None):
+    def draw(ax):
+        if label_column is not None:
+            to_visualize = df.loc[:, df.columns != label_column].values
+        else:
+            to_visualize = df.values
+
+        components = Isomap(n_components=n_components.value).fit_transform(to_visualize)
+        components = [components[:, i] for i in range(n_components.value)]
+
+        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size)
+
+    visualize_dataset(n_components, fig_size, save_path, draw)

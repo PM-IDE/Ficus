@@ -1,6 +1,7 @@
 from sklearn.decomposition import PCA
 
-from ficus.analysis.event_log_analysis import draw_pca_results, PcaNComponents
+from ficus.analysis.event_log_analysis import draw_pca_results, PcaNComponents, visualize_dataset_pca, \
+    visualize_dataset_isomap, DatasetVisualizationMethod
 from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
 from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance
 from ficus.grpc_pipelines.grpc_pipelines import *
@@ -263,7 +264,8 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
                  fig_size: (int, int),
                  font_size: int,
                  save_path: Optional[str],
-                 n_components: PcaNComponents = PcaNComponents.Three):
+                 n_components: PcaNComponents,
+                 visualization_method: DatasetVisualizationMethod):
         super().__init__()
         self.show_visualization = show_visualization
         self.fig_size = fig_size
@@ -271,6 +273,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
         self.save_path = save_path
         self.n_components = n_components
         self.n_components = n_components
+        self.visualization_method = visualization_method
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
         if not self.show_visualization:
@@ -278,11 +281,14 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
 
         dataset = values[const_labeled_traces_activities_dataset].labeled_dataset
         df = from_grpc_labeled_dataset(dataset)
-        pca = PCA(n_components=self.n_components.value)
-        pca_result = pca.fit_transform(df.loc[:, df.columns != const_cluster_labels].values)
+        if self.visualization_method == DatasetVisualizationMethod.Pca:
+            vis_func = visualize_dataset_pca
+        elif self.visualization_method == DatasetVisualizationMethod.Isomap:
+            vis_func = visualize_dataset_isomap
+        else:
+            raise KeyError()
 
-        draw_pca_results(df, pca_result, self.n_components,
-                         self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+        vis_func(df, self.n_components, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
 
 
 class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
@@ -296,8 +302,9 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
                  save_path: Optional[str],
                  activities_repr_source: ActivitiesRepresentationSource,
                  distance: Distance,
-                 n_components: PcaNComponents):
-        super().__init__(show_visualization, fig_size, font_size, save_path, n_components)
+                 n_components: PcaNComponents,
+                 visualization_method: DatasetVisualizationMethod):
+        super().__init__(show_visualization, fig_size, font_size, save_path, n_components, visualization_method)
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
@@ -337,9 +344,11 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three):
+                 n_components: PcaNComponents = PcaNComponents.Three,
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         visualization_method)
 
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
@@ -369,9 +378,11 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three):
+                 n_components: PcaNComponents = PcaNComponents.Three,
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         visualization_method)
 
         self.learning_iterations_count = learning_iterations_count
 
@@ -399,9 +410,11 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three):
+                 n_components: PcaNComponents = PcaNComponents.Three,
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components)
+                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         visualization_method)
 
         self.min_events_count_in_cluster = min_events_count_in_cluster
 
