@@ -118,6 +118,7 @@ impl ContextKeys {
     pub const LABELED_TRACES_ACTIVITIES_DATASET: &'static str = "labeled_traces_activities_dataset";
     pub const ACTIVITIES_REPR_SOURCE: &'static str = "activities_repr_source";
     pub const DISTANCE: &'static str = "distance";
+    pub const EXECUTE_ONLY_ON_LAST_EXTRACTION: &'static str = "execute_only_on_last_extraction";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -183,6 +184,7 @@ impl ContextKeys {
         Self::insert_labeled_traces_activities(&mut context);
         Self::insert_obtain_activities_repr_from_traces(&mut context);
         Self::insert_distance(&mut context);
+        Self::insert_execute_only_on_last_extraction(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -431,5 +433,9 @@ impl ContextKeys {
 
     fn insert_distance(context: &mut ContextKeysInitContext) {
         Self::insert_key::<FicusDistance>(context, Self::DISTANCE)
+    }
+
+    fn insert_execute_only_on_last_extraction(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<bool>(context, Self::EXECUTE_ONLY_ON_LAST_EXTRACTION)
     }
 }

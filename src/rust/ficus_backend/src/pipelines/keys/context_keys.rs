@@ -570,10 +570,19 @@ impl ContextKeys {
 
     pub fn distance(&self) -> &DefaultContextKey<FicusDistance> {
         self.find_concrete_key::<FicusDistance>(Self::DISTANCE)
-            .expect("FicusDistance should be present in keys")
+            .expect("DISTANCE should be present in keys")
     }
 
     pub fn is_distance(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.distance(), key)
+    }
+
+    pub fn execute_only_on_last_extraction(&self) -> &DefaultContextKey<bool> {
+        self.find_concrete_key::<bool>(Self::EXECUTE_ONLY_ON_LAST_EXTRACTION)
+            .expect("EXECUTE_ONLY_ON_LAST_EXTRACTION should be present in keys")
+    }
+
+    pub fn is_execute_only_on_last_extraction(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.execute_only_on_last_extraction(), key)
     }
 }

@@ -48,6 +48,7 @@ const_traces_activities_dataset = 'traces_activities_dataset'
 const_labeled_traces_activities_dataset = 'labeled_traces_activities_dataset'
 const_activities_representation_source = 'activities_repr_source'
 const_distance = 'distance'
+const_execute_only_on_last_extraction = 'execute_only_on_last_extraction'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'

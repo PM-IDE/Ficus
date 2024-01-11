@@ -346,6 +346,7 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::DISCOVER_ACTIVITIES_UNTIL_NO_MORE, &|context, infra, keys, config| {
             let activity_level = *Self::get_user_data(config, keys.activity_level())?;
             let after_activities_extraction_pipeline = Self::get_user_data(config, keys.pipeline());
+            let execute_only_after_last_extraction = *Self::get_user_data(config, keys.execute_only_on_last_extraction())?;
 
             loop {
                 let log = Self::get_user_data(context, keys.event_log())?;
@@ -367,14 +368,24 @@ impl PipelineParts {
                     return Ok(());
                 }
 
+                let mut executed_pipeline = false;
                 if let Ok(pipeline) = after_activities_extraction_pipeline {
-                    pipeline.execute(context, infra, keys)?;
+                    let should_execute = if execute_only_after_last_extraction {
+                        activities_instances.iter().all(|x| x.iter().all(|y| y.length == 1))
+                    } else {
+                        true
+                    };
+
+                    if should_execute {
+                        pipeline.execute(context, infra, keys)?;
+                        executed_pipeline = true;
+                    }
                 }
 
                 Self::do_create_log_from_activities(context, keys, config)?;
 
                 let new_events_count = count_events(Self::get_user_data(context, keys.event_log())?);
-                if new_events_count == events_count {
+                if (execute_only_after_last_extraction && executed_pipeline) || new_events_count == events_count {
                     Self::do_clear_activities_related_stuff(context, keys);
                     return Ok(());
                 }

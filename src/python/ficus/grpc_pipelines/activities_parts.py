@@ -150,7 +150,8 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
                  min_events_in_unattached_subtrace_count: int = 0,
                  min_events_in_activity_count: int = 0,
                  activity_filter_kind: ActivityFilterKind = ActivityFilterKind.DefaultFilter,
-                 after_activities_extraction_pipeline: Optional[Pipeline2] = None):
+                 after_activities_extraction_pipeline: Optional[Pipeline2] = None,
+                 execute_only_on_last_extraction: bool = False):
         super().__init__()
         self.event_class = event_class
         self.narrow_activities = narrow_activities
@@ -164,6 +165,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         self.min_events_in_activity_count = min_events_in_activity_count
         self.activity_filter_kind = activity_filter_kind
         self.after_activities_extraction_pipeline = after_activities_extraction_pipeline
+        self.execute_only_on_last_extraction = execute_only_on_last_extraction
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -177,6 +179,7 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity_count)
         append_undef_activity_handling_strat(config, const_undef_activity_handling_strategy, self.undef_strategy)
         append_activity_filter_kind(config, const_activity_filter_kind, self.activity_filter_kind)
+        append_bool_value(config, const_execute_only_on_last_extraction, self.execute_only_on_last_extraction)
 
         if self.event_class is not None:
             append_string_value(config, const_event_class_regex, self.event_class)
