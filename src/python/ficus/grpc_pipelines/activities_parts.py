@@ -1,6 +1,6 @@
 from sklearn.decomposition import PCA
 
-from ficus.analysis.event_log_analysis import draw_pca_results, PcaNComponents, visualize_dataset_pca, \
+from ficus.analysis.event_log_analysis import draw_pca_results, NComponents, visualize_dataset_pca, \
     visualize_dataset_isomap, DatasetVisualizationMethod
 from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
 from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance
@@ -264,7 +264,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
                  fig_size: (int, int),
                  font_size: int,
                  save_path: Optional[str],
-                 n_components: PcaNComponents,
+                 n_components: NComponents,
                  visualization_method: DatasetVisualizationMethod):
         super().__init__()
         self.show_visualization = show_visualization
@@ -302,7 +302,7 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
                  save_path: Optional[str],
                  activities_repr_source: ActivitiesRepresentationSource,
                  distance: Distance,
-                 n_components: PcaNComponents,
+                 n_components: NComponents,
                  visualization_method: DatasetVisualizationMethod):
         super().__init__(show_visualization, fig_size, font_size, save_path, n_components, visualization_method)
         self.tolerance = tolerance
@@ -344,7 +344,7 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three,
+                 n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, font_size, save_path, activities_repr_source, distance, n_components,
@@ -378,7 +378,7 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three,
+                 n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, font_size, save_path, activities_repr_source, distance, n_components,
@@ -410,7 +410,7 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
-                 n_components: PcaNComponents = PcaNComponents.Three,
+                 n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, font_size, save_path, activities_repr_source, distance, n_components,

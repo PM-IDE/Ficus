@@ -367,7 +367,7 @@ def draw_events_entropy_histogram(log: MyEventLog,
         plt.close(current_figure)
 
 
-class PcaNComponents(Enum):
+class NComponents(Enum):
     One = 1
     Two = 2
     Three = 3
@@ -378,12 +378,12 @@ class DatasetVisualizationMethod(Enum):
     Isomap = 1
 
 
-def visualize_dataset(num_components: PcaNComponents,
+def visualize_dataset(num_components: NComponents,
                       fig_size: (int, int),
                       save_path: Optional[str],
                       draw_func):
     fig = plt.figure(figsize=fig_size)
-    if num_components == PcaNComponents.Three:
+    if num_components == NComponents.Three:
         ax = fig.add_subplot(projection='3d')
     else:
         ax = fig.add_subplot()
@@ -399,7 +399,7 @@ def visualize_dataset(num_components: PcaNComponents,
 
 
 def visualize_dataset_pca(df: pd.DataFrame,
-                          n_components: PcaNComponents,
+                          n_components: NComponents,
                           fig_size: (int, int),
                           font_size: int,
                           save_path: Optional[str] = None,
@@ -419,7 +419,7 @@ def get_values_to_visualize(df: pd.DataFrame, label_column: Optional[str]):
 
 def draw_pca_results(df: pd.DataFrame,
                      pca_result,
-                     n_components: PcaNComponents,
+                     n_components: NComponents,
                      fig_size: (int, int),
                      font_size: int,
                      save_path: Optional[str] = None,
@@ -463,7 +463,7 @@ def draw_scatter_plot_for_dataset_visualization(ax,
 
 
 def visualize_dataset_isomap(df: pd.DataFrame,
-                             n_components: PcaNComponents,
+                             n_components: NComponents,
                              fig_size: (int, int),
                              font_size: int,
                              save_path: Optional[str] = None,
