@@ -189,7 +189,9 @@ class DiscoverActivitiesUntilNoMore2(PipelinePart2):
 
     def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
         super().append_parts_with_callbacks(parts)
-        self.after_activities_extraction_pipeline.append_parts_with_callbacks(parts)
+
+        if self.after_activities_extraction_pipeline is not None:
+            self.after_activities_extraction_pipeline.append_parts_with_callbacks(parts)
 
 
 class ExecuteWithEachActivityLog2(PipelinePart2):
