@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use linfa_nn::distance::{L1Dist, L2Dist, Distance};
-use ndarray::{Dimension, ArrayView};
+use linfa_nn::distance::{Distance, L1Dist, L2Dist};
+use ndarray::{ArrayView, Dimension};
 
 use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities};
 
@@ -51,15 +51,15 @@ impl FromStr for FicusDistance {
 pub enum DistanceWrapper {
     Cosine(CosineDistance),
     L1(L1Dist),
-    L2(L2Dist)
+    L2(L2Dist),
 }
 
 impl DistanceWrapper {
     pub fn new(ficus_distance: FicusDistance) -> DistanceWrapper {
         match ficus_distance {
-            FicusDistance::Cosine => DistanceWrapper::Cosine(CosineDistance{}),
-            FicusDistance::L1 => DistanceWrapper::L1(L1Dist{}),
-            FicusDistance::L2 => DistanceWrapper::L2(L2Dist{}),
+            FicusDistance::Cosine => DistanceWrapper::Cosine(CosineDistance {}),
+            FicusDistance::L1 => DistanceWrapper::L1(L1Dist {}),
+            FicusDistance::L2 => DistanceWrapper::L2(L2Dist {}),
         }
     }
 }
@@ -73,7 +73,11 @@ impl Distance<f64> for DistanceWrapper {
         }
     }
 
-    fn rdistance<D: ndarray::prelude::Dimension>(&self, a: ndarray::prelude::ArrayView<f64, D>, b: ndarray::prelude::ArrayView<f64, D>) -> f64 {
+    fn rdistance<D: ndarray::prelude::Dimension>(
+        &self,
+        a: ndarray::prelude::ArrayView<f64, D>,
+        b: ndarray::prelude::ArrayView<f64, D>,
+    ) -> f64 {
         self.distance(a, b)
     }
 
@@ -96,5 +100,5 @@ where
     pub tolerance: f64,
     pub class_extractor: Option<String>,
     pub activities_repr_source: ActivityRepresentationSource,
-    pub distance: FicusDistance
+    pub distance: FicusDistance,
 }

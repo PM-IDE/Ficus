@@ -7,13 +7,13 @@ use linfa::{
 use linfa_clustering::KMeans;
 
 use crate::{
-    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode,
-    utils::dataset::dataset::LabeledDataset,
+    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, utils::dataset::dataset::LabeledDataset,
 };
 
 use super::{
-    common::{create_dataset, merge_activities, transform_to_ficus_dataset, ClusteredDataset, MyDataset},
-    params::{ClusteringCommonParams, FicusDistance, DistanceWrapper},
+    common::{create_dataset, transform_to_ficus_dataset, ClusteredDataset, MyDataset},
+    merging::merge_activities,
+    params::{ClusteringCommonParams, DistanceWrapper, FicusDistance},
 };
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
@@ -49,11 +49,11 @@ fn create_labeled_dataset_from_k_means(
 }
 
 fn create_k_means_model(
-    clusters_count: usize, 
-    iterations_count: u64, 
-    tolerance: f64, 
-    dataset: &MyDataset, 
-    distance: FicusDistance
+    clusters_count: usize,
+    iterations_count: u64,
+    tolerance: f64,
+    dataset: &MyDataset,
+    distance: FicusDistance,
 ) -> KMeans<f64, DistanceWrapper> {
     KMeans::params_with(clusters_count, rand::thread_rng(), DistanceWrapper::new(distance))
         .max_n_iterations(iterations_count)

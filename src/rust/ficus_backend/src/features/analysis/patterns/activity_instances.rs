@@ -689,7 +689,7 @@ pub fn create_vector_of_underlying_events<TLog: EventLog>(event: &Rc<RefCell<TLo
 
 fn create_vector_of_underlying_events_intenral<TLog: EventLog>(
     event: &Rc<RefCell<TLog::TEvent>>,
-    result: &mut Vec<Rc<RefCell<TLog::TEvent>>>
+    result: &mut Vec<Rc<RefCell<TLog::TEvent>>>,
 ) {
     let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };
 

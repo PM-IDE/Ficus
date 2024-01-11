@@ -5,7 +5,8 @@ use linfa_nn::KdTree;
 use crate::{event_log::core::event_log::EventLog, utils::dataset::dataset::LabeledDataset};
 
 use super::{
-    common::{create_dataset, merge_activities, transform_to_ficus_dataset},
+    common::{create_dataset, transform_to_ficus_dataset},
+    merging::merge_activities,
     params::{ClusteringCommonParams, DistanceWrapper},
 };
 

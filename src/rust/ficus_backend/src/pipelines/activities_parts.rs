@@ -509,7 +509,7 @@ impl PipelineParts {
             activity_level,
             class_extractor,
             activities_repr_source,
-            distance
+            distance,
         })
     }
 
