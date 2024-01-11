@@ -36,6 +36,7 @@ pub(super) fn merge_activities(
     let mut new_activity_name_parts = HashSet::new();
     let mut new_cluster_activities = HashMap::new();
 
+    let mut clusters_count = 0;
     for (cluster, cluster_activities) in &clusters_to_activities {
         if cluster_activities.len() < 2 {
             continue;
@@ -63,12 +64,8 @@ pub(super) fn merge_activities(
         new_activity_name_parts.sort_by(|first, second| first.cmp(second));
 
         let mut new_activity_name = String::new();
-        new_activity_name.push_str("CLUSTER_");
-
-        for name in new_activity_name_parts {
-            new_activity_name.push_str(name.as_str());
-            new_activity_name.push_str("::");
-        }
+        new_activity_name.push_str(format!("CLUSTER_{}", clusters_count).as_str());
+        clusters_count += 1;
 
         let new_node = ActivityNode {
             repeat_set: None,
