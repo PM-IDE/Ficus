@@ -9,7 +9,7 @@ import pandas as pd
 from matplotlib import pyplot as plt, axes
 from matplotlib.collections import PatchCollection
 from sklearn.decomposition import PCA
-from sklearn.manifold import Isomap
+from sklearn.manifold import Isomap, MDS, TSNE
 
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
@@ -376,6 +376,8 @@ class NComponents(Enum):
 class DatasetVisualizationMethod(Enum):
     Pca = 0,
     Isomap = 1
+    MDS = 2
+    TSNE = 3
 
 
 def visualize_dataset(num_components: NComponents,
@@ -468,15 +470,41 @@ def visualize_dataset_isomap(df: pd.DataFrame,
                              font_size: int,
                              save_path: Optional[str] = None,
                              label_column: Optional[str] = None):
-    def draw(ax):
-        if label_column is not None:
-            to_visualize = df.loc[:, df.columns != label_column].values
-        else:
-            to_visualize = df.values
+    visualize_dataset_internal(df, n_components, Isomap(n_components=n_components.value),
+                               fig_size, font_size, save_path, label_column)
 
-        components = Isomap(n_components=n_components.value).fit_transform(to_visualize)
+
+def visualize_dataset_internal(df: pd.DataFrame,
+                               n_components: NComponents,
+                               visualizer,
+                               fig_size: (int, int),
+                               font_size: int,
+                               save_path: Optional[str] = None,
+                               label_column: Optional[str] = None):
+    def draw(ax):
+        components = visualizer.fit_transform(get_values_to_visualize(df, label_column))
         components = [components[:, i] for i in range(n_components.value)]
 
         draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size)
 
     visualize_dataset(n_components, fig_size, save_path, draw)
+
+
+def visualize_dataset_tsne(df: pd.DataFrame,
+                           n_components: NComponents,
+                           fig_size: (int, int),
+                           font_size: int,
+                           save_path: Optional[str] = None,
+                           label_column: Optional[str] = None):
+    visualize_dataset_internal(df, n_components, TSNE(n_components=n_components.value),
+                               fig_size, font_size, save_path, label_column)
+
+
+def visualize_dataset_mds(df: pd.DataFrame,
+                             n_components: NComponents,
+                             fig_size: (int, int),
+                             font_size: int,
+                             save_path: Optional[str] = None,
+                             label_column: Optional[str] = None):
+    visualize_dataset_internal(df, n_components, MDS(n_components=n_components.value),
+                               fig_size, font_size, save_path, label_column)

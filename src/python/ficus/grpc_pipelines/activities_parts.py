@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 
 from ficus.analysis.event_log_analysis import draw_pca_results, NComponents, visualize_dataset_pca, \
-    visualize_dataset_isomap, DatasetVisualizationMethod
+    visualize_dataset_isomap, DatasetVisualizationMethod, visualize_dataset_mds, visualize_dataset_tsne
 from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
 from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance
 from ficus.grpc_pipelines.grpc_pipelines import *
@@ -285,6 +285,10 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
             vis_func = visualize_dataset_pca
         elif self.visualization_method == DatasetVisualizationMethod.Isomap:
             vis_func = visualize_dataset_isomap
+        elif self.visualization_method == DatasetVisualizationMethod.MDS:
+            vis_func = visualize_dataset_mds
+        elif self.visualization_method == DatasetVisualizationMethod.TSNE:
+            vis_func = visualize_dataset_tsne
         else:
             raise KeyError()
 
@@ -330,6 +334,7 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
             append_string_value(config, const_event_class_regex, self.class_extractor)
 
         return config
+
 
 class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
     def __init__(self,
