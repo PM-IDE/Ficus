@@ -3,7 +3,7 @@ use std::str::FromStr;
 use linfa_nn::distance::{Distance, L1Dist, L2Dist};
 use ndarray::{ArrayView, Dimension};
 
-use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities};
+use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::colors::ColorsHolder};
 
 use super::common::CosineDistance;
 
@@ -96,6 +96,7 @@ pub struct ActivitiesVisualizationParams<'a, TLog> where TLog: EventLog {
     pub activity_level: usize,
     pub class_extractor: Option<String>,
     pub activities_repr_source: ActivityRepresentationSource,
+    pub colors_holder: &'a mut ColorsHolder
 }
 
 pub struct ClusteringCommonParams<'a, TLog>

@@ -2,7 +2,7 @@ from sklearn.decomposition import PCA
 
 from ficus.analysis.event_log_analysis import draw_pca_results, NComponents, visualize_dataset_pca, \
     visualize_dataset_isomap, DatasetVisualizationMethod, visualize_dataset_mds, visualize_dataset_tsne
-from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset
+from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset, from_grpc_color
 from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance
 from ficus.grpc_pipelines.grpc_pipelines import *
 from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
@@ -282,8 +282,12 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
         dataset = values[const_labeled_traces_activities_dataset].labeled_dataset
         df = from_grpc_labeled_dataset(dataset)
 
+        colors = dict()
+        for label, color in zip(dataset.labels, dataset.labelsColors):
+            colors[label] = from_grpc_color(color)
+
         vis_func = get_visualization_function(self.visualization_method)
-        vis_func(df, self.n_components, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+        vis_func(df, self.n_components, colors, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
 
 
 def get_visualization_function(method: DatasetVisualizationMethod):

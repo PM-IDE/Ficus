@@ -5,7 +5,7 @@ use linfa_nn::KdTree;
 use crate::{event_log::core::event_log::EventLog, utils::dataset::dataset::LabeledDataset};
 
 use super::{
-    common::{create_dataset, transform_to_ficus_dataset},
+    common::{create_dataset, transform_to_ficus_dataset, create_colors_vector},
     merging::merge_activities,
     params::{ClusteringCommonParams, DistanceWrapper},
 };
@@ -34,7 +34,8 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
             .map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 })
             .collect();
 
-        Some(LabeledDataset::new(ficus_dataset, labels))
+        let colors = create_colors_vector(&labels, params.vis_params.colors_holder);
+        Some(LabeledDataset::new(ficus_dataset, labels, colors))
     } else {
         None
     }

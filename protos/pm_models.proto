@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "util.proto";
 
 package ficus;
 
@@ -111,4 +112,5 @@ message GrpcDataset {
 message GrpcLabeledDataset {
     GrpcDataset dataset = 1;
     repeated int32 labels = 2;
+    repeated GrpcColor labelsColors = 3;
 }

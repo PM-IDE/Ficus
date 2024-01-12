@@ -555,9 +555,11 @@ fn convert_to_grpc_dataset(dataset: &FicusDataset) -> GrpcDataset {
 fn convert_to_labeled_grpc_dataset(dataset: &LabeledDataset) -> GrpcLabeledDataset {
     let grpc_dataset = convert_to_grpc_dataset(dataset.dataset());
     let labels = dataset.labels().iter().map(|x| *x as i32).collect();
+    let labels_colors = dataset.colors().iter().map(|x| convert_to_grpc_color(x)).collect();
 
     GrpcLabeledDataset {
         dataset: Some(grpc_dataset),
         labels,
+        labels_colors,
     }
 }

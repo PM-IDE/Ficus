@@ -1,4 +1,5 @@
 from google.protobuf import timestamp_pb2 as _timestamp_pb2
+import util_pb2 as _util_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -165,9 +166,11 @@ class GrpcDataset(_message.Message):
     def __init__(self, matrix: _Optional[_Union[GrpcMatrix, _Mapping]] = ..., columnsNames: _Optional[_Iterable[str]] = ..., rowNames: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class GrpcLabeledDataset(_message.Message):
-    __slots__ = ["dataset", "labels"]
+    __slots__ = ["dataset", "labels", "labelsColors"]
     DATASET_FIELD_NUMBER: _ClassVar[int]
     LABELS_FIELD_NUMBER: _ClassVar[int]
+    LABELSCOLORS_FIELD_NUMBER: _ClassVar[int]
     dataset: GrpcDataset
     labels: _containers.RepeatedScalarFieldContainer[int]
-    def __init__(self, dataset: _Optional[_Union[GrpcDataset, _Mapping]] = ..., labels: _Optional[_Iterable[int]] = ...) -> None: ...
+    labelsColors: _containers.RepeatedCompositeFieldContainer[_util_pb2.GrpcColor]
+    def __init__(self, dataset: _Optional[_Union[GrpcDataset, _Mapping]] = ..., labels: _Optional[_Iterable[int]] = ..., labelsColors: _Optional[_Iterable[_Union[_util_pb2.GrpcColor, _Mapping]]] = ...) -> None: ...

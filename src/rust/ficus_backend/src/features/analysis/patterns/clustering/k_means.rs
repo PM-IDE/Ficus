@@ -7,11 +7,11 @@ use linfa::{
 use linfa_clustering::KMeans;
 
 use crate::{
-    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, utils::dataset::dataset::LabeledDataset,
+    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, utils::{dataset::dataset::LabeledDataset, colors::{ColorsHolder, self}},
 };
 
 use super::{
-    common::{create_dataset, transform_to_ficus_dataset, ClusteredDataset, MyDataset},
+    common::{create_dataset, transform_to_ficus_dataset, ClusteredDataset, MyDataset, create_colors_vector},
     merging::merge_activities,
     params::{ClusteringCommonParams, DistanceWrapper, FicusDistance},
 };
@@ -32,7 +32,8 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
             &clustered_dataset.targets.map(|x| Some(*x)),
         );
 
-        Some(create_labeled_dataset_from_k_means(&dataset, &clustered_dataset, &processed, classes_names))
+        let holder = &mut params.vis_params.colors_holder;
+        Some(create_labeled_dataset_from_k_means(&dataset, &clustered_dataset, &processed, classes_names, holder))
     } else {
         None
     }
@@ -43,9 +44,13 @@ fn create_labeled_dataset_from_k_means(
     clustered_dataset: &ClusteredDataset,
     processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
     classes_names: Vec<String>,
+    colors_holder: &mut ColorsHolder
 ) -> LabeledDataset {
     let ficus_dataset = transform_to_ficus_dataset(dataset, processed, classes_names);
-    LabeledDataset::new(ficus_dataset, clustered_dataset.targets.clone().into_raw_vec())
+    let labels = clustered_dataset.targets.clone().into_raw_vec();
+    let colors = create_colors_vector(&labels, colors_holder);
+
+    LabeledDataset::new(ficus_dataset, labels, colors)
 }
 
 fn create_k_means_model(
@@ -94,7 +99,8 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
             );
 
             let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
-            Some(LabeledDataset::new(ficus_dataset, best_labels.clone().into_raw_vec()))
+            let colors = create_colors_vector(&best_labels.to_vec(), params.vis_params.colors_holder);
+            Some(LabeledDataset::new(ficus_dataset, best_labels.clone().into_raw_vec(), colors))
         } else {
             None
         }

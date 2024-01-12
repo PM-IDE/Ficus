@@ -13,7 +13,7 @@ use crate::{
     event_log::core::{
         event::{
             event::Event,
-            event_hasher::{default_class_extractor_name, RegexEventHasher},
+            event_hasher::{default_class_extractor_name, RegexEventHasher, EventHasher},
         },
         event_log::EventLog,
         trace::trace::Trace,
@@ -23,10 +23,10 @@ use crate::{
         repeat_sets::ActivityNode,
     },
     pipelines::aliases::TracesActivities,
-    utils::dataset::dataset::FicusDataset,
+    utils::{dataset::dataset::FicusDataset, colors::{ColorsHolder, Color}},
 };
 
-use super::params::{ActivityRepresentationSource, ClusteringCommonParams, ActivitiesVisualizationParams};
+use super::{params::{ActivityRepresentationSource, ClusteringCommonParams, ActivitiesVisualizationParams}, merging::create_cluster_name};
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
@@ -312,4 +312,8 @@ pub fn transform_to_ficus_dataset(
 
     let row_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
     FicusDataset::new(matrix, classes_names, row_names)
+}
+
+pub(super) fn create_colors_vector(labels: &Vec<usize>, colors_holder: &mut ColorsHolder) -> Vec<Color> {
+    labels.iter().map(|x| colors_holder.get_or_create(&create_cluster_name(*x))).collect()
 }

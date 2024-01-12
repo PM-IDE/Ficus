@@ -1,3 +1,5 @@
+use crate::utils::colors::Color;
+
 pub struct FicusDataset {
     values: Vec<Vec<f64>>,
     columns_names: Vec<String>,
@@ -29,11 +31,12 @@ impl FicusDataset {
 pub struct LabeledDataset {
     dataset: FicusDataset,
     labels: Vec<usize>,
+    labels_colors: Vec<Color>
 }
 
 impl LabeledDataset {
-    pub fn new(dataset: FicusDataset, labels: Vec<usize>) -> Self {
-        Self { dataset, labels }
+    pub fn new(dataset: FicusDataset, labels: Vec<usize>, labels_colors: Vec<Color>) -> Self {
+        Self { dataset, labels, labels_colors }
     }
 
     pub fn dataset(&self) -> &FicusDataset {
@@ -42,5 +45,9 @@ impl LabeledDataset {
 
     pub fn labels(&self) -> &Vec<usize> {
         &self.labels
+    }
+
+    pub fn colors(&self) -> &Vec<Color> {
+        &self.labels_colors
     }
 }

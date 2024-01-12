@@ -401,6 +401,7 @@ def visualize_dataset(num_components: NComponents,
 
 def visualize_dataset_pca(df: pd.DataFrame,
                           n_components: NComponents,
+                          colors: dict[str, Color],
                           fig_size: (int, int),
                           font_size: int,
                           save_path: Optional[str] = None,
@@ -408,7 +409,7 @@ def visualize_dataset_pca(df: pd.DataFrame,
     pca = PCA(n_components=n_components.value)
     pca_result = pca.fit_transform(get_values_to_visualize(df, label_column))
 
-    draw_pca_results(df, pca_result, n_components, fig_size, font_size, save_path, label_column)
+    draw_pca_results(df, pca_result, n_components, colors, fig_size, font_size, save_path, label_column)
 
 
 def get_values_to_visualize(df: pd.DataFrame, label_column: Optional[str]):
@@ -421,6 +422,7 @@ def get_values_to_visualize(df: pd.DataFrame, label_column: Optional[str]):
 def draw_pca_results(df: pd.DataFrame,
                      pca_result,
                      n_components: NComponents,
+                     colors: dict[str, Color],
                      fig_size: (int, int),
                      font_size: int,
                      save_path: Optional[str] = None,
@@ -429,7 +431,7 @@ def draw_pca_results(df: pd.DataFrame,
         components_count = n_components.value
         components = [pca_result[:, i] for i in range(components_count)]
 
-        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size)
+        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size, colors)
 
     visualize_dataset(n_components, fig_size, save_path, draw)
 
@@ -438,18 +440,16 @@ def draw_scatter_plot_for_dataset_visualization(ax,
                                                 df: pd.DataFrame,
                                                 components,
                                                 label_column: Optional[str],
-                                                font_size: int):
+                                                font_size: int,
+                                                colors: dict[str, Color]):
     if label_column is None:
         ax.scatter(*components)
     else:
         y = df[label_column].to_numpy()
-        provider = RandomUniqueColorsProvider()
-        labels_to_columns = dict()
 
         for label in np.unique(y):
             ix = np.where(y == label)
-            color = labels_to_columns[label] if label in labels_to_columns else provider.next()
-            labels_to_columns[label] = color
+            color = colors[label].to_hex()
 
             selected_components = [components[i][ix] for i in range(len(components))]
             ax.scatter(*selected_components, c=color, s=40)
@@ -465,16 +465,18 @@ def draw_scatter_plot_for_dataset_visualization(ax,
 
 def visualize_dataset_isomap(df: pd.DataFrame,
                              n_components: NComponents,
+                             colors: dict[str, Color],
                              fig_size: (int, int),
                              font_size: int,
                              save_path: Optional[str] = None,
                              label_column: Optional[str] = None):
-    visualize_dataset_internal(df, n_components, Isomap(n_components=n_components.value),
+    visualize_dataset_internal(df, n_components, colors, Isomap(n_components=n_components.value),
                                fig_size, font_size, save_path, label_column)
 
 
 def visualize_dataset_internal(df: pd.DataFrame,
                                n_components: NComponents,
+                               colors: dict[str, Color],
                                visualizer,
                                fig_size: (int, int),
                                font_size: int,
@@ -484,26 +486,28 @@ def visualize_dataset_internal(df: pd.DataFrame,
         components = visualizer.fit_transform(get_values_to_visualize(df, label_column))
         components = [components[:, i] for i in range(n_components.value)]
 
-        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size)
+        draw_scatter_plot_for_dataset_visualization(ax, df, components, label_column, font_size, colors)
 
     visualize_dataset(n_components, fig_size, save_path, draw)
 
 
 def visualize_dataset_tsne(df: pd.DataFrame,
                            n_components: NComponents,
+                           colors: dict[str, Color],
                            fig_size: (int, int),
                            font_size: int,
                            save_path: Optional[str] = None,
                            label_column: Optional[str] = None):
-    visualize_dataset_internal(df, n_components, TSNE(n_components=n_components.value),
+    visualize_dataset_internal(df, n_components, colors, TSNE(n_components=n_components.value),
                                fig_size, font_size, save_path, label_column)
 
 
 def visualize_dataset_mds(df: pd.DataFrame,
                           n_components: NComponents,
+                          colors: dict[str, Color],
                           fig_size: (int, int),
                           font_size: int,
                           save_path: Optional[str] = None,
                           label_column: Optional[str] = None):
-    visualize_dataset_internal(df, n_components, MDS(n_components=n_components.value),
+    visualize_dataset_internal(df, n_components, colors, MDS(n_components=n_components.value),
                                fig_size, font_size, save_path, label_column)
