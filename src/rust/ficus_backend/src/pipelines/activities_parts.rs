@@ -464,9 +464,12 @@ impl PipelineParts {
                         continue;
                     }
 
-                    let found_match = found_match.ok().unwrap().unwrap();
-                    let start = found_match.start();
-                    let end = found_match.end();
+                    let (start, end) = if let Ok(Some(found_match)) = found_match {
+                        (found_match.start(), found_match.end())
+                    } else {
+                        (0, borrowed_event.name().len())
+                    };
+
                     drop(found_match);
                     drop(borrowed_event);
 
