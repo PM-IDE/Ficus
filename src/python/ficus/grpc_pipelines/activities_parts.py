@@ -281,18 +281,25 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
 
         dataset = values[const_labeled_traces_activities_dataset].labeled_dataset
         df = from_grpc_labeled_dataset(dataset)
-        if self.visualization_method == DatasetVisualizationMethod.Pca:
-            vis_func = visualize_dataset_pca
-        elif self.visualization_method == DatasetVisualizationMethod.Isomap:
-            vis_func = visualize_dataset_isomap
-        elif self.visualization_method == DatasetVisualizationMethod.MDS:
-            vis_func = visualize_dataset_mds
-        elif self.visualization_method == DatasetVisualizationMethod.TSNE:
-            vis_func = visualize_dataset_tsne
-        else:
-            raise KeyError()
 
+        vis_func = get_visualization_function(self.visualization_method)
         vis_func(df, self.n_components, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+
+
+def get_visualization_function(method: DatasetVisualizationMethod):
+    if method == DatasetVisualizationMethod.Pca:
+        return visualize_dataset_pca
+
+    if method == DatasetVisualizationMethod.Isomap:
+        return visualize_dataset_isomap
+
+    if method == DatasetVisualizationMethod.MDS:
+        return visualize_dataset_mds
+
+    if method == DatasetVisualizationMethod.TSNE:
+        return visualize_dataset_tsne
+
+    raise KeyError()
 
 
 class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
@@ -442,13 +449,19 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
                  class_extractor: Optional[str] = None,
                  fig_size: (int, int) = (7, 9),
                  font_size: int = 14,
-                 save_path: Optional[str] = None):
+                 save_path: Optional[str] = None,
+                 activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
+                 n_components: NComponents = NComponents.Three,
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__()
         self.activity_level = activity_level
         self.class_extractor = class_extractor
         self.fig_size = fig_size
         self.font_size = font_size
         self.save_path = save_path
+        self.n_components = n_components
+        self.visualization_method = visualization_method
+        self.activities_repr_source = activities_repr_source
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -456,6 +469,11 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
 
         if self.class_extractor is not None:
             append_string_value(config, const_event_class_regex, self.class_extractor)
+
+        append_enum_value(config,
+                          const_activities_representation_source,
+                          const_activities_repr_source_enum_name,
+                          self.activities_repr_source.name)
 
         part = _create_complex_get_context_part(self.uuid,
                                                 [const_traces_activities_dataset],
@@ -467,7 +485,5 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
     def execute_callback(self, values: dict[str, GrpcContextValue]):
         dataset = values[const_traces_activities_dataset].dataset
         df = from_grpc_ficus_dataset(dataset)
-
-        pca = PCA(n_components=3)
-        pca_result = pca.fit_transform(df.values)
-        draw_pca_results(df, pca_result, self.fig_size, self.font_size, save_path=self.save_path)
+        vis_func = get_visualization_function(self.visualization_method)
+        vis_func(df, self.n_components, self.fig_size, self.font_size, self.save_path, None)

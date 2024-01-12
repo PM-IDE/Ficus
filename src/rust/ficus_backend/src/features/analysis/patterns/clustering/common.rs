@@ -26,14 +26,14 @@ use crate::{
     utils::dataset::dataset::FicusDataset,
 };
 
-use super::params::{ActivityRepresentationSource, ClusteringCommonParams};
+use super::params::{ActivityRepresentationSource, ClusteringCommonParams, ActivitiesVisualizationParams};
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
-pub(super) fn create_dataset<TLog: EventLog>(
-    params: &ClusteringCommonParams<TLog>,
+pub fn create_dataset<TLog: EventLog>(
+    params: &ActivitiesVisualizationParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     match params.activities_repr_source {
         ActivityRepresentationSource::EventClasses => create_dataset_from_activities_classes(params),
@@ -43,7 +43,7 @@ pub(super) fn create_dataset<TLog: EventLog>(
 }
 
 pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: EventLog>(
-    params: &ClusteringCommonParams<TLog>,
+    params: &ActivitiesVisualizationParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
@@ -70,7 +70,7 @@ pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: Even
 }
 
 pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
-    params: &ClusteringCommonParams<TLog>,
+    params: &ActivitiesVisualizationParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
@@ -109,7 +109,7 @@ fn create_activities_repr_from_subtraces<TLog: EventLog>(
     traces_activities: &TracesActivities,
     regex_hasher: Option<&RegexEventHasher>,
     all_event_classes: &mut HashSet<u64>,
-    params: &ClusteringCommonParams<TLog>,
+    params: &ActivitiesVisualizationParams<TLog>,
     event_classes_updater: impl Fn(&[Rc<RefCell<TLog::TEvent>>], &mut HashMap<u64, usize>, &mut HashSet<u64>) -> (),
 ) -> HashMap<String, (Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)> {
     let mut processed = HashMap::new();
@@ -215,7 +215,7 @@ fn create_dataset_internal(
 }
 
 pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
-    params: &ClusteringCommonParams<TLog>,
+    params: &ActivitiesVisualizationParams<TLog>,
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
@@ -292,15 +292,7 @@ impl Distance<f64> for CosineDistance {
     }
 }
 
-pub fn create_traces_activities_dataset<TLog: EventLog>(params: &ClusteringCommonParams<TLog>) -> Option<FicusDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset_from_activities_classes(params) {
-        Some(transform_to_ficus_dataset(&dataset, &processed, classes_names))
-    } else {
-        None
-    }
-}
-
-pub(super) fn transform_to_ficus_dataset(
+pub fn transform_to_ficus_dataset(
     dataset: &MyDataset,
     processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
     classes_names: Vec<String>,

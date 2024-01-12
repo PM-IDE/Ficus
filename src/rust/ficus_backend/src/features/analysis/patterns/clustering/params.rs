@@ -90,15 +90,19 @@ impl Distance<f64> for DistanceWrapper {
     }
 }
 
+pub struct ActivitiesVisualizationParams<'a, TLog> where TLog: EventLog {
+    pub log: &'a TLog,
+    pub traces_activities: &'a mut TracesActivities,
+    pub activity_level: usize,
+    pub class_extractor: Option<String>,
+    pub activities_repr_source: ActivityRepresentationSource,
+}
+
 pub struct ClusteringCommonParams<'a, TLog>
 where
     TLog: EventLog,
 {
-    pub log: &'a TLog,
-    pub traces_activities: &'a mut TracesActivities,
-    pub activity_level: usize,
+    pub vis_params: ActivitiesVisualizationParams<'a, TLog>,
     pub tolerance: f64,
-    pub class_extractor: Option<String>,
-    pub activities_repr_source: ActivityRepresentationSource,
     pub distance: FicusDistance,
 }

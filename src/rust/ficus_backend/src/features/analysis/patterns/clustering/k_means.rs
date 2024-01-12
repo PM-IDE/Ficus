@@ -21,13 +21,13 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
     clusters_count: usize,
     iterations_count: usize,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
+    if let Some((dataset, processed, classes_names)) = create_dataset(&params.vis_params) {
         let model = create_k_means_model(clusters_count, iterations_count as u64, params.tolerance, &dataset, params.distance);
 
         let clustered_dataset = model.predict(dataset.clone());
         merge_activities(
-            params.log,
-            params.traces_activities,
+            params.vis_params.log,
+            params.vis_params.traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clustered_dataset.targets.map(|x| Some(*x)),
         );
@@ -66,7 +66,7 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
     params: &mut ClusteringCommonParams<TLog>,
     iterations_count: usize,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
+    if let Some((dataset, processed, classes_names)) = create_dataset(&params.vis_params) {
         let mut best_metric = -1f64;
         let mut best_labels = None;
 
@@ -87,8 +87,8 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
 
         if let Some(best_labels) = best_labels.as_ref() {
             merge_activities(
-                params.log,
-                params.traces_activities,
+                params.vis_params.log,
+                params.vis_params.traces_activities,
                 &processed.iter().map(|x| x.0.clone()).collect(),
                 &best_labels.map(|x| Some(*x)),
             );

@@ -4,10 +4,10 @@ use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
-use crate::features::analysis::patterns::clustering::common::create_traces_activities_dataset;
+use crate::features::analysis::patterns::clustering::common::{create_dataset, transform_to_ficus_dataset};
 use crate::features::analysis::patterns::clustering::dbscan::clusterize_activities_dbscan;
 use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
-use crate::features::analysis::patterns::clustering::params::ClusteringCommonParams;
+use crate::features::analysis::patterns::clustering::params::{ClusteringCommonParams, ActivitiesVisualizationParams};
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
@@ -497,30 +497,42 @@ impl PipelineParts {
         })
     }
 
-    fn create_common_clustering_params<'a>(
+    fn create_common_visualization_params<'a>(
         context: &'a mut PipelineContext,
         config: &'a UserDataImpl,
         keys: &ContextKeys,
-    ) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+    ) -> Result<ActivitiesVisualizationParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
         let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
-        let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
         let activities_repr_source = *Self::get_user_data(config, keys.activities_repr_source())?;
-        let distance = *Self::get_user_data(config, keys.distance())?;
         let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
             Ok(extractor) => Some(extractor.to_owned()),
             Err(_) => None,
         };
 
-        Ok(ClusteringCommonParams {
+        Ok(ActivitiesVisualizationParams {
             log,
             traces_activities,
-            tolerance,
             activity_level,
             class_extractor,
             activities_repr_source,
-            distance,
+        })
+    }
+
+    fn create_common_clustering_params<'a>(
+        context: &'a mut PipelineContext,
+        config: &'a UserDataImpl,
+        keys: &ContextKeys,
+    ) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+        let vis_params = Self::create_common_visualization_params(context, config, keys)?;
+        let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+        let distance = *Self::get_user_data(config, keys.distance())?;
+
+        Ok(ClusteringCommonParams {
+            vis_params,
+            tolerance,
+            distance
         })
     }
 
@@ -559,10 +571,11 @@ impl PipelineParts {
 
     pub(super) fn create_traces_activities_dataset() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CREATE_TRACES_ACTIVITIES_DATASET, &|context, _, keys, config| {
-            let params = Self::create_common_clustering_params(context, config, keys)?;
+            let params = Self::create_common_visualization_params(context, config, keys)?;
 
-            if let Some(dataset) = create_traces_activities_dataset(&params) {
-                context.put_concrete(keys.traces_activities_dataset().key(), dataset);
+            if let Some((dataset, processed, classes)) = create_dataset(&params) {
+                let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes);
+                context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
             }
 
             Ok(())

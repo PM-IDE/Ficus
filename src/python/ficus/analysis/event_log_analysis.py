@@ -1,8 +1,7 @@
 import math
 import os
 from enum import Enum
-from typing import List, Union, Callable, Optional
-from dataclasses import dataclass
+from typing import List, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -501,10 +500,10 @@ def visualize_dataset_tsne(df: pd.DataFrame,
 
 
 def visualize_dataset_mds(df: pd.DataFrame,
-                             n_components: NComponents,
-                             fig_size: (int, int),
-                             font_size: int,
-                             save_path: Optional[str] = None,
-                             label_column: Optional[str] = None):
+                          n_components: NComponents,
+                          fig_size: (int, int),
+                          font_size: int,
+                          save_path: Optional[str] = None,
+                          label_column: Optional[str] = None):
     visualize_dataset_internal(df, n_components, MDS(n_components=n_components.value),
                                fig_size, font_size, save_path, label_column)

@@ -14,15 +14,15 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
     params: &mut ClusteringCommonParams<TLog>,
     min_points: usize,
 ) -> Option<LabeledDataset> {
-    if let Some((dataset, processed, classes_names)) = create_dataset(params) {
+    if let Some((dataset, processed, classes_names)) = create_dataset(&params.vis_params) {
         let clusters = Dbscan::params_with(min_points, DistanceWrapper::new(params.distance), KdTree)
             .tolerance(params.tolerance)
             .transform(dataset.records())
             .unwrap();
 
         merge_activities(
-            params.log,
-            params.traces_activities,
+            params.vis_params.log,
+            params.vis_params.traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clusters,
         );
