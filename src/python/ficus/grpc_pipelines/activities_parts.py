@@ -262,6 +262,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
     def __init__(self,
                  show_visualization: bool,
                  fig_size: (int, int),
+                 view_params: (int, int),
                  font_size: int,
                  save_path: Optional[str],
                  n_components: NComponents,
@@ -269,6 +270,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
         super().__init__()
         self.show_visualization = show_visualization
         self.fig_size = fig_size
+        self.view_params = view_params
         self.font_size = font_size
         self.save_path = save_path
         self.n_components = n_components
@@ -287,7 +289,8 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
             colors[label] = from_grpc_color(color)
 
         vis_func = get_visualization_function(self.visualization_method)
-        vis_func(df, self.n_components, colors, self.fig_size, self.font_size, self.save_path, const_cluster_labels)
+        vis_func(df, self.n_components, colors, self.fig_size, self.view_params,
+                 self.font_size, self.save_path, const_cluster_labels)
 
 
 def get_visualization_function(method: DatasetVisualizationMethod):
@@ -313,13 +316,16 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
                  class_extractor: Optional[str],
                  show_visualization: bool,
                  fig_size: (int, int),
+                 view_params: (int, int),
                  font_size: int,
                  save_path: Optional[str],
                  activities_repr_source: ActivitiesRepresentationSource,
                  distance: Distance,
                  n_components: NComponents,
                  visualization_method: DatasetVisualizationMethod):
-        super().__init__(show_visualization, fig_size, font_size, save_path, n_components, visualization_method)
+        super().__init__(show_visualization, fig_size, view_params, font_size,
+                         save_path, n_components, visualization_method)
+
         self.tolerance = tolerance
         self.activity_level = activity_level
         self.class_extractor = class_extractor
@@ -356,6 +362,7 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  class_extractor: Optional[str] = None,
                  show_visualization: bool = True,
                  fig_size: (int, int) = (7, 9),
+                 view_params: (int, int) = (-140, 60),
                  font_size: int = 14,
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
@@ -363,7 +370,7 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
                          visualization_method)
 
         self.clusters_count = clusters_count
@@ -390,6 +397,7 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  class_extractor: Optional[str] = None,
                  show_visualization: bool = True,
                  fig_size: (int, int) = (7, 9),
+                 view_params: (int, int) = (-140, 60),
                  font_size: int = 14,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
@@ -397,7 +405,7 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
                          visualization_method)
 
         self.learning_iterations_count = learning_iterations_count
@@ -422,6 +430,7 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  class_extractor: Optional[str] = None,
                  show_visualization: bool = True,
                  fig_size: (int, int) = (7, 9),
+                 view_params: (int, int) = (-140, 60),
                  font_size: int = 14,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  save_path: Optional[str] = None,
@@ -429,7 +438,7 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
-                         fig_size, font_size, save_path, activities_repr_source, distance, n_components,
+                         fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
                          visualization_method)
 
         self.min_events_count_in_cluster = min_events_count_in_cluster
@@ -452,6 +461,7 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
                  activity_level: int = 0,
                  class_extractor: Optional[str] = None,
                  fig_size: (int, int) = (7, 9),
+                 view_params: (int, int) = (-140, 60),
                  font_size: int = 14,
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
@@ -466,6 +476,7 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
         self.n_components = n_components
         self.visualization_method = visualization_method
         self.activities_repr_source = activities_repr_source
+        self.view_params = view_params
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -490,4 +501,5 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
         dataset = values[const_traces_activities_dataset].dataset
         df = from_grpc_ficus_dataset(dataset)
         vis_func = get_visualization_function(self.visualization_method)
-        vis_func(df, self.n_components, self.fig_size, self.font_size, self.save_path, None)
+
+        vis_func(df, self.n_components, dict(), self.fig_size, self.view_params, self.font_size, self.save_path, None)
