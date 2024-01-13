@@ -77,6 +77,7 @@ impl PipelineParts {
             Self::clusterize_activities_from_traces_k_means_grid_search(),
             Self::clusterize_activities_from_traces_dbscan(),
             Self::create_traces_activities_dataset(),
+            Self::write_log_to_bxes(),
         ];
 
         let mut names_to_parts = HashMap::new();

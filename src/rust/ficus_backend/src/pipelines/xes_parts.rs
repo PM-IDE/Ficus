@@ -1,4 +1,4 @@
-use crate::event_log::bxes::converter::read_bxes_into_xes_log;
+use crate::event_log::bxes::converter::{read_bxes_into_xes_log, write_event_log_to_bxes};
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},
@@ -46,6 +46,18 @@ impl PipelineParts {
             } else {
                 let message = format!("Failed to read event log from {}", path.as_str());
                 Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
+            }
+        })
+    }
+
+    pub(super) fn write_log_to_bxes() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::WRITE_LOG_TO_BXES, &|context, _, keys, _| {
+            let path = Self::get_user_data(context, keys.path())?;
+            let log = Self::get_user_data(context, keys.event_log())?;
+
+            match write_event_log_to_bxes(log, path) {
+                Ok(_) => Ok(()),
+                Err(err) => Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(err.to_string()))),
             }
         })
     }
