@@ -266,7 +266,8 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
                  font_size: int,
                  save_path: Optional[str],
                  n_components: NComponents,
-                 visualization_method: DatasetVisualizationMethod):
+                 visualization_method: DatasetVisualizationMethod,
+                 legend_cols: int):
         super().__init__()
         self.show_visualization = show_visualization
         self.fig_size = fig_size
@@ -276,6 +277,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
         self.n_components = n_components
         self.n_components = n_components
         self.visualization_method = visualization_method
+        self.legend_cols = legend_cols
 
     def execute_callback(self, values: dict[str, GrpcContextValue]):
         if not self.show_visualization:
@@ -290,7 +292,7 @@ class ClusterizationPartWithPCAVisualization2(PipelinePart2WithCallback):
 
         vis_func = get_visualization_function(self.visualization_method)
         vis_func(df, self.n_components, colors, self.fig_size, self.view_params,
-                 self.font_size, self.save_path, const_cluster_labels)
+                 self.font_size, self.legend_cols, self.save_path, const_cluster_labels)
 
 
 def get_visualization_function(method: DatasetVisualizationMethod):
@@ -322,9 +324,10 @@ class ClusterizationPart2(ClusterizationPartWithPCAVisualization2):
                  activities_repr_source: ActivitiesRepresentationSource,
                  distance: Distance,
                  n_components: NComponents,
-                 visualization_method: DatasetVisualizationMethod):
+                 visualization_method: DatasetVisualizationMethod,
+                 legend_cols: int):
         super().__init__(show_visualization, fig_size, view_params, font_size,
-                         save_path, n_components, visualization_method)
+                         save_path, n_components, visualization_method, legend_cols)
 
         self.tolerance = tolerance
         self.activity_level = activity_level
@@ -368,10 +371,11 @@ class ClusterizeActivitiesFromTracesKMeans(ClusterizationPart2):
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  distance: Distance = Distance.Cosine,
                  n_components: NComponents = NComponents.Three,
-                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca,
+                 legend_cols: int = 2):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
-                         visualization_method)
+                         visualization_method, legend_cols)
 
         self.clusters_count = clusters_count
         self.learning_iterations_count = learning_iterations_count
@@ -403,10 +407,11 @@ class ClusterizeActivitiesFromTracesKMeansGridSearch(ClusterizationPart2):
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
                  n_components: NComponents = NComponents.Three,
-                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca,
+                 legend_cols: int = 2):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
-                         visualization_method)
+                         visualization_method, legend_cols)
 
         self.learning_iterations_count = learning_iterations_count
 
@@ -436,10 +441,11 @@ class ClusterizeActivitiesFromTracesDbscan(ClusterizationPart2):
                  save_path: Optional[str] = None,
                  distance: Distance = Distance.Cosine,
                  n_components: NComponents = NComponents.Three,
-                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca,
+                 legend_cols: int = 2):
         super().__init__(activity_level, tolerance, class_extractor, show_visualization,
                          fig_size, view_params, font_size, save_path, activities_repr_source, distance, n_components,
-                         visualization_method)
+                         visualization_method, legend_cols)
 
         self.min_events_count_in_cluster = min_events_count_in_cluster
 
@@ -466,7 +472,8 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
                  save_path: Optional[str] = None,
                  activities_repr_source: ActivitiesRepresentationSource = ActivitiesRepresentationSource.EventClasses,
                  n_components: NComponents = NComponents.Three,
-                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca):
+                 visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca,
+                 legend_cols: int = 2):
         super().__init__()
         self.activity_level = activity_level
         self.class_extractor = class_extractor
@@ -477,6 +484,7 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
         self.visualization_method = visualization_method
         self.activities_repr_source = activities_repr_source
         self.view_params = view_params
+        self.legend_cols = legend_cols
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -502,4 +510,5 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
         df = from_grpc_ficus_dataset(dataset)
         vis_func = get_visualization_function(self.visualization_method)
 
-        vis_func(df, self.n_components, dict(), self.fig_size, self.view_params, self.font_size, self.save_path, None)
+        vis_func(df, self.n_components, dict(), self.fig_size, self.view_params,
+                 self.font_size, self.legend_cols, self.save_path, None)
