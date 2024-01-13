@@ -391,7 +391,6 @@ def visualize_dataset(num_components: NComponents,
 
     draw_func(ax)
 
-    ax.legend()
     if save_path is None:
         fig.show()
     else:
@@ -455,7 +454,10 @@ def draw_scatter_plot_for_dataset_visualization(ax,
             color = colors[label].to_hex() if label in colors else '#FFFFFF'
 
             selected_components = [components[i][ix] for i in range(len(components))]
-            ax.scatter(*selected_components, c=color, s=40)
+            ax.scatter(*selected_components, c=color, label=f'CLUSTER_{label}')
+
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+                  fancybox=True, shadow=True, ncol=5)
 
     for i in range(len(components)):
         if i == 0:
