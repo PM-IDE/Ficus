@@ -449,6 +449,9 @@ def draw_scatter_plot_for_dataset_visualization(ax,
                                                 colors: dict[str, Color],
                                                 view_params: (int, int),
                                                 legend_cols: int):
+    if len(components) == 1:
+        components.append(np.array([0 for _ in range(len(components[0]))]))
+
     if label_column is None:
         ax.scatter(*components)
     else:
