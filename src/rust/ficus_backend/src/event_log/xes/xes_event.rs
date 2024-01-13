@@ -105,6 +105,10 @@ impl Event for XesEventImpl {
     fn new_with_max_date(name: String) -> Self {
         Self::new(name, DateTime::<Utc>::MAX_UTC)
     }
+
+    fn name_pointer(&self) -> &Rc<Box<String>> {
+        &self.event_base.name
+    }
 }
 
 impl Clone for XesEventImpl {

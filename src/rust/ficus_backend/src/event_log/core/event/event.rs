@@ -43,6 +43,8 @@ pub trait Event: Clone {
     fn new_with_max_date(name: String) -> Self;
 
     fn name(&self) -> &String;
+    fn name_pointer(&self) -> &Rc<Box<String>>;
+
     fn timestamp(&self) -> &DateTime<Utc>;
     fn lifecycle(&self) -> Option<Lifecycle>;
     fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>>;
