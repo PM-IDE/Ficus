@@ -25,5 +25,11 @@ class ReadLogFromBxes2(PipelinePart2):
 
 
 class WriteLogToBxes2(PipelinePart2):
+    def __init__(self, save_path: str):
+        super().__init__()
+        self.save_path = save_path
+
     def to_grpc_part(self) -> GrpcPipelinePartBase:
-        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_write_log_to_bxes))
+        config = GrpcPipelinePartConfiguration()
+        append_string_value(config, const_path, self.save_path)
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_write_log_to_bxes, config))

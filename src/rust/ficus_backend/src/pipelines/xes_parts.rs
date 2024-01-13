@@ -51,8 +51,8 @@ impl PipelineParts {
     }
 
     pub(super) fn write_log_to_bxes() -> (String, PipelinePartFactory) {
-        Self::create_pipeline_part(Self::WRITE_LOG_TO_BXES, &|context, _, keys, _| {
-            let path = Self::get_user_data(context, keys.path())?;
+        Self::create_pipeline_part(Self::WRITE_LOG_TO_BXES, &|context, _, keys, config| {
+            let path = Self::get_user_data(config, keys.path())?;
             let log = Self::get_user_data(context, keys.event_log())?;
 
             match write_event_log_to_bxes(log, path) {
