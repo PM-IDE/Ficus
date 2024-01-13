@@ -99,6 +99,7 @@ const_clusterize_activities_from_traces_k_means= 'ClusterizeActivitiesFromTraces
 const_clusterize_activities_from_traces_k_means_grid_search = 'ClusterizeActivitiesFromTracesKMeansGridSearch'
 const_clusterize_activities_from_traces_dbscan = 'ClusterizeActivitiesFromTracesDbscan'
 const_create_traces_activities_dataset = 'CreateTracesActivitiesDataset'
+const_write_log_to_bxes = 'WriteLogToBxes'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'

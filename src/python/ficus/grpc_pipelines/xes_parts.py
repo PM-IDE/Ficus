@@ -22,3 +22,8 @@ class WriteLogToXes2(PipelinePart2):
 class ReadLogFromBxes2(PipelinePart2):
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_read_log_from_bxes))
+
+
+class WriteLogToBxes2(PipelinePart2):
+    def to_grpc_part(self) -> GrpcPipelinePartBase:
+        return GrpcPipelinePartBase(defaultPart=_create_default_pipeline_part(const_write_log_to_bxes))
