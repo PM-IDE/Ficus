@@ -412,9 +412,10 @@ impl PipelineParts {
                     }
                 };
 
-            for (_, activity_log) in activities_to_logs {
+            for (activity_name, activity_log) in activities_to_logs {
                 let mut temp_context = PipelineContext::empty_from(context);
                 temp_context.put_concrete(keys.event_log().key(), activity_log.borrow().clone());
+                temp_context.put_concrete(keys.activity_name().key(), activity_name.clone());
 
                 pipeline.execute(&mut temp_context, infra, keys)?;
             }
