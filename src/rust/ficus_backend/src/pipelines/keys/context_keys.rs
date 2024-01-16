@@ -585,4 +585,13 @@ impl ContextKeys {
     pub fn is_execute_only_on_last_extraction(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.execute_only_on_last_extraction(), key)
     }
+
+    pub fn event_log_name(&self) -> &DefaultContextKey<String> {
+        self.find_concrete_key::<String>(Self::EVENT_LOG_NAME)
+            .expect("EVENT_LOG_NAME should be present in keys")
+    }
+
+    pub fn is_event_log_name(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.event_log_name(), key)
+    }
 }

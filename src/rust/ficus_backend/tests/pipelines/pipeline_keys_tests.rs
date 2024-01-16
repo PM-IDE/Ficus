@@ -115,6 +115,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<ActivityRepresentationSource>(keys, ContextKeys::ACTIVITIES_REPR_SOURCE, &mut used);
         assert_existence::<FicusDistance>(keys, ContextKeys::DISTANCE, &mut used);
         assert_existence::<bool>(keys, ContextKeys::EXECUTE_ONLY_ON_LAST_EXTRACTION, &mut used);
+        assert_existence::<String>(keys, ContextKeys::EVENT_LOG_NAME, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -191,7 +192,8 @@ fn get_all_keys_names() -> Vec<String> {
         "labeled_traces_activities_dataset",
         "activities_repr_source",
         "distance",
-        "execute_only_on_last_extraction"
+        "execute_only_on_last_extraction",
+        "event_log_name"
     ]
 }
 
@@ -276,6 +278,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<ActivityRepresentationSource>(keys, ContextKeys::ACTIVITIES_REPR_SOURCE, &mut used);
         assert_keys_equivalence::<FicusDistance>(keys, ContextKeys::DISTANCE, &mut used);
         assert_keys_equivalence::<bool>(keys, ContextKeys::EXECUTE_ONLY_ON_LAST_EXTRACTION, &mut used);
+        assert_keys_equivalence::<String>(keys, ContextKeys::EVENT_LOG_NAME, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })

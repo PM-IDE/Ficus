@@ -97,6 +97,7 @@ impl ContextKeys {
     pub const LEARNING_ITERATIONS_COUNT: &'static str = "learning_iterations_count";
     pub const TOLERANCE: &'static str = "tolerance";
     pub const MIN_EVENTS_IN_CLUSTERS_COUNT: &'static str = "min_events_in_cluster_count";
+    pub const EVENT_LOG_NAME: &'static str = "event_log_name";
 
     pub const EVENT_LOG: &'static str = "event_log";
     pub const ACTIVITIES: &'static str = "activities";
@@ -185,6 +186,7 @@ impl ContextKeys {
         Self::insert_obtain_activities_repr_from_traces(&mut context);
         Self::insert_distance(&mut context);
         Self::insert_execute_only_on_last_extraction(&mut context);
+        Self::insert_event_log_name(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -437,5 +439,9 @@ impl ContextKeys {
 
     fn insert_execute_only_on_last_extraction(context: &mut ContextKeysInitContext) {
         Self::insert_key::<bool>(context, Self::EXECUTE_ONLY_ON_LAST_EXTRACTION)
+    }
+
+    fn insert_event_log_name(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<String>(context, Self::EVENT_LOG_NAME)
     }
 }
