@@ -49,6 +49,8 @@ const_labeled_traces_activities_dataset = 'labeled_traces_activities_dataset'
 const_activities_representation_source = 'activities_repr_source'
 const_distance = 'distance'
 const_execute_only_on_last_extraction = 'execute_only_on_last_extraction'
+const_log_traces_dataset = 'log_traces_dataset'
+const_labeled_log_traces_dataset = 'labeled_log_traces_dataset'
 
 const_draw_placement_of_event_by_regex = 'DrawPlacementOfEventsByRegex'
 const_draw_full_activities_diagram = 'DrawFullActivitiesDiagram'
@@ -100,6 +102,7 @@ const_clusterize_activities_from_traces_k_means_grid_search = 'ClusterizeActivit
 const_clusterize_activities_from_traces_dbscan = 'ClusterizeActivitiesFromTracesDbscan'
 const_create_traces_activities_dataset = 'CreateTracesActivitiesDataset'
 const_write_log_to_bxes = 'WriteLogToBxes'
+const_clusterize_log_traces = 'ClusterizeLogTraces'
 
 const_pattern_discovery_strategy_enum_name = 'PatternsDiscoveryStrategy'
 const_patterns_kind_enum_name = 'PatternsKindDto'
