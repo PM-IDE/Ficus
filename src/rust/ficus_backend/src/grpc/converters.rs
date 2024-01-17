@@ -164,6 +164,10 @@ pub fn convert_to_grpc_context_value(key: &dyn ContextKey, value: &dyn Any, keys
         try_convert_to_grpc_dataset(value)
     } else if keys.is_labeled_traces_activities_dataset(key) {
         try_convert_to_grpc_labeled_dataset(value)
+    } else if keys.is_labeled_log_traces_dataset(key) {
+        try_convert_to_grpc_labeled_dataset(value)
+    } else if keys.is_log_traces_dataset(key) {
+        try_convert_to_grpc_dataset(value)
     } else {
         None
     }

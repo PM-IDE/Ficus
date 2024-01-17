@@ -517,7 +517,7 @@ class VisualizeTracesActivities2(PipelinePart2WithCallback):
                  self.font_size, self.legend_cols, self.save_path, None)
 
 
-class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2)
+class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2):
     def __init__(self,
                  after_clusterization_pipeline: Pipeline2,
                  min_events_count_in_cluster: int = 1,
@@ -553,8 +553,8 @@ class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2)
         append_pipeline_value(config, const_pipeline, self.after_clusterization_pipeline)
 
         part = _create_complex_get_context_part(self.uuid,
-                                                [const_labeled_traces_activities_dataset],
-                                                const_clusterize_activities_from_traces_k_means_grid_search,
+                                                [const_labeled_log_traces_dataset],
+                                                const_clusterize_log_traces,
                                                 config)
 
         return GrpcPipelinePartBase(complexContextRequestPart=part)
