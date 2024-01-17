@@ -13,11 +13,11 @@ use crate::{
 use super::{
     common::{create_dataset, transform_to_ficus_dataset, ClusteredDataset, MyDataset, create_colors_vector},
     merging::merge_activities,
-    params::{ClusteringCommonParams, DistanceWrapper, FicusDistance},
+    params::{ActivitiesClusteringParams, DistanceWrapper, FicusDistance},
 };
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
-    params: &mut ClusteringCommonParams<TLog>,
+    params: &mut ActivitiesClusteringParams<TLog>,
     clusters_count: usize,
     iterations_count: usize,
 ) -> Option<LabeledDataset> {
@@ -26,13 +26,13 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
 
         let clustered_dataset = model.predict(dataset.clone());
         merge_activities(
-            params.vis_params.log,
+            params.vis_params.common_vis_params.log,
             params.vis_params.traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clustered_dataset.targets.map(|x| Some(*x)),
         );
 
-        let holder = &mut params.vis_params.colors_holder;
+        let holder = &mut params.vis_params.common_vis_params.colors_holder;
         Some(create_labeled_dataset_from_k_means(&dataset, &clustered_dataset, &processed, classes_names, holder))
     } else {
         None
@@ -73,7 +73,7 @@ fn create_k_means_model(
 }
 
 pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
-    params: &mut ClusteringCommonParams<TLog>,
+    params: &mut ActivitiesClusteringParams<TLog>,
     iterations_count: usize,
 ) -> Option<LabeledDataset> {
     if let Some((dataset, processed, classes_names)) = create_dataset(&params.vis_params) {
@@ -97,7 +97,7 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
 
         if let Some(best_labels) = best_labels.as_ref() {
             merge_activities(
-                params.vis_params.log,
+                params.vis_params.common_vis_params.log,
                 params.vis_params.traces_activities,
                 &processed.iter().map(|x| x.0.clone()).collect(),
                 &best_labels.map(|x| Some(*x)),
@@ -109,7 +109,7 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
                 classes_names
             );
 
-            let colors = create_colors_vector(&best_labels.to_vec(), params.vis_params.colors_holder);
+            let colors = create_colors_vector(&best_labels.to_vec(), params.vis_params.common_vis_params.colors_holder);
             Some(LabeledDataset::new(ficus_dataset, best_labels.clone().into_raw_vec(), colors))
         } else {
             None

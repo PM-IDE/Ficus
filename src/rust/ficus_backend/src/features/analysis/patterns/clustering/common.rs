@@ -26,7 +26,7 @@ use crate::{
     utils::{dataset::dataset::FicusDataset, colors::{ColorsHolder, Color}},
 };
 
-use super::{params::{ActivityRepresentationSource, ClusteringCommonParams, ActivitiesVisualizationParams}, merging::create_cluster_name};
+use super::{params::{ActivityRepresentationSource, ActivitiesClusteringParams, ActivitiesVisualizationParams}, merging::create_cluster_name};
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
@@ -131,7 +131,7 @@ fn create_activities_repr_from_subtraces<TLog: EventLog>(
             let map: &mut HashMap<u64, usize> = &mut processed.get_mut(&node.name).unwrap().1;
             if let Some(repeat_set) = node.repeat_set.as_ref() {
                 let array = repeat_set.sub_array;
-                let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
+                let trace = params.common_vis_params.log.traces().get(repeat_set.trace_index).unwrap();
                 let events = trace.borrow();
                 let events = events.events();
 
@@ -238,7 +238,7 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
 
                     let activity_event_classes = if let Some(regex_hasher) = regex_hasher.as_ref() {
                         if let Some(repeat_set) = activity.node.borrow().repeat_set.as_ref() {
-                            let trace = params.log.traces().get(repeat_set.trace_index).unwrap();
+                            let trace = params.common_vis_params.log.traces().get(repeat_set.trace_index).unwrap();
                             let trace = trace.borrow();
                             let events = trace.events();
                             let array = &repeat_set.sub_array;

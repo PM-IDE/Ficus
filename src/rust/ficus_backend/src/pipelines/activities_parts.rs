@@ -7,7 +7,7 @@ use crate::features::analysis::patterns::activity_instances::{substitute_underly
 use crate::features::analysis::patterns::clustering::common::{create_dataset, transform_to_ficus_dataset};
 use crate::features::analysis::patterns::clustering::dbscan::{clusterize_activities_dbscan, clusterize_log_by_traces_dbscan};
 use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
-use crate::features::analysis::patterns::clustering::params::{ClusteringCommonParams, ActivitiesVisualizationParams};
+use crate::features::analysis::patterns::clustering::params::{ActivitiesClusteringParams, ActivitiesVisualizationParams, CommonVisualizationParams, TracesClusteringParams};
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
@@ -487,7 +487,7 @@ impl PipelineParts {
 
     pub(super) fn clusterize_activities_from_traces_k_means() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS, &|context, _, keys, config| {
-            let mut params = Self::create_common_clustering_params(context, config, keys)?;
+            let mut params = Self::create_activities_clustering_params(context, config, keys)?;
             let clusters_count = *Self::get_user_data(config, keys.clusters_count())? as usize;
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
 
@@ -501,13 +501,23 @@ impl PipelineParts {
         })
     }
 
-    fn create_common_visualization_params<'a>(
+    fn create_common_vis_params<'a>(
+        context: &'a PipelineContext,
+        config: &'a UserDataImpl,
+        keys: &ContextKeys,
+    ) -> Result<CommonVisualizationParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+        let log = Self::get_user_data(context, keys.event_log())?;
+        let colors_holder = Self::get_user_data_mut(context, keys.colors_holder())?;
+
+        Ok(CommonVisualizationParams { log, colors_holder })
+    }
+
+    fn create_activities_visualization_params<'a>(
         context: &'a mut PipelineContext,
         config: &'a UserDataImpl,
         keys: &ContextKeys,
     ) -> Result<ActivitiesVisualizationParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
-        let log = Self::get_user_data(context, keys.event_log())?;
-        let colors_holder = Self::get_user_data_mut(context, keys.colors_holder())?;
+        let common_vis_params = Self::create_common_vis_params(context, config, keys)?;
         let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
         let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
         let activities_repr_source = *Self::get_user_data(config, keys.activities_repr_source())?;
@@ -517,25 +527,24 @@ impl PipelineParts {
         };
 
         Ok(ActivitiesVisualizationParams {
-            log,
+            common_vis_params,
             traces_activities,
             activity_level,
             class_extractor,
             activities_repr_source,
-            colors_holder
         })
     }
 
-    fn create_common_clustering_params<'a>(
+    fn create_activities_clustering_params<'a>(
         context: &'a mut PipelineContext,
         config: &'a UserDataImpl,
         keys: &ContextKeys,
-    ) -> Result<ClusteringCommonParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
-        let vis_params = Self::create_common_visualization_params(context, config, keys)?;
+    ) -> Result<ActivitiesClusteringParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+        let vis_params = Self::create_activities_visualization_params(context, config, keys)?;
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let distance = *Self::get_user_data(config, keys.distance())?;
 
-        Ok(ClusteringCommonParams {
+        Ok(ActivitiesClusteringParams {
             vis_params,
             tolerance,
             distance
@@ -547,7 +556,7 @@ impl PipelineParts {
             Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_KMEANS_GRID_SEARCH,
             &|context, _, keys, config| {
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
-                let mut params = Self::create_common_clustering_params(context, config, keys)?;
+                let mut params = Self::create_activities_clustering_params(context, config, keys)?;
 
                 let labeled_dataset = clusterize_activities_k_means_grid_search(&mut params, learning_iterations_count);
 
@@ -563,7 +572,7 @@ impl PipelineParts {
     pub(super) fn clusterize_activities_from_traces_dbscan() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_ACTIVITIES_FROM_TRACES_DBSCAN, &|context, _, keys, config| {
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
-            let mut params = Self::create_common_clustering_params(context, config, keys)?;
+            let mut params = Self::create_activities_clustering_params(context, config, keys)?;
 
             let labeled_dataset = clusterize_activities_dbscan(&mut params, min_points_in_cluster);
 
@@ -577,7 +586,7 @@ impl PipelineParts {
 
     pub(super) fn create_traces_activities_dataset() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CREATE_TRACES_ACTIVITIES_DATASET, &|context, _, keys, config| {
-            let params = Self::create_common_visualization_params(context, config, keys)?;
+            let params = Self::create_activities_visualization_params(context, config, keys)?;
 
             if let Some((dataset, processed, classes)) = create_dataset(&params) {
                 let ficus_dataset = transform_to_ficus_dataset(
@@ -593,9 +602,24 @@ impl PipelineParts {
         })
     }
 
+    fn create_traces_clustering_params<'a>(
+        context: &'a mut PipelineContext,
+        config: &'a UserDataImpl,
+        keys: &ContextKeys,
+    ) -> Result<TracesClusteringParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
+        let tolerance = *Self::get_user_data(config, keys.tolerance())?;
+        let distance = *Self::get_user_data(config, keys.distance())?;
+
+        Ok(TracesClusteringParams {
+            vis_params: Self::create_common_vis_params(context, config, keys)?,
+            distance,
+            tolerance,
+        })
+    }
+
     pub(super) fn clusterize_log_traces() -> (String, PipelinePartFactory) {
         Self::create_pipeline_part(Self::CLUSTERIZE_LOG_TRACES, &|context, infra, keys, config| {
-            let mut params = Self::create_common_clustering_params(context, config, keys)?;
+            let mut params = Self::create_traces_clustering_params(context, config, keys)?;
             let after_clusterization_pipeline = Self::get_user_data(config, keys.pipeline())?;
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
 

@@ -10,11 +10,11 @@ use crate::{event_log::core::{event_log::EventLog, trace::trace::Trace, event::e
 use super::{
     common::{create_dataset, transform_to_ficus_dataset, create_colors_vector, MyDataset, scale_raw_dataset_min_max},
     merging::merge_activities,
-    params::{ClusteringCommonParams, DistanceWrapper},
+    params::{ActivitiesClusteringParams, DistanceWrapper, TracesClusteringParams},
 };
 
 pub fn clusterize_activities_dbscan<TLog: EventLog>(
-    params: &mut ClusteringCommonParams<TLog>,
+    params: &mut ActivitiesClusteringParams<TLog>,
     min_points: usize,
 ) -> Option<LabeledDataset> {
     if let Some((dataset, processed, classes_names)) = create_dataset(&params.vis_params) {
@@ -24,7 +24,7 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
             .unwrap();
 
         merge_activities(
-            params.vis_params.log,
+            params.vis_params.common_vis_params.log,
             params.vis_params.traces_activities,
             &processed.iter().map(|x| x.0.clone()).collect(),
             &clusters,
@@ -42,7 +42,7 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
             .map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 })
             .collect();
 
-        let colors = create_colors_vector(&labels, params.vis_params.colors_holder);
+        let colors = create_colors_vector(&labels, params.vis_params.common_vis_params.colors_holder);
         Some(LabeledDataset::new(ficus_dataset, labels, colors))
     } else {
         None
@@ -50,7 +50,7 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
 }
 
 pub fn clusterize_log_by_traces_dbscan<TLog: EventLog>(
-    params: &mut ClusteringCommonParams<TLog>,
+    params: &mut TracesClusteringParams<TLog>,
     min_points: usize,
 ) -> Option<(Vec<TLog>, LabeledDataset)> {
     if let Some((dataset, objects, features)) = create_traces_dataset(params.vis_params.log) {
