@@ -41,3 +41,4 @@ class Distance(Enum):
     Cosine = 0
     L1 = 1
     L2 = 2
+    Levenshtein = 3

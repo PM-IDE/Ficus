@@ -277,24 +277,6 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
     )
 }
 
-#[derive(Clone)]
-pub struct CosineDistance {}
-
-impl Distance<f64> for CosineDistance {
-    fn distance<D: Dimension>(&self, a: ArrayView<f64, D>, b: ArrayView<f64, D>) -> f64 {
-        let mut sum = 0.0;
-        let mut a_square = 0.0;
-        let mut b_square = 0.0;
-
-        for (a, b) in a.iter().zip(b.iter()) {
-            sum += a * b;
-            a_square += a * a;
-            b_square += b * b;
-        }
-
-        1.0 - sum / (a_square.sqrt() * b_square.sqrt())
-    }
-}
 
 pub fn transform_to_ficus_dataset(
     dataset: &MyDataset,

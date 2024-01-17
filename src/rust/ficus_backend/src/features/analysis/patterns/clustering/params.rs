@@ -5,7 +5,8 @@ use ndarray::{ArrayView, Dimension};
 
 use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::colors::ColorsHolder};
 
-use super::common::CosineDistance;
+use super::distance::{CosineDistance, LevenshteinDistance};
+
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum ActivityRepresentationSource {
@@ -32,6 +33,7 @@ pub enum FicusDistance {
     Cosine,
     L1,
     L2,
+    Levenshtein
 }
 
 impl FromStr for FicusDistance {
@@ -42,6 +44,7 @@ impl FromStr for FicusDistance {
             "Cosine" => Ok(Self::Cosine),
             "L1" => Ok(Self::L1),
             "L2" => Ok(Self::L2),
+            "Levenshtein" => Ok(Self::Levenshtein),
             _ => Err(()),
         }
     }
@@ -52,6 +55,7 @@ pub enum DistanceWrapper {
     Cosine(CosineDistance),
     L1(L1Dist),
     L2(L2Dist),
+    Levenshtein(LevenshteinDistance)
 }
 
 impl DistanceWrapper {
@@ -60,6 +64,7 @@ impl DistanceWrapper {
             FicusDistance::Cosine => DistanceWrapper::Cosine(CosineDistance {}),
             FicusDistance::L1 => DistanceWrapper::L1(L1Dist {}),
             FicusDistance::L2 => DistanceWrapper::L2(L2Dist {}),
+            FicusDistance::Levenshtein => DistanceWrapper::Levenshtein(LevenshteinDistance {}),
         }
     }
 }
@@ -70,6 +75,7 @@ impl Distance<f64> for DistanceWrapper {
             DistanceWrapper::Cosine(d) => d.distance(a, b),
             DistanceWrapper::L1(d) => d.distance(a, b),
             DistanceWrapper::L2(d) => d.distance(a, b),
+            DistanceWrapper::Levenshtein(d) => d.distance(a, b),
         }
     }
 
