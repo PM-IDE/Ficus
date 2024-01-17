@@ -580,7 +580,12 @@ impl PipelineParts {
             let params = Self::create_common_visualization_params(context, config, keys)?;
 
             if let Some((dataset, processed, classes)) = create_dataset(&params) {
-                let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes);
+                let ficus_dataset = transform_to_ficus_dataset(
+                    &dataset, 
+                    processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
+                    classes
+                );
+
                 context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
             }
 

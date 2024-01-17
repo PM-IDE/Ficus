@@ -46,7 +46,12 @@ fn create_labeled_dataset_from_k_means(
     classes_names: Vec<String>,
     colors_holder: &mut ColorsHolder
 ) -> LabeledDataset {
-    let ficus_dataset = transform_to_ficus_dataset(dataset, processed, classes_names);
+    let ficus_dataset = transform_to_ficus_dataset(
+        dataset, 
+        processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
+        classes_names
+    );
+    
     let labels = clustered_dataset.targets.clone().into_raw_vec();
     let colors = create_colors_vector(&labels, colors_holder);
 
@@ -98,7 +103,12 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
                 &best_labels.map(|x| Some(*x)),
             );
 
-            let ficus_dataset = transform_to_ficus_dataset(&dataset, &processed, classes_names);
+            let ficus_dataset = transform_to_ficus_dataset(
+                &dataset, 
+                processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
+                classes_names
+            );
+
             let colors = create_colors_vector(&best_labels.to_vec(), params.vis_params.colors_holder);
             Some(LabeledDataset::new(ficus_dataset, best_labels.clone().into_raw_vec(), colors))
         } else {

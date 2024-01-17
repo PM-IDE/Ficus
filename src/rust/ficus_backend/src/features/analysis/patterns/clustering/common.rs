@@ -184,21 +184,7 @@ fn create_dataset_internal(
         }
     }
 
-    for i in 0..all_event_classes.len() {
-        let mut max = f64::MIN;
-        let mut min = f64::MAX;
-
-        for j in 0..processed.len() {
-            let index = i + j * all_event_classes.len();
-            max = max.max(vector[index]);
-            min = min.min(vector[index]);
-        }
-
-        for j in 0..processed.len() {
-            let index = i + j * all_event_classes.len();
-            vector[index] = (vector[index] - min) / (max - min);
-        }
-    }
+    scale_raw_dataset_min_max(&mut vector, processed.len(), all_event_classes.len());
 
     let shape = (processed.len(), all_event_classes.len());
 
@@ -212,6 +198,24 @@ fn create_dataset_internal(
         processed,
         all_event_classes.iter().map(|x| x.to_string()).collect(),
     ))
+}
+
+pub fn scale_raw_dataset_min_max(vector: &mut Vec<f64>, objects_count: usize, features_count: usize) {
+    for i in 0..features_count {
+        let mut max = f64::MIN;
+        let mut min = f64::MAX;
+
+        for j in 0..objects_count {
+            let index = i + j * features_count;
+            max = max.max(vector[index]);
+            min = min.min(vector[index]);
+        }
+
+        for j in 0..objects_count {
+            let index = i + j * features_count;
+            vector[index] = (vector[index] - min) / (max - min);
+        }
+    }
 }
 
 pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
@@ -294,7 +298,7 @@ impl Distance<f64> for CosineDistance {
 
 pub fn transform_to_ficus_dataset(
     dataset: &MyDataset,
-    processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
+    processed: Vec<String>,
     classes_names: Vec<String>,
 ) -> FicusDataset {
     let rows_count = dataset.records().shape()[0];
@@ -310,8 +314,7 @@ pub fn transform_to_ficus_dataset(
         matrix.push(vec);
     }
 
-    let row_names = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
-    FicusDataset::new(matrix, classes_names, row_names)
+    FicusDataset::new(matrix, classes_names, processed)
 }
 
 pub(super) fn create_colors_vector(labels: &Vec<usize>, colors_holder: &mut ColorsHolder) -> Vec<Color> {
