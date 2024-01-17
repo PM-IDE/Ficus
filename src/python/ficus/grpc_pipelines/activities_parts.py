@@ -558,3 +558,7 @@ class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2):
                                                 config)
 
         return GrpcPipelinePartBase(complexContextRequestPart=part)
+
+    def append_parts_with_callbacks(self, parts: list['PipelinePart2WithCallback']):
+        super().append_parts_with_callbacks(parts)
+        self.after_clusterization_pipeline.append_parts_with_callbacks(parts)
