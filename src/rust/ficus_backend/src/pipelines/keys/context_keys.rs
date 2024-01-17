@@ -594,4 +594,22 @@ impl ContextKeys {
     pub fn is_event_log_name(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.event_log_name(), key)
     }
+
+    pub fn log_traces_dataset(&self) -> &DefaultContextKey<FicusDataset> {
+        self.find_concrete_key::<FicusDataset>(Self::LOG_TRACES_DATASET)
+            .expect("LOG_TRACES_DATASET should be present in keys")
+    }
+
+    pub fn is_log_traces_dataset(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.log_traces_dataset(), key)
+    }
+
+    pub fn labeled_log_traces_dataset(&self) -> &DefaultContextKey<LabeledDataset> {
+        self.find_concrete_key::<LabeledDataset>(Self::LABELED_LOG_TRACES_DATASET)
+            .expect("LABELED_LOG_TRACES_DATASET should be present in keys")
+    }
+
+    pub fn is_labeled_log_traces_dataset(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.labeled_log_traces_dataset(), key)
+    }
 }

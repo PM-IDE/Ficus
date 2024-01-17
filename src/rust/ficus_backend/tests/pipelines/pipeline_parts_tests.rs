@@ -55,7 +55,8 @@ fn get_test_parts_names() -> Vec<String> {
         "ClusterizeActivitiesFromTracesKMeansGridSearch",
         "ClusterizeActivitiesFromTracesDbscan",
         "CreateTracesActivitiesDataset",
-        "WriteLogToBxes"
+        "WriteLogToBxes",
+        "ClusterizeLogTraces"
     ]
 }
 

@@ -120,6 +120,8 @@ impl ContextKeys {
     pub const ACTIVITIES_REPR_SOURCE: &'static str = "activities_repr_source";
     pub const DISTANCE: &'static str = "distance";
     pub const EXECUTE_ONLY_ON_LAST_EXTRACTION: &'static str = "execute_only_on_last_extraction";
+    pub const LABELED_LOG_TRACES_DATASET: &'static str = "labeled_log_traces_dataset";
+    pub const LOG_TRACES_DATASET: &'static str = "log_traces_dataset";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -187,6 +189,8 @@ impl ContextKeys {
         Self::insert_distance(&mut context);
         Self::insert_execute_only_on_last_extraction(&mut context);
         Self::insert_event_log_name(&mut context);
+        Self::insert_log_traces_dataset(&mut context);
+        Self::insert_labeled_log_traces_dataset(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -443,5 +447,13 @@ impl ContextKeys {
 
     fn insert_event_log_name(context: &mut ContextKeysInitContext) {
         Self::insert_key::<String>(context, Self::EVENT_LOG_NAME)
+    }
+
+    fn insert_log_traces_dataset(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<FicusDataset>(context, Self::LOG_TRACES_DATASET)
+    }
+
+    fn insert_labeled_log_traces_dataset(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<LabeledDataset>(context, Self::LABELED_LOG_TRACES_DATASET)
     }
 }

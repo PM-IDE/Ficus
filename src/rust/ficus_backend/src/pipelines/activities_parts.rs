@@ -5,7 +5,7 @@ use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
 use crate::features::analysis::patterns::clustering::common::{create_dataset, transform_to_ficus_dataset};
-use crate::features::analysis::patterns::clustering::dbscan::clusterize_activities_dbscan;
+use crate::features::analysis::patterns::clustering::dbscan::{clusterize_activities_dbscan, clusterize_log_by_traces_dbscan};
 use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
 use crate::features::analysis::patterns::clustering::params::{ClusteringCommonParams, ActivitiesVisualizationParams};
 use crate::pipelines::context::PipelineInfrastructure;
@@ -587,6 +587,28 @@ impl PipelineParts {
                 );
 
                 context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
+            }
+
+            Ok(())
+        })
+    }
+
+    pub(super) fn clusterize_log_traces() -> (String, PipelinePartFactory) {
+        Self::create_pipeline_part(Self::CLUSTERIZE_LOG_TRACES, &|context, infra, keys, config| {
+            let mut params = Self::create_common_clustering_params(context, config, keys)?;
+            let after_clusterization_pipeline = Self::get_user_data(config, keys.pipeline())?;
+            let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
+
+            let new_logs = clusterize_log_by_traces_dbscan(&mut params, min_points_in_cluster);
+            if let Some(new_logs) = new_logs {
+                context.put_concrete(keys.labeled_log_traces_dataset().key(), new_logs.1);
+
+                for log in new_logs.0 {
+                    let mut new_context = context.clone();
+                    new_context.put_concrete(keys.event_log().key(), log);
+
+                    after_clusterization_pipeline.execute(&mut new_context, infra, keys)?;
+                }
             }
 
             Ok(())
