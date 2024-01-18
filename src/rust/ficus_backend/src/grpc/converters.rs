@@ -4,7 +4,8 @@ use std::{any::Any, str::FromStr};
 
 use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use crate::features::analysis::patterns::clustering::params::{ActivityRepresentationSource, FicusDistance};
+use crate::features::clustering::activities::activities_params::ActivityRepresentationSource;
+use crate::features::clustering::common::FicusDistance;
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;

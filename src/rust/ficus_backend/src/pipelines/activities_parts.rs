@@ -4,10 +4,13 @@ use crate::event_log::xes::xes_trace::XesTraceImpl;
 use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
-use crate::features::analysis::patterns::clustering::common::{create_dataset, transform_to_ficus_dataset};
-use crate::features::analysis::patterns::clustering::dbscan::{clusterize_activities_dbscan, clusterize_log_by_traces_dbscan};
-use crate::features::analysis::patterns::clustering::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
-use crate::features::analysis::patterns::clustering::params::{ActivitiesClusteringParams, ActivitiesVisualizationParams, CommonVisualizationParams, TracesClusteringParams};
+use crate::features::clustering::activities::activities_common::create_dataset;
+use crate::features::clustering::activities::activities_params::{ActivitiesVisualizationParams, ActivitiesClusteringParams};
+use crate::features::clustering::activities::dbscan::clusterize_activities_dbscan;
+use crate::features::clustering::activities::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
+use crate::features::clustering::common::{CommonVisualizationParams, transform_to_ficus_dataset};
+use crate::features::clustering::traces::dbscan::clusterize_log_by_traces_dbscan;
+use crate::features::clustering::traces::traces_params::TracesClusteringParams;
 use crate::pipelines::context::PipelineInfrastructure;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{

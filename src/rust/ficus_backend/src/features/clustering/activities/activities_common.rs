@@ -6,31 +6,28 @@ use std::{
 };
 
 use linfa::DatasetBase;
-use linfa_nn::distance::Distance;
-use ndarray::{Array1, Array2, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
+use ndarray::Array2;
 
 use crate::{
     event_log::core::{
         event::{
             event::Event,
-            event_hasher::{default_class_extractor_name, RegexEventHasher, EventHasher},
+            event_hasher::{default_class_extractor_name, RegexEventHasher},
         },
         event_log::EventLog,
         trace::trace::Trace,
     },
-    features::analysis::patterns::{
+    features::{analysis::patterns::{
         activity_instances::{create_vector_of_underlying_events, ActivityInTraceInfo},
         repeat_sets::ActivityNode,
-    },
+    }, clustering::common::{MyDataset, scale_raw_dataset_min_max}},
     pipelines::aliases::TracesActivities,
-    utils::{dataset::dataset::FicusDataset, colors::{ColorsHolder, Color}},
 };
 
-use super::{params::{ActivityRepresentationSource, ActivitiesClusteringParams, ActivitiesVisualizationParams}, merging::create_cluster_name};
+use super::activities_params::{ActivitiesVisualizationParams, ActivityRepresentationSource};
+
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
-pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
-pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
 pub fn create_dataset<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
@@ -200,23 +197,6 @@ fn create_dataset_internal(
     ))
 }
 
-pub fn scale_raw_dataset_min_max(vector: &mut Vec<f64>, objects_count: usize, features_count: usize) {
-    for i in 0..features_count {
-        let mut max = f64::MIN;
-        let mut min = f64::MAX;
-
-        for j in 0..objects_count {
-            let index = i + j * features_count;
-            max = max.max(vector[index]);
-            min = min.min(vector[index]);
-        }
-
-        for j in 0..objects_count {
-            let index = i + j * features_count;
-            vector[index] = (vector[index] - min) / (max - min);
-        }
-    }
-}
 
 pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
@@ -275,30 +255,4 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
             processed
         },
     )
-}
-
-
-pub fn transform_to_ficus_dataset(
-    dataset: &MyDataset,
-    processed: Vec<String>,
-    classes_names: Vec<String>,
-) -> FicusDataset {
-    let rows_count = dataset.records().shape()[0];
-    let cols_count = dataset.records().shape()[1];
-
-    let mut matrix = vec![];
-    for i in 0..rows_count {
-        let mut vec = vec![];
-        for j in 0..cols_count {
-            vec.push(*dataset.records.get([i, j]).unwrap());
-        }
-
-        matrix.push(vec);
-    }
-
-    FicusDataset::new(matrix, classes_names, processed)
-}
-
-pub(super) fn create_colors_vector(labels: &Vec<usize>, colors_holder: &mut ColorsHolder) -> Vec<Color> {
-    labels.iter().map(|x| colors_holder.get_or_create(&create_cluster_name(*x))).collect()
 }

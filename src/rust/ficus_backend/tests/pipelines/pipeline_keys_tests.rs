@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::{collections::HashSet, sync::Arc};
 
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
-use ficus_backend::features::analysis::patterns::clustering::params::{ActivityRepresentationSource, FicusDistance};
+use ficus_backend::features::clustering::activities::activities_params::ActivityRepresentationSource;
+use ficus_backend::features::clustering::common::FicusDistance;
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;

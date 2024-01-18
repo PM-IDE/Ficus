@@ -8,7 +8,7 @@ use ndarray::Array1;
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    features::analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode},
+    features::{analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode}, clustering::common::create_cluster_name},
     pipelines::aliases::TracesActivities,
 };
 
@@ -130,8 +130,4 @@ pub(super) fn merge_activities(
             last_seen_activity = activity_name;
         }
     }
-}
-
-pub(super) fn create_cluster_name(cluster_index: usize) -> String {
-    format!("CLUSTER_{}", cluster_index)
 }

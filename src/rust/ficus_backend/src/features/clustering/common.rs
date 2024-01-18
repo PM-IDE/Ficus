@@ -1,32 +1,17 @@
 use std::str::FromStr;
 
-use linfa_nn::distance::{Distance, L1Dist, L2Dist};
-use ndarray::{ArrayView, Dimension};
+use linfa::DatasetBase;
+use linfa_nn::distance::{L1Dist, L2Dist, Distance};
+use ndarray::{ArrayBase, OwnedRepr, Dim, Array1, Dimension, ArrayView};
 
-use crate::{event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities, utils::colors::ColorsHolder};
+use crate::{event_log::core::event_log::EventLog, utils::{colors::{ColorsHolder, Color}, dataset::dataset::FicusDataset}};
 
-use super::distance::{CosineDistance, LevenshteinDistance};
+use super::activities::distance::{CosineDistance, LevenshteinDistance};
 
 
-#[derive(PartialEq, Eq, Clone, Copy)]
-pub enum ActivityRepresentationSource {
-    EventClasses,
-    SubTraces,
-    SubTracesUnderlyingEvents,
-}
+pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
+pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
-impl FromStr for ActivityRepresentationSource {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "EventClasses" => Ok(Self::EventClasses),
-            "SubTraces" => Ok(Self::SubTraces),
-            "SubTracesUnderlyingEvents" => Ok(Self::SubTracesUnderlyingEvents),
-            _ => Err(()),
-        }
-    }
-}
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum FicusDistance {
@@ -101,28 +86,49 @@ pub struct CommonVisualizationParams<'a, TLog> where TLog: EventLog {
     pub colors_holder: &'a mut ColorsHolder
 }
 
-pub struct ActivitiesVisualizationParams<'a, TLog> where TLog: EventLog {
-    pub common_vis_params: CommonVisualizationParams<'a, TLog>,
-    pub traces_activities: &'a mut TracesActivities,
-    pub activity_level: usize,
-    pub class_extractor: Option<String>,
-    pub activities_repr_source: ActivityRepresentationSource,
+pub fn transform_to_ficus_dataset(
+    dataset: &MyDataset,
+    processed: Vec<String>,
+    classes_names: Vec<String>,
+) -> FicusDataset {
+    let rows_count = dataset.records().shape()[0];
+    let cols_count = dataset.records().shape()[1];
+
+    let mut matrix = vec![];
+    for i in 0..rows_count {
+        let mut vec = vec![];
+        for j in 0..cols_count {
+            vec.push(*dataset.records.get([i, j]).unwrap());
+        }
+
+        matrix.push(vec);
+    }
+
+    FicusDataset::new(matrix, classes_names, processed)
 }
 
-pub struct ActivitiesClusteringParams<'a, TLog>
-where
-    TLog: EventLog,
-{
-    pub vis_params: ActivitiesVisualizationParams<'a, TLog>,
-    pub tolerance: f64,
-    pub distance: FicusDistance,
+pub(super) fn create_colors_vector(labels: &Vec<usize>, colors_holder: &mut ColorsHolder) -> Vec<Color> {
+    labels.iter().map(|x| colors_holder.get_or_create(&create_cluster_name(*x))).collect()
 }
 
-pub struct TracesClusteringParams<'a, TLog>
-where
-    TLog: EventLog,
-{
-    pub vis_params: CommonVisualizationParams<'a, TLog>,
-    pub tolerance: f64,
-    pub distance: FicusDistance,
+pub fn scale_raw_dataset_min_max(vector: &mut Vec<f64>, objects_count: usize, features_count: usize) {
+    for i in 0..features_count {
+        let mut max = f64::MIN;
+        let mut min = f64::MAX;
+
+        for j in 0..objects_count {
+            let index = i + j * features_count;
+            max = max.max(vector[index]);
+            min = min.min(vector[index]);
+        }
+
+        for j in 0..objects_count {
+            let index = i + j * features_count;
+            vector[index] = (vector[index] - min) / (max - min);
+        }
+    }
+}
+
+pub fn create_cluster_name(cluster_index: usize) -> String {
+    format!("CLUSTER_{}", cluster_index)
 }

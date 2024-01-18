@@ -7,13 +7,13 @@ use linfa::{
 use linfa_clustering::KMeans;
 
 use crate::{
-    event_log::core::event_log::EventLog, features::analysis::patterns::repeat_sets::ActivityNode, utils::{dataset::dataset::LabeledDataset, colors::{ColorsHolder, self}},
+    event_log::core::event_log::EventLog, features::{analysis::patterns::repeat_sets::ActivityNode, clustering::common::{MyDataset, ClusteredDataset, transform_to_ficus_dataset, create_colors_vector, FicusDistance, DistanceWrapper}}, utils::{dataset::dataset::LabeledDataset, colors::{ColorsHolder, self}},
 };
 
 use super::{
-    common::{create_dataset, transform_to_ficus_dataset, ClusteredDataset, MyDataset, create_colors_vector},
+    activities_common::{create_dataset},
     merging::merge_activities,
-    params::{ActivitiesClusteringParams, DistanceWrapper, FicusDistance},
+    activities_params::{ActivitiesClusteringParams},
 };
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
