@@ -1,8 +1,10 @@
 use std::str::FromStr;
 
-use crate::{features::clustering::common::{CommonVisualizationParams, FicusDistance}, event_log::core::event_log::EventLog, pipelines::aliases::TracesActivities};
-
-
+use crate::{
+    event_log::core::event_log::EventLog,
+    features::clustering::common::{CommonVisualizationParams, FicusDistance},
+    pipelines::aliases::TracesActivities,
+};
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum ActivityRepresentationSource {
@@ -24,7 +26,10 @@ impl FromStr for ActivityRepresentationSource {
     }
 }
 
-pub struct ActivitiesVisualizationParams<'a, TLog> where TLog: EventLog {
+pub struct ActivitiesVisualizationParams<'a, TLog>
+where
+    TLog: EventLog,
+{
     pub common_vis_params: CommonVisualizationParams<'a, TLog>,
     pub traces_activities: &'a mut TracesActivities,
     pub activity_level: usize,

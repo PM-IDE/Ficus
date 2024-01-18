@@ -5,10 +5,10 @@ use crate::features::analysis::event_log_info::count_events;
 use crate::features::analysis::patterns::activity_instances;
 use crate::features::analysis::patterns::activity_instances::{substitute_underlying_events, ActivitiesLogSource, UNDEF_ACTIVITY_NAME};
 use crate::features::clustering::activities::activities_common::create_dataset;
-use crate::features::clustering::activities::activities_params::{ActivitiesVisualizationParams, ActivitiesClusteringParams};
+use crate::features::clustering::activities::activities_params::{ActivitiesClusteringParams, ActivitiesVisualizationParams};
 use crate::features::clustering::activities::dbscan::clusterize_activities_dbscan;
 use crate::features::clustering::activities::k_means::{clusterize_activities_k_means, clusterize_activities_k_means_grid_search};
-use crate::features::clustering::common::{CommonVisualizationParams, transform_to_ficus_dataset};
+use crate::features::clustering::common::{transform_to_ficus_dataset, CommonVisualizationParams};
 use crate::features::clustering::traces::dbscan::clusterize_log_by_traces_dbscan;
 use crate::features::clustering::traces::traces_params::TracesClusteringParams;
 use crate::pipelines::context::PipelineInfrastructure;
@@ -155,11 +155,9 @@ impl PipelineParts {
 
         let strategy = match undef_activity_strat {
             UndefActivityHandlingStrategyDto::DontInsert => UndefActivityHandlingStrategy::DontInsert,
-            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => {
-                UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
-                    Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
-                }))
-            }
+            UndefActivityHandlingStrategyDto::InsertAsSingleEvent => UndefActivityHandlingStrategy::InsertAsSingleEvent(Box::new(|| {
+                Rc::new(RefCell::new(XesEventImpl::new_with_min_date(UNDEF_ACTIVITY_NAME.to_owned())))
+            })),
             UndefActivityHandlingStrategyDto::InsertAllEvents => UndefActivityHandlingStrategy::InsertAllEvents,
         };
 
@@ -403,17 +401,18 @@ impl PipelineParts {
             let log = Self::get_user_data(context, keys.event_log())?;
             let dto = Self::get_user_data(config, keys.activities_logs_source())?;
 
-            let activities_to_logs =
-                match dto {
-                    ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
-                    ActivitiesLogsSourceDto::TracesActivities => {
-                        let activity_level = *Self::get_user_data(config, keys.activity_level())?;
-                        let activities = Self::get_user_data(context, keys.trace_activities())?;
-                        activity_instances::create_logs_for_activities(
-                            &ActivitiesLogSource::TracesActivities(log, activities, activity_level as usize)
-                        )
-                    }
-                };
+            let activities_to_logs = match dto {
+                ActivitiesLogsSourceDto::Log => activity_instances::create_logs_for_activities(&ActivitiesLogSource::Log(log)),
+                ActivitiesLogsSourceDto::TracesActivities => {
+                    let activity_level = *Self::get_user_data(config, keys.activity_level())?;
+                    let activities = Self::get_user_data(context, keys.trace_activities())?;
+                    activity_instances::create_logs_for_activities(&ActivitiesLogSource::TracesActivities(
+                        log,
+                        activities,
+                        activity_level as usize,
+                    ))
+                }
+            };
 
             for (activity_name, activity_log) in activities_to_logs {
                 let mut temp_context = PipelineContext::empty_from(context);
@@ -550,7 +549,7 @@ impl PipelineParts {
         Ok(ActivitiesClusteringParams {
             vis_params,
             tolerance,
-            distance
+            distance,
         })
     }
 
@@ -592,11 +591,8 @@ impl PipelineParts {
             let params = Self::create_activities_visualization_params(context, config, keys)?;
 
             if let Some((dataset, processed, classes)) = create_dataset(&params) {
-                let ficus_dataset = transform_to_ficus_dataset(
-                    &dataset, 
-                    processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
-                    classes
-                );
+                let ficus_dataset =
+                    transform_to_ficus_dataset(&dataset, processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), classes);
 
                 context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
             }

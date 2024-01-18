@@ -31,12 +31,16 @@ impl FicusDataset {
 pub struct LabeledDataset {
     dataset: FicusDataset,
     labels: Vec<usize>,
-    labels_colors: Vec<Color>
+    labels_colors: Vec<Color>,
 }
 
 impl LabeledDataset {
     pub fn new(dataset: FicusDataset, labels: Vec<usize>, labels_colors: Vec<Color>) -> Self {
-        Self { dataset, labels, labels_colors }
+        Self {
+            dataset,
+            labels,
+            labels_colors,
+        }
     }
 
     pub fn dataset(&self) -> &FicusDataset {

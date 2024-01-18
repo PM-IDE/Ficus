@@ -7,14 +7,20 @@ use linfa::{
 use linfa_clustering::KMeans;
 
 use crate::{
-    event_log::core::event_log::EventLog, features::{analysis::patterns::repeat_sets::ActivityNode, clustering::common::{MyDataset, ClusteredDataset, transform_to_ficus_dataset, create_colors_vector, FicusDistance, DistanceWrapper}}, utils::{dataset::dataset::LabeledDataset, colors::{ColorsHolder, self}},
+    event_log::core::event_log::EventLog,
+    features::{
+        analysis::patterns::repeat_sets::ActivityNode,
+        clustering::common::{
+            create_colors_vector, transform_to_ficus_dataset, ClusteredDataset, DistanceWrapper, FicusDistance, MyDataset,
+        },
+    },
+    utils::{
+        colors::{self, ColorsHolder},
+        dataset::dataset::LabeledDataset,
+    },
 };
 
-use super::{
-    activities_common::{create_dataset},
-    merging::merge_activities,
-    activities_params::{ActivitiesClusteringParams},
-};
+use super::{activities_common::create_dataset, activities_params::ActivitiesClusteringParams, merging::merge_activities};
 
 pub fn clusterize_activities_k_means<TLog: EventLog>(
     params: &mut ActivitiesClusteringParams<TLog>,
@@ -33,7 +39,13 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
         );
 
         let holder = &mut params.vis_params.common_vis_params.colors_holder;
-        Some(create_labeled_dataset_from_k_means(&dataset, &clustered_dataset, &processed, classes_names, holder))
+        Some(create_labeled_dataset_from_k_means(
+            &dataset,
+            &clustered_dataset,
+            &processed,
+            classes_names,
+            holder,
+        ))
     } else {
         None
     }
@@ -44,14 +56,14 @@ fn create_labeled_dataset_from_k_means(
     clustered_dataset: &ClusteredDataset,
     processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
     classes_names: Vec<String>,
-    colors_holder: &mut ColorsHolder
+    colors_holder: &mut ColorsHolder,
 ) -> LabeledDataset {
     let ficus_dataset = transform_to_ficus_dataset(
-        dataset, 
-        processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
-        classes_names
+        dataset,
+        processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(),
+        classes_names,
     );
-    
+
     let labels = clustered_dataset.targets.clone().into_raw_vec();
     let colors = create_colors_vector(&labels, colors_holder);
 
@@ -104,9 +116,9 @@ pub fn clusterize_activities_k_means_grid_search<TLog: EventLog>(
             );
 
             let ficus_dataset = transform_to_ficus_dataset(
-                &dataset, 
-                processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
-                classes_names
+                &dataset,
+                processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(),
+                classes_names,
             );
 
             let colors = create_colors_vector(&best_labels.to_vec(), params.vis_params.common_vis_params.colors_holder);

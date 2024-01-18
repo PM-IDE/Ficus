@@ -570,11 +570,10 @@ where
     let trace = log.traces().get(sub_array.trace_index).unwrap().borrow();
     let events = trace.events();
 
-    let regex =
-        match class_extractor {
-            Some(extractor) => Some(Regex::new(&extractor).unwrap()),
-            None => None,
-        };
+    let regex = match class_extractor {
+        Some(extractor) => Some(Regex::new(&extractor).unwrap()),
+        None => None,
+    };
 
     for index in left..right {
         name.push('(');

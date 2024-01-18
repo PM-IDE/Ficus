@@ -167,26 +167,25 @@ impl GrpcBackendService for FicusService {
 
     async fn get_context_value(&self, request: Request<GrpcGetContextValueRequest>) -> Result<Response<GrpcGetContextValueResult>, Status> {
         let key_name = &request.get_ref().key.as_ref().unwrap().name;
-        let result =
-            match self.context_keys.find_key(key_name) {
-                None => Self::create_get_context_value_error("Failed to find key for key name".to_string()),
-                Some(key) => {
-                    let id = request.get_ref().execution_id.as_ref().unwrap();
-                    match self.contexts.lock().as_mut().unwrap().get_mut(&id.guid) {
-                        None => Self::create_get_context_value_error("Failed to get context for guid".to_string()),
-                        Some(value) => match value.any(key.key()) {
-                            None => {
-                                if let Some(created_value) = value.any(key.key()) {
-                                    self.try_convert_context_value(key, created_value)
-                                } else {
-                                    Self::create_get_context_value_error("Failed to find context value for key".to_string())
-                                }
+        let result = match self.context_keys.find_key(key_name) {
+            None => Self::create_get_context_value_error("Failed to find key for key name".to_string()),
+            Some(key) => {
+                let id = request.get_ref().execution_id.as_ref().unwrap();
+                match self.contexts.lock().as_mut().unwrap().get_mut(&id.guid) {
+                    None => Self::create_get_context_value_error("Failed to get context for guid".to_string()),
+                    Some(value) => match value.any(key.key()) {
+                        None => {
+                            if let Some(created_value) = value.any(key.key()) {
+                                self.try_convert_context_value(key, created_value)
+                            } else {
+                                Self::create_get_context_value_error("Failed to find context value for key".to_string())
                             }
-                            Some(context_value) => self.try_convert_context_value(key, context_value),
-                        },
-                    }
+                        }
+                        Some(context_value) => self.try_convert_context_value(key, context_value),
+                    },
                 }
-            };
+            }
+        };
 
         Ok(Response::new(result))
     }

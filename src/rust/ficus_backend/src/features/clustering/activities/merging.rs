@@ -8,7 +8,10 @@ use ndarray::Array1;
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    features::{analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode}, clustering::common::create_cluster_name},
+    features::{
+        analysis::patterns::{activity_instances::ActivityInTraceInfo, repeat_sets::ActivityNode},
+        clustering::common::create_cluster_name,
+    },
     pipelines::aliases::TracesActivities,
 };
 

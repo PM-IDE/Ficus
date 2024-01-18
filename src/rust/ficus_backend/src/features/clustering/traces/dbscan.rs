@@ -1,14 +1,23 @@
-use std::{collections::{HashMap, HashSet}, cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use linfa::{traits::Transformer, DatasetBase};
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;
 use ndarray::Array2;
 
-use crate::{event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}, utils::dataset::dataset::LabeledDataset, features::clustering::{common::{DistanceWrapper, create_colors_vector, FicusDistance, MyDataset, scale_raw_dataset_min_max, transform_to_ficus_dataset}}};
+use crate::{
+    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    features::clustering::common::{
+        create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, DistanceWrapper, FicusDistance, MyDataset,
+    },
+    utils::dataset::dataset::LabeledDataset,
+};
 
 use super::traces_params::TracesClusteringParams;
-
 
 pub fn clusterize_log_by_traces_dbscan<TLog: EventLog>(
     params: &mut TracesClusteringParams<TLog>,
@@ -19,7 +28,7 @@ pub fn clusterize_log_by_traces_dbscan<TLog: EventLog>(
             .tolerance(params.tolerance)
             .transform(dataset.records())
             .unwrap();
-        
+
         let ficus_dataset = transform_to_ficus_dataset(&dataset, objects, features);
 
         let labels = clusters
@@ -79,11 +88,7 @@ fn create_traces_dataset_default<TLog: EventLog>(log: &TLog) -> Option<(MyDatase
         }
 
         for class in &all_event_classes {
-            raw_dataset.push(if let Some(count) = events_counts.get(class) {
-                *count
-            } else {
-                0
-            } as f64);
+            raw_dataset.push(if let Some(count) = events_counts.get(class) { *count } else { 0 } as f64);
         }
     }
 

@@ -117,17 +117,16 @@ where
         set
     };
 
-    let create_activity_node =
-        |repeat_set: &SubArrayWithTraceIndex| {
-            let events_set = extract_events_set(repeat_set);
-            Rc::new(RefCell::new(ActivityNode {
-                repeat_set: Some(*repeat_set),
-                event_classes: events_set,
-                children: vec![],
-                level: activity_level,
-                name: name_creator(repeat_set),
-            }))
-        };
+    let create_activity_node = |repeat_set: &SubArrayWithTraceIndex| {
+        let events_set = extract_events_set(repeat_set);
+        Rc::new(RefCell::new(ActivityNode {
+            repeat_set: Some(*repeat_set),
+            event_classes: events_set,
+            children: vec![],
+            level: activity_level,
+            name: name_creator(repeat_set),
+        }))
+    };
 
     let mut activity_nodes = repeats
         .iter()

@@ -17,15 +17,17 @@ use crate::{
         event_log::EventLog,
         trace::trace::Trace,
     },
-    features::{analysis::patterns::{
-        activity_instances::{create_vector_of_underlying_events, ActivityInTraceInfo},
-        repeat_sets::ActivityNode,
-    }, clustering::common::{MyDataset, scale_raw_dataset_min_max}},
+    features::{
+        analysis::patterns::{
+            activity_instances::{create_vector_of_underlying_events, ActivityInTraceInfo},
+            repeat_sets::ActivityNode,
+        },
+        clustering::common::{scale_raw_dataset_min_max, MyDataset},
+    },
     pipelines::aliases::TracesActivities,
 };
 
 use super::activities_params::{ActivitiesVisualizationParams, ActivityRepresentationSource};
-
 
 pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>;
 
@@ -196,7 +198,6 @@ fn create_dataset_internal(
         all_event_classes.iter().map(|x| x.to_string()).collect(),
     ))
 }
-
 
 pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,

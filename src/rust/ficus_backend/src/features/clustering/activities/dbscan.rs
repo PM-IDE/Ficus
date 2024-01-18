@@ -1,14 +1,22 @@
-use std::{collections::{HashSet, HashMap}, os::raw, rc::Rc, cell::RefCell};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    os::raw,
+    rc::Rc,
+};
 
 use linfa::{traits::Transformer, DatasetBase};
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;
 use ndarray::Array2;
 
-use crate::{event_log::core::{event_log::EventLog, trace::trace::Trace, event::event::Event}, utils::dataset::dataset::LabeledDataset, features::clustering::common::{DistanceWrapper, transform_to_ficus_dataset, create_colors_vector}};
+use crate::{
+    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    features::clustering::common::{create_colors_vector, transform_to_ficus_dataset, DistanceWrapper},
+    utils::dataset::dataset::LabeledDataset,
+};
 
-use super::{activities_params::ActivitiesClusteringParams, activities_common::create_dataset, merging::merge_activities};
-
+use super::{activities_common::create_dataset, activities_params::ActivitiesClusteringParams, merging::merge_activities};
 
 pub fn clusterize_activities_dbscan<TLog: EventLog>(
     params: &mut ActivitiesClusteringParams<TLog>,
@@ -28,11 +36,11 @@ pub fn clusterize_activities_dbscan<TLog: EventLog>(
         );
 
         let ficus_dataset = transform_to_ficus_dataset(
-            &dataset, 
-            processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), 
-            classes_names
+            &dataset,
+            processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(),
+            classes_names,
         );
-        
+
         let labels = clusters
             .into_raw_vec()
             .iter()

@@ -21,15 +21,14 @@ where
 {
     let mut repeats = vec![];
 
-    let mut push_repeats =
-        |patterns: &[(usize, usize)]| {
-            repeats.push(
-                patterns
-                    .into_iter()
-                    .map(|repeat| SubArrayInTraceInfo::new(repeat.0, repeat.1 - repeat.0))
-                    .collect(),
-            );
-        };
+    let mut push_repeats = |patterns: &[(usize, usize)]| {
+        repeats.push(
+            patterns
+                .into_iter()
+                .map(|repeat| SubArrayInTraceInfo::new(repeat.0, repeat.1 - repeat.0))
+                .collect(),
+        );
+    };
 
     match strategy {
         PatternsDiscoveryStrategy::FromAllTraces => {

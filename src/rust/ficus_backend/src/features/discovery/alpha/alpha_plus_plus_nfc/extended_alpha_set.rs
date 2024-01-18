@@ -208,20 +208,19 @@ impl<'a> ToString for ExtendedAlphaSet<'a> {
         repr.push_str(self.alpha_set.to_string().as_str());
         repr.push_str(", ");
 
-        let mut serialize_set =
-            |set: &BTreeSet<&'a String>| {
-                repr.push('{');
-                for item in set {
-                    repr.push_str(item);
-                    repr.push(',');
-                }
+        let mut serialize_set = |set: &BTreeSet<&'a String>| {
+            repr.push('{');
+            for item in set {
+                repr.push_str(item);
+                repr.push(',');
+            }
 
-                if set.len() > 0 {
-                    repr.remove(repr.len() - 1);
-                }
+            if set.len() > 0 {
+                repr.remove(repr.len() - 1);
+            }
 
-                repr.push_str("}, ");
-            };
+            repr.push_str("}, ");
+        };
 
         serialize_set(&self.left_extension);
         serialize_set(&self.right_extension);

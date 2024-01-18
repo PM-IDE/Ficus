@@ -1,7 +1,7 @@
 use std::vec;
 
 use linfa_nn::distance::Distance;
-use ndarray::{Dimension, ArrayView};
+use ndarray::{ArrayView, Dimension};
 
 #[derive(Clone)]
 pub struct CosineDistance {}

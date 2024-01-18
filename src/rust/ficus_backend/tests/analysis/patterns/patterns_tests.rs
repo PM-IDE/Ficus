@@ -267,7 +267,12 @@ fn test_super_maximal_repeats_single_merged_trace_string() {
 fn test_near_super_maximal_repeats_single_merged_trace() {
     execute_test_with_positions(
         create_maximal_repeats_log,
-        |log| dump_repeats(&find_near_super_maximal_repeats(log, &PatternsDiscoveryStrategy::FromSingleMergedTrace)),
+        |log| {
+            dump_repeats(&find_near_super_maximal_repeats(
+                log,
+                &PatternsDiscoveryStrategy::FromSingleMergedTrace,
+            ))
+        },
         &[
             (0, 0, 2),
             (0, 1, 5),

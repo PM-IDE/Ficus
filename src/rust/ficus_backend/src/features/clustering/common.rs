@@ -1,24 +1,28 @@
 use std::str::FromStr;
 
 use linfa::DatasetBase;
-use linfa_nn::distance::{L1Dist, L2Dist, Distance};
-use ndarray::{ArrayBase, OwnedRepr, Dim, Array1, Dimension, ArrayView};
+use linfa_nn::distance::{Distance, L1Dist, L2Dist};
+use ndarray::{Array1, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
 
-use crate::{event_log::core::event_log::EventLog, utils::{colors::{ColorsHolder, Color}, dataset::dataset::FicusDataset}};
+use crate::{
+    event_log::core::event_log::EventLog,
+    utils::{
+        colors::{Color, ColorsHolder},
+        dataset::dataset::FicusDataset,
+    },
+};
 
 use super::activities::distance::{CosineDistance, LevenshteinDistance};
 
-
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
-
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum FicusDistance {
     Cosine,
     L1,
     L2,
-    Levenshtein
+    Levenshtein,
 }
 
 impl FromStr for FicusDistance {
@@ -40,7 +44,7 @@ pub enum DistanceWrapper {
     Cosine(CosineDistance),
     L1(L1Dist),
     L2(L2Dist),
-    Levenshtein(LevenshteinDistance)
+    Levenshtein(LevenshteinDistance),
 }
 
 impl DistanceWrapper {
@@ -81,16 +85,15 @@ impl Distance<f64> for DistanceWrapper {
     }
 }
 
-pub struct CommonVisualizationParams<'a, TLog> where TLog: EventLog {
+pub struct CommonVisualizationParams<'a, TLog>
+where
+    TLog: EventLog,
+{
     pub log: &'a TLog,
-    pub colors_holder: &'a mut ColorsHolder
+    pub colors_holder: &'a mut ColorsHolder,
 }
 
-pub fn transform_to_ficus_dataset(
-    dataset: &MyDataset,
-    processed: Vec<String>,
-    classes_names: Vec<String>,
-) -> FicusDataset {
+pub fn transform_to_ficus_dataset(dataset: &MyDataset, processed: Vec<String>, classes_names: Vec<String>) -> FicusDataset {
     let rows_count = dataset.records().shape()[0];
     let cols_count = dataset.records().shape()[1];
 
@@ -108,7 +111,10 @@ pub fn transform_to_ficus_dataset(
 }
 
 pub(super) fn create_colors_vector(labels: &Vec<usize>, colors_holder: &mut ColorsHolder) -> Vec<Color> {
-    labels.iter().map(|x| colors_holder.get_or_create(&create_cluster_name(*x))).collect()
+    labels
+        .iter()
+        .map(|x| colors_holder.get_or_create(&create_cluster_name(*x)))
+        .collect()
 }
 
 pub fn scale_raw_dataset_min_max(vector: &mut Vec<f64>, objects_count: usize, features_count: usize) {

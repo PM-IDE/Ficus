@@ -58,9 +58,9 @@ impl GetContextValuePipelinePart {
                             });
                         }
                         None => {
-                            return Err(PipelinePartExecutionError::MissingContext(
-                                MissingContextError::new(key.key().name().clone())
-                            ))
+                            return Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                                key.key().name().clone(),
+                            )))
                         }
                     }
                 }
@@ -92,9 +92,9 @@ impl PipelinePart for GetContextValuePipelinePart {
             match keys.find_key(key_name) {
                 Some(key) => context_keys.push(key),
                 None => {
-                    return Err(PipelinePartExecutionError::MissingContext(
-                        MissingContextError::new(key_name.clone())
-                    ))
+                    return Err(PipelinePartExecutionError::MissingContext(MissingContextError::new(
+                        key_name.clone(),
+                    )))
                 }
             }
         }

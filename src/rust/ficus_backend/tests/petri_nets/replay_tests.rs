@@ -122,19 +122,18 @@ pub fn execute_test_with_annotation<T>(net: &DefaultPetriNet, annotation: HashMa
 where
     T: ToString + PartialEq + Debug + Copy,
 {
-    let mut processed_annotations: Vec<(String, T)> =
-        annotation
-            .iter()
-            .map(|pair| {
-                if let Some((arc, transition)) = net.arc(pair.0) {
-                    let place = net.place(&arc.place_id());
-                    let name = format!("{}--{}", place.name(), transition.name());
-                    return (name, *pair.1);
-                }
+    let mut processed_annotations: Vec<(String, T)> = annotation
+        .iter()
+        .map(|pair| {
+            if let Some((arc, transition)) = net.arc(pair.0) {
+                let place = net.place(&arc.place_id());
+                let name = format!("{}--{}", place.name(), transition.name());
+                return (name, *pair.1);
+            }
 
-                panic!();
-            })
-            .collect();
+            panic!();
+        })
+        .collect();
 
     processed_annotations.sort_by(|first, second| first.0.cmp(&second.0));
     expected.sort_by(|first, second| first.0.cmp(&second.0));
