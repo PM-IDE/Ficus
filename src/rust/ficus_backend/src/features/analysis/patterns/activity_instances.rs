@@ -700,3 +700,20 @@ fn create_vector_of_underlying_events_intenral<TLog: EventLog>(
         result.push(event.clone());
     }
 }
+
+pub fn create_vector_of_immediate_underlying_events<TLog: EventLog>(
+    event: &Rc<RefCell<TLog::TEvent>>
+) -> Vec<Rc<RefCell<TLog::TEvent>>> {
+    let mut events = vec![];
+
+    let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };
+    if let Some(underlying_events) = event.borrow_mut().user_data().get::<Vec<Rc<RefCell<TLog::TEvent>>>>(&key) {
+        for underlying_event in underlying_events {
+            events.push(underlying_event.clone());
+        }
+    } else {
+        events.push(event.clone());
+    }
+
+    events
+}
