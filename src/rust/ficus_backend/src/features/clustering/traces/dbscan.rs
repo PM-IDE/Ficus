@@ -4,7 +4,6 @@ use std::{
     rc::Rc,
 };
 
-use chrono::Local;
 use linfa::{traits::Transformer, DatasetBase};
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;

@@ -15,7 +15,7 @@ use crate::{
         },
     },
     utils::{
-        colors::{self, ColorsHolder},
+        colors::ColorsHolder,
         dataset::dataset::LabeledDataset,
     },
 };

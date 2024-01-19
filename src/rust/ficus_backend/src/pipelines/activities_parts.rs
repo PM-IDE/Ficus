@@ -31,6 +31,7 @@ use crate::{
 use std::str::FromStr;
 use std::{cell::RefCell, rc::Rc};
 
+use super::errors::pipeline_errors::RawPartExecutionError;
 use super::{
     aliases::TracesActivities,
     context::PipelineContext,
@@ -546,11 +547,12 @@ impl PipelineParts {
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let distance = *Self::get_user_data(config, keys.distance())?;
 
-        Ok(ActivitiesClusteringParams {
-            vis_params,
-            tolerance,
-            distance,
-        })
+        if let Some(params) = ActivitiesClusteringParams::new(vis_params, tolerance, distance) {
+            Ok(params)
+        } else {
+            let message = "Failed to create activities clustering params".to_owned();
+            Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
+        }
     }
 
     pub(super) fn clusterize_activities_from_traces_k_means_grid_search() -> (String, PipelinePartFactory) {

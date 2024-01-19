@@ -1,17 +1,9 @@
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-    os::raw,
-    rc::Rc,
-};
-
-use linfa::{traits::Transformer, DatasetBase};
+use linfa::traits::Transformer;
 use linfa_clustering::Dbscan;
 use linfa_nn::KdTree;
-use ndarray::Array2;
 
 use crate::{
-    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    event_log::core::event_log::EventLog,
     features::clustering::common::{create_colors_vector, transform_to_ficus_dataset, DistanceWrapper},
     utils::dataset::dataset::LabeledDataset,
 };
