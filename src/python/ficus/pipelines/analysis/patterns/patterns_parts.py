@@ -1,3 +1,4 @@
+from ....analysis.patterns.util import _do_create_hashes_traces
 from ....pipelines.serialization.pipeline_parts import SavePathCreator
 
 from .type_aliases import GraphAttributesSetter
@@ -5,7 +6,7 @@ from ...common import InternalDrawingPipelinePart
 from ....analysis.event_log_info import calculate_events_count
 from ....analysis.event_log_split import merge_all_traces_in_one_log
 from ....analysis.patterns.patterns_graphs import draw_short_activity_diagram, draw_full_activity_diagram, \
-    default_graph_attr_setter, draw_activity_graph, draw_activity_placement_diagram
+    default_graph_attr_setter, draw_activity_graph, draw_activity_placement_diagram, draw_patterns
 from ....analysis.patterns.util import *
 from ....pipelines.analysis.patterns.models import TandemArrayKind
 from ....pipelines.contexts.accessors import *
@@ -33,6 +34,17 @@ class DiscoverTandemArrays(InternalPipelinePart):
                                                event_class_extractor=self.class_extractor)
 
         return current_input.with_patterns(arrays)
+
+
+class AddAllPatterns(InternalPipelinePart):
+    def __init__(self, class_extractor: Callable[[MyEvent], str] = None):
+        self.class_extractor = class_extractor
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        hashed_log = _do_create_hashes_traces(log(current_input))
+        all_patterns = add_all_patterns(hashed_log, patterns(current_input))
+
+        return current_input.with_patterns(all_patterns)
 
 
 class DiscoverRepeatsSets(InternalPipelinePart):
@@ -197,6 +209,31 @@ class DrawActivitiesDiagram(InternalDrawingPipelinePart):
                   save_path=self._get_save_path(current_input),
                   height_scale=self.height_scale,
                   width_scale=self.width_scale)
+
+        return current_input
+
+
+class DrawPatterns(InternalDrawingPipelinePart):
+    def __init__(self,
+                 short_diagram: bool,
+                 title: str = None,
+                 plot_legend: bool = False,
+                 height_scale: int = 1,
+                 width_scale: int = 1,
+                 save_path: Optional[Union[str, SavePathCreator]] = None):
+        super().__init__(title, plot_legend, height_scale, width_scale, save_path)
+        self.short_diagram = short_diagram
+
+    def execute(self, current_input: PipelinePartResult) -> PipelinePartResult:
+        draw_patterns(log(current_input),
+                      patterns(current_input),
+                      cached_colors(current_input),
+                      title=self.title,
+                      plot_legend=self.plot_legend,
+                      save_path=self._get_save_path(current_input),
+                      height_scale=self.height_scale,
+                      width_scale=self.width_scale,
+                      short_diagram=self.short_diagram)
 
         return current_input
 

@@ -1,13 +1,15 @@
+import dataclasses
 from typing import Callable, Optional
 
 import graphviz
 from IPython.core.display import Image
 from IPython.core.display_functions import display
+from attr import dataclass
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
 
 from .constants import undefined_activity, activity_name_sep
-from ..common.common_models import GraphNode
+from ..common.common_models import GraphNode, SubArrayInEventLog
 from ..event_log_analysis import TraceDiversityLikeDiagramContext, _draw_traces_diversity_like_diagram_internal
 from ...analysis.patterns.patterns_models import ActivityInTraceInfo, ActivityNode, EventClassNode
 from ...log.event_log import MyEventLog
@@ -49,16 +51,40 @@ def _do_draw_activity_diagram(log: MyEventLog,
                               height_scale: int,
                               width_scale: int):
     def draw_func(ctx: TraceDiversityLikeDiagramContext):
-        _activity_draw_func(ctx, log, cached_colors, traces_activities, short_diagram)
+        dtos = []
+        for trace_activities in traces_activities:
+            trace_dtos = []
+            for activity in trace_activities:
+                events = activity.node.set_of_events
+                activity_hash = calculate_poly_hash_for_collection(list(sorted(events)))
+
+                trace_dtos.append(SubTraceDrawingDto(
+                    activity.start_pos,
+                    activity.length,
+                    activity_hash,
+                    activity.node.name
+                ))
+
+            dtos.append(trace_dtos)
+
+        _sub_traces_draw_func(ctx, log, cached_colors, dtos, short_diagram)
 
     _draw_traces_diversity_like_diagram_internal(log, draw_func, title, save_path, plot_legend, height_scale, width_scale)
 
 
-def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
-                        log: MyEventLog,
-                        cached_colors: dict[str, str],
-                        activities: list[list[ActivityInTraceInfo]],
-                        draw_short_diagram: bool):
+@dataclass
+class SubTraceDrawingDto:
+    start_pos: int
+    length: int
+    hash: int
+    name: str
+
+
+def _sub_traces_draw_func(ctx: TraceDiversityLikeDiagramContext,
+                          log: MyEventLog,
+                          cached_colors: dict[str, str],
+                          activities: list[list[SubTraceDrawingDto]],
+                          draw_short_diagram: bool):
     real_colors_provider = random_unique_color_provider_instance
 
     def colors_provider(name: str):
@@ -89,11 +115,11 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
             last_drew_index = 0
             patches = []
 
-            for index, activity in enumerate(trace_activities):
-                if last_drew_index < activity.start_pos:
+            for index, dto in enumerate(trace_activities):
+                if last_drew_index < dto.start_pos:
                     width = ctx.rect_width
                     if not draw_short_diagram:
-                        width *= (activity.start_pos - last_drew_index)
+                        width *= (dto.start_pos - last_drew_index)
 
                     rect = plt.Rectangle((current_x, current_y), width, ctx.rect_height,
                                          fc=colors_provider(undefined_activity))
@@ -101,22 +127,21 @@ def _activity_draw_func(ctx: TraceDiversityLikeDiagramContext,
                     patches.append(rect)
                     current_x += width
 
-                events = activity.node.set_of_events
-                activity_hash = calculate_poly_hash_for_collection(list(sorted(events)))
-                activity_name = activity.node.name
-                if activity_hash not in activities_colors:
-                    activities_colors[activity_hash] = colors_provider(activity_name)
+
+                activity_name = dto.name
+                if dto.hash not in activities_colors:
+                    activities_colors[dto.hash] = colors_provider(activity_name)
 
                 activity_x_width = ctx.rect_width
                 if not draw_short_diagram:
-                    activity_x_width *= activity.length
+                    activity_x_width *= dto.length
 
-                color = activities_colors[activity_hash]
+                color = activities_colors[dto.hash]
                 rect = plt.Rectangle((current_x, current_y), activity_x_width, ctx.rect_height, fc=color)
                 ctx.names_to_rects[activity_name] = rect
                 patches.append(rect)
                 current_x += activity_x_width
-                last_drew_index = activity.start_pos + activity.length
+                last_drew_index = dto.start_pos + dto.length
 
             if last_drew_index < len(real_trace):
                 width = ctx.rect_width
@@ -275,3 +300,34 @@ def draw_event_class_tree(nodes: list[EventClassNode],
                 save_path=save_path,
                 add_root_node=add_root_node,
                 set_attributes_to_func=set_attributes_to_func)
+
+
+def draw_patterns(log: MyEventLog,
+                  traces_patterns: list[list[SubArrayInEventLog]],
+                  cached_colors: dict[str, str],
+                  title: str = None,
+                  plot_legend: bool = True,
+                  save_path: str = None,
+                  height_scale: int = 1,
+                  width_scale: int = 1,
+                  short_diagram: bool = False):
+    def draw_func(ctx: TraceDiversityLikeDiagramContext):
+        dtos = []
+        for trace, trace_patterns in zip(log, traces_patterns):
+            trace_dtos = []
+            for pattern in trace_patterns:
+                pattern_seq = trace[pattern.first_pos:(pattern.first_pos + pattern.length)]
+                pattern_hash = calculate_poly_hash_for_collection(pattern_seq)
+                trace_dtos.append(SubTraceDrawingDto(
+                    pattern.first_pos,
+                    pattern.length,
+                    pattern_hash,
+                    str(pattern_hash)
+                ))
+
+            dtos.append(trace_dtos)
+
+        _sub_traces_draw_func(ctx, log, cached_colors, dtos, short_diagram)
+
+    _draw_traces_diversity_like_diagram_internal(log, draw_func, title, save_path, plot_legend, height_scale,
+                                                 width_scale)

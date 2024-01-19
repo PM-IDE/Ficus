@@ -708,3 +708,29 @@ def count_underlying_events(event: MyEvent):
             count += 1
 
     return count
+
+
+def add_all_patterns(log: list[list[int]], patterns: list[list[SubArrayInEventLog]]) -> list[list[SubArrayInEventLog]]:
+    all_log_patterns = []
+    for trace, trace_patterns in zip(log, patterns):
+        tree_dict = dict()
+        for index, pattern in enumerate(trace_patterns):
+            start = pattern.first_pos
+            end = start + pattern.length
+            tree_dict[str(index)] = trace[start:end]
+
+        tree = Tree(tree_dict)
+        all_trace_patterns = []
+        index = 1
+        current_start = 0
+
+        while index < len(trace):
+            if not tree.find(trace[current_start:index]):
+                all_trace_patterns.append(SubArrayInEventLog(first_pos=current_start, length=index-current_start))
+                current_start = index
+
+            index += 1
+
+        all_log_patterns.append(all_trace_patterns)
+
+    return all_log_patterns

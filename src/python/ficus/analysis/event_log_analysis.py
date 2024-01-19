@@ -10,6 +10,7 @@ from matplotlib.collections import PatchCollection
 from sklearn.decomposition import PCA
 from sklearn.manifold import Isomap, MDS, TSNE
 
+from .common.common_models import SubArrayInEventLog
 from .event_log_analysis_entropy import calculate_default_entropies
 from .event_log_split import split_log_by_traces
 from ..log.event_log import MyEventLog
