@@ -3,6 +3,7 @@ use std::{any::Any, borrow::Cow, collections::HashMap};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::clustering::activities::activities_params::ActivityRepresentationSource;
 use crate::features::clustering::common::FicusDistance;
+use crate::features::clustering::traces::traces_params::TracesRepresentationSource;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -123,6 +124,7 @@ impl ContextKeys {
     pub const EXECUTE_ONLY_ON_LAST_EXTRACTION: &'static str = "execute_only_on_last_extraction";
     pub const LABELED_LOG_TRACES_DATASET: &'static str = "labeled_log_traces_dataset";
     pub const LOG_TRACES_DATASET: &'static str = "log_traces_dataset";
+    pub const TRACES_REPR_SOURCE: &'static str = "traces_repr_source";
 
     pub fn new() -> Self {
         let mut context = ContextKeysInitContext::empty();
@@ -192,6 +194,7 @@ impl ContextKeys {
         Self::insert_event_log_name(&mut context);
         Self::insert_log_traces_dataset(&mut context);
         Self::insert_labeled_log_traces_dataset(&mut context);
+        Self::insert_traces_repr_source(&mut context);
 
         let (concrete_keys, context_keys) = context.deconstruct();
 
@@ -456,5 +459,9 @@ impl ContextKeys {
 
     fn insert_labeled_log_traces_dataset(context: &mut ContextKeysInitContext) {
         Self::insert_key::<LabeledDataset>(context, Self::LABELED_LOG_TRACES_DATASET)
+    }
+
+    fn insert_traces_repr_source(context: &mut ContextKeysInitContext) {
+        Self::insert_key::<TracesRepresentationSource>(context, Self::TRACES_REPR_SOURCE)
     }
 }

@@ -192,7 +192,7 @@ impl GrpcBackendService for FicusService {
 
     async fn drop_execution_result(&self, request: Request<GrpcGuid>) -> Result<Response<()>, Status> {
         let mut contexts = self.contexts.lock();
-        let mut contexts = contexts.as_mut().ok().unwrap();
+        let contexts = contexts.as_mut().ok().unwrap();
         let guid_str = &request.get_ref().guid;
 
         match contexts.remove(guid_str) {

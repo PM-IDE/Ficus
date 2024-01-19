@@ -3,6 +3,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::clustering::activities::activities_params::ActivityRepresentationSource;
 use crate::features::clustering::common::FicusDistance;
+use crate::features::clustering::traces::traces_params::TracesRepresentationSource;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
@@ -612,5 +613,14 @@ impl ContextKeys {
 
     pub fn is_labeled_log_traces_dataset(&self, key: &dyn ContextKey) -> bool {
         Self::are_keys_equal(self.labeled_log_traces_dataset(), key)
+    }
+
+    pub fn traces_representation_source(&self) -> &DefaultContextKey<TracesRepresentationSource> {
+        self.find_concrete_key::<TracesRepresentationSource>(Self::TRACES_REPR_SOURCE)
+            .expect("TRACES_REPR_SOURCE should be present in keys")
+    }
+
+    pub fn is_traces_representation_source(&self, key: &dyn ContextKey) -> bool {
+        Self::are_keys_equal(self.traces_representation_source(), key)
     }
 }

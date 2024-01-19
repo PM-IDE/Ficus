@@ -6,6 +6,7 @@ use super::backend_service::{FicusService, ServicePipelineExecutionContext};
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::clustering::activities::activities_params::ActivityRepresentationSource;
 use crate::features::clustering::common::FicusDistance;
+use crate::features::clustering::traces::traces_params::TracesRepresentationSource;
 use crate::features::discovery::petri_net::arc::Arc;
 use crate::features::discovery::petri_net::marking::{Marking, SingleMarking};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
@@ -97,6 +98,8 @@ pub(super) fn put_into_user_data(
                 parse_grpc_enum::<ActivityRepresentationSource>(user_data, key, &grpc_enum.value);
             } else if enum_name == name_of_type!(FicusDistance) {
                 parse_grpc_enum::<FicusDistance>(user_data, key, &grpc_enum.value);
+            } else if enum_name == name_of_type!(TracesRepresentationSource) {
+                parse_grpc_enum::<TracesRepresentationSource>(user_data, key, &grpc_enum.value);
             }
         }
         ContextValue::EventLogInfo(_) => todo!(),

@@ -42,3 +42,9 @@ class Distance(Enum):
     L1 = 1
     L2 = 2
     Levenshtein = 3
+
+
+class TracesRepresentationSource(Enum):
+    Events = 0
+    UnderlyingEvents = 1
+    DeepestUnderlyingEvents = 2

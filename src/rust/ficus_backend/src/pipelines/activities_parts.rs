@@ -608,11 +608,13 @@ impl PipelineParts {
     ) -> Result<TracesClusteringParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
         let tolerance = *Self::get_user_data(config, keys.tolerance())?;
         let distance = *Self::get_user_data(config, keys.distance())?;
+        let repr_source = *Self::get_user_data(config, keys.traces_representation_source())?;
 
         Ok(TracesClusteringParams {
             vis_params: Self::create_common_vis_params(context, config, keys)?,
             distance,
             tolerance,
+            repr_source
         })
     }
 

@@ -4,6 +4,7 @@ use std::{collections::HashSet, sync::Arc};
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use ficus_backend::features::clustering::activities::activities_params::ActivityRepresentationSource;
 use ficus_backend::features::clustering::common::FicusDistance;
+use ficus_backend::features::clustering::traces::traces_params::TracesRepresentationSource;
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
@@ -119,6 +120,7 @@ fn test_event_log_all_concrete_keys() {
         assert_existence::<String>(keys, ContextKeys::EVENT_LOG_NAME, &mut used);
         assert_existence::<FicusDataset>(keys, ContextKeys::LOG_TRACES_DATASET, &mut used);
         assert_existence::<LabeledDataset>(keys, ContextKeys::LABELED_LOG_TRACES_DATASET, &mut used);
+        assert_existence::<TracesRepresentationSource>(keys, ContextKeys::TRACES_REPR_SOURCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
@@ -198,7 +200,8 @@ fn get_all_keys_names() -> Vec<String> {
         "execute_only_on_last_extraction",
         "event_log_name",
         "log_traces_dataset",
-        "labeled_log_traces_dataset"
+        "labeled_log_traces_dataset",
+        "traces_repr_source"
     ]
 }
 
@@ -286,6 +289,7 @@ fn test_equivalence_of_keys() {
         assert_keys_equivalence::<String>(keys, ContextKeys::EVENT_LOG_NAME, &mut used);
         assert_keys_equivalence::<FicusDataset>(keys, ContextKeys::LOG_TRACES_DATASET, &mut used);
         assert_keys_equivalence::<LabeledDataset>(keys, ContextKeys::LABELED_LOG_TRACES_DATASET, &mut used);
+        assert_keys_equivalence::<TracesRepresentationSource>(keys, ContextKeys::TRACES_REPR_SOURCE, &mut used);
 
         assert_eq!(used.len(), get_all_keys_names().len())
     })
