@@ -179,7 +179,7 @@ fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
 
         for event in trace {
             if !all_event_classes.contains_key(event.borrow().name()) {
-                all_event_classes.insert(event.borrow().name().to_owned(), all_event_classes.len());
+                all_event_classes.insert(event.borrow().name().to_owned(), all_event_classes.len() + 1);
             }
         }
     }
