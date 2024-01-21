@@ -1,11 +1,14 @@
-from ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan
+from ficus.analysis.event_log_analysis import DatasetVisualizationMethod, NComponents
+from ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan, DiscoverActivitiesFromPatterns2, \
+    DiscoverActivitiesInstances2, ClusterizeActivitiesFromTracesDbscan
 from ficus.grpc_pipelines.constants import const_labeled_log_traces_dataset, const_cluster_labels
 from ficus.grpc_pipelines.context_values import from_grpc_labeled_dataset
-from ficus.grpc_pipelines.data_models import Distance
+from ficus.grpc_pipelines.data_models import Distance, PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
+    ActivitiesRepresentationSource
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PipelinePart2WithCallback, PipelinePart2
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcContextValue
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
-from .test_grpc_pipelines import _execute_test_with_names_log
+from .test_grpc_pipelines import _execute_test_with_names_log, ResultAssertanceKind
 
 
 def test_simple_dataset_1():
@@ -133,6 +136,28 @@ def test_simple_dataset_6():
     )
 
 
+def test_levenshtein_in_activities_clustering():
+    _execute_test_with_names_log(
+        [],
+        Pipeline2(
+            UseNamesEventLog2(),
+            DiscoverActivitiesFromPatterns2(patterns_kind=PatternsKind.MaximalRepeats,
+                                            strategy=PatternsDiscoveryStrategy.FromSingleMergedTrace),
+            DiscoverActivitiesInstances2(narrow_activities=NarrowActivityKind.NarrowDown),
+            ClusterizeActivitiesFromTracesDbscan(min_events_count_in_cluster=2,
+                                                 tolerance=0.1,
+                                                 activities_repr_source=ActivitiesRepresentationSource.SubTracesUnderlyingEvents,
+                                                 distance=Distance.Levenshtein,
+                                                 activity_level=0,
+                                                 view_params=(30, 60),
+                                                 legend_cols=4,
+                                                 visualization_method=DatasetVisualizationMethod.TSNE,
+                                                 n_components=NComponents.Three),
+        ),
+        assertance_kind=ResultAssertanceKind.Error
+    )
+
+
 class TestDatasetPipelinePart(PipelinePart2WithCallback):
     def __init__(self, original_part: PipelinePart2, expected_dataset: list[list[float]]):
         super().__init__()
@@ -149,11 +174,15 @@ class TestDatasetPipelinePart(PipelinePart2WithCallback):
         assert df.values.tolist() == self.expected_dataset
 
 
-def execute_test_with_dataset(names_log, clusterization_pipeline, expected_raw_dataset):
+def execute_test_with_dataset(names_log,
+                              clusterization_pipeline,
+                              expected_raw_dataset,
+                              assertance_kind=ResultAssertanceKind.Success):
     _execute_test_with_names_log(
         names_log,
         Pipeline2(
             UseNamesEventLog2(),
             TestDatasetPipelinePart(clusterization_pipeline, expected_raw_dataset),
-        )
+        ),
+        assertance_kind
     )

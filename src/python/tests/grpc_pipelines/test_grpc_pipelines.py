@@ -1,5 +1,6 @@
 import os.path
 import tempfile
+from enum import Enum
 
 from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
@@ -137,13 +138,25 @@ def test_filter_traces_by_events_count():
     ))
 
 
-def _execute_test_with_names_log(names_log: list[list[str]], pipeline: Pipeline2):
+class ResultAssertanceKind(Enum):
+    Success = 0
+    Error = 1
+
+
+def _execute_test_with_names_log(names_log: list[list[str]],
+                                 pipeline: Pipeline2,
+                                 assertance_kind: ResultAssertanceKind = ResultAssertanceKind.Success):
     result = pipeline.execute({
         const_names_event_log: NamesLogContextValue(names_log)
     })
 
-    assert result.finalResult.HasField('success')
-    assert not result.finalResult.HasField('error')
+    success_field = 'success'
+    error_field = 'error'
+
+    (present_field, not_present_error_field) = (success_field, error_field) if assertance_kind == ResultAssertanceKind.Success else (error_field, success_field)
+
+    assert result.finalResult.HasField(present_field)
+    assert not result.finalResult.HasField(not_present_error_field)
 
 
 def test_apply_class_extractor():
