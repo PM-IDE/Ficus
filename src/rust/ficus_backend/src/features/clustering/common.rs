@@ -130,7 +130,11 @@ pub fn scale_raw_dataset_min_max(vector: &mut Vec<f64>, objects_count: usize, fe
 
         for j in 0..objects_count {
             let index = i + j * features_count;
-            vector[index] = (vector[index] - min) / (max - min);
+            vector[index] = if max == min {
+                1.0
+            } else {
+                (vector[index] - min) / (max - min)
+            }
         }
     }
 }
