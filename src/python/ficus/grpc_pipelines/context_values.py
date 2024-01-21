@@ -227,7 +227,11 @@ def from_grpc_ficus_dataset(grpc_dataset: GrpcDataset) -> pd.DataFrame:
     for column_name in grpc_dataset.columnsNames:
         columns.append(column_name)
 
-    return pd.DataFrame(data, columns=columns)
+    index = []
+    for row_name in grpc_dataset.rowNames:
+        index.append(row_name)
+
+    return pd.DataFrame(data, columns=columns, index=index)
 
 
 def from_grpc_labeled_dataset(grpc_dataset: GrpcLabeledDataset):
