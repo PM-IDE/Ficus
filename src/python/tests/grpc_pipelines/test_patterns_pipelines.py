@@ -53,12 +53,12 @@ def test_several_levels():
         Pipeline2(
             UseNamesEventLog2(),
             TracesDiversityDiagram2(plot_legend=True, title='InitialLog'),
-            DiscoverActivitiesForSeveralLevels2(event_classes=['^(.*?)\\.', '.*'],
+            DiscoverActivitiesForSeveralLevels2(event_classes=[r'^(.*?)(?=\.)', '.*'],
                                                 patterns_kind=PatternsKind.MaximalRepeats),
             CreateLogFromActivitiesInstances2(),
             AssertNamesLogTestPart([
-                ['(A.D)::(B.C)', '(C)::(D)', '(A.D)::(B.C)', '(C)::(D)'],
-                ['(A.D)::(B.C)', '(C)::(D)', '(A.D)::(B.C)']
+                ['(A)::(B)', '(C)::(D)', '(A)::(B)', '(C)::(D)'],
+                ['(A)::(B)', '(C)::(D)', '(A)::(B)']
             ])
         )
     )
@@ -89,7 +89,7 @@ def test_discover_activities_until_no_more():
         Pipeline2(
             UseNamesEventLog2(),
             DiscoverActivitiesUntilNoMore2(event_class=r'^(.*?)(?=\.)'),
-            AssertNamesLogTestPart([['(A.A)::(B.B)::(C)::(D)'], ['(A.A)::(B.B)::(C)::(D)']])
+            AssertNamesLogTestPart([['(A)::(B)::(C)::(D)'], ['(A)::(B)::(C)::(D)']])
         )
     )
 
