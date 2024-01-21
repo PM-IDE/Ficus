@@ -54,7 +54,7 @@ pub fn clusterize_activities_k_means<TLog: EventLog>(
 fn create_labeled_dataset_from_k_means(
     dataset: &MyDataset,
     clustered_dataset: &ClusteredDataset,
-    processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<u64, usize>)>,
+    processed: &Vec<(Rc<RefCell<ActivityNode>>, HashMap<String, usize>)>,
     classes_names: Vec<String>,
     colors_holder: &mut ColorsHolder,
 ) -> LabeledDataset {
