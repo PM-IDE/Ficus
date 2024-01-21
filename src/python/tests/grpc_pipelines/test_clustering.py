@@ -1,6 +1,7 @@
 from ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan
 from ficus.grpc_pipelines.constants import const_labeled_log_traces_dataset, const_cluster_labels
 from ficus.grpc_pipelines.context_values import from_grpc_labeled_dataset
+from ficus.grpc_pipelines.data_models import Distance
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PipelinePart2WithCallback, PipelinePart2
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcContextValue
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
@@ -22,6 +23,112 @@ def test_simple_dataset_1():
             [1.0,  0.0,  1.0,  0.0],
             [1.0,  0.5,  1.0,  0.5],
             [1.0,  1.0,  1.0,  1.0]
+        ]
+    )
+
+
+def test_simple_dataset_2():
+    execute_test_with_dataset(
+        [
+            ['A', 'C'],
+            ['A', 'B', 'C'],
+            ['A', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'B', 'C'],
+        ],
+        ClusterizeLogTracesDbscan(
+            after_clusterization_pipeline=Pipeline2(),
+            min_events_count_in_cluster=2,
+        ),
+        [
+            [1.0, 0.0, 1.0],
+            [1.0, 0.25, 1.0],
+            [1.0, 0.5, 1.0],
+            [1.0, 0.75, 1.0],
+            [1.0, 1.0, 1.0]
+        ]
+    )
+
+
+def test_simple_dataset_3():
+    execute_test_with_dataset(
+        [
+            ['A', 'B', 'B', 'D'],
+            ['A', 'B', 'C', 'C', 'B', 'D'],
+            ['A', 'B', 'C', 'C', 'C', 'C', 'B', 'D'],
+        ],
+        ClusterizeLogTracesDbscan(
+            after_clusterization_pipeline=Pipeline2(),
+            min_events_count_in_cluster=2,
+        ),
+        [
+            [1.0, 1.0, 0.0, 1.0],
+            [1.0, 1.0, 0.5, 1.0],
+            [1.0, 1.0, 1.0, 1.0]
+        ]
+    )
+
+
+def test_simple_dataset_4():
+    execute_test_with_dataset(
+        [
+            ['A', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'C'],
+            ['A', 'B', 'D', 'B', 'D', 'B', 'C'],
+        ],
+        ClusterizeLogTracesDbscan(
+            after_clusterization_pipeline=Pipeline2(),
+            min_events_count_in_cluster=2,
+            distance=Distance.Levenshtein
+        ),
+        [
+            [1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 2.0, 4.0, 2.0, 3.0, 0.0, 0.0, 0.0],
+            [1.0, 2.0, 4.0, 2.0, 4.0, 2.0, 3.0, 0.0]
+        ]
+    )
+
+
+def test_simple_dataset_5():
+    execute_test_with_dataset(
+        [
+            ['A', 'C'],
+            ['A', 'B', 'C'],
+            ['A', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'C'],
+            ['A', 'B', 'B', 'B', 'B', 'C'],
+        ],
+        ClusterizeLogTracesDbscan(
+            after_clusterization_pipeline=Pipeline2(),
+            min_events_count_in_cluster=2,
+            distance=Distance.Levenshtein
+        ),
+        [
+            [1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 3.0, 2.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 3.0, 3.0, 2.0, 0.0, 0.0, 0.0],
+            [1.0, 3.0, 3.0, 3.0, 2.0, 0.0, 0.0],
+            [1.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0]
+        ]
+    )
+
+
+def test_simple_dataset_6():
+    execute_test_with_dataset(
+        [
+            ['A', 'B', 'B', 'D'],
+            ['A', 'B', 'C', 'C', 'B', 'D'],
+            ['A', 'B', 'C', 'C', 'C', 'C', 'B', 'D'],
+        ],
+        ClusterizeLogTracesDbscan(
+            after_clusterization_pipeline=Pipeline2(),
+            min_events_count_in_cluster=2,
+            distance=Distance.Levenshtein
+        ),
+        [
+            [1.0, 2.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 2.0, 4.0, 4.0, 2.0, 3.0, 0.0, 0.0, 0.0],
+            [1.0, 2.0, 4.0, 4.0, 4.0, 4.0, 2.0, 3.0, 0.0]
         ]
     )
 
