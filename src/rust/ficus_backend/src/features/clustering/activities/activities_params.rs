@@ -46,22 +46,18 @@ where
     pub(super) distance: FicusDistance,
 }
 
-impl<'a, TLog> ActivitiesClusteringParams<'a, TLog> 
+impl<'a, TLog> ActivitiesClusteringParams<'a, TLog>
 where
-    TLog: EventLog
+    TLog: EventLog,
 {
-    pub fn new(
-        vis_params: ActivitiesVisualizationParams<'a, TLog>,
-        tolerance: f64,
-        distance: FicusDistance,
-    ) -> Option<Self> {
+    pub fn new(vis_params: ActivitiesVisualizationParams<'a, TLog>, tolerance: f64, distance: FicusDistance) -> Option<Self> {
         if distance == FicusDistance::Levenshtein {
             None
         } else {
             Some(Self {
                 vis_params,
                 tolerance,
-                distance
+                distance,
             })
         }
     }

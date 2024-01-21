@@ -616,7 +616,7 @@ impl PipelineParts {
             vis_params: Self::create_common_vis_params(context, config, keys)?,
             distance,
             tolerance,
-            repr_source
+            repr_source,
         })
     }
 

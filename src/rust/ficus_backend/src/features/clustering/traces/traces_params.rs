@@ -12,7 +12,7 @@ where
     pub vis_params: CommonVisualizationParams<'a, TLog>,
     pub tolerance: f64,
     pub distance: FicusDistance,
-    pub repr_source: TracesRepresentationSource
+    pub repr_source: TracesRepresentationSource,
 }
 
 #[derive(Copy, Clone)]
@@ -30,7 +30,7 @@ impl FromStr for TracesRepresentationSource {
             "Events" => Ok(Self::Events),
             "UnderlyingEvents" => Ok(Self::UnderlyingEvents),
             "DeepestUnderlyingEvents" => Ok(Self::DeepestUnderlyingEvents),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }

@@ -10,10 +10,7 @@ use ndarray::Array2;
 
 use crate::{
     event_log::core::{
-        event::{
-            event::Event,
-            event_hasher::RegexEventHasher,
-        },
+        event::{event::Event, event_hasher::RegexEventHasher},
         event_log::EventLog,
         trace::trace::Trace,
     },

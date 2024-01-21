@@ -11,9 +11,12 @@ use ndarray::Array2;
 
 use crate::{
     event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
-    features::{clustering::common::{
-        create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, DistanceWrapper, FicusDistance, MyDataset,
-    }, analysis::patterns::activity_instances::{create_vector_of_underlying_events, create_vector_of_immediate_underlying_events}},
+    features::{
+        analysis::patterns::activity_instances::{create_vector_of_immediate_underlying_events, create_vector_of_underlying_events},
+        clustering::common::{
+            create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, DistanceWrapper, FicusDistance, MyDataset,
+        },
+    },
     utils::dataset::dataset::LabeledDataset,
 };
 
@@ -60,9 +63,9 @@ pub fn clusterize_log_by_traces_dbscan<TLog: EventLog>(
 }
 
 fn create_traces_dataset<TLog: EventLog>(
-    log: &TLog, 
+    log: &TLog,
     distance: &FicusDistance,
-    trace_repr_source: &TracesRepresentationSource
+    trace_repr_source: &TracesRepresentationSource,
 ) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
     match distance {
         FicusDistance::Cosine | FicusDistance::L1 | FicusDistance::L2 => create_traces_dataset_default(log, trace_repr_source),
@@ -78,8 +81,8 @@ fn create_traces_dataset_default<TLog: EventLog>(
 }
 
 fn create_trace_representation<TLog: EventLog>(
-    trace: &TLog::TTrace, 
-    trace_repr_source: &TracesRepresentationSource
+    trace: &TLog::TTrace,
+    trace_repr_source: &TracesRepresentationSource,
 ) -> Vec<Rc<RefCell<TLog::TEvent>>> {
     match trace_repr_source {
         TracesRepresentationSource::Events => trace.events().clone(),
@@ -92,7 +95,7 @@ fn create_trace_representation<TLog: EventLog>(
             }
 
             events
-        },
+        }
         TracesRepresentationSource::DeepestUnderlyingEvents => {
             let mut events = vec![];
             for event in trace.events() {
@@ -157,7 +160,7 @@ fn create_traces_dataset_default_internal<TLog: EventLog>(
 
 fn create_traces_dataset_levenshtein<TLog: EventLog>(
     log: &TLog,
-    trace_repr_source: &TracesRepresentationSource
+    trace_repr_source: &TracesRepresentationSource,
 ) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
     create_traces_dataset_levenshtein_internal(log, |trace| create_trace_representation::<TLog>(trace, trace_repr_source))
 }

@@ -701,9 +701,7 @@ fn create_vector_of_underlying_events_intenral<TLog: EventLog>(
     }
 }
 
-pub fn create_vector_of_immediate_underlying_events<TLog: EventLog>(
-    event: &Rc<RefCell<TLog::TEvent>>
-) -> Vec<Rc<RefCell<TLog::TEvent>>> {
+pub fn create_vector_of_immediate_underlying_events<TLog: EventLog>(event: &Rc<RefCell<TLog::TEvent>>) -> Vec<Rc<RefCell<TLog::TEvent>>> {
     let mut events = vec![];
 
     let key = unsafe { KEYS.underlying_events_key::<TLog::TEvent>() };

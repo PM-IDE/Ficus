@@ -14,10 +14,7 @@ use crate::{
             create_colors_vector, transform_to_ficus_dataset, ClusteredDataset, DistanceWrapper, FicusDistance, MyDataset,
         },
     },
-    utils::{
-        colors::ColorsHolder,
-        dataset::dataset::LabeledDataset,
-    },
+    utils::{colors::ColorsHolder, dataset::dataset::LabeledDataset},
 };
 
 use super::{activities_common::create_dataset, activities_params::ActivitiesClusteringParams, merging::merge_activities};
