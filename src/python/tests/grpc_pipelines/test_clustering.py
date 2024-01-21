@@ -29,7 +29,8 @@ def test_simple_dataset_1():
             [1.0, 0.0, 1.0, 0.0],
             [1.0, 0.5, 1.0, 0.5],
             [1.0, 1.0, 1.0, 1.0]
-        ]
+        ],
+        [0, 0, 0]
     )
 
 
@@ -52,7 +53,8 @@ def test_simple_dataset_2():
             [1.0, 0.5, 1.0],
             [1.0, 0.75, 1.0],
             [1.0, 1.0, 1.0]
-        ]
+        ],
+        [0, 0, 0, 0, 0]
     )
 
 
@@ -71,7 +73,8 @@ def test_simple_dataset_3():
             [1.0, 1.0, 0.0, 1.0],
             [1.0, 1.0, 0.5, 1.0],
             [1.0, 1.0, 1.0, 1.0]
-        ]
+        ],
+        [0, 0, 0]
     )
 
 
@@ -91,7 +94,8 @@ def test_simple_dataset_4():
             [1.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             [1.0, 2.0, 4.0, 2.0, 3.0, 0.0, 0.0, 0.0],
             [1.0, 2.0, 4.0, 2.0, 4.0, 2.0, 3.0, 0.0]
-        ]
+        ],
+        [0, 0, 0],
     )
 
 
@@ -115,7 +119,8 @@ def test_simple_dataset_5():
             [1.0, 3.0, 3.0, 2.0, 0.0, 0.0, 0.0],
             [1.0, 3.0, 3.0, 3.0, 2.0, 0.0, 0.0],
             [1.0, 3.0, 3.0, 3.0, 3.0, 2.0, 0.0]
-        ]
+        ],
+        [0, 0, 0, 0, 0]
     )
 
 
@@ -135,7 +140,8 @@ def test_simple_dataset_6():
             [1.0, 2.0, 2.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             [1.0, 2.0, 4.0, 4.0, 2.0, 3.0, 0.0, 0.0, 0.0],
             [1.0, 2.0, 4.0, 4.0, 4.0, 4.0, 2.0, 3.0, 0.0]
-        ]
+        ],
+        [0, 0, 0]
     )
 
 
@@ -171,7 +177,7 @@ def test_activities_dataset_1():
             ['X', 'Q', 'Z', 'y', 'X', 'Q', 'Z'],
         ],
         ClusterizeActivitiesFromTracesDbscan(min_events_count_in_cluster=2,
-                                             tolerance=0.1,
+                                             tolerance=0.5,
                                              activities_repr_source=ActivitiesRepresentationSource.EventClasses,
                                              distance=Distance.Cosine,
                                              show_visualization=False),
@@ -180,7 +186,8 @@ def test_activities_dataset_1():
             [1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-        ]
+        ],
+        [1, 1, 2, 2]
     )
 
 
@@ -194,7 +201,7 @@ def test_activities_dataset_2():
             ['X', 'Q', 'Z', 'Z', 'y', 'X', 'Q', 'Z', 'Z'],
         ],
         ClusterizeActivitiesFromTracesDbscan(min_events_count_in_cluster=2,
-                                             tolerance=0.1,
+                                             tolerance=0.5,
                                              activities_repr_source=ActivitiesRepresentationSource.EventClasses,
                                              distance=Distance.Cosine,
                                              show_visualization=False),
@@ -203,7 +210,8 @@ def test_activities_dataset_2():
             [1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-        ]
+        ],
+        [1, 1, 2, 2]
     )
 
 def test_activities_dataset_3():
@@ -216,7 +224,7 @@ def test_activities_dataset_3():
             ['X', 'Q', 'Z', 'Z', 'y', 'X', 'Q', 'Z', 'Z'],
         ],
         ClusterizeActivitiesFromTracesDbscan(min_events_count_in_cluster=2,
-                                             tolerance=0.1,
+                                             tolerance=0.6,
                                              activities_repr_source=ActivitiesRepresentationSource.SubTraces,
                                              distance=Distance.Cosine,
                                              show_visualization=False),
@@ -225,7 +233,8 @@ def test_activities_dataset_3():
             [0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0, 1.0, 0.5, 0.0, 1.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5]
-        ]
+        ],
+        [1, 1, 2, 2]
     )
 
 
@@ -239,7 +248,7 @@ def test_activities_dataset_4():
             ['X', 'Q', 'Z', 'Z', 'y', 'X', 'Q', 'Z', 'Z'],
         ],
         ClusterizeActivitiesFromTracesDbscan(min_events_count_in_cluster=2,
-                                             tolerance=0.1,
+                                             tolerance=0.6,
                                              activities_repr_source=ActivitiesRepresentationSource.SubTracesUnderlyingEvents,
                                              distance=Distance.Cosine,
                                              show_visualization=False),
@@ -248,7 +257,8 @@ def test_activities_dataset_4():
             [0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 0.0, 0.0, 1.0, 0.5, 0.0, 1.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5]
-        ]
+        ],
+        [1, 1, 2, 2]
     )
 
 
@@ -256,26 +266,29 @@ class TestDatasetPipelinePart(PipelinePart2WithCallback):
     def __init__(self,
                  original_part: PipelinePart2,
                  expected_dataset: list[list[float]],
+                 expected_clusters: list[int],
                  labeled_dataset_key: str):
         super().__init__()
         self.uuid = original_part.uuid
         self.original_part = original_part
         self.expected_dataset = expected_dataset
         self.labeled_dataset_key = labeled_dataset_key
+        self.expected_clusters = expected_clusters
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         return self.original_part.to_grpc_part()
 
     def execute_callback(self, values: dict[str, GrpcContextValue], labeled_log_traces_dataset=None):
         dataset = values[self.labeled_dataset_key].labeled_dataset
-        df = from_grpc_labeled_dataset(dataset).drop([const_cluster_labels], axis=1)
-        print(df)
-        assert df.values.tolist() == self.expected_dataset
+        df = from_grpc_labeled_dataset(dataset)
+        assert df.drop([const_cluster_labels], axis=1).values.tolist() == self.expected_dataset
+        assert df[const_cluster_labels].to_numpy().tolist() == self.expected_clusters
 
 
 def execute_test_with_activities_dataset(names_log,
                                          clusterization_pipeline,
                                          expected_raw_dataset,
+                                         exepcted_clusters,
                                          assertance_kind=ResultAssertanceKind.Success):
     _execute_test_with_names_log(
         names_log,
@@ -285,6 +298,7 @@ def execute_test_with_activities_dataset(names_log,
                                                 patterns_kind=PatternsKind.MaximalRepeats),
             TestDatasetPipelinePart(clusterization_pipeline,
                                     expected_raw_dataset,
+                                    exepcted_clusters,
                                     const_labeled_traces_activities_dataset)
         ),
         assertance_kind
@@ -294,12 +308,16 @@ def execute_test_with_activities_dataset(names_log,
 def execute_test_with_traces_dataset(names_log,
                                      clusterization_pipeline,
                                      expected_raw_dataset,
+                                     expected_clusters,
                                      assertance_kind=ResultAssertanceKind.Success):
     _execute_test_with_names_log(
         names_log,
         Pipeline2(
             UseNamesEventLog2(),
-            TestDatasetPipelinePart(clusterization_pipeline, expected_raw_dataset, const_labeled_log_traces_dataset),
+            TestDatasetPipelinePart(clusterization_pipeline,
+                                    expected_raw_dataset,
+                                    expected_clusters,
+                                    const_labeled_log_traces_dataset),
         ),
         assertance_kind
     )
