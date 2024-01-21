@@ -3,8 +3,8 @@ from ficus.grpc_pipelines.filtering_parts import FilterEventsByName2, FilterEven
 from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
-from tests.grpc_pipelines.pipeline_parts_for_tests import AssertNamesLogTestPart
-from tests.grpc_pipelines.test_grpc_pipelines import _execute_test_with_exercise_log
+from .pipeline_parts_for_tests import AssertNamesLogTestPart
+from .test_grpc_pipelines import _execute_test_with_exercise_log
 
 
 def test_filter_events_by_name():

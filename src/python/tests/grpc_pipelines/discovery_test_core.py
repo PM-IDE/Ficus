@@ -6,10 +6,10 @@ from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
 
 from ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
-from tests.core.gold_based_test import execute_test_with_gold
+from ..core.gold_based_test import execute_test_with_gold
 
-from tests.grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log
-from tests.test_data_provider import petri_net_test_gold_dir
+from ..grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log
+from ..test_data_provider import petri_net_test_gold_dir
 
 
 def _execute_discovery_test(test_name: str, names_log: list[list[str]], discovery_part):

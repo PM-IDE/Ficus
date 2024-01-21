@@ -19,7 +19,4 @@ class AssertNamesLogTestPart(PipelinePart2WithCallback):
         for trace in values[const_names_event_log].names_log.log.traces:
             names_log.append(list(trace.events))
 
-        if names_log != self.expected_names_log:
-            print(f'Actual: {names_log}')
-            print(f'Expected: {self.expected_names_log}')
-            assert False
+        assert names_log == self.expected_names_log

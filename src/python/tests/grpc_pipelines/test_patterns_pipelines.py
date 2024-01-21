@@ -19,10 +19,10 @@ from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
-from tests.grpc_pipelines.pipeline_parts_for_tests import AssertNamesLogTestPart
-from tests.grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log, _execute_test_with_exercise_log, \
+from .pipeline_parts_for_tests import AssertNamesLogTestPart
+from .test_grpc_pipelines import _execute_test_with_names_log, _execute_test_with_exercise_log, \
     _execute_test_with_context
-from tests.test_data_provider import console_app_method2_log_path
+from ..test_data_provider import console_app_method2_log_path
 
 
 def test_class_extractors():

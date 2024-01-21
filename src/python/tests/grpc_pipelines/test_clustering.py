@@ -5,7 +5,7 @@ from ficus.grpc_pipelines.data_models import Distance
 from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PipelinePart2WithCallback, PipelinePart2
 from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcContextValue
 from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
-from tests.grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log
+from .test_grpc_pipelines import _execute_test_with_names_log
 
 
 def test_simple_dataset_1():

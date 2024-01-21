@@ -1,6 +1,6 @@
 from ficus.grpc_pipelines.discovery_parts import DiscoverPetriNetAlphaPlusPlusNfc2
 
-from tests.grpc_pipelines.discovery_test_core import _execute_discovery_test
+from .discovery_test_core import _execute_discovery_test
 
 
 def test_discover_petri_net_alpha_plus_plus_nfc():
