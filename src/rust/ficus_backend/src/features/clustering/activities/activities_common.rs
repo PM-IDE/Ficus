@@ -19,7 +19,10 @@ use crate::{
             activity_instances::{create_vector_of_underlying_events, ActivityInTraceInfo},
             repeat_sets::ActivityNode,
         },
-        clustering::common::{scale_raw_dataset_min_max, MyDataset},
+        clustering::{
+            common::{scale_raw_dataset_min_max, MyDataset},
+            error::ClusteringError,
+        },
     },
     pipelines::aliases::TracesActivities,
 };
@@ -30,7 +33,7 @@ pub(super) type ActivityNodeWithCoords = Vec<(Rc<RefCell<ActivityNode>>, HashMap
 
 pub fn create_dataset<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
-) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+) -> Result<(MyDataset, ActivityNodeWithCoords, Vec<String>), ClusteringError> {
     match params.activities_repr_source {
         ActivityRepresentationSource::EventClasses => create_dataset_from_activities_classes(params),
         ActivityRepresentationSource::SubTraces => create_dataset_from_activities_traces(params),
@@ -40,12 +43,12 @@ pub fn create_dataset<TLog: EventLog>(
 
 pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
-) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+) -> Result<(MyDataset, ActivityNodeWithCoords, Vec<String>), ClusteringError> {
     create_dataset_internal(
         params.traces_activities,
         params.common_vis_params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
-            create_activities_repr_from_subtraces(
+            Ok(create_activities_repr_from_subtraces(
                 traces_activities,
                 regex_hasher,
                 all_event_classes,
@@ -60,25 +63,25 @@ pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: Even
 
                     update_event_classes::<TLog>(sub_trace_events.as_slice(), regex_hasher, all_event_classes, map)
                 },
-            )
+            ))
         },
     )
 }
 
 pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
-) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+) -> Result<(MyDataset, ActivityNodeWithCoords, Vec<String>), ClusteringError> {
     create_dataset_internal(
         params.traces_activities,
         params.common_vis_params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
-            create_activities_repr_from_subtraces(
+            Ok(create_activities_repr_from_subtraces(
                 traces_activities,
                 regex_hasher,
                 all_event_classes,
                 params,
                 |events, map, all_event_classes| update_event_classes::<TLog>(events, regex_hasher, all_event_classes, map),
-            )
+            ))
         },
     )
 }
@@ -151,15 +154,15 @@ fn create_dataset_internal(
         &Vec<Vec<ActivityInTraceInfo>>,
         Option<&RegexEventHasher>,
         &mut HashSet<String>,
-    ) -> HashMap<String, (Rc<RefCell<ActivityNode>>, HashMap<String, usize>)>,
-) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+    ) -> Result<HashMap<String, (Rc<RefCell<ActivityNode>>, HashMap<String, usize>)>, ClusteringError>,
+) -> Result<(MyDataset, ActivityNodeWithCoords, Vec<String>), ClusteringError> {
     let mut all_event_classes = HashSet::new();
     let regex_hasher = match class_extractor.as_ref() {
         Some(class_extractor) => Some(RegexEventHasher::new(class_extractor).ok().unwrap()),
         None => None,
     };
 
-    let processed = activities_repr_fullfiller(traces_activities, regex_hasher.as_ref(), &mut all_event_classes);
+    let processed = activities_repr_fullfiller(traces_activities, regex_hasher.as_ref(), &mut all_event_classes)?;
 
     let mut all_event_classes = all_event_classes.into_iter().collect::<Vec<String>>();
     all_event_classes.sort();
@@ -186,10 +189,10 @@ fn create_dataset_internal(
 
     let array = match Array2::from_shape_vec(shape, vector) {
         Ok(score) => score,
-        Err(_) => return None,
+        Err(_) => return Err(ClusteringError::FailedToCreateNdArray),
     };
 
-    Some((
+    Ok((
         DatasetBase::from(array),
         processed,
         all_event_classes.iter().map(|x| x.to_string()).collect(),
@@ -198,7 +201,7 @@ fn create_dataset_internal(
 
 pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
     params: &ActivitiesVisualizationParams<TLog>,
-) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
+) -> Result<(MyDataset, ActivityNodeWithCoords, Vec<String>), ClusteringError> {
     create_dataset_internal(
         params.traces_activities,
         params.common_vis_params.class_extractor.clone(),
@@ -238,7 +241,7 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
 
                         abstracted_event_classes
                     } else {
-                        panic!();
+                        return Err(ClusteringError::NoRepeatSet);
                     };
 
                     processed.insert(
@@ -248,7 +251,7 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
                 }
             }
 
-            processed
+            Ok(processed)
         },
     )
 }

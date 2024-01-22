@@ -494,12 +494,12 @@ impl PipelineParts {
             let clusters_count = *Self::get_user_data(config, keys.clusters_count())? as usize;
             let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
 
-            let labeled_dataset = clusterize_activities_k_means(&mut params, clusters_count, learning_iterations_count);
+            let labeled_dataset = match clusterize_activities_k_means(&mut params, clusters_count, learning_iterations_count) {
+                Ok(labeled_dataset) => labeled_dataset,
+                Err(error) => return Err(error.into()),
+            };
 
-            if let Some(labeled_dataset) = labeled_dataset {
-                context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
-            }
-
+            context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset);
             Ok(())
         })
     }
@@ -565,12 +565,12 @@ impl PipelineParts {
                 let learning_iterations_count = *Self::get_user_data(config, keys.learning_iterations_count())? as usize;
                 let mut params = Self::create_activities_clustering_params(context, config, keys)?;
 
-                let labeled_dataset = clusterize_activities_k_means_grid_search(&mut params, learning_iterations_count);
+                let labeled_dataset = match clusterize_activities_k_means_grid_search(&mut params, learning_iterations_count) {
+                    Ok(labeled_dataset) => labeled_dataset,
+                    Err(error) => return Err(error.into()),
+                };
 
-                if let Some(labeled_dataset) = labeled_dataset {
-                    context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
-                }
-
+                context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset);
                 Ok(())
             },
         )
@@ -581,12 +581,12 @@ impl PipelineParts {
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
             let mut params = Self::create_activities_clustering_params(context, config, keys)?;
 
-            let labeled_dataset = clusterize_activities_dbscan(&mut params, min_points_in_cluster);
+            let labeled_dataset = match clusterize_activities_dbscan(&mut params, min_points_in_cluster) {
+                Ok(labeled_dataset) => labeled_dataset,
+                Err(error) => return Err(error.into()),
+            };
 
-            if let Some(labeled_dataset) = labeled_dataset {
-                context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset)
-            }
-
+            context.put_concrete(keys.labeled_traces_activities_dataset().key(), labeled_dataset);
             Ok(())
         })
     }
@@ -595,13 +595,15 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::CREATE_TRACES_ACTIVITIES_DATASET, &|context, _, keys, config| {
             let params = Self::create_activities_visualization_params(context, config, keys)?;
 
-            if let Some((dataset, processed, classes)) = create_dataset(&params) {
-                let ficus_dataset =
-                    transform_to_ficus_dataset(&dataset, processed.iter().map(|x| x.0.borrow().name.to_owned()).collect(), classes);
+            let (dataset, processed, classes) = match create_dataset(&params) {
+                Ok((dataset, processed, classes)) => (dataset, processed, classes),
+                Err(error) => return Err(error.into()),
+            };
 
-                context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
-            }
+            let processed = processed.iter().map(|x| x.0.borrow().name.to_owned()).collect();
+            let ficus_dataset = transform_to_ficus_dataset(&dataset, processed, classes);
 
+            context.put_concrete(keys.traces_activities_dataset().key(), ficus_dataset);
             Ok(())
         })
     }
@@ -629,16 +631,17 @@ impl PipelineParts {
             let after_clusterization_pipeline = Self::get_user_data(config, keys.pipeline())?;
             let min_points_in_cluster = *Self::get_user_data(config, keys.min_events_in_clusters_count())? as usize;
 
-            let new_logs = clusterize_log_by_traces_dbscan(&mut params, min_points_in_cluster);
-            if let Some(new_logs) = new_logs {
-                context.put_concrete(keys.labeled_log_traces_dataset().key(), new_logs.1);
+            let new_logs = match clusterize_log_by_traces_dbscan(&mut params, min_points_in_cluster) {
+                Ok(new_logs) => new_logs,
+                Err(error) => return Err(error.into()),
+            };
 
-                for log in new_logs.0 {
-                    let mut new_context = context.clone();
-                    new_context.put_concrete(keys.event_log().key(), log);
+            context.put_concrete(keys.labeled_log_traces_dataset().key(), new_logs.1);
+            for log in new_logs.0 {
+                let mut new_context = context.clone();
+                new_context.put_concrete(keys.event_log().key(), log);
 
-                    after_clusterization_pipeline.execute(&mut new_context, infra, keys)?;
-                }
+                after_clusterization_pipeline.execute(&mut new_context, infra, keys)?;
             }
 
             Ok(())

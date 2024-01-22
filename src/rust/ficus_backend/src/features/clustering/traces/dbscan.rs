@@ -17,7 +17,7 @@ use crate::{
     },
     features::{
         analysis::patterns::activity_instances::{create_vector_of_immediate_underlying_events, create_vector_of_underlying_events},
-        clustering::common::{create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, MyDataset},
+        clustering::{common::{create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, MyDataset}, error::ClusteringError},
     },
     utils::{
         dataset::dataset::LabeledDataset,
@@ -30,44 +30,41 @@ use super::traces_params::{TracesClusteringParams, TracesRepresentationSource};
 pub fn clusterize_log_by_traces_dbscan<TLog: EventLog>(
     params: &mut TracesClusteringParams<TLog>,
     min_points: usize,
-) -> Option<(Vec<TLog>, LabeledDataset)> {
+) -> Result<(Vec<TLog>, LabeledDataset), ClusteringError> {
     let class_extractor = params.vis_params.class_extractor.as_ref();
     let traces_dataset = create_traces_dataset(params.vis_params.log, &params.distance, class_extractor, &params.repr_source);
 
-    if let Some((dataset, objects, features)) = traces_dataset {
-        let clusters = Dbscan::params_with(min_points, DistanceWrapper::new(params.distance), KdTree)
-            .tolerance(params.tolerance)
-            .transform(dataset.records())
-            .unwrap();
+    let (dataset, objects, features) = traces_dataset?;
+    let clusters = Dbscan::params_with(min_points, DistanceWrapper::new(params.distance), KdTree)
+        .tolerance(params.tolerance)
+        .transform(dataset.records())
+        .unwrap();
 
-        let ficus_dataset = transform_to_ficus_dataset(&dataset, objects, features);
+    let ficus_dataset = transform_to_ficus_dataset(&dataset, objects, features);
 
-        let labels = clusters
-            .into_raw_vec()
-            .iter()
-            .map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 })
-            .collect();
+    let labels = clusters
+        .into_raw_vec()
+        .iter()
+        .map(|x| if x.is_none() { 0 } else { x.unwrap() + 1 })
+        .collect();
 
-        let mut new_logs: HashMap<usize, TLog> = HashMap::new();
-        for (trace, label) in params.vis_params.log.traces().iter().zip(&labels) {
-            let trace_copy = trace.borrow().clone();
-            if let Some(cluster_log) = new_logs.get_mut(label) {
-                cluster_log.push(Rc::new(RefCell::new(trace_copy)));
-            } else {
-                let mut cluster_log = TLog::empty();
-                cluster_log.push(Rc::new(RefCell::new(trace_copy)));
+    let mut new_logs: HashMap<usize, TLog> = HashMap::new();
+    for (trace, label) in params.vis_params.log.traces().iter().zip(&labels) {
+        let trace_copy = trace.borrow().clone();
+        if let Some(cluster_log) = new_logs.get_mut(label) {
+            cluster_log.push(Rc::new(RefCell::new(trace_copy)));
+        } else {
+            let mut cluster_log = TLog::empty();
+            cluster_log.push(Rc::new(RefCell::new(trace_copy)));
 
-                new_logs.insert(label.to_owned(), cluster_log);
-            }
+            new_logs.insert(label.to_owned(), cluster_log);
         }
-
-        let new_logs = new_logs.into_iter().map(|x| x.1).collect();
-        let colors = create_colors_vector(&labels, &mut params.vis_params.colors_holder);
-
-        Some((new_logs, LabeledDataset::new(ficus_dataset, labels, colors)))
-    } else {
-        None
     }
+
+    let new_logs = new_logs.into_iter().map(|x| x.1).collect();
+    let colors = create_colors_vector(&labels, &mut params.vis_params.colors_holder);
+
+    Ok((new_logs, LabeledDataset::new(ficus_dataset, labels, colors)))
 }
 
 fn create_traces_dataset<TLog: EventLog>(
@@ -75,7 +72,7 @@ fn create_traces_dataset<TLog: EventLog>(
     distance: &FicusDistance,
     class_extractor: Option<&String>,
     trace_repr_source: &TracesRepresentationSource,
-) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
+) -> Result<(MyDataset, Vec<String>, Vec<String>), ClusteringError> {
     match distance {
         FicusDistance::Cosine | FicusDistance::L1 | FicusDistance::L2 => {
             create_traces_dataset_default(log, class_extractor, trace_repr_source)
@@ -88,7 +85,7 @@ fn create_traces_dataset_default<TLog: EventLog>(
     log: &TLog,
     class_extractor: Option<&String>,
     trace_repr_source: &TracesRepresentationSource,
-) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
+) -> Result<(MyDataset, Vec<String>, Vec<String>), ClusteringError> {
     create_traces_dataset_default_internal(log, class_extractor, |trace| {
         create_trace_representation::<TLog>(trace, trace_repr_source)
     })
@@ -127,7 +124,7 @@ fn create_traces_dataset_default_internal<TLog: EventLog>(
     log: &TLog,
     class_extractor: Option<&String>,
     trace_repr_creator: impl Fn(&TLog::TTrace) -> Vec<Rc<RefCell<TLog::TEvent>>>,
-) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
+) -> Result<(MyDataset, Vec<String>, Vec<String>), ClusteringError> {
     let regex_hasher = match class_extractor.as_ref() {
         Some(class_extractor) => Some(RegexEventHasher::new(class_extractor).ok().unwrap()),
         None => None,
@@ -179,10 +176,10 @@ fn create_traces_dataset_default_internal<TLog: EventLog>(
     let shape = (processed_traces.len(), all_event_classes.len());
     let array = match Array2::from_shape_vec(shape, raw_dataset) {
         Ok(score) => score,
-        Err(_) => return None,
+        Err(_) => return Err(ClusteringError::FailedToCreateNdArray),
     };
 
-    Some((
+    Ok((
         DatasetBase::from(array),
         (0..processed_traces.len()).into_iter().map(|x| format!("Trace_{}", x)).collect(),
         all_event_classes,
@@ -193,7 +190,7 @@ fn create_traces_dataset_levenshtein<TLog: EventLog>(
     log: &TLog,
     class_extractor: Option<&String>,
     trace_repr_source: &TracesRepresentationSource,
-) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
+) -> Result<(MyDataset, Vec<String>, Vec<String>), ClusteringError> {
     create_traces_dataset_levenshtein_internal(log, class_extractor, |trace| {
         create_trace_representation::<TLog>(trace, trace_repr_source)
     })
@@ -203,7 +200,7 @@ fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
     log: &TLog,
     class_extractor: Option<&String>,
     trace_repr_creator: impl Fn(&TLog::TTrace) -> Vec<Rc<RefCell<TLog::TEvent>>>,
-) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
+) -> Result<(MyDataset, Vec<String>, Vec<String>), ClusteringError> {
     let regex_hasher = match class_extractor.as_ref() {
         Some(class_extractor) => Some(RegexEventHasher::new(class_extractor).ok().unwrap()),
         None => None,
@@ -253,10 +250,10 @@ fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
     let shape = (processed_traces.len(), max_length);
     let array = match Array2::from_shape_vec(shape, raw_dataset) {
         Ok(score) => score,
-        Err(_) => return None,
+        Err(_) => return Err(ClusteringError::FailedToCreateNdArray),
     };
 
-    Some((
+    Ok((
         DatasetBase::from(array),
         (0..processed_traces.len()).into_iter().map(|x| format!("Trace_{}", x)).collect(),
         (0..max_length).into_iter().map(|x| format!("Symbol_{}", x)).collect(),
