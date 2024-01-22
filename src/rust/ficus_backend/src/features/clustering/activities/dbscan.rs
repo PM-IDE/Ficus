@@ -4,8 +4,8 @@ use linfa_nn::KdTree;
 
 use crate::{
     event_log::core::event_log::EventLog,
-    features::clustering::common::{create_colors_vector, transform_to_ficus_dataset, DistanceWrapper},
-    utils::dataset::dataset::LabeledDataset,
+    features::clustering::common::{create_colors_vector, transform_to_ficus_dataset},
+    utils::{dataset::dataset::LabeledDataset, distance::distance::DistanceWrapper},
 };
 
 use super::{activities_common::create_dataset, activities_params::ActivitiesClusteringParams, merging::merge_activities};

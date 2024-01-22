@@ -1,8 +1,5 @@
-use std::str::FromStr;
-
 use linfa::DatasetBase;
-use linfa_nn::distance::{Distance, L1Dist, L2Dist};
-use ndarray::{Array1, ArrayBase, ArrayView, Dim, Dimension, OwnedRepr};
+use ndarray::{Array1, ArrayBase, Dim, OwnedRepr};
 
 use crate::{
     event_log::core::event_log::EventLog,
@@ -12,78 +9,8 @@ use crate::{
     },
 };
 
-use super::activities::distance::{CosineDistance, LevenshteinDistance};
-
 pub(super) type MyDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, Array1<()>>;
 pub(super) type ClusteredDataset = DatasetBase<ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
-
-#[derive(PartialEq, Eq, Clone, Copy)]
-pub enum FicusDistance {
-    Cosine,
-    L1,
-    L2,
-    Levenshtein,
-}
-
-impl FromStr for FicusDistance {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Cosine" => Ok(Self::Cosine),
-            "L1" => Ok(Self::L1),
-            "L2" => Ok(Self::L2),
-            "Levenshtein" => Ok(Self::Levenshtein),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone)]
-pub enum DistanceWrapper {
-    Cosine(CosineDistance),
-    L1(L1Dist),
-    L2(L2Dist),
-    Levenshtein(LevenshteinDistance),
-}
-
-impl DistanceWrapper {
-    pub fn new(ficus_distance: FicusDistance) -> DistanceWrapper {
-        match ficus_distance {
-            FicusDistance::Cosine => DistanceWrapper::Cosine(CosineDistance {}),
-            FicusDistance::L1 => DistanceWrapper::L1(L1Dist {}),
-            FicusDistance::L2 => DistanceWrapper::L2(L2Dist {}),
-            FicusDistance::Levenshtein => DistanceWrapper::Levenshtein(LevenshteinDistance {}),
-        }
-    }
-}
-
-impl Distance<f64> for DistanceWrapper {
-    fn distance<D: Dimension>(&self, a: ArrayView<f64, D>, b: ArrayView<f64, D>) -> f64 {
-        match self {
-            DistanceWrapper::Cosine(d) => d.distance(a, b),
-            DistanceWrapper::L1(d) => d.distance(a, b),
-            DistanceWrapper::L2(d) => d.distance(a, b),
-            DistanceWrapper::Levenshtein(d) => d.distance(a, b),
-        }
-    }
-
-    fn rdistance<D: ndarray::prelude::Dimension>(
-        &self,
-        a: ndarray::prelude::ArrayView<f64, D>,
-        b: ndarray::prelude::ArrayView<f64, D>,
-    ) -> f64 {
-        self.distance(a, b)
-    }
-
-    fn rdist_to_dist(&self, rdist: f64) -> f64 {
-        rdist
-    }
-
-    fn dist_to_rdist(&self, dist: f64) -> f64 {
-        dist
-    }
-}
 
 pub struct CommonVisualizationParams<'a, TLog>
 where

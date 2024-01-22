@@ -516,7 +516,11 @@ impl PipelineParts {
             Err(_) => None,
         };
 
-        Ok(CommonVisualizationParams { log, colors_holder, class_extractor })
+        Ok(CommonVisualizationParams {
+            log,
+            colors_holder,
+            class_extractor,
+        })
     }
 
     fn create_activities_visualization_params<'a>(

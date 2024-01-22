@@ -2,12 +2,12 @@ use std::{any::Any, borrow::Cow, collections::HashMap};
 
 use crate::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use crate::features::clustering::activities::activities_params::ActivityRepresentationSource;
-use crate::features::clustering::common::FicusDistance;
 use crate::features::clustering::traces::traces_params::TracesRepresentationSource;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use crate::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use crate::pipelines::patterns_parts::PatternsKindDto;
 use crate::utils::dataset::dataset::{FicusDataset, LabeledDataset};
+use crate::utils::distance::distance::FicusDistance;
 use crate::utils::graph::graph::DefaultGraph;
 use crate::{
     event_log::xes::xes_event_log::XesEventLogImpl,

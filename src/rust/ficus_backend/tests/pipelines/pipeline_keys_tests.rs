@@ -3,12 +3,12 @@ use std::{collections::HashSet, sync::Arc};
 
 use ficus_backend::features::analysis::patterns::activity_instances::{ActivityInTraceFilterKind, ActivityNarrowingKind};
 use ficus_backend::features::clustering::activities::activities_params::ActivityRepresentationSource;
-use ficus_backend::features::clustering::common::FicusDistance;
 use ficus_backend::features::clustering::traces::traces_params::TracesRepresentationSource;
 use ficus_backend::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use ficus_backend::pipelines::activities_parts::{ActivitiesLogsSourceDto, UndefActivityHandlingStrategyDto};
 use ficus_backend::pipelines::patterns_parts::PatternsKindDto;
 use ficus_backend::utils::dataset::dataset::{FicusDataset, LabeledDataset};
+use ficus_backend::utils::distance::distance::FicusDistance;
 use ficus_backend::utils::graph::graph::DefaultGraph;
 use ficus_backend::{
     event_log::{core::event_log::EventLog, xes::xes_event_log::XesEventLogImpl},

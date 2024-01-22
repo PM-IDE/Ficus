@@ -10,14 +10,19 @@ use linfa_nn::KdTree;
 use ndarray::Array2;
 
 use crate::{
-    event_log::core::{event::{event::Event, event_hasher::RegexEventHasher}, event_log::EventLog, trace::trace::Trace},
+    event_log::core::{
+        event::{event::Event, event_hasher::RegexEventHasher},
+        event_log::EventLog,
+        trace::trace::Trace,
+    },
     features::{
         analysis::patterns::activity_instances::{create_vector_of_immediate_underlying_events, create_vector_of_underlying_events},
-        clustering::common::{
-            create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, DistanceWrapper, FicusDistance, MyDataset,
-        },
+        clustering::common::{create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, MyDataset},
     },
-    utils::dataset::dataset::LabeledDataset,
+    utils::{
+        dataset::dataset::LabeledDataset,
+        distance::distance::{DistanceWrapper, FicusDistance},
+    },
 };
 
 use super::traces_params::{TracesClusteringParams, TracesRepresentationSource};
@@ -72,7 +77,9 @@ fn create_traces_dataset<TLog: EventLog>(
     trace_repr_source: &TracesRepresentationSource,
 ) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
     match distance {
-        FicusDistance::Cosine | FicusDistance::L1 | FicusDistance::L2 => create_traces_dataset_default(log, class_extractor, trace_repr_source),
+        FicusDistance::Cosine | FicusDistance::L1 | FicusDistance::L2 => {
+            create_traces_dataset_default(log, class_extractor, trace_repr_source)
+        }
         FicusDistance::Levenshtein => create_traces_dataset_levenshtein(log, class_extractor, trace_repr_source),
     }
 }
@@ -82,7 +89,9 @@ fn create_traces_dataset_default<TLog: EventLog>(
     class_extractor: Option<&String>,
     trace_repr_source: &TracesRepresentationSource,
 ) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
-    create_traces_dataset_default_internal(log, class_extractor, |trace| create_trace_representation::<TLog>(trace, trace_repr_source))
+    create_traces_dataset_default_internal(log, class_extractor, |trace| {
+        create_trace_representation::<TLog>(trace, trace_repr_source)
+    })
 }
 
 fn create_trace_representation<TLog: EventLog>(
@@ -136,9 +145,9 @@ fn create_traces_dataset_default_internal<TLog: EventLog>(
             let event = event.borrow();
             let processed_event_name = match regex_hasher.as_ref() {
                 Some(regex_hasher) => regex_hasher.transform(event.name()),
-                None => event.name()
+                None => event.name(),
             };
-            
+
             all_event_classes.insert(processed_event_name.to_owned());
         }
     }
@@ -154,7 +163,7 @@ fn create_traces_dataset_default_internal<TLog: EventLog>(
             let event = event.borrow();
             let processed_event_name = match regex_hasher.as_ref() {
                 Some(regex_hasher) => regex_hasher.transform(event.name()).to_owned(),
-                None => event.name().to_owned()
+                None => event.name().to_owned(),
             };
 
             *events_counts.entry(processed_event_name).or_default() += 1;
@@ -185,7 +194,9 @@ fn create_traces_dataset_levenshtein<TLog: EventLog>(
     class_extractor: Option<&String>,
     trace_repr_source: &TracesRepresentationSource,
 ) -> Option<(MyDataset, Vec<String>, Vec<String>)> {
-    create_traces_dataset_levenshtein_internal(log, class_extractor, |trace| create_trace_representation::<TLog>(trace, trace_repr_source))
+    create_traces_dataset_levenshtein_internal(log, class_extractor, |trace| {
+        create_trace_representation::<TLog>(trace, trace_repr_source)
+    })
 }
 
 fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
@@ -213,7 +224,7 @@ fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
             let event = event.borrow();
             let processed_event_name = match regex_hasher.as_ref() {
                 Some(regex_hasher) => regex_hasher.transform(event.name()),
-                None => event.name()
+                None => event.name(),
             };
 
             if !all_event_classes.contains_key(processed_event_name) {
@@ -228,7 +239,7 @@ fn create_traces_dataset_levenshtein_internal<TLog: EventLog>(
             let event = event.borrow();
             let processed_event_name = match regex_hasher.as_ref() {
                 Some(regex_hasher) => regex_hasher.transform(event.name()),
-                None => event.name()
+                None => event.name(),
             };
 
             raw_dataset.push(*all_event_classes.get(processed_event_name).expect("Should be there") as f64);

@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
-    event_log::core::event_log::EventLog,
-    features::clustering::common::{CommonVisualizationParams, FicusDistance},
+    event_log::core::event_log::EventLog, features::clustering::common::CommonVisualizationParams, utils::distance::distance::FicusDistance,
 };
 
 pub struct TracesClusteringParams<'a, TLog>

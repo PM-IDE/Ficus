@@ -10,11 +10,13 @@ use crate::{
     event_log::core::event_log::EventLog,
     features::{
         analysis::patterns::repeat_sets::ActivityNode,
-        clustering::common::{
-            create_colors_vector, transform_to_ficus_dataset, ClusteredDataset, DistanceWrapper, FicusDistance, MyDataset,
-        },
+        clustering::common::{create_colors_vector, transform_to_ficus_dataset, ClusteredDataset, MyDataset},
     },
-    utils::{colors::ColorsHolder, dataset::dataset::LabeledDataset},
+    utils::{
+        colors::ColorsHolder,
+        dataset::dataset::LabeledDataset,
+        distance::distance::{DistanceWrapper, FicusDistance},
+    },
 };
 
 use super::{activities_common::create_dataset, activities_params::ActivitiesClusteringParams, merging::merge_activities};

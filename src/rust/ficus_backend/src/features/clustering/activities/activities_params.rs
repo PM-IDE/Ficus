@@ -1,9 +1,8 @@
 use std::str::FromStr;
 
 use crate::{
-    event_log::core::event_log::EventLog,
-    features::clustering::common::{CommonVisualizationParams, FicusDistance},
-    pipelines::aliases::TracesActivities,
+    event_log::core::event_log::EventLog, features::clustering::common::CommonVisualizationParams, pipelines::aliases::TracesActivities,
+    utils::distance::distance::FicusDistance,
 };
 
 #[derive(PartialEq, Eq, Clone, Copy)]
