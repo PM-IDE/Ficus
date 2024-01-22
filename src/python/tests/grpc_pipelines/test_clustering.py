@@ -14,7 +14,7 @@ from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from .test_grpc_pipelines import _execute_test_with_names_log, ResultAssertanceKind
 
 
-def test_simple_dataset_1():
+def test_traces_dataset_1():
     execute_test_with_traces_dataset(
         [
             ['A', 'B', 'C'],
@@ -34,7 +34,7 @@ def test_simple_dataset_1():
     )
 
 
-def test_simple_dataset_2():
+def test_traces_dataset_2():
     execute_test_with_traces_dataset(
         [
             ['A', 'C'],
@@ -58,7 +58,7 @@ def test_simple_dataset_2():
     )
 
 
-def test_simple_dataset_3():
+def test_traces_dataset_3():
     execute_test_with_traces_dataset(
         [
             ['A', 'B', 'B', 'D'],
@@ -78,7 +78,7 @@ def test_simple_dataset_3():
     )
 
 
-def test_simple_dataset_4():
+def test_traces_dataset_4():
     execute_test_with_traces_dataset(
         [
             ['A', 'B', 'C'],
@@ -99,7 +99,7 @@ def test_simple_dataset_4():
     )
 
 
-def test_simple_dataset_5():
+def test_traces_dataset_5():
     execute_test_with_traces_dataset(
         [
             ['A', 'C'],
@@ -124,7 +124,7 @@ def test_simple_dataset_5():
     )
 
 
-def test_simple_dataset_6():
+def test_traces_dataset_6():
     execute_test_with_traces_dataset(
         [
             ['A', 'B', 'B', 'D'],
@@ -142,6 +142,56 @@ def test_simple_dataset_6():
             [1.0, 2.0, 4.0, 4.0, 4.0, 4.0, 2.0, 3.0, 0.0]
         ],
         [0, 0, 0]
+    )
+
+
+def test_traces_dataset_7():
+    execute_test_with_traces_dataset(
+        [
+            ['A.X', 'A.B', 'B.C', 'C.C', 'x', 'A.Q', 'A.W', 'B.E', 'C.D'],
+            ['A.D', 'D.D', 'C.S', 'C', 'y', 'A', 'D.D', 'C.f', 'C.A'],
+
+            ['X.D', 'X.Q', 'Y.E', 'Z.R', 'a', 'X.P', 'X.E', 'Y.V', 'Z.D'],
+            ['X.A', 'Q.D', 'Z.E', 'Z.R', 'b', 'X.F', 'Q.G', 'Z.W', 'Z.A'],
+        ],
+        ClusterizeLogTracesDbscan(after_clusterization_pipeline=Pipeline2(),
+                                  min_events_count_in_cluster=2,
+                                  tolerance=0.7,
+                                  class_extractor=r'^(.*?)(?=\.)',
+                                  distance=Distance.Cosine,
+                                  show_visualization=False),
+        [
+            [1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+            [0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 1.0, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+        ],
+        [1, 1, 2, 2]
+    )
+
+
+def test_traces_dataset_8():
+    execute_test_with_traces_dataset(
+        [
+            ['A.X', 'A.B', 'B.C', 'C.C', 'x', 'A.Q', 'A.W', 'B.E', 'C.D'],
+            ['A.D', 'D.D', 'C.S', 'C', 'y', 'A', 'D.D', 'C.f', 'C.A'],
+
+            ['X.D', 'X.Q', 'Y.E', 'Z.R', 'a', 'X.P', 'X.E', 'Y.V', 'Z.D'],
+            ['X.A', 'Q.D', 'Z.E', 'Z.R', 'b', 'X.F', 'Q.G', 'Z.W', 'Z.A'],
+        ],
+        ClusterizeLogTracesDbscan(after_clusterization_pipeline=Pipeline2(),
+                                  min_events_count_in_cluster=2,
+                                  tolerance=5,
+                                  class_extractor=r'^(.*?)(?=\.)',
+                                  distance=Distance.Levenshtein,
+                                  show_visualization=False),
+        [
+            [1.0, 1.0, 2.0, 3.0, 4.0, 1.0, 1.0, 2.0, 3.0, 0.0],
+            [1.0, 5.0, 3.0, 3.0, 6.0, 1.0, 5.0, 3.0, 3.0, 0.0],
+            [7.0, 7.0, 8.0, 9.0, 10.0, 7.0, 7.0, 8.0, 9.0, 0.0],
+            [7.0, 11.0, 9.0, 9.0, 12.0, 7.0, 11.0, 9.0, 9.0, 0.0]
+        ],
+        [1, 1, 2, 2]
     )
 
 
@@ -281,6 +331,7 @@ class TestDatasetPipelinePart(PipelinePart2WithCallback):
     def execute_callback(self, values: dict[str, GrpcContextValue], labeled_log_traces_dataset=None):
         dataset = values[self.labeled_dataset_key].labeled_dataset
         df = from_grpc_labeled_dataset(dataset)
+
         assert df.drop([const_cluster_labels], axis=1).values.tolist() == self.expected_dataset
         assert df[const_cluster_labels].to_numpy().tolist() == self.expected_clusters
 
@@ -288,7 +339,7 @@ class TestDatasetPipelinePart(PipelinePart2WithCallback):
 def execute_test_with_activities_dataset(names_log,
                                          clusterization_pipeline,
                                          expected_raw_dataset,
-                                         exepcted_clusters,
+                                         expected_clusters,
                                          assertance_kind=ResultAssertanceKind.Success):
     _execute_test_with_names_log(
         names_log,
@@ -298,7 +349,7 @@ def execute_test_with_activities_dataset(names_log,
                                                 patterns_kind=PatternsKind.MaximalRepeats),
             TestDatasetPipelinePart(clusterization_pipeline,
                                     expected_raw_dataset,
-                                    exepcted_clusters,
+                                    expected_clusters,
                                     const_labeled_traces_activities_dataset)
         ),
         assertance_kind
