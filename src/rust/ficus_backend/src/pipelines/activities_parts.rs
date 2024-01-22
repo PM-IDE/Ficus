@@ -511,8 +511,12 @@ impl PipelineParts {
     ) -> Result<CommonVisualizationParams<'a, XesEventLogImpl>, PipelinePartExecutionError> {
         let log = Self::get_user_data(context, keys.event_log())?;
         let colors_holder = Self::get_user_data_mut(context, keys.colors_holder())?;
+        let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
+            Ok(extractor) => Some(extractor.to_owned()),
+            Err(_) => None,
+        };
 
-        Ok(CommonVisualizationParams { log, colors_holder })
+        Ok(CommonVisualizationParams { log, colors_holder, class_extractor })
     }
 
     fn create_activities_visualization_params<'a>(
@@ -524,16 +528,11 @@ impl PipelineParts {
         let traces_activities = Self::get_user_data_mut(context, keys.trace_activities())?;
         let activity_level = *Self::get_user_data(config, keys.activity_level())? as usize;
         let activities_repr_source = *Self::get_user_data(config, keys.activities_repr_source())?;
-        let class_extractor = match Self::get_user_data(config, keys.event_class_regex()) {
-            Ok(extractor) => Some(extractor.to_owned()),
-            Err(_) => None,
-        };
 
         Ok(ActivitiesVisualizationParams {
             common_vis_params,
             traces_activities,
             activity_level,
-            class_extractor,
             activities_repr_source,
         })
     }

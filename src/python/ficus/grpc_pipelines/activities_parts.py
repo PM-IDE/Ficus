@@ -531,7 +531,8 @@ class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2):
                  n_components: NComponents = NComponents.Three,
                  visualization_method: DatasetVisualizationMethod = DatasetVisualizationMethod.Pca,
                  legend_cols: int = 2,
-                 traces_repr_source: TracesRepresentationSource = TracesRepresentationSource.Events):
+                 traces_repr_source: TracesRepresentationSource = TracesRepresentationSource.Events,
+                 class_extractor: Optional[str] = None):
         super().__init__(show_visualization, fig_size, view_params, font_size,
                          save_path, n_components, visualization_method, legend_cols,
                          const_labeled_log_traces_dataset)
@@ -541,6 +542,7 @@ class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2):
         self.tolerance = tolerance
         self.distance = distance
         self.traces_repr_source = traces_repr_source
+        self.class_extractor = class_extractor
 
     def to_grpc_part(self) -> GrpcPipelinePartBase:
         config = GrpcPipelinePartConfiguration()
@@ -558,6 +560,9 @@ class ClusterizeLogTracesDbscan(ClusterizationPartWithVisualization2):
 
         append_uint32_value(config, const_min_events_in_cluster_count, self.min_events_count_in_cluster)
         append_pipeline_value(config, const_pipeline, self.after_clusterization_pipeline)
+
+        if self.class_extractor is not None:
+            append_string_value(config, const_event_class_regex, self.class_extractor)
 
         part = _create_complex_get_context_part(self.uuid,
                                                 [const_labeled_log_traces_dataset],

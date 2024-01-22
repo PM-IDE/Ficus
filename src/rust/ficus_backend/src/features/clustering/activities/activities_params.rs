@@ -33,7 +33,6 @@ where
     pub common_vis_params: CommonVisualizationParams<'a, TLog>,
     pub traces_activities: &'a mut TracesActivities,
     pub activity_level: usize,
-    pub class_extractor: Option<String>,
     pub activities_repr_source: ActivityRepresentationSource,
 }
 

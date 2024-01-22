@@ -43,7 +43,7 @@ pub(super) fn create_dataset_from_activities_traces_underlying_events<TLog: Even
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
-        params.class_extractor.clone(),
+        params.common_vis_params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
             create_activities_repr_from_subtraces(
                 traces_activities,
@@ -70,7 +70,7 @@ pub(super) fn create_dataset_from_activities_traces<TLog: EventLog>(
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
-        params.class_extractor.clone(),
+        params.common_vis_params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
             create_activities_repr_from_subtraces(
                 traces_activities,
@@ -201,7 +201,7 @@ pub(super) fn create_dataset_from_activities_classes<TLog: EventLog>(
 ) -> Option<(MyDataset, ActivityNodeWithCoords, Vec<String>)> {
     create_dataset_internal(
         params.traces_activities,
-        params.class_extractor.clone(),
+        params.common_vis_params.class_extractor.clone(),
         |traces_activities, regex_hasher, all_event_classes| {
             let mut processed = HashMap::new();
             for trace_activities in traces_activities.iter() {

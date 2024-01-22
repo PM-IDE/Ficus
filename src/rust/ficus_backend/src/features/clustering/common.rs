@@ -91,6 +91,7 @@ where
 {
     pub log: &'a TLog,
     pub colors_holder: &'a mut ColorsHolder,
+    pub class_extractor: Option<String>,
 }
 
 pub fn transform_to_ficus_dataset(dataset: &MyDataset, processed: Vec<String>, classes_names: Vec<String>) -> FicusDataset {
