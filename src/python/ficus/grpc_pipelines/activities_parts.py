@@ -93,6 +93,7 @@ class DiscoverActivitiesForSeveralLevels2(PipelinePart2):
         append_patterns_discovery_strategy(config, const_patterns_discovery_strategy, self.strategy)
         append_uint32_value(config, const_min_events_in_activity, self.min_events_in_activity_count)
         append_activity_filter_kind(config, const_activity_filter_kind, self.activity_filter_kind)
+        append_uint32_value(config, const_tandem_array_length, self.max_array_length)
 
         default_part = _create_default_pipeline_part(const_discover_activities_for_several_levels, config)
         return GrpcPipelinePartBase(defaultPart=default_part)
