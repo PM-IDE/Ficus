@@ -101,7 +101,7 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
     let bxes_log = BxesEventLog {
         metadata,
         variants,
-        version: 0,
+        version: 1,
     };
 
     write_bxes(path, &bxes_log)
