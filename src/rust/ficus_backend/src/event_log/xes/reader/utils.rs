@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 
 use crate::event_log::{core::event::event::EventPayloadValue, xes::constants::*};
 
-use quick_xml::events::{attributes::Attribute, BytesStart};
+use quick_xml::{events::{attributes::Attribute, BytesStart}, escape::unescape};
 
 pub struct KeyValuePair<TKey, TValue> {
     pub key: Option<TKey>,
@@ -23,8 +23,9 @@ pub fn read_payload_like_tag(tag: &BytesStart) -> Option<PayloadTagDescriptor> {
         return None;
     }
 
-    let key = kv.key.as_ref().unwrap().to_owned();
-    let value = kv.value.as_ref().unwrap().to_owned();
+    let key = unescape(kv.key.as_ref().unwrap()).ok().unwrap().to_string();
+    let value = unescape(kv.value.as_ref().unwrap()).ok().unwrap().to_string();
+
     let payload_type = match String::from_utf8(tag.name().0.to_vec()) {
         Ok(string) => string,
         Err(_) => return None,
