@@ -37,7 +37,7 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
                     BxesEvent {
                         name: Rc::new(Box::new(BxesValue::String(event.name_pointer().clone()))),
                         lifecycle: match event.lifecycle() {
-                            None => bxes::models::Lifecycle::Braf(bxes::models::BrafLifecycle::Unspecified),
+                            None => bxes::models::Lifecycle::Standard(bxes::models::StandardLifecycle::Unspecified),
                             Some(lifecycle) => convert_xes_to_bxes_lifecycle(lifecycle),
                         },
                         timestamp: event.timestamp().timestamp_nanos(),
