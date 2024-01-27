@@ -4,7 +4,10 @@ use chrono::{DateTime, Utc};
 
 use crate::event_log::{core::event::event::EventPayloadValue, xes::constants::*};
 
-use quick_xml::{events::{attributes::Attribute, BytesStart}, escape::unescape};
+use quick_xml::{
+    escape::unescape,
+    events::{attributes::Attribute, BytesStart},
+};
 
 pub struct KeyValuePair<TKey, TValue> {
     pub key: Option<TKey>,

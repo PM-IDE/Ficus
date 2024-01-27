@@ -1,7 +1,10 @@
-use crate::event_log::xes::{
-    constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
-    shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty},
-    xes_event_log::XesEventLogImpl,
+use crate::event_log::{
+    core::event::event::EventPayloadValue,
+    xes::{
+        constants::{CLASSIFIER_TAG_NAME, EXTENSION_TAG_NAME},
+        shared::{XesClassifier, XesEventLogExtension, XesGlobal, XesProperty},
+        xes_event_log::XesEventLogImpl,
+    },
 };
 
 use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
@@ -12,7 +15,7 @@ use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
 pub struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
-    seen_globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,
+    seen_globals: Rc<RefCell<HashMap<String, HashMap<String, EventPayloadValue>>>>,
 }
 
 pub enum XesEventLogItem {
@@ -144,23 +147,23 @@ impl FromFileXesEventLogReader {
         }
     }
 
-    fn try_read_global(reader: &mut Reader<BufReader<File>>, storage: &mut Vec<u8>) -> Option<HashMap<String, String>> {
-        let mut map: Option<HashMap<String, String>> = None;
+    fn try_read_global(reader: &mut Reader<BufReader<File>>, storage: &mut Vec<u8>) -> Option<HashMap<String, EventPayloadValue>> {
+        let mut map: Option<HashMap<String, EventPayloadValue>> = None;
 
         loop {
             match reader.read_event_into(storage) {
                 Err(_) => return None,
                 Ok(quick_xml::events::Event::Empty(tag)) => {
-                    let kv = utils::extract_key_value(&tag);
-                    if kv.key.is_none() || kv.value.is_none() {
-                        return None;
-                    }
+                    if let Some(descriptor) = utils::read_payload_like_tag(&tag) {
+                        if let None = map {
+                            map = Some(HashMap::new())
+                        }
 
-                    if let None = map {
-                        map = Some(HashMap::new())
+                        let payload_type = descriptor.payload_type.as_str().as_bytes();
+                        if let Some(payload_value) = utils::extract_payload_value(payload_type, &descriptor.value) {
+                            map.as_mut().unwrap().insert(descriptor.key, payload_value);
+                        }
                     }
-
-                    map.as_mut().unwrap().insert(kv.key.unwrap(), kv.value.unwrap());
                 }
                 Ok(quick_xml::events::Event::End(tag)) => match tag.name().0 {
                     GLOBAL_TAG_NAME => break,

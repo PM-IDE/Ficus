@@ -12,7 +12,7 @@ pub struct XesEventLogExtension {
 #[derive(Debug, Clone)]
 pub struct XesGlobal {
     pub scope: String,
-    pub default_values: HashMap<String, String>,
+    pub default_values: HashMap<String, EventPayloadValue>,
 }
 
 #[derive(Debug, Clone)]

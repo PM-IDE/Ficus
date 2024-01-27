@@ -56,9 +56,7 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
 
             for (key, value) in defaults {
                 attrs.clear();
-                attrs.push((KEY_ATTR_NAME_STR, key.as_str()));
-                attrs.push((VALUE_ATTR_NAME_STR, value.as_str()));
-                write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
+                write_payload_tag(&writer, key, value);
             }
         }
 

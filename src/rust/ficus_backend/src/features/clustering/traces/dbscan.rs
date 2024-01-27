@@ -17,7 +17,10 @@ use crate::{
     },
     features::{
         analysis::patterns::activity_instances::{create_vector_of_immediate_underlying_events, create_vector_of_underlying_events},
-        clustering::{common::{create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, MyDataset}, error::ClusteringError},
+        clustering::{
+            common::{create_colors_vector, scale_raw_dataset_min_max, transform_to_ficus_dataset, MyDataset},
+            error::ClusteringError,
+        },
     },
     utils::{
         dataset::dataset::LabeledDataset,

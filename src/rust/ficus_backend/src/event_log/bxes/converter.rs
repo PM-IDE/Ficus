@@ -87,7 +87,7 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
                         .iter()
                         .map(|kv| {
                             let key = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.0.to_owned())))));
-                            let value = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.1.to_owned())))));
+                            let value = Rc::new(Box::new(payload_value_to_bxes_value(kv.1)));
 
                             (key, value)
                         })

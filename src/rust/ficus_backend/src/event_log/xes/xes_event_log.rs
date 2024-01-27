@@ -15,14 +15,14 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub struct XesEventLogImpl {
     traces_holder: TracesHolder<XesTraceImpl>,
-    globals: HashMap<String, HashMap<String, String>>,
+    globals: HashMap<String, HashMap<String, EventPayloadValue>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,
     properties: HashMap<String, EventPayloadValue>,
 }
 
 impl XesEventLogImpl {
-    pub fn globals_map(&self) -> &HashMap<String, HashMap<String, String>> {
+    pub fn globals_map(&self) -> &HashMap<String, HashMap<String, EventPayloadValue>> {
         &self.globals
     }
 
@@ -48,7 +48,7 @@ impl XesEventLogImpl {
         properties
     }
 
-    pub fn ordered_globals(&self) -> Vec<(&String, Vec<(&String, &String)>)> {
+    pub fn ordered_globals(&self) -> Vec<(&String, Vec<(&String, &EventPayloadValue)>)> {
         let mut globals = Vec::new();
         for (key, value) in self.globals_map() {
             let mut defaults = Vec::new();

@@ -17,7 +17,7 @@ use super::utils;
 pub struct TraceXesEventLogIterator {
     buffer: Vec<u8>,
     reader: Rc<RefCell<Reader<BufReader<File>>>>,
-    globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,
+    globals: Rc<RefCell<HashMap<String, HashMap<String, EventPayloadValue>>>>,
 }
 
 impl Iterator for TraceXesEventLogIterator {
@@ -48,7 +48,7 @@ impl Iterator for TraceXesEventLogIterator {
 impl TraceXesEventLogIterator {
     pub(crate) fn new(
         reader: Rc<RefCell<Reader<BufReader<File>>>>,
-        seen_globals: Rc<RefCell<HashMap<String, HashMap<String, String>>>>,
+        seen_globals: Rc<RefCell<HashMap<String, HashMap<String, EventPayloadValue>>>>,
     ) -> TraceXesEventLogIterator {
         TraceXesEventLogIterator {
             reader,
@@ -109,7 +109,7 @@ impl TraceXesEventLogIterator {
         }
 
         for (key, value) in globals.get(EVENT_TAG_NAME_STR).unwrap() {
-            Self::set_parsed_value(STRING_TAG_NAME, key, value, name, date, lifecycle, payload);
+            Self::update_event_data(key, value.clone(), date, name, lifecycle, payload);
         }
     }
 
