@@ -95,7 +95,12 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
                 })
                 .collect(),
         ),
-        properties: Some(log.ordered_properties().iter().map(|kv| kv_pair_to_bxes_pair(kv)).collect()),
+        properties: Some(
+            log.properties_map()
+                .iter()
+                .map(|kv| kv_pair_to_bxes_pair(&(&kv.name, &kv.value)))
+                .collect(),
+        ),
     };
 
     let bxes_log = BxesEventLog {

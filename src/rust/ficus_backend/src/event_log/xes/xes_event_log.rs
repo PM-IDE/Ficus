@@ -1,6 +1,6 @@
 use super::{
     reader::file_xes_log_reader::XesEventLogItem,
-    shared::{XesClassifier, XesEventLogExtension},
+    shared::{XesClassifier, XesEventLogExtension, XesProperty},
     xes_event::XesEventImpl,
     xes_trace::XesTraceImpl,
 };
@@ -18,7 +18,7 @@ pub struct XesEventLogImpl {
     globals: HashMap<String, HashMap<String, EventPayloadValue>>,
     extensions: Vec<XesEventLogExtension>,
     classifiers: Vec<XesClassifier>,
-    properties: HashMap<String, EventPayloadValue>,
+    properties: Vec<XesProperty>,
 }
 
 impl XesEventLogImpl {
@@ -34,14 +34,14 @@ impl XesEventLogImpl {
         &self.classifiers
     }
 
-    pub fn properties_map(&self) -> &HashMap<String, EventPayloadValue> {
+    pub fn properties_map(&self) -> &Vec<XesProperty> {
         &self.properties
     }
 
     pub fn ordered_properties(&self) -> Vec<(&String, &EventPayloadValue)> {
         let mut properties = Vec::new();
-        for (key, value) in self.properties_map() {
-            properties.push((key, value));
+        for property in self.properties_map() {
+            properties.push((&property.name, &property.value));
         }
 
         vec_utils::sort_by_first(&mut properties);
@@ -74,7 +74,7 @@ impl XesEventLogImpl {
         let mut globals = HashMap::new();
         let mut traces = Vec::new();
         let mut classifiers = Vec::new();
-        let mut properties = HashMap::new();
+        let mut properties = Vec::new();
 
         for item in event_log_reader {
             match item {
@@ -85,7 +85,7 @@ impl XesEventLogImpl {
                 XesEventLogItem::Global(global) => _ = globals.insert(global.scope, global.default_values),
                 XesEventLogItem::Extension(extension) => extensions.push(extension),
                 XesEventLogItem::Classifier(classifier) => classifiers.push(classifier),
-                XesEventLogItem::Property(property) => _ = properties.insert(property.name, property.value),
+                XesEventLogItem::Property(property) => _ = properties.push(property),
             }
         }
 
@@ -124,7 +124,7 @@ impl EventLog for XesEventLogImpl {
             globals: HashMap::new(),
             extensions: Vec::new(),
             classifiers: Vec::new(),
-            properties: HashMap::new(),
+            properties: Vec::new(),
         }
     }
 

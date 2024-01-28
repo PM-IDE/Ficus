@@ -27,7 +27,7 @@ impl XesEventImpl {
         Self {
             event_base: EventBase::new(name, timestamp),
             lifecycle,
-            payload: payload,
+            payload,
         }
     }
 }

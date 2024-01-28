@@ -10,7 +10,13 @@ use crate::event_log::{
 use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
 use crate::event_log::xes::constants::*;
 use quick_xml::{events::BytesStart, Reader};
-use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fs::File,
+    io::{BufReader, Read},
+    rc::Rc,
+};
 
 pub struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,
@@ -69,7 +75,10 @@ impl Iterator for FromFileXesEventLogReader {
                         Some(item) => return Some(item),
                         None => continue,
                     },
-                    _ => continue,
+                    _ => match Self::try_read_property(&tag) {
+                        Some(item) => return Some(item),
+                        None => continue,
+                    },
                 },
                 Ok(quick_xml::events::Event::Empty(tag)) => match Self::try_read_tag(&tag) {
                     Some(item) => return Some(item),
@@ -132,6 +141,10 @@ impl FromFileXesEventLogReader {
             return result;
         }
 
+        Self::try_read_property(tag)
+    }
+
+    fn try_read_property(tag: &BytesStart) -> Option<XesEventLogItem> {
         match utils::read_payload_like_tag(tag) {
             Some(descriptor) => {
                 let payload_type = descriptor.payload_type.as_str().as_bytes();
