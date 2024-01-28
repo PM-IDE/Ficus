@@ -63,6 +63,16 @@ impl FromStr for XesStandardLifecycle {
             "start" => Ok(XesStandardLifecycle::Start),
             "complete" => Ok(XesStandardLifecycle::Complete),
             "unknown" => Ok(XesStandardLifecycle::Unknown),
+            "unspecified" => Ok(XesStandardLifecycle::Unspecified),
+            "assign" => Ok(XesStandardLifecycle::Assign),
+            "ate_abort" => Ok(XesStandardLifecycle::AteAbort),
+            "autoskip" => Ok(XesStandardLifecycle::Autoskip),
+            "manualskip" => Ok(XesStandardLifecycle::ManualSkip),
+            "pi_abort" => Ok(XesStandardLifecycle::PiAbort),
+            "reassign" => Ok(XesStandardLifecycle::ReAssign),
+            "suspend" => Ok(XesStandardLifecycle::Suspend),
+            "resume" => Ok(XesStandardLifecycle::Resume),
+            "withdraw" => Ok(XesStandardLifecycle::Withdraw),
             _ => Err(ParseXesStandardLifecycleError),
         }
     }
@@ -117,6 +127,36 @@ impl ToString for XesBrafLifecycle {
             XesBrafLifecycle::OpenRunning => String::from_str("Open.Running").ok().unwrap(),
             XesBrafLifecycle::OpenRunningInProgress => String::from_str("Open.Running.InProgress").ok().unwrap(),
             XesBrafLifecycle::OpenRunningSuspended => String::from_str("Open.Running.Suspended").ok().unwrap(),
+        }
+    }
+}
+
+impl FromStr for XesBrafLifecycle {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Unspecified" => Ok(XesBrafLifecycle::Unspecified), 
+            "Closed" => Ok(XesBrafLifecycle::Closed),
+            "Closed.Cancelled" => Ok(XesBrafLifecycle::ClosedCancelled),
+            "Closed.Cancelled.Aborted" => Ok(XesBrafLifecycle::ClosedCancelledAborted),
+            "Closed.Cancelled.Error" => Ok(XesBrafLifecycle::ClosedCancelledError),
+            "Closed.Cancelled.Exited" => Ok(XesBrafLifecycle::ClosedCancelledExited),
+            "Closed.Cancelled.Obsolete" => Ok(XesBrafLifecycle::ClosedCancelledObsolete),
+            "Closed.Cancelled.Terminated" => Ok(XesBrafLifecycle::ClosedCancelledTerminated),
+            "Completed" => Ok(XesBrafLifecycle::Completed),
+            "Completed.Failed" => Ok(XesBrafLifecycle::CompletedFailed),
+            "Completed.Success" => Ok(XesBrafLifecycle::CompletedSuccess),
+            "Open" => Ok(XesBrafLifecycle::Open),
+            "Open.NotRunning" => Ok(XesBrafLifecycle::OpenNotRunning),
+            "Open.NotRunning.Assigned" => Ok(XesBrafLifecycle::OpenNotRunningAssigned),
+            "Open.NotRunning.Reserved" => Ok(XesBrafLifecycle::OpenNotRunningReserved),
+            "Open.NotRunning.Suspended.Assigned" => Ok(XesBrafLifecycle::OpenNotRunningSuspendedAssigned),
+            "Open.NotRunning.Suspended.Reserved" => Ok(XesBrafLifecycle::OpenNotRunningSuspendedReserved),
+            "Open.Running" => Ok(XesBrafLifecycle::OpenRunning),
+            "Open.Running.InProgress" => Ok(XesBrafLifecycle::OpenRunningInProgress),
+            "Open.Running.Suspended" => Ok(XesBrafLifecycle::OpenRunningSuspended),
+            _ => Err(())
         }
     }
 }

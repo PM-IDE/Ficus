@@ -1,13 +1,14 @@
 use crate::event_log::{
     core::event::{
         event::EventPayloadValue,
-        lifecycle::{Lifecycle, XesStandardLifecycle},
+        lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
     },
     xes::xes_event::XesEventImpl,
 };
 
 use crate::event_log::xes::constants::*;
 
+use bxes::models::BrafLifecycle;
 use chrono::{DateTime, Utc};
 use quick_xml::Reader;
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
@@ -152,9 +153,10 @@ impl TraceXesEventLogIterator {
             }
             LIFECYCLE_TRANSITION_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
-                    match XesStandardLifecycle::from_str(parsed_string.as_str()) {
-                        Ok(lifecycle_value) => *lifecycle = Some(Lifecycle::XesStandardLifecycle(lifecycle_value)),
-                        _ => {}
+                    if let Ok(standard_lifecycle) = XesStandardLifecycle::from_str(parsed_string.as_str()) {
+                        *lifecycle = Some(Lifecycle::XesStandardLifecycle(standard_lifecycle));return;
+                    } else if let Ok(braf_lifecycle) = XesBrafLifecycle::from_str(parsed_string.as_str()) {
+                        *lifecycle = Some(Lifecycle::BrafLifecycle(braf_lifecycle));
                     }
                 }
             }
