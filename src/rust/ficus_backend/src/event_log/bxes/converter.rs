@@ -18,7 +18,10 @@ use crate::event_log::{
         event_log::EventLog,
         trace::trace::Trace,
     },
-    xes::{constants::EVENT_TAG_NAME_STR, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+    xes::{
+        constants::EVENT_TAG_NAME_STR, shared::XesEventLogExtension, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl,
+        xes_trace::XesTraceImpl,
+    },
 };
 
 pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), BxesWriteError> {
@@ -98,38 +101,41 @@ fn create_bxes_classifiers(log: &XesEventLogImpl) -> Vec<BxesClassifier> {
 }
 
 fn create_bxes_extensions(log: &XesEventLogImpl) -> Vec<BxesExtension> {
-    log.extensions()
-        .iter()
-        .map(|e| BxesExtension {
-            name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.name.to_owned()))))),
-            prefix: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.prefix.to_owned()))))),
-            uri: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.uri.to_owned()))))),
-        })
-        .collect()
+    log.extensions().iter().map(|e| convert_to_bxes_extension(e)).collect()
+}
+
+fn convert_to_bxes_extension(e: &XesEventLogExtension) -> BxesExtension {
+    BxesExtension {
+        name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.name.to_owned()))))),
+        prefix: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.prefix.to_owned()))))),
+        uri: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.uri.to_owned()))))),
+    }
 }
 
 fn create_bxes_globals(log: &XesEventLogImpl) -> Vec<BxesGlobal> {
     log.ordered_globals()
         .iter()
         .map(|g| BxesGlobal {
-            entity_kind: match g.0.as_str() {
-                "event" => BxesGlobalKind::Event,
-                "trace" => BxesGlobalKind::Trace,
-                "log" => BxesGlobalKind::Log,
-                _ => panic!(),
-            },
-            globals: g
-                .1
-                .iter()
-                .map(|kv| {
-                    let key = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.0.to_owned())))));
-                    let value = Rc::new(Box::new(payload_value_to_bxes_value(kv.1)));
-
-                    (key, value)
-                })
-                .collect(),
+            entity_kind: parse_entity_kind(g.0.as_str()),
+            globals: g.1.iter().map(|kv| convert_to_bxes_global_attribute(kv)).collect(),
         })
         .collect()
+}
+
+fn parse_entity_kind(string: &str) -> BxesGlobalKind {
+    match string {
+        "event" => BxesGlobalKind::Event,
+        "trace" => BxesGlobalKind::Trace,
+        "log" => BxesGlobalKind::Log,
+        _ => panic!(),
+    }
+}
+
+fn convert_to_bxes_global_attribute(kv: &(&String, &EventPayloadValue)) -> (Rc<Box<BxesValue>>, Rc<Box<BxesValue>>) {
+    let key = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.0.to_owned())))));
+    let value = Rc::new(Box::new(payload_value_to_bxes_value(kv.1)));
+
+    (key, value)
 }
 
 fn create_bxes_properties(log: &XesEventLogImpl) -> Vec<(Rc<Box<BxesValue>>, Rc<Box<BxesValue>>)> {
@@ -175,25 +181,7 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                         panic!("Key is not a string");
                     };
 
-                    let paylaod_value = match value.as_ref().as_ref() {
-                        BxesValue::Int32(value) => EventPayloadValue::Int32(*value),
-                        BxesValue::Int64(value) => EventPayloadValue::Int64(*value),
-                        BxesValue::Uint32(value) => EventPayloadValue::Uint32(*value),
-                        BxesValue::Uint64(value) => EventPayloadValue::Uint64(*value),
-                        BxesValue::Float32(value) => EventPayloadValue::Float32(*value),
-                        BxesValue::Float64(value) => EventPayloadValue::Float64(*value),
-                        BxesValue::String(string) => EventPayloadValue::String(string.clone()),
-                        BxesValue::Bool(bool) => EventPayloadValue::Boolean(*bool),
-                        BxesValue::Timestamp(stamp) => EventPayloadValue::Date(Utc.timestamp_nanos(*stamp)),
-                        BxesValue::BrafLifecycle(_) => todo!(),
-                        BxesValue::StandardLifecycle(_) => todo!(),
-                        BxesValue::Artifact(_) => todo!(),
-                        BxesValue::Drivers(_) => todo!(),
-                        BxesValue::Guid(value) => EventPayloadValue::Guid(*value),
-                        BxesValue::SoftwareEventType(_) => todo!(),
-                    };
-
-                    payload.insert(key, paylaod_value);
+                    payload.insert(key, bxes_value_to_payload_value(&value));
                 }
 
                 Some(payload)
@@ -209,6 +197,26 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
     }
 
     Some(xes_log)
+}
+
+fn bxes_value_to_payload_value(value: &BxesValue) -> EventPayloadValue {
+    match value {
+        BxesValue::Int32(value) => EventPayloadValue::Int32(*value),
+        BxesValue::Int64(value) => EventPayloadValue::Int64(*value),
+        BxesValue::Uint32(value) => EventPayloadValue::Uint32(*value),
+        BxesValue::Uint64(value) => EventPayloadValue::Uint64(*value),
+        BxesValue::Float32(value) => EventPayloadValue::Float32(*value),
+        BxesValue::Float64(value) => EventPayloadValue::Float64(*value),
+        BxesValue::String(string) => EventPayloadValue::String(string.clone()),
+        BxesValue::Bool(bool) => EventPayloadValue::Boolean(*bool),
+        BxesValue::Timestamp(stamp) => EventPayloadValue::Date(Utc.timestamp_nanos(*stamp)),
+        BxesValue::BrafLifecycle(_) => todo!(),
+        BxesValue::StandardLifecycle(_) => todo!(),
+        BxesValue::Artifact(_) => todo!(),
+        BxesValue::Drivers(_) => todo!(),
+        BxesValue::Guid(value) => EventPayloadValue::Guid(*value),
+        BxesValue::SoftwareEventType(_) => todo!(),
+    }
 }
 
 fn payload_value_to_bxes_value(value: &EventPayloadValue) -> BxesValue {
