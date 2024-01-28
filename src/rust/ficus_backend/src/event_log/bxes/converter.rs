@@ -18,7 +18,7 @@ use crate::event_log::{
         event_log::EventLog,
         trace::trace::Trace,
     },
-    xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+    xes::{constants::EVENT_TAG_NAME_STR, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
 };
 
 pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), BxesWriteError> {
@@ -41,7 +41,17 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
                             Some(lifecycle) => convert_xes_to_bxes_lifecycle(lifecycle),
                         },
                         timestamp: event.timestamp().timestamp_nanos(),
-                        attributes: Some(event.ordered_payload().iter().map(|kv| kv_pair_to_bxes_pair(kv)).collect()),
+                        attributes: Some(event.ordered_payload().iter().filter(|kv| {
+                            if let Some(event_globals) = log.globals_map().get(EVENT_TAG_NAME_STR) {
+                                if let Some(default_value) = event_globals.get(kv.0) {
+                                    default_value != kv.1
+                                } else {
+                                    true
+                                }
+                            } else {
+                                true
+                            }
+                        }).map(|kv| kv_pair_to_bxes_pair(kv)).collect()),
                     }
                 })
                 .collect(),
