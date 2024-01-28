@@ -136,7 +136,7 @@ impl FromStr for XesBrafLifecycle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Unspecified" => Ok(XesBrafLifecycle::Unspecified), 
+            "Unspecified" => Ok(XesBrafLifecycle::Unspecified),
             "Closed" => Ok(XesBrafLifecycle::Closed),
             "Closed.Cancelled" => Ok(XesBrafLifecycle::ClosedCancelled),
             "Closed.Cancelled.Aborted" => Ok(XesBrafLifecycle::ClosedCancelledAborted),
@@ -156,7 +156,7 @@ impl FromStr for XesBrafLifecycle {
             "Open.Running" => Ok(XesBrafLifecycle::OpenRunning),
             "Open.Running.InProgress" => Ok(XesBrafLifecycle::OpenRunningInProgress),
             "Open.Running.Suspended" => Ok(XesBrafLifecycle::OpenRunningSuspended),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }

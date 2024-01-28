@@ -22,8 +22,22 @@ use crate::event_log::{
 };
 
 pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), BxesWriteError> {
-    let variants = log
-        .traces()
+    let bxes_log = BxesEventLog {
+        metadata: BxesEventLogMetadata {
+            classifiers: Some(create_bxes_classifiers(log)),
+            extensions: Some(create_bxes_extensions(log)),
+            globals: Some(create_bxes_globals(log)),
+            properties: Some(create_bxes_properties(log)),
+        },
+        variants: create_bxes_traces(log),
+        version: 1,
+    };
+
+    write_bxes(path, &bxes_log)
+}
+
+fn create_bxes_traces(log: &XesEventLogImpl) -> Vec<BxesTraceVariant> {
+    log.traces()
         .iter()
         .map(|trace| BxesTraceVariant {
             traces_count: 1,
@@ -32,94 +46,97 @@ pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), 
                 .borrow()
                 .events()
                 .iter()
-                .map(|event| {
-                    let event = event.borrow();
-                    BxesEvent {
-                        name: Rc::new(Box::new(BxesValue::String(event.name_pointer().clone()))),
-                        lifecycle: match event.lifecycle() {
-                            None => bxes::models::Lifecycle::Standard(bxes::models::StandardLifecycle::Unspecified),
-                            Some(lifecycle) => convert_xes_to_bxes_lifecycle(lifecycle),
-                        },
-                        timestamp: event.timestamp().timestamp_nanos(),
-                        attributes: Some(event.ordered_payload().iter().filter(|kv| {
-                            if let Some(event_globals) = log.globals_map().get(EVENT_TAG_NAME_STR) {
-                                if let Some(default_value) = event_globals.get(kv.0) {
-                                    default_value != kv.1
-                                } else {
-                                    true
-                                }
-                            } else {
-                                true
-                            }
-                        }).map(|kv| kv_pair_to_bxes_pair(kv)).collect()),
-                    }
+                .map(|event| create_bxes_event(log, &event.borrow()))
+                .collect(),
+        })
+        .collect()
+}
+
+fn create_bxes_event(log: &XesEventLogImpl, event: &XesEventImpl) -> BxesEvent {
+    BxesEvent {
+        name: Rc::new(Box::new(BxesValue::String(event.name_pointer().clone()))),
+        lifecycle: match event.lifecycle() {
+            None => bxes::models::Lifecycle::Standard(bxes::models::StandardLifecycle::Unspecified),
+            Some(lifecycle) => convert_xes_to_bxes_lifecycle(lifecycle),
+        },
+        timestamp: event.timestamp().timestamp_nanos(),
+        attributes: Some(
+            event
+                .ordered_payload()
+                .iter()
+                .filter(|kv| is_not_default_attribute(log, kv))
+                .map(|kv| kv_pair_to_bxes_pair(kv))
+                .collect(),
+        ),
+    }
+}
+
+fn is_not_default_attribute(log: &XesEventLogImpl, kv: &(&String, &EventPayloadValue)) -> bool {
+    if let Some(event_globals) = log.globals_map().get(EVENT_TAG_NAME_STR) {
+        if let Some(default_value) = event_globals.get(kv.0) {
+            default_value != kv.1
+        } else {
+            true
+        }
+    } else {
+        true
+    }
+}
+
+fn create_bxes_classifiers(log: &XesEventLogImpl) -> Vec<BxesClassifier> {
+    log.classifiers()
+        .iter()
+        .map(|c| BxesClassifier {
+            keys: c
+                .keys
+                .iter()
+                .map(|x| Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(x.to_owned()))))))
+                .collect(),
+            name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(c.name.to_owned()))))),
+        })
+        .collect()
+}
+
+fn create_bxes_extensions(log: &XesEventLogImpl) -> Vec<BxesExtension> {
+    log.extensions()
+        .iter()
+        .map(|e| BxesExtension {
+            name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.name.to_owned()))))),
+            prefix: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.prefix.to_owned()))))),
+            uri: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.uri.to_owned()))))),
+        })
+        .collect()
+}
+
+fn create_bxes_globals(log: &XesEventLogImpl) -> Vec<BxesGlobal> {
+    log.ordered_globals()
+        .iter()
+        .map(|g| BxesGlobal {
+            entity_kind: match g.0.as_str() {
+                "event" => BxesGlobalKind::Event,
+                "trace" => BxesGlobalKind::Trace,
+                "log" => BxesGlobalKind::Log,
+                _ => panic!(),
+            },
+            globals: g
+                .1
+                .iter()
+                .map(|kv| {
+                    let key = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.0.to_owned())))));
+                    let value = Rc::new(Box::new(payload_value_to_bxes_value(kv.1)));
+
+                    (key, value)
                 })
                 .collect(),
         })
-        .collect();
+        .collect()
+}
 
-    let metadata = BxesEventLogMetadata {
-        classifiers: Some(
-            log.classifiers()
-                .iter()
-                .map(|c| BxesClassifier {
-                    keys: c
-                        .keys
-                        .iter()
-                        .map(|x| Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(x.to_owned()))))))
-                        .collect(),
-                    name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(c.name.to_owned()))))),
-                })
-                .collect(),
-        ),
-        extensions: Some(
-            log.extensions()
-                .iter()
-                .map(|e| BxesExtension {
-                    name: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.name.to_owned()))))),
-                    prefix: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.prefix.to_owned()))))),
-                    uri: Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(e.uri.to_owned()))))),
-                })
-                .collect(),
-        ),
-        globals: Some(
-            log.ordered_globals()
-                .iter()
-                .map(|g| BxesGlobal {
-                    entity_kind: match g.0.as_str() {
-                        "event" => BxesGlobalKind::Event,
-                        "trace" => BxesGlobalKind::Trace,
-                        "log" => BxesGlobalKind::Log,
-                        _ => panic!(),
-                    },
-                    globals: g
-                        .1
-                        .iter()
-                        .map(|kv| {
-                            let key = Rc::new(Box::new(BxesValue::String(Rc::new(Box::new(kv.0.to_owned())))));
-                            let value = Rc::new(Box::new(payload_value_to_bxes_value(kv.1)));
-
-                            (key, value)
-                        })
-                        .collect(),
-                })
-                .collect(),
-        ),
-        properties: Some(
-            log.properties_map()
-                .iter()
-                .map(|kv| kv_pair_to_bxes_pair(&(&kv.name, &kv.value)))
-                .collect(),
-        ),
-    };
-
-    let bxes_log = BxesEventLog {
-        metadata,
-        variants,
-        version: 1,
-    };
-
-    write_bxes(path, &bxes_log)
+fn create_bxes_properties(log: &XesEventLogImpl) -> Vec<(Rc<Box<BxesValue>>, Rc<Box<BxesValue>>)> {
+    log.properties_map()
+        .iter()
+        .map(|kv| kv_pair_to_bxes_pair(&(&kv.name, &kv.value)))
+        .collect()
 }
 
 fn kv_pair_to_bxes_pair(kv: &(&String, &EventPayloadValue)) -> (Rc<Box<BxesValue>>, Rc<Box<BxesValue>>) {

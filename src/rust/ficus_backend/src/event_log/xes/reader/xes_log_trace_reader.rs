@@ -154,7 +154,7 @@ impl TraceXesEventLogIterator {
             LIFECYCLE_TRANSITION_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
                     if let Ok(standard_lifecycle) = XesStandardLifecycle::from_str(parsed_string.as_str()) {
-                        *lifecycle = Some(Lifecycle::XesStandardLifecycle(standard_lifecycle));return;
+                        *lifecycle = Some(Lifecycle::XesStandardLifecycle(standard_lifecycle));
                     } else if let Ok(braf_lifecycle) = XesBrafLifecycle::from_str(parsed_string.as_str()) {
                         *lifecycle = Some(Lifecycle::BrafLifecycle(braf_lifecycle));
                     }
