@@ -41,12 +41,15 @@ impl PipelineParts {
         Self::create_pipeline_part(Self::READ_LOG_FROM_BXES, &|context, _, keys, _| {
             let path = Self::get_user_data(context, keys.path())?;
 
-            if let Some(log) = read_bxes_into_xes_log(path) {
-                context.put_concrete(keys.event_log().key(), log);
-                Ok(())
-            } else {
-                let message = format!("Failed to read event log from {}", path.as_str());
-                Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
+            match read_bxes_into_xes_log(path) {
+                Ok(log) => {
+                    context.put_concrete(keys.event_log().key(), log);
+                    Ok(())
+                },
+                Err(err) => {
+                    let message = format!("Failed to read event log from {}, error: {}", path.as_str(), err.to_string());
+                    Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
+                }
             }
         })
     }

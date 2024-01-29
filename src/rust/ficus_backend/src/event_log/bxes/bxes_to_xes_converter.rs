@@ -19,19 +19,36 @@ use crate::event_log::{
 
 use super::conversions::{convert_xes_to_bxes_lifecycle, payload_value_to_bxes_value};
 
-pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), BxesWriteError> {
+pub enum XesToBxesWriterError {
+    BxesWriteError(BxesWriteError),
+    ConversionError(String)
+}
+
+impl ToString for XesToBxesWriterError {
+    fn to_string(&self) -> String {
+        match self {
+            XesToBxesWriterError::BxesWriteError(err) => err.to_string(),
+            XesToBxesWriterError::ConversionError(err) => err.to_owned(),
+        }
+    }
+}
+
+pub fn write_event_log_to_bxes(log: &XesEventLogImpl, path: &str) -> Result<(), XesToBxesWriterError> {
     let bxes_log = BxesEventLog {
         metadata: BxesEventLogMetadata {
             classifiers: Some(create_bxes_classifiers(log)),
             extensions: Some(create_bxes_extensions(log)),
-            globals: Some(create_bxes_globals(log)),
+            globals: Some(create_bxes_globals(log)?),
             properties: Some(create_bxes_properties(log)),
         },
         variants: create_bxes_traces(log),
         version: 1,
     };
 
-    write_bxes(path, &bxes_log)
+    match write_bxes(path, &bxes_log) {
+        Ok(()) => Ok(()),
+        Err(error) => Err(XesToBxesWriterError::BxesWriteError(error)),
+    }
 }
 
 fn create_bxes_traces(log: &XesEventLogImpl) -> Vec<BxesTraceVariant> {
@@ -107,22 +124,24 @@ fn convert_to_bxes_extension(e: &XesEventLogExtension) -> BxesExtension {
     }
 }
 
-fn create_bxes_globals(log: &XesEventLogImpl) -> Vec<BxesGlobal> {
-    log.ordered_globals()
-        .iter()
-        .map(|g| BxesGlobal {
-            entity_kind: parse_entity_kind(g.0.as_str()),
-            globals: g.1.iter().map(|kv| convert_to_bxes_global_attribute(kv)).collect(),
+fn create_bxes_globals(log: &XesEventLogImpl) -> Result<Vec<BxesGlobal>, XesToBxesWriterError> {
+    let mut globals = vec![];
+    for xes_global in log.ordered_globals().iter() {
+        globals.push(BxesGlobal {
+            entity_kind: parse_entity_kind(xes_global.0.as_str())?,
+            globals: xes_global.1.iter().map(|kv| convert_to_bxes_global_attribute(kv)).collect(),
         })
-        .collect()
+    }
+
+    Ok(globals)
 }
 
-fn parse_entity_kind(string: &str) -> BxesGlobalKind {
+fn parse_entity_kind(string: &str) -> Result<BxesGlobalKind, XesToBxesWriterError> {
     match string {
-        "event" => BxesGlobalKind::Event,
-        "trace" => BxesGlobalKind::Trace,
-        "log" => BxesGlobalKind::Log,
-        _ => panic!(),
+        "event" => Ok(BxesGlobalKind::Event),
+        "trace" => Ok(BxesGlobalKind::Trace),
+        "log" => Ok(BxesGlobalKind::Log),
+        _ => Err(XesToBxesWriterError::ConversionError(format!("Not supported global entity type: {}", string))),
     }
 }
 

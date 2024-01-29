@@ -1,6 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
-use bxes::models::BxesValue;
+use bxes::{models::BxesValue, read::errors::BxesReadError};
 use chrono::{TimeZone, Utc};
 
 use crate::event_log::{
@@ -10,10 +10,24 @@ use crate::event_log::{
 
 use super::conversions::{bxes_value_to_payload_value, convert_bxes_to_xes_lifecycle};
 
-pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
+pub enum BxesToXesReadError {
+    BxesReadError(BxesReadError),
+    ConversionError(String),
+}
+
+impl ToString for BxesToXesReadError {
+    fn to_string(&self) -> String {
+        match self {
+            BxesToXesReadError::BxesReadError(err) => err.to_string(),
+            BxesToXesReadError::ConversionError(err) => err.to_string(),
+        }
+    }
+}
+
+pub fn read_bxes_into_xes_log(path: &str) -> Result<XesEventLogImpl, BxesToXesReadError> {
     let log = match bxes::read::single_file_bxes_reader::read_bxes(path) {
         Ok(log) => log,
-        Err(_) => return None,
+        Err(error) => return Err(BxesToXesReadError::BxesReadError(error)),
     };
 
     let mut xes_log = XesEventLogImpl::empty();
@@ -23,7 +37,8 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
             let name = if let BxesValue::String(string) = event.name.as_ref().as_ref() {
                 string.clone()
             } else {
-                panic!("Name is not a string")
+                let message = format!("The name of event was not a string: {:?}", event.name);
+                return Err(BxesToXesReadError::ConversionError(message));
             };
 
             let timestamp = Utc.timestamp_nanos(event.timestamp);
@@ -36,7 +51,8 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
                     let key = if let BxesValue::String(string) = key.as_ref().as_ref() {
                         string.as_ref().as_ref().to_owned()
                     } else {
-                        panic!("Key is not a string");
+                        let message = format!("The attribute key is not a string: {:?}", key);
+                        return Err(BxesToXesReadError::ConversionError(message));
                     };
 
                     payload.insert(key, bxes_value_to_payload_value(&value));
@@ -54,5 +70,5 @@ pub fn read_bxes_into_xes_log(path: &str) -> Option<XesEventLogImpl> {
         xes_log.push(Rc::new(RefCell::new(xes_trace)));
     }
 
-    Some(xes_log)
+    Ok(xes_log)
 }
