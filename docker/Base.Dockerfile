@@ -18,4 +18,7 @@ RUN apt install python3.10 -y
 COPY ./Ficus/ ./pmide/ficus/
 COPY ./bxes/ ./pmide/bxes/
 
+RUN $python -m pip install pytest
+RUN $python -m pip install -r /pmide/ficus/src/python/requirements.txt
+
 RUN $cargo build --manifest-path /pmide/ficus/src/rust/ficus_backend/Cargo.toml --release
