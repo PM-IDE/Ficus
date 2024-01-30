@@ -10,8 +10,7 @@ RUN /root/.cargo/bin/rustup update 1.75.0
 
 RUN apt install python3.10 -y
 
-COPY ./Ficus/src/rust ./pmide/ficus/src/rust
-COPY ./Ficus/src/python ./pmide/ficus/src/python
+COPY ./Ficus/ ./pmide/ficus/
 COPY ./bxes/ ./pmide/bxes/
 
-RUN /root/.cargo/bin/cargo test --manifest-path ./pmide/ficus/src/rust/ficus_backend/Cargo.toml --release
+ENTRYPOINT /root/.cargo/bin/cargo test --manifest-path ./pmide/ficus/src/rust/ficus_backend/Cargo.toml --release
