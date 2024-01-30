@@ -25,6 +25,7 @@ linfa = "0.7.0"
 linfa-clustering = "0.7.0"
 linfa-nn = "0.7.0"
 ndarray = "0.15.6"
+bxes = { path = "../../../../bxes/src/rust/bxes/" }
 
 [dependencies.uuid]
 version = "1.4.1"
