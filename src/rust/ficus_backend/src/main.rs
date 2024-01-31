@@ -13,7 +13,7 @@ mod utils;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ficus_service = FicusService::new(Arc::new(Box::new(ContextKeys::new())));
     let service = GrpcBackendServiceServer::new(ficus_service);
-    Server::builder().add_service(service).serve("127.0.0.1:8080".parse()?).await?;
+    Server::builder().add_service(service).serve("[::]:8080".parse()?).await?;
 
     Ok(())
 }
