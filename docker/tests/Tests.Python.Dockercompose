@@ -13,6 +13,8 @@ services:
 
   python_tests:
     container_name: python_tests
+    environment:
+      - FICUS_BACKEND_ADDR=ficus_backend:8080
     build:
       context: ../../../
       dockerfile: "./Ficus/docker/tests/Tests.Python.Dockerfile"
