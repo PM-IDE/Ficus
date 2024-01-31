@@ -1,6 +1,7 @@
 FROM ubuntu:latest
 
 RUN apt update
+RUN apt install graphviz -y
 RUN apt install curl -y
 RUN apt install build-essential -y
 RUN apt install protobuf-compiler -y
