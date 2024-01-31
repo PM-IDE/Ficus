@@ -18,6 +18,7 @@ from ficus.grpc_pipelines.models.util_pb2 import *
 from ficus.pipelines.analysis.patterns.models import AdjustingMode
 from ficus.util import performance_cookie
 
+ficus_backend_addr_key = 'backend'
 
 class Pipeline2:
     def __init__(self, *parts):
@@ -27,7 +28,8 @@ class Pipeline2:
         options = [('grpc.max_send_message_length', 512 * 1024 * 1024),
                    ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
 
-        with grpc.insecure_channel('localhost:8080', options=options) as channel:
+        addr = initial_context[ficus_backend_addr_key] if ficus_backend_addr_key in initial_context else 'localhost:8080'
+        with grpc.insecure_channel(addr, options=options) as channel:
             stub = GrpcBackendServiceStub(channel)
             parts = list(self.parts)
             request = GrpcPipelineExecutionRequest(

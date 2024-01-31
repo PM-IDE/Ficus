@@ -16,7 +16,7 @@ from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2, DrawPlac
     DrawPlacementOfEventsByRegex2
 from ficus.grpc_pipelines.filtering_parts import FilterTracesByEventsCount2, FilterEventsByName2, FilterEventsByRegex2, \
     FilterLogByVariants2
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2
+from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PrintEventLogInfo2, ficus_backend_addr_key
 from ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2, AddStartArtificialEvents2, \
     AddEndArtificialEvents2
 from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2, PatternsDiscoveryStrategy
@@ -31,13 +31,22 @@ def test_simple_pipeline():
         ReadLogFromXes2()
     )
 
-    result = pipeline.execute({
+    result = _execute_pipeline(pipeline, {
         'path': StringContextValue('asdasdasdasdas')
     })
 
     assert not result.finalResult.HasField('success')
     assert result.finalResult.error is not None
     assert result.finalResult.error == 'Failed to read event log from asdasdasdasdas'
+
+
+def _execute_pipeline(pipeline, config):
+    backend_addr = os.getenv('FICUS_BACKEND_ADDR')
+    if backend_addr is None:
+        backend_addr = 'localhost:8080'
+
+    config[ficus_backend_addr_key] = backend_addr
+    return pipeline.execute(config)
 
 
 def test_pipeline_with_getting_context_value():
@@ -48,7 +57,7 @@ def test_pipeline_with_getting_context_value():
 
 
 def _execute_test_with_exercise_log(log_name: str, pipeline: Pipeline2):
-    result = pipeline.execute({
+    result = _execute_pipeline(pipeline, {
         'path': StringContextValue(get_example_log_path(f'{log_name}.xes'))
     })
 
@@ -57,7 +66,7 @@ def _execute_test_with_exercise_log(log_name: str, pipeline: Pipeline2):
 
 
 def _execute_test_with_context(pipeline: Pipeline2, context: dict[str, ContextValue]):
-    result = pipeline.execute(context)
+    result = _execute_pipeline(pipeline, context)
 
     assert result.finalResult.HasField('success')
     assert not result.finalResult.HasField('error')
@@ -146,7 +155,7 @@ class ResultAssertanceKind(Enum):
 def _execute_test_with_names_log(names_log: list[list[str]],
                                  pipeline: Pipeline2,
                                  assertance_kind: ResultAssertanceKind = ResultAssertanceKind.Success):
-    result = pipeline.execute({
+    result = _execute_pipeline(pipeline, {
         const_names_event_log: NamesLogContextValue(names_log)
     })
 
