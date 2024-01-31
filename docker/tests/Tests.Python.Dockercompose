@@ -2,19 +2,23 @@ services:
   ficus_backend:
     container_name: ficus_backend
     build:
-      context: .
-      dockerfile: "./docker/run/Run.FicusBackend.Dockerfile"
+      context: ../../../
+      dockerfile: "./Ficus/docker/run/Run.FicusBackend.Dockerfile"
     expose:
       - 8080
     ports:
-      - "8080"
+      - "8080:8080"
     networks:
       - local
 
   python_tests:
     container_name: python_tests
     build:
-      context: .
-      dockerfile: "./docker/tests/Tests.Python.Dockerfile"
+      context: ../../../
+      dockerfile: "./Ficus/docker/tests/Tests.Python.Dockerfile"
     networks:
       - local
+
+networks:
+  local:
+    driver: bridge
