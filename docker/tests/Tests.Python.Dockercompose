@@ -24,6 +24,8 @@ services:
       - local
     volumes:
       - shared_volume:/tmp
+    depends_on:
+      - ficus_backend
 
 volumes:
   shared_volume: {}
