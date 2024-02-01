@@ -29,6 +29,9 @@ class Pipeline2:
                    ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
 
         addr = initial_context[ficus_backend_addr_key] if ficus_backend_addr_key in initial_context else 'localhost:8080'
+        if ficus_backend_addr_key in initial_context:
+            del initial_context[ficus_backend_addr_key]
+
         with grpc.insecure_channel(addr, options=options) as channel:
             stub = GrpcBackendServiceStub(channel)
             parts = list(self.parts)
