@@ -1,4 +1,4 @@
-FROM ficus_base:latest
+FROM --platform=linux/amd64 ficus_base:latest
 
 WORKDIR /pmide/ficus/src/python
 

@@ -1,4 +1,4 @@
-FROM ubuntu:latest as system_setup
+FROM --platform=linux/amd64 ubuntu:latest as system_setup
 
 RUN apt update
 RUN apt install graphviz -y
@@ -22,5 +22,6 @@ FROM system_setup as source_build
 COPY ./Ficus/ ./pmide/ficus/
 COPY ./bxes/ ./pmide/bxes/
 
+RUN pip install --upgrade pip setuptools wheel
 RUN $python -m pip install -r /pmide/ficus/src/python/requirements.txt
 RUN $cargo build --manifest-path /pmide/ficus/src/rust/ficus_backend/Cargo.toml --release
