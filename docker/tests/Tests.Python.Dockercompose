@@ -10,6 +10,8 @@ services:
       - "8080:8080"
     networks:
       - local
+    volumes:
+      - shared_volume:/tmp
 
   python_tests:
     container_name: python_tests
@@ -20,6 +22,11 @@ services:
       dockerfile: "./Ficus/docker/tests/Tests.Python.Dockerfile"
     networks:
       - local
+    volumes:
+      - shared_volume:/tmp
+
+volumes:
+  shared_volume: {}
 
 networks:
   local:
