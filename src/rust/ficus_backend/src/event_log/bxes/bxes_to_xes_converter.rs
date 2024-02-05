@@ -21,7 +21,7 @@ use super::conversions::{convert_xes_to_bxes_lifecycle, payload_value_to_bxes_va
 
 pub enum XesToBxesWriterError {
     BxesWriteError(BxesWriteError),
-    ConversionError(String)
+    ConversionError(String),
 }
 
 impl ToString for XesToBxesWriterError {
@@ -141,7 +141,10 @@ fn parse_entity_kind(string: &str) -> Result<BxesGlobalKind, XesToBxesWriterErro
         "event" => Ok(BxesGlobalKind::Event),
         "trace" => Ok(BxesGlobalKind::Trace),
         "log" => Ok(BxesGlobalKind::Log),
-        _ => Err(XesToBxesWriterError::ConversionError(format!("Not supported global entity type: {}", string))),
+        _ => Err(XesToBxesWriterError::ConversionError(format!(
+            "Not supported global entity type: {}",
+            string
+        ))),
     }
 }
 

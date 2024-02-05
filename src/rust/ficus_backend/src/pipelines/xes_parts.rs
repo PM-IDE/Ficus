@@ -45,7 +45,7 @@ impl PipelineParts {
                 Ok(log) => {
                     context.put_concrete(keys.event_log().key(), log);
                     Ok(())
-                },
+                }
                 Err(err) => {
                     let message = format!("Failed to read event log from {}, error: {}", path.as_str(), err.to_string());
                     Err(PipelinePartExecutionError::Raw(RawPartExecutionError::new(message)))
