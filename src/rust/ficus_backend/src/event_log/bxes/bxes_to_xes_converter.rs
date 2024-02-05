@@ -8,7 +8,12 @@ use chrono::{TimeZone, Utc};
 
 use crate::event_log::{
     core::{event::event::EventPayloadValue, event_log::EventLog, trace::trace::Trace},
-    xes::{shared::{XesClassifier, XesEventLogExtension, XesProperty}, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+    xes::{
+        shared::{XesClassifier, XesEventLogExtension, XesProperty},
+        xes_event::XesEventImpl,
+        xes_event_log::XesEventLogImpl,
+        xes_trace::XesTraceImpl,
+    },
 };
 
 use super::conversions::{bxes_value_to_payload_value, convert_bxes_to_xes_lifecycle, global_type_to_string};
@@ -123,7 +128,7 @@ fn string_or_err(value: &BxesValue, entity_name: &str) -> Result<String, BxesToX
     if let BxesValue::String(string) = value {
         Ok(string.as_ref().as_ref().to_owned())
     } else {
-        return Err(BxesToXesReadError::ConversionError(format!("{} key was not a string", entity_name)))
+        return Err(BxesToXesReadError::ConversionError(format!("{} key was not a string", entity_name)));
     }
 }
 
