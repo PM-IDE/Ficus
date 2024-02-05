@@ -9,6 +9,7 @@ use chrono::{TimeZone, Utc};
 use crate::event_log::{
     core::{event::event::EventPayloadValue, event_log::EventLog, trace::trace::Trace},
     xes::{
+        self,
         shared::{XesClassifier, XesEventLogExtension, XesProperty},
         xes_event::XesEventImpl,
         xes_event_log::XesEventLogImpl,
@@ -58,12 +59,22 @@ pub fn read_bxes_into_xes_log(path: &str) -> Result<XesEventLogImpl, BxesToXesRe
 }
 
 fn set_classifiers(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
-    if let Some(classifiers) = log.metadata.classifiers.as_ref() {
-        for classifier in classifiers {
-            xes_log.classifiers_mut().push(XesClassifier {
-                name: string_or_err(&classifier.name, "Classifier")?,
-                keys: vector_of_strings_or_err(&classifier.keys, "Classifier key")?,
-            });
+    set_metadata_vector_item(xes_log.classifiers_mut(), log.metadata.classifiers.as_ref(), |classifier| {
+        Ok(XesClassifier {
+            name: string_or_err(&classifier.name, "Classifier")?,
+            keys: vector_of_strings_or_err(&classifier.keys, "Classifier key")?,
+        })
+    })
+}
+
+fn set_metadata_vector_item<TBxesItem, TXesItem>(
+    target: &mut Vec<TXesItem>,
+    given: Option<&Vec<TBxesItem>>,
+    conversion: impl Fn(&TBxesItem) -> Result<TXesItem, BxesToXesReadError>,
+) -> Result<(), BxesToXesReadError> {
+    if let Some(given) = given {
+        for given_entity in given {
+            target.push(conversion(given_entity)?);
         }
     }
 
@@ -71,30 +82,22 @@ fn set_classifiers(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<
 }
 
 fn set_properties(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
-    if let Some(properties) = log.metadata.properties.as_ref() {
-        for property in properties {
-            xes_log.properties_mut().push(XesProperty {
-                name: string_or_err(&property.0, "Property key")?,
-                value: bxes_value_to_payload_value(&property.1),
-            });
-        }
-    }
-
-    Ok(())
+    set_metadata_vector_item(xes_log.properties_mut(), log.metadata.properties.as_ref(), |property| {
+        Ok(XesProperty {
+            name: string_or_err(&property.0, "Property key")?,
+            value: bxes_value_to_payload_value(&property.1),
+        })
+    })
 }
 
 fn set_extensions(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
-    if let Some(extensions) = log.metadata.extensions.as_ref() {
-        for extension in extensions {
-            xes_log.extensions_mut().push(XesEventLogExtension {
-                name: string_or_err(&extension.name, "Extension name")?,
-                uri: string_or_err(&extension.uri, "Extension uri")?,
-                prefix: string_or_err(&extension.prefix, "Extension prefix")?,
-            })
-        }
-    }
-
-    Ok(())
+    set_metadata_vector_item(xes_log.extensions_mut(), log.metadata.extensions.as_ref(), |extension| {
+        Ok(XesEventLogExtension {
+            name: string_or_err(&extension.name, "Extension name")?,
+            uri: string_or_err(&extension.uri, "Extension uri")?,
+            prefix: string_or_err(&extension.prefix, "Extension prefix")?,
+        })
+    })
 }
 
 fn set_globals(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
