@@ -38,6 +38,22 @@ impl XesEventLogImpl {
         &self.properties
     }
 
+    pub fn globals_mut(&mut self) -> &mut HashMap<String, HashMap<String, EventPayloadValue>> {
+        &mut self.globals
+    }
+
+    pub fn extensions_mut(&mut self) -> &mut Vec<XesEventLogExtension> {
+        &mut self.extensions
+    }
+
+    pub fn properties_mut(&mut self) -> &mut Vec<XesProperty> {
+        &mut self.properties
+    }
+
+    pub fn classifiers_mut(&mut self) -> &mut Vec<XesClassifier> {
+        &mut self.classifiers
+    }
+
     pub fn ordered_properties(&self) -> Vec<(&String, &EventPayloadValue)> {
         let mut properties = Vec::new();
         for property in self.properties_map() {

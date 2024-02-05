@@ -1,10 +1,12 @@
-use bxes::models::BxesValue;
+use bxes::models::{BxesGlobalKind, BxesValue};
 use chrono::{TimeZone, Utc};
 
 use crate::event_log::core::event::{
     event::EventPayloadValue,
     lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
 };
+
+use super::bxes_to_xes_converter::XesToBxesWriterError;
 
 pub(super) fn bxes_value_to_payload_value(value: &BxesValue) -> EventPayloadValue {
     match value {
@@ -125,5 +127,29 @@ pub(super) fn convert_xes_to_bxes_lifecycle(ficus_lifecycle: Lifecycle) -> bxes:
             XesStandardLifecycle::Unknown => bxes::models::StandardLifecycle::Unknown,
             XesStandardLifecycle::Withdraw => bxes::models::StandardLifecycle::Withdraw,
         }),
+    }
+}
+
+const EVENT_GLOBAL_ENTITY_TYPE: &str = "event";
+const TRACE_GLOBAL_ENTITY_TYPE: &str = "trace";
+const LOG_GLOBAL_ENTITY_TYPE: &str = "log";
+
+pub(super) fn parse_entity_kind(string: &str) -> Result<BxesGlobalKind, XesToBxesWriterError> {
+    match string {
+        EVENT_GLOBAL_ENTITY_TYPE => Ok(BxesGlobalKind::Event),
+        TRACE_GLOBAL_ENTITY_TYPE => Ok(BxesGlobalKind::Trace),
+        LOG_GLOBAL_ENTITY_TYPE => Ok(BxesGlobalKind::Log),
+        _ => Err(XesToBxesWriterError::ConversionError(format!(
+            "Not supported global entity type: {}",
+            string
+        ))),
+    }
+}
+
+pub(super) fn global_type_to_string(entity_type: &BxesGlobalKind) -> String {
+    match entity_type {
+        BxesGlobalKind::Event => EVENT_GLOBAL_ENTITY_TYPE.to_string(),
+        BxesGlobalKind::Trace => TRACE_GLOBAL_ENTITY_TYPE.to_string(),
+        BxesGlobalKind::Log => LOG_GLOBAL_ENTITY_TYPE.to_string(),
     }
 }

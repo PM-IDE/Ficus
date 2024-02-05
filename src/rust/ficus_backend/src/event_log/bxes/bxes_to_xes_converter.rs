@@ -17,7 +17,7 @@ use crate::event_log::{
     xes::{constants::EVENT_TAG_NAME_STR, shared::XesEventLogExtension, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl},
 };
 
-use super::conversions::{convert_xes_to_bxes_lifecycle, payload_value_to_bxes_value};
+use super::conversions::{convert_xes_to_bxes_lifecycle, parse_entity_kind, payload_value_to_bxes_value};
 
 pub enum XesToBxesWriterError {
     BxesWriteError(BxesWriteError),
@@ -134,18 +134,6 @@ fn create_bxes_globals(log: &XesEventLogImpl) -> Result<Vec<BxesGlobal>, XesToBx
     }
 
     Ok(globals)
-}
-
-fn parse_entity_kind(string: &str) -> Result<BxesGlobalKind, XesToBxesWriterError> {
-    match string {
-        "event" => Ok(BxesGlobalKind::Event),
-        "trace" => Ok(BxesGlobalKind::Trace),
-        "log" => Ok(BxesGlobalKind::Log),
-        _ => Err(XesToBxesWriterError::ConversionError(format!(
-            "Not supported global entity type: {}",
-            string
-        ))),
-    }
 }
 
 fn convert_to_bxes_global_attribute(kv: &(&String, &EventPayloadValue)) -> (Rc<Box<BxesValue>>, Rc<Box<BxesValue>>) {

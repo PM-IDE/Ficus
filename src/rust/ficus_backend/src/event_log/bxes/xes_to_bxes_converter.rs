@@ -1,17 +1,17 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap, rc::Rc};
 
 use bxes::{
-    models::{BxesEvent, BxesValue},
+    models::{BxesEvent, BxesEventLog, BxesValue},
     read::errors::BxesReadError,
 };
 use chrono::{TimeZone, Utc};
 
 use crate::event_log::{
     core::{event::event::EventPayloadValue, event_log::EventLog, trace::trace::Trace},
-    xes::{xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
+    xes::{shared::{XesClassifier, XesEventLogExtension, XesProperty}, xes_event::XesEventImpl, xes_event_log::XesEventLogImpl, xes_trace::XesTraceImpl},
 };
 
-use super::conversions::{bxes_value_to_payload_value, convert_bxes_to_xes_lifecycle};
+use super::conversions::{bxes_value_to_payload_value, convert_bxes_to_xes_lifecycle, global_type_to_string};
 
 pub enum BxesToXesReadError {
     BxesReadError(BxesReadError),
@@ -34,6 +34,12 @@ pub fn read_bxes_into_xes_log(path: &str) -> Result<XesEventLogImpl, BxesToXesRe
     };
 
     let mut xes_log = XesEventLogImpl::empty();
+
+    set_classifiers(&mut xes_log, &log)?;
+    set_properties(&mut xes_log, &log)?;
+    set_extensions(&mut xes_log, &log)?;
+    set_globals(&mut xes_log, &log)?;
+
     for variant in &log.variants {
         let mut xes_trace = XesTraceImpl::empty();
         for event in &variant.events {
@@ -44,6 +50,81 @@ pub fn read_bxes_into_xes_log(path: &str) -> Result<XesEventLogImpl, BxesToXesRe
     }
 
     Ok(xes_log)
+}
+
+fn set_classifiers(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
+    if let Some(classifiers) = log.metadata.classifiers.as_ref() {
+        for classifier in classifiers {
+            xes_log.classifiers_mut().push(XesClassifier {
+                name: string_or_err(&classifier.name, "Classifier")?,
+                keys: vector_of_strings_or_err(&classifier.keys, "Classifier key")?,
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn set_properties(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
+    if let Some(properties) = log.metadata.properties.as_ref() {
+        for property in properties {
+            xes_log.properties_mut().push(XesProperty {
+                name: string_or_err(&property.0, "Property key")?,
+                value: bxes_value_to_payload_value(&property.1),
+            });
+        }
+    }
+
+    Ok(())
+}
+
+fn set_extensions(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
+    if let Some(extensions) = log.metadata.extensions.as_ref() {
+        for extension in extensions {
+            xes_log.extensions_mut().push(XesEventLogExtension {
+                name: string_or_err(&extension.name, "Extension name")?,
+                uri: string_or_err(&extension.uri, "Extension uri")?,
+                prefix: string_or_err(&extension.prefix, "Extension prefix")?,
+            })
+        }
+    }
+
+    Ok(())
+}
+
+fn set_globals(xes_log: &mut XesEventLogImpl, log: &BxesEventLog) -> Result<(), BxesToXesReadError> {
+    if let Some(globals) = log.metadata.globals.as_ref() {
+        for global in globals {
+            let global_type = global_type_to_string(&global.entity_kind);
+
+            let mut globals_map = HashMap::new();
+            for global_value in &global.globals {
+                let key = string_or_err(&global_value.0, format!("{} global kv key", &global_type).as_str())?;
+                globals_map.insert(key, bxes_value_to_payload_value(&global_value.1));
+            }
+
+            xes_log.globals_mut().insert(global_type, globals_map);
+        }
+    }
+
+    Ok(())
+}
+
+fn vector_of_strings_or_err(values: &Vec<Rc<Box<BxesValue>>>, entity_name: &str) -> Result<Vec<String>, BxesToXesReadError> {
+    let mut result = vec![];
+    for value in values {
+        result.push(string_or_err(value, entity_name)?)
+    }
+
+    Ok(result)
+}
+
+fn string_or_err(value: &BxesValue, entity_name: &str) -> Result<String, BxesToXesReadError> {
+    if let BxesValue::String(string) = value {
+        Ok(string.as_ref().as_ref().to_owned())
+    } else {
+        return Err(BxesToXesReadError::ConversionError(format!("{} key was not a string", entity_name)))
+    }
 }
 
 fn create_xes_event(bxes_event: &BxesEvent) -> Result<XesEventImpl, BxesToXesReadError> {
