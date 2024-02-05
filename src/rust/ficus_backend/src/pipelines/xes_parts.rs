@@ -1,5 +1,5 @@
-use crate::event_log::bxes::bxes_to_xes_converter::write_event_log_to_bxes;
-use crate::event_log::bxes::xes_to_bxes_converter::read_bxes_into_xes_log;
+use crate::event_log::bxes::xes_to_bxes_converter::write_event_log_to_bxes;
+use crate::event_log::bxes::bxes_to_xes_converter::read_bxes_into_xes_log;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::{
     event_log::xes::{reader::file_xes_log_reader::read_event_log, writer::xes_event_log_writer::write_log},

@@ -6,7 +6,7 @@ use crate::event_log::core::event::{
     lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
 };
 
-use super::bxes_to_xes_converter::XesToBxesWriterError;
+use super::xes_to_bxes_converter::XesToBxesWriterError;
 
 pub(super) fn bxes_value_to_payload_value(value: &BxesValue) -> EventPayloadValue {
     match value {
