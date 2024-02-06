@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Lifecycle {
     XesStandardLifecycle(XesStandardLifecycle),
     BrafLifecycle(XesBrafLifecycle),
@@ -36,7 +36,7 @@ impl ToString for XesStandardLifecycle {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum XesStandardLifecycle {
     Unspecified = 0,
     Assign = 1,
@@ -80,7 +80,7 @@ impl FromStr for XesStandardLifecycle {
 
 pub struct ParseXesStandardLifecycleError;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum XesBrafLifecycle {
     Unspecified = 0,
     Closed = 1,

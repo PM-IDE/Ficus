@@ -1,10 +1,7 @@
 use std::rc::Rc;
 
 use bxes::{
-    models::{
-        BxesClassifier, BxesEvent, BxesEventLog, BxesEventLogMetadata, BxesExtension, BxesGlobal, BxesGlobalKind, BxesTraceVariant,
-        BxesValue,
-    },
+    models::{BxesClassifier, BxesEvent, BxesEventLog, BxesEventLogMetadata, BxesExtension, BxesGlobal, BxesTraceVariant, BxesValue},
     writer::{errors::BxesWriteError, single_file_bxes_writer::write_bxes},
 };
 
@@ -72,7 +69,7 @@ fn create_bxes_event(log: &XesEventLogImpl, event: &XesEventImpl) -> BxesEvent {
         name: Rc::new(Box::new(BxesValue::String(event.name_pointer().clone()))),
         lifecycle: match event.lifecycle() {
             None => bxes::models::Lifecycle::Standard(bxes::models::StandardLifecycle::Unspecified),
-            Some(lifecycle) => convert_xes_to_bxes_lifecycle(lifecycle),
+            Some(lifecycle) => convert_xes_to_bxes_lifecycle(&lifecycle),
         },
         timestamp: event.timestamp().timestamp_nanos(),
         attributes: Some(

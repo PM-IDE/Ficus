@@ -17,6 +17,7 @@ pub enum EventPayloadValue {
     Uint64(u64),
     Guid(uuid::Uuid),
     Timestamp(i64),
+    Lifecycle(Lifecycle),
 }
 
 impl ToString for EventPayloadValue {
@@ -33,6 +34,7 @@ impl ToString for EventPayloadValue {
             EventPayloadValue::Uint64(value) => value.to_string(),
             EventPayloadValue::Guid(value) => value.to_string(),
             EventPayloadValue::Timestamp(value) => value.to_string(),
+            EventPayloadValue::Lifecycle(lifecycle) => lifecycle.to_string(),
         }
     }
 }

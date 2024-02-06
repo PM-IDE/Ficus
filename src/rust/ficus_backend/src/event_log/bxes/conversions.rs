@@ -3,7 +3,7 @@ use chrono::{TimeZone, Utc};
 
 use crate::event_log::core::event::{
     event::EventPayloadValue,
-    lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
+    lifecycle::{self, Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
 };
 
 use super::xes_to_bxes_converter::XesToBxesWriterError;
@@ -19,8 +19,14 @@ pub(super) fn bxes_value_to_payload_value(value: &BxesValue) -> EventPayloadValu
         BxesValue::String(string) => EventPayloadValue::String(string.clone()),
         BxesValue::Bool(bool) => EventPayloadValue::Boolean(*bool),
         BxesValue::Timestamp(stamp) => EventPayloadValue::Date(Utc.timestamp_nanos(*stamp)),
-        BxesValue::BrafLifecycle(_) => todo!(),
-        BxesValue::StandardLifecycle(_) => todo!(),
+        BxesValue::BrafLifecycle(lifecycle) => {
+            let lifecycle = bxes::models::Lifecycle::Braf(lifecycle.clone());
+            EventPayloadValue::Lifecycle(convert_bxes_to_xes_lifecycle(&lifecycle))
+        }
+        BxesValue::StandardLifecycle(lifecycle) => {
+            let lifecycle = bxes::models::Lifecycle::Standard(lifecycle.clone());
+            EventPayloadValue::Lifecycle(convert_bxes_to_xes_lifecycle(&lifecycle))
+        }
         BxesValue::Artifact(_) => todo!(),
         BxesValue::Drivers(_) => todo!(),
         BxesValue::Guid(value) => EventPayloadValue::Guid(*value),
@@ -41,6 +47,10 @@ pub(super) fn payload_value_to_bxes_value(value: &EventPayloadValue) -> BxesValu
         EventPayloadValue::Uint64(value) => BxesValue::Uint64(*value),
         EventPayloadValue::Guid(value) => BxesValue::Guid(value.clone()),
         EventPayloadValue::Timestamp(value) => BxesValue::Timestamp(*value),
+        EventPayloadValue::Lifecycle(lifecycle) => match convert_xes_to_bxes_lifecycle(lifecycle) {
+            bxes::models::Lifecycle::Braf(braf) => BxesValue::BrafLifecycle(braf),
+            bxes::models::Lifecycle::Standard(standard) => BxesValue::StandardLifecycle(standard),
+        },
     }
 }
 
@@ -87,7 +97,7 @@ pub(super) fn convert_bxes_to_xes_lifecycle(bxes_lifecycle: &bxes::models::Lifec
     }
 }
 
-pub(super) fn convert_xes_to_bxes_lifecycle(ficus_lifecycle: Lifecycle) -> bxes::models::Lifecycle {
+pub(super) fn convert_xes_to_bxes_lifecycle(ficus_lifecycle: &Lifecycle) -> bxes::models::Lifecycle {
     match ficus_lifecycle {
         Lifecycle::BrafLifecycle(braf_lifecycle) => bxes::models::Lifecycle::Braf(match braf_lifecycle {
             XesBrafLifecycle::Unspecified => bxes::models::BrafLifecycle::Unspecified,
