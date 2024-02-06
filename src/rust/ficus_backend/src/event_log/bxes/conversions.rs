@@ -3,7 +3,7 @@ use chrono::{TimeZone, Utc};
 
 use crate::event_log::core::event::{
     event::EventPayloadValue,
-    lifecycle::{self, Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
+    lifecycle::{braf_lifecycle::XesBrafLifecycle, standard_lifecycle::XesStandardLifecycle, xes_lifecycle::Lifecycle},
 };
 
 use super::xes_to_bxes_converter::XesToBxesWriterError;

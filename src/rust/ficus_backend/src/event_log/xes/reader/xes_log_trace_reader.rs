@@ -1,14 +1,13 @@
 use crate::event_log::{
     core::event::{
         event::EventPayloadValue,
-        lifecycle::{Lifecycle, XesBrafLifecycle, XesStandardLifecycle},
+        lifecycle::{braf_lifecycle::XesBrafLifecycle, standard_lifecycle::XesStandardLifecycle, xes_lifecycle::Lifecycle},
     },
     xes::xes_event::XesEventImpl,
 };
 
 use crate::event_log::xes::constants::*;
 
-use bxes::models::BrafLifecycle;
 use chrono::{DateTime, Utc};
 use quick_xml::Reader;
 use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};

@@ -3,13 +3,15 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     event_log::core::{
-        event::event::{Event, EventPayloadValue},
-        event::event_hasher::EventHasher,
-        event::events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
-        event::{event_base::EventBase, lifecycle::Lifecycle},
+        event::{
+            event::{Event, EventPayloadValue},
+            event_base::EventBase,
+            event_hasher::EventHasher,
+            events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
+            lifecycle::xes_lifecycle::Lifecycle,
+        },
         event_log::EventLog,
-        trace::trace::Trace,
-        trace::traces_holder::TracesHolder,
+        trace::{trace::Trace, traces_holder::TracesHolder},
     },
     utils::user_data::user_data::UserDataImpl,
 };

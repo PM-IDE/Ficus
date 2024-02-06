@@ -1,8 +1,9 @@
 use crate::utils::user_data::user_data::UserDataImpl;
 
-use super::lifecycle::Lifecycle;
 use chrono::{DateTime, Utc};
 use std::{collections::HashMap, rc::Rc};
+
+use super::lifecycle::xes_lifecycle::Lifecycle;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EventPayloadValue {

@@ -6,7 +6,7 @@ use crate::{
     event_log::core::event::{
         event::{Event, EventPayloadValue},
         event_base::EventBase,
-        lifecycle::Lifecycle,
+        lifecycle::xes_lifecycle::Lifecycle,
     },
     utils::{user_data::user_data::UserDataImpl, vec_utils},
 };
