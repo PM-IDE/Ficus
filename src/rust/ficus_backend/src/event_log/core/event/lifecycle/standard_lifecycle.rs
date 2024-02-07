@@ -1,6 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, ops::Deref, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+use once_cell::sync::Lazy;
+
+use crate::utils::hash_map_utils::reverse_map;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum XesStandardLifecycle {
     Unspecified = 0,
     Assign = 1,
@@ -33,49 +37,41 @@ const RESUME: &'static str = "resume";
 const SUSPEND: &'static str = "suspend";
 const WITHDRAW: &'static str = "withdraw";
 
+static strings_to_lifecycle: Lazy<HashMap<&'static str, XesStandardLifecycle>> = Lazy::new(|| {
+    HashMap::from_iter(vec![
+        (SCHEDULE, XesStandardLifecycle::Schedule),
+        (START, XesStandardLifecycle::Start),
+        (COMPLETE, XesStandardLifecycle::Complete),
+        (UNKNOWN, XesStandardLifecycle::Unknown),
+        (UNSPECIFIED, XesStandardLifecycle::Unspecified),
+        (ASSIGN, XesStandardLifecycle::Assign),
+        (ATE_ABORT, XesStandardLifecycle::AteAbort),
+        (AUTOSKIP, XesStandardLifecycle::Autoskip),
+        (MANUAL_SKIP, XesStandardLifecycle::ManualSkip),
+        (PI_ABORT, XesStandardLifecycle::PiAbort),
+        (RE_ASSIGN, XesStandardLifecycle::ReAssign),
+        (RESUME, XesStandardLifecycle::Resume),
+        (SUSPEND, XesStandardLifecycle::Suspend),
+        (WITHDRAW, XesStandardLifecycle::Withdraw),
+    ])
+});
+
+static lifecycle_to_strings: Lazy<HashMap<XesStandardLifecycle, &'static str>> = Lazy::new(|| reverse_map(strings_to_lifecycle.deref()));
+
 impl ToString for XesStandardLifecycle {
     fn to_string(&self) -> String {
-        match self {
-            Self::Schedule => String::from_str(SCHEDULE).ok().unwrap(),
-            Self::Start => String::from_str(START).ok().unwrap(),
-            Self::Complete => String::from_str(COMPLETE).ok().unwrap(),
-            Self::Unknown => String::from_str(UNKNOWN).ok().unwrap(),
-            Self::Unspecified => String::from_str(UNSPECIFIED).ok().unwrap(),
-            Self::Assign => String::from_str(ASSIGN).ok().unwrap(),
-            Self::AteAbort => String::from_str(ATE_ABORT).ok().unwrap(),
-            Self::Autoskip => String::from_str(AUTOSKIP).ok().unwrap(),
-            Self::ManualSkip => String::from_str(MANUAL_SKIP).ok().unwrap(),
-            Self::PiAbort => String::from_str(PI_ABORT).ok().unwrap(),
-            Self::ReAssign => String::from_str(RE_ASSIGN).ok().unwrap(),
-            Self::Resume => String::from_str(RESUME).ok().unwrap(),
-            Self::Suspend => String::from_str(SUSPEND).ok().unwrap(),
-            Self::Withdraw => String::from_str(WITHDRAW).ok().unwrap(),
-        }
+        lifecycle_to_strings.get(&self).unwrap().to_string()
     }
 }
 
 impl FromStr for XesStandardLifecycle {
-    type Err = ParseXesStandardLifecycleError;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<XesStandardLifecycle, Self::Err> {
-        match s {
-            SCHEDULE => Ok(XesStandardLifecycle::Schedule),
-            START => Ok(XesStandardLifecycle::Start),
-            COMPLETE => Ok(XesStandardLifecycle::Complete),
-            UNKNOWN => Ok(XesStandardLifecycle::Unknown),
-            UNSPECIFIED => Ok(XesStandardLifecycle::Unspecified),
-            ASSIGN => Ok(XesStandardLifecycle::Assign),
-            ATE_ABORT => Ok(XesStandardLifecycle::AteAbort),
-            AUTOSKIP => Ok(XesStandardLifecycle::Autoskip),
-            MANUAL_SKIP => Ok(XesStandardLifecycle::ManualSkip),
-            PI_ABORT => Ok(XesStandardLifecycle::PiAbort),
-            RE_ASSIGN => Ok(XesStandardLifecycle::ReAssign),
-            SUSPEND => Ok(XesStandardLifecycle::Suspend),
-            RESUME => Ok(XesStandardLifecycle::Resume),
-            WITHDRAW => Ok(XesStandardLifecycle::Withdraw),
-            _ => Err(ParseXesStandardLifecycleError),
+        if let Some(lifecycle) = strings_to_lifecycle.get(s) {
+            Ok(*lifecycle)
+        } else {
+            Err(())
         }
     }
 }
-
-pub struct ParseXesStandardLifecycleError;

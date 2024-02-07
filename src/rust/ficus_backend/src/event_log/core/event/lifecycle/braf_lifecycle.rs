@@ -1,6 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, ops::Deref, str::FromStr};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+use once_cell::sync::Lazy;
+
+use crate::utils::hash_map_utils::reverse_map;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum XesBrafLifecycle {
     Unspecified = 0,
     Closed = 1,
@@ -45,30 +49,42 @@ const OPEN_RUNNING: &'static str = "Open.Running";
 const OPEN_RUNNING_INPROGRESS: &'static str = "Open.Running.InProgress";
 const OPEN_RUNNING_SUSPENDED: &'static str = "Open.Running.Suspended";
 
+static strings_to_lifecycle: Lazy<HashMap<&'static str, XesBrafLifecycle>> = Lazy::new(|| {
+    HashMap::from_iter(vec![
+        (UNSPECIFIED, XesBrafLifecycle::Unspecified),
+        (CLOSED, XesBrafLifecycle::Closed),
+        (CLOSED_CANCELLED, XesBrafLifecycle::ClosedCancelled),
+        (CLOSED_CANCELLED_ABORTED, XesBrafLifecycle::ClosedCancelledAborted),
+        (CLOSED_CANCELLED_ERROR, XesBrafLifecycle::ClosedCancelledError),
+        (CLOSED_CANCELLED_EXITED, XesBrafLifecycle::ClosedCancelledExited),
+        (CLOSED_CANCELLED_OBSOLETE, XesBrafLifecycle::ClosedCancelledObsolete),
+        (CLOSED_CANCELLED_TERMINATED, XesBrafLifecycle::ClosedCancelledTerminated),
+        (COMPLETED, XesBrafLifecycle::Completed),
+        (COMPLETED_FAILED, XesBrafLifecycle::CompletedFailed),
+        (COMPLETED_SUCCESS, XesBrafLifecycle::CompletedSuccess),
+        (OPEN, XesBrafLifecycle::Open),
+        (OPEN_NOTRUNNING, XesBrafLifecycle::OpenNotRunning),
+        (OPEN_NOTRUNNING_ASSIGNED, XesBrafLifecycle::OpenNotRunningAssigned),
+        (OPEN_NOTRUNNING_RESERVED, XesBrafLifecycle::OpenNotRunningReserved),
+        (
+            OPEN_NOTRUNNING_SUSPENDED_ASSIGNED,
+            XesBrafLifecycle::OpenNotRunningSuspendedAssigned,
+        ),
+        (
+            OPEN_NOTRUNNING_SUSPENDED_RESERVED,
+            XesBrafLifecycle::OpenNotRunningSuspendedReserved,
+        ),
+        (OPEN_RUNNING, XesBrafLifecycle::OpenRunning),
+        (OPEN_RUNNING_INPROGRESS, XesBrafLifecycle::OpenRunningInProgress),
+        (OPEN_RUNNING_SUSPENDED, XesBrafLifecycle::OpenRunningSuspended),
+    ])
+});
+
+static lifecycle_to_strings: Lazy<HashMap<XesBrafLifecycle, &'static str>> = Lazy::new(|| reverse_map(strings_to_lifecycle.deref()));
+
 impl ToString for XesBrafLifecycle {
     fn to_string(&self) -> String {
-        match self {
-            XesBrafLifecycle::Unspecified => String::from_str(UNSPECIFIED).ok().unwrap(),
-            XesBrafLifecycle::Closed => String::from_str(CLOSED).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelled => String::from_str(CLOSED_CANCELLED).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelledAborted => String::from_str(CLOSED_CANCELLED_ABORTED).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelledError => String::from_str(CLOSED_CANCELLED_ERROR).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelledExited => String::from_str(CLOSED_CANCELLED_EXITED).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelledObsolete => String::from_str(CLOSED_CANCELLED_OBSOLETE).ok().unwrap(),
-            XesBrafLifecycle::ClosedCancelledTerminated => String::from_str(CLOSED_CANCELLED_TERMINATED).ok().unwrap(),
-            XesBrafLifecycle::Completed => String::from_str(COMPLETED).ok().unwrap(),
-            XesBrafLifecycle::CompletedFailed => String::from_str(COMPLETED_FAILED).ok().unwrap(),
-            XesBrafLifecycle::CompletedSuccess => String::from_str(COMPLETED_SUCCESS).ok().unwrap(),
-            XesBrafLifecycle::Open => String::from_str(OPEN).ok().unwrap(),
-            XesBrafLifecycle::OpenNotRunning => String::from_str(OPEN_NOTRUNNING).ok().unwrap(),
-            XesBrafLifecycle::OpenNotRunningAssigned => String::from_str(OPEN_NOTRUNNING_ASSIGNED).ok().unwrap(),
-            XesBrafLifecycle::OpenNotRunningReserved => String::from_str(OPEN_NOTRUNNING_RESERVED).ok().unwrap(),
-            XesBrafLifecycle::OpenNotRunningSuspendedAssigned => String::from_str(OPEN_NOTRUNNING_SUSPENDED_ASSIGNED).ok().unwrap(),
-            XesBrafLifecycle::OpenNotRunningSuspendedReserved => String::from_str(OPEN_NOTRUNNING_SUSPENDED_RESERVED).ok().unwrap(),
-            XesBrafLifecycle::OpenRunning => String::from_str(OPEN_RUNNING).ok().unwrap(),
-            XesBrafLifecycle::OpenRunningInProgress => String::from_str(OPEN_RUNNING_INPROGRESS).ok().unwrap(),
-            XesBrafLifecycle::OpenRunningSuspended => String::from_str(OPEN_RUNNING_SUSPENDED).ok().unwrap(),
-        }
+        lifecycle_to_strings.get(&self).unwrap().to_string()
     }
 }
 
@@ -76,28 +92,10 @@ impl FromStr for XesBrafLifecycle {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            UNSPECIFIED => Ok(XesBrafLifecycle::Unspecified),
-            CLOSED => Ok(XesBrafLifecycle::Closed),
-            CLOSED_CANCELLED => Ok(XesBrafLifecycle::ClosedCancelled),
-            CLOSED_CANCELLED_ABORTED => Ok(XesBrafLifecycle::ClosedCancelledAborted),
-            CLOSED_CANCELLED_ERROR => Ok(XesBrafLifecycle::ClosedCancelledError),
-            CLOSED_CANCELLED_EXITED => Ok(XesBrafLifecycle::ClosedCancelledExited),
-            CLOSED_CANCELLED_OBSOLETE => Ok(XesBrafLifecycle::ClosedCancelledObsolete),
-            CLOSED_CANCELLED_TERMINATED => Ok(XesBrafLifecycle::ClosedCancelledTerminated),
-            COMPLETED => Ok(XesBrafLifecycle::Completed),
-            COMPLETED_FAILED => Ok(XesBrafLifecycle::CompletedFailed),
-            COMPLETED_SUCCESS => Ok(XesBrafLifecycle::CompletedSuccess),
-            OPEN => Ok(XesBrafLifecycle::Open),
-            OPEN_NOTRUNNING => Ok(XesBrafLifecycle::OpenNotRunning),
-            OPEN_NOTRUNNING_ASSIGNED => Ok(XesBrafLifecycle::OpenNotRunningAssigned),
-            OPEN_NOTRUNNING_RESERVED => Ok(XesBrafLifecycle::OpenNotRunningReserved),
-            OPEN_NOTRUNNING_SUSPENDED_ASSIGNED => Ok(XesBrafLifecycle::OpenNotRunningSuspendedAssigned),
-            OPEN_NOTRUNNING_SUSPENDED_RESERVED => Ok(XesBrafLifecycle::OpenNotRunningSuspendedReserved),
-            OPEN_RUNNING => Ok(XesBrafLifecycle::OpenRunning),
-            OPEN_RUNNING_INPROGRESS => Ok(XesBrafLifecycle::OpenRunningInProgress),
-            OPEN_RUNNING_SUSPENDED => Ok(XesBrafLifecycle::OpenRunningSuspended),
-            _ => Err(()),
+        if let Some(lifecycle) = strings_to_lifecycle.get(s) {
+            Ok(*lifecycle)
+        } else {
+            Err(())
         }
     }
 }

@@ -56,3 +56,16 @@ where
 
     true
 }
+
+pub fn reverse_map<TKey, TValue>(map: &HashMap<TKey, TValue>) -> HashMap<TValue, TKey>
+where
+    TKey: Hash + Eq + PartialEq + Clone,
+    TValue: Hash + Eq + PartialEq + Clone,
+{
+    let mut reversed_map = HashMap::new();
+    for (key, value) in map {
+        reversed_map.insert(value.clone(), key.clone());
+    }
+
+    reversed_map
+}
