@@ -1,8 +1,8 @@
-from ficus.grpc_pipelines.constants import const_use_names_event_log, const_names_event_log, const_get_names_event_log, \
+from .constants import const_use_names_event_log, const_names_event_log, const_get_names_event_log, \
     const_pipeline
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, PipelinePart2WithCallback, \
+from .grpc_pipelines import PipelinePart2, _create_default_pipeline_part, PipelinePart2WithCallback, \
     _create_complex_get_context_part, Pipeline2, append_pipeline_value, PrintEventLogInfo2
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextValue
 
 

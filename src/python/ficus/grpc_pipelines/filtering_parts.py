@@ -1,8 +1,8 @@
-from ficus.grpc_pipelines.constants import const_events_count, const_filter_traces_by_events_count, const_event_name, \
+from .constants import const_events_count, const_filter_traces_by_events_count, const_event_name, \
     const_filter_events_by_name, const_regex, const_filter_events_by_regex, const_filter_log_by_variants
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_uint32_value, \
+from .grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_uint32_value, \
     append_string_value
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
 
 
 class FilterTracesByEventsCount2(PipelinePart2):

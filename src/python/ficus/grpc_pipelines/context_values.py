@@ -3,12 +3,12 @@ from typing import Optional
 
 import pandas as pd
 
-from ficus.analysis.event_log_analysis import ColoredRectangle, Color
-from ficus.discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
-from ficus.grpc_pipelines.constants import const_cluster_labels
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
-from ficus.grpc_pipelines.models.pm_models_pb2 import *
-from ficus.grpc_pipelines.models.util_pb2 import GrpcColor
+from ..analysis.event_log_analysis import ColoredRectangle, Color
+from ..discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
+from .constants import const_cluster_labels
+from .models.pipelines_and_context_pb2 import *
+from .models.pm_models_pb2 import *
+from .models.util_pb2 import GrpcColor
 
 
 @dataclass

@@ -1,8 +1,8 @@
-from ficus.grpc_pipelines.filtering_parts import FilterEventsByName2, FilterEventsByRegex2, FilterLogByVariants2
+from ...ficus.grpc_pipelines.filtering_parts import FilterEventsByName2, FilterEventsByRegex2, FilterLogByVariants2
 
-from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
+from ...ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
+from ...ficus.grpc_pipelines.grpc_pipelines import Pipeline2
 from .pipeline_parts_for_tests import AssertNamesLogTestPart
 from .test_grpc_pipelines import _execute_test_with_exercise_log
 

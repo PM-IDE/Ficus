@@ -1,6 +1,6 @@
-from ficus.grpc_pipelines.constants import const_names_event_log, const_get_names_event_log
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2WithCallback, _create_complex_get_context_part
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
+from ...ficus.grpc_pipelines.constants import const_names_event_log, const_get_names_event_log
+from ...ficus.grpc_pipelines.grpc_pipelines import PipelinePart2WithCallback, _create_complex_get_context_part
+from ...ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextValue
 
 

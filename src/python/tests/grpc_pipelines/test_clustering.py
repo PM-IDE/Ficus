@@ -1,14 +1,14 @@
-from ficus.analysis.event_log_analysis import DatasetVisualizationMethod, NComponents
-from ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan, DiscoverActivitiesFromPatterns2, \
+from ...ficus.analysis.event_log_analysis import DatasetVisualizationMethod, NComponents
+from ...ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan, DiscoverActivitiesFromPatterns2, \
     DiscoverActivitiesInstances2, ClusterizeActivitiesFromTracesDbscan, DiscoverActivitiesForSeveralLevels2
-from ficus.grpc_pipelines.constants import const_labeled_log_traces_dataset, const_cluster_labels, \
+from ...ficus.grpc_pipelines.constants import const_labeled_log_traces_dataset, const_cluster_labels, \
     const_labeled_traces_activities_dataset
-from ficus.grpc_pipelines.context_values import from_grpc_labeled_dataset
-from ficus.grpc_pipelines.data_models import Distance, PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
+from ...ficus.grpc_pipelines.context_values import from_grpc_labeled_dataset
+from ...ficus.grpc_pipelines.data_models import Distance, PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
     ActivitiesRepresentationSource
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PipelinePart2WithCallback, PipelinePart2
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcContextValue
-from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
+from ...ficus.grpc_pipelines.grpc_pipelines import Pipeline2, PipelinePart2WithCallback, PipelinePart2
+from ...ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcContextValue
+from ...ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from .test_grpc_pipelines import _execute_test_with_names_log, ResultAssertanceKind
 
 

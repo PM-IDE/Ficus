@@ -1,4 +1,3 @@
-import os
 from typing import Iterable
 
 from .test_data_provider import all_example_logs

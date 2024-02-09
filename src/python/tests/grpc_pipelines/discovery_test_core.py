@@ -1,11 +1,11 @@
 import os
 import tempfile
 
-from ficus.grpc_pipelines.discovery_parts import SerializePetriNetToPNML2, ViewPetriNet2
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
+from ...ficus.grpc_pipelines.discovery_parts import SerializePetriNetToPNML2, ViewPetriNet2
+from ...ficus.grpc_pipelines.grpc_pipelines import Pipeline2
 
-from ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2
-from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
+from ...ficus.grpc_pipelines.mutation_parts import AddStartEndArtificialEvents2
+from ...ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 from ..core.gold_based_test import execute_test_with_gold
 
 from ..grpc_pipelines.test_grpc_pipelines import _execute_test_with_names_log

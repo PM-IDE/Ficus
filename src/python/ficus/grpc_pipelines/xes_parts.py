@@ -1,6 +1,6 @@
-from ficus.grpc_pipelines.constants import *
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_string_value
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
+from .constants import *
+from .grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_string_value
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
 
 
 class ReadLogFromXes2(PipelinePart2):

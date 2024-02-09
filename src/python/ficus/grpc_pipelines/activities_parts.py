@@ -1,16 +1,14 @@
-from sklearn.decomposition import PCA
-
-from ficus.analysis.event_log_analysis import draw_pca_results, NComponents, visualize_dataset_pca, \
-    visualize_dataset_isomap, DatasetVisualizationMethod, visualize_dataset_mds, visualize_dataset_tsne
-from ficus.grpc_pipelines.context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset, from_grpc_color
-from ficus.grpc_pipelines.data_models import ActivitiesRepresentationSource, Distance, TracesRepresentationSource
-from ficus.grpc_pipelines.grpc_pipelines import *
-from ficus.grpc_pipelines.grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
+from .context_values import from_grpc_ficus_dataset, from_grpc_labeled_dataset, from_grpc_color
+from .data_models import ActivitiesRepresentationSource, Distance, TracesRepresentationSource
+from .grpc_pipelines import *
+from .grpc_pipelines import _create_default_pipeline_part, _create_complex_get_context_part
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextValue
-from ficus.grpc_pipelines.patterns_parts import FindMaximalRepeats2, \
+from .patterns_parts import FindMaximalRepeats2, \
     FindSuperMaximalRepeats2, FindNearSuperMaximalRepeats2, FindPrimitiveTandemArrays2, FindMaximalTandemArrays2
-from ficus.pipelines.analysis.patterns.models import AdjustingMode
+from ..analysis.event_log_analysis import NComponents, visualize_dataset_pca, \
+    visualize_dataset_isomap, DatasetVisualizationMethod, visualize_dataset_mds, visualize_dataset_tsne
+from ..pipelines.analysis.patterns.models import AdjustingMode
 
 
 class DiscoverActivities2(PipelinePart2):

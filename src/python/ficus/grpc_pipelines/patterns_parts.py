@@ -1,12 +1,12 @@
 from typing import Optional
 
-from ficus.grpc_pipelines.constants import const_tandem_array_length, const_event_class_regex, \
+from .constants import const_tandem_array_length, const_event_class_regex, \
     const_find_primitive_tandem_arrays, const_find_maximal_tandem_arrays, const_patterns_discovery_strategy, \
     const_find_maximal_repeats, const_find_super_maximal_repeats, const_find_near_super_maximal_repeats
-from ficus.grpc_pipelines.data_models import PatternsDiscoveryStrategy
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_uint32_value, \
+from .data_models import PatternsDiscoveryStrategy
+from .grpc_pipelines import PipelinePart2, _create_default_pipeline_part, append_uint32_value, \
     append_string_value, append_patterns_discovery_strategy
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration
 
 
 class FindTandemArrays2(PipelinePart2):

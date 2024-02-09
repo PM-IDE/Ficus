@@ -1,13 +1,13 @@
 import uuid
 from typing import Optional
 
-from ficus.grpc_pipelines.constants import const_colors_event_log, const_traces_diversity_diagram, const_event_name, \
+from .constants import const_colors_event_log, const_traces_diversity_diagram, const_event_name, \
     const_draw_placement_of_event_by_name, const_regex, const_draw_placement_of_event_by_regex, \
     const_draw_full_activities_diagram, const_draw_short_activities_diagram
-from ficus.grpc_pipelines.context_values import StringContextValue
-from ficus.grpc_pipelines.grpc_pipelines import PipelinePart2WithDrawColorsLogCallback, \
+from .context_values import StringContextValue
+from .grpc_pipelines import PipelinePart2WithDrawColorsLogCallback, \
     _create_complex_get_context_part, append_string_value, PipelinePart2WithCanvasCallback
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
+from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipelinePartConfiguration, \
     GrpcContextKeyValue, GrpcContextKey
 
 

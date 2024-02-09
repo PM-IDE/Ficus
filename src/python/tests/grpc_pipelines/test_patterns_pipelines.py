@@ -1,24 +1,24 @@
-from ficus.grpc_pipelines.context_values import StringContextValue
-from ficus.grpc_pipelines.filtering_parts import FilterEventsByRegex2, FilterLogByVariants2
+from ...ficus.grpc_pipelines.context_values import StringContextValue
+from ...ficus.grpc_pipelines.filtering_parts import FilterEventsByRegex2, FilterLogByVariants2
 
-from ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
+from ...ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 
-from ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
-from ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
+from ...ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
+from ...ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
     ActivityFilterKind, ActivitiesLogsSource
 
-from ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2
+from ...ficus.grpc_pipelines.drawing_parts import TracesDiversityDiagram2
 
-from ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
+from ...ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, DiscoverActivitiesForSeveralLevels2, DiscoverActivitiesFromPatterns2, \
     DiscoverActivitiesUntilNoMore2, ExecuteWithEachActivityLog2, ClearActivitiesRelatedStuff2, \
     PrintNumberOfUnderlyingEvents2, SubstituteUnderlyingEvents2
 
-from ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2
+from ...ficus.grpc_pipelines.patterns_parts import FindSuperMaximalRepeats2
 
-from ficus.grpc_pipelines.util_parts import UseNamesEventLog2
+from ...ficus.grpc_pipelines.util_parts import UseNamesEventLog2
 
-from ficus.grpc_pipelines.grpc_pipelines import Pipeline2
+from ...ficus.grpc_pipelines.grpc_pipelines import Pipeline2
 from .pipeline_parts_for_tests import AssertNamesLogTestPart
 from .test_grpc_pipelines import _execute_test_with_names_log, _execute_test_with_exercise_log, \
     _execute_test_with_context
