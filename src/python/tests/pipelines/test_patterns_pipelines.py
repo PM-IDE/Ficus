@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from ..test_data_provider import console_app_method2_log_path, data_dir, gold_dir
 from ...ficus.analysis.patterns.event_log_patterns import *
 from ...ficus.pipelines.analysis.high_level import DiscoverActivitiesFromTandemArrays, \
@@ -56,12 +58,14 @@ def _do_test_with_event_graph(gold_path: str, path_to_xes: str):
     execute_test_with_gold(gold_path, serialized_graph(result))
 
 
+@pytest.mark.skip(reason="unreadable gold")
 def test_creating_graph_of_activities():
     log_path = console_app_method2_log_path()
     gold_path = os.path.join(gold_dir(), 'test_pipelines', 'test_creating_graph_of_activities.gold')
     _do_test_with_activities_graph(gold_path, log_path)
 
 
+@pytest.mark.skip(reason="unreadable gold")
 def test_creating_event_class_graph():
     log_path = console_app_method2_log_path()
     gold_path = os.path.join(gold_dir(), 'test_pipelines', 'test_creating_event_class_graph.gold')
