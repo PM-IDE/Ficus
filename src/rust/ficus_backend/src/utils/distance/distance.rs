@@ -54,10 +54,10 @@ impl Distance<f64> for DistanceWrapper {
         }
     }
 
-    fn rdistance<D: ndarray::prelude::Dimension>(
+    fn rdistance<D: Dimension>(
         &self,
-        a: ndarray::prelude::ArrayView<f64, D>,
-        b: ndarray::prelude::ArrayView<f64, D>,
+        a: ArrayView<f64, D>,
+        b: ArrayView<f64, D>,
     ) -> f64 {
         self.distance(a, b)
     }

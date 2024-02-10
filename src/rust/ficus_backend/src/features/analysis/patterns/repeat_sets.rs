@@ -167,13 +167,12 @@ where
 
         let mut found_any_match = false;
 
-        'this_loop: for level_index in (0..(nodes_by_level.len() - 1)).rev() {
+        for level_index in (0..(nodes_by_level.len() - 1)).rev() {
             for activity_node in nodes_by_level.get(level_index).unwrap() {
                 let mut activity_node = activity_node.borrow_mut();
                 if activity_node.contains_other(&current_node) {
                     activity_node.children.push(Rc::clone(current_node_ptr));
                     found_any_match = true;
-                    break 'this_loop;
                 }
             }
         }
@@ -184,7 +183,6 @@ where
                 if top_level_node.contains_other(&current_node) && !Rc::ptr_eq(top_level_node_ptr, current_node_ptr) {
                     top_level_node.children.push(Rc::clone(current_node_ptr));
                     found_any_match = true;
-                    break;
                 }
             }
         }
