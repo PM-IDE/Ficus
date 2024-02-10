@@ -1,3 +1,5 @@
+from ...ficus.legacy.filtering.event_log_filters import next_event_to_remove_default_entropy_direct, \
+    next_removal_default_entropy_indirect
 from ...tests import log_creators
 from ...ficus.legacy.analysis.event_log_info import *
 from ...tests.filtering.util import create_sequence_of_removals
