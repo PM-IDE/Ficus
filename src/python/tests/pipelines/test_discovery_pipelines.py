@@ -1,9 +1,9 @@
 from ..test_data_provider import get_example_log_path
-from ...ficus.pipelines.contexts.keys import petri_net_key
-from ...ficus.pipelines.discovery.discovery_parts import DiscoverPetriNetAlpha, DiscoverPetriNetAlphaPlus, \
+from ...ficus.legacy.pipelines.contexts.keys import petri_net_key
+from ...ficus.legacy.pipelines.discovery.discovery_parts import DiscoverPetriNetAlpha, DiscoverPetriNetAlphaPlus, \
     DiscoverPetriNetInductive, DiscoverPetriNetHeuristic
-from ...ficus.pipelines.pipelines import Pipeline, PipelinePart
-from ...ficus.pipelines.start.start_parts import ReadLogFromXes
+from ...ficus.legacy.pipelines.pipelines import Pipeline, PipelinePart
+from ...ficus.legacy.pipelines.start.start_parts import ReadLogFromXes
 
 
 def test_alpha_discovery():

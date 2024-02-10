@@ -1,3 +1,4 @@
+from ...log.event_log import MyEventLog
 from ...log.functions import read_log_from_xes
 from ...pipelines.pipelines import *
 

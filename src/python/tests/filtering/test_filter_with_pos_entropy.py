@@ -1,4 +1,5 @@
-from ...ficus.filtering.event_log_filters import *
+from ...ficus.legacy.filtering.event_log_filters import next_event_remove_pos_entropy_direct, \
+    next_event_remove_pos_entropy_indirect
 from ...tests.log_creators import *
 from ...tests.filtering.util import create_sequence_of_removals
 

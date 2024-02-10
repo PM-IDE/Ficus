@@ -3,9 +3,9 @@ import pytest
 
 from ..core.gold_based_test import execute_test_with_gold
 from ..log_creators import *
-from ..test_data_provider import all_test_split_traces, data_dir, gold_dir
-from ...ficus.log.functions import *
-from ...ficus.log.pm4py_converters import *
+from ..test_data_provider import all_test_split_traces, gold_dir
+from ...ficus.legacy.log.functions import *
+from ...ficus.legacy.log.pm4py_converters import *
 
 
 @pytest.mark.parametrize("log_path", all_example_logs(), indirect=True)

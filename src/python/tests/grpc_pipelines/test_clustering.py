@@ -1,4 +1,4 @@
-from ...ficus.analysis.event_log_analysis import DatasetVisualizationMethod, NComponents
+from ...ficus.legacy.analysis.event_log_analysis import DatasetVisualizationMethod, NComponents
 from ...ficus.grpc_pipelines.activities_parts import ClusterizeLogTracesDbscan, DiscoverActivitiesFromPatterns2, \
     DiscoverActivitiesInstances2, ClusterizeActivitiesFromTracesDbscan, DiscoverActivitiesForSeveralLevels2
 from ...ficus.grpc_pipelines.constants import const_labeled_log_traces_dataset, const_cluster_labels, \

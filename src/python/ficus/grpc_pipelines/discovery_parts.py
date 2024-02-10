@@ -1,7 +1,7 @@
-from ..discovery.graph import draw_graph, from_grpc_graph
-from ..discovery.petri_net import draw_petri_net
+from ..legacy.discovery.graph import draw_graph
+from ...ficus.legacy.discovery.petri_net import draw_petri_net
 from .context_values import from_grpc_petri_net, from_grpc_count_annotation, \
-    from_grpc_frequency_annotation
+    from_grpc_frequency_annotation, from_grpc_graph
 from .grpc_pipelines import *
 from .grpc_pipelines import _create_default_pipeline_part, _create_simple_get_context_value_part, \
     _create_complex_get_context_part

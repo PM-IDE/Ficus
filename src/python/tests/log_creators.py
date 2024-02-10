@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from .test_data_provider import all_example_logs
-from ..ficus.log.functions import *
+from ..ficus.legacy.log.functions import *
 
 
 def create_log_from_filter_out_chaotic_events() -> MyEventLog:

@@ -3,12 +3,13 @@ from typing import Optional
 
 import pandas as pd
 
-from ..analysis.event_log_analysis import ColoredRectangle, Color
-from ..discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
+from ..legacy.analysis.event_log_analysis import ColoredRectangle, Color
+from ..legacy.discovery.petri_net import Arc, Transition, Place, PetriNet, Marking, SinglePlaceMarking
 from .constants import const_cluster_labels
 from .models.pipelines_and_context_pb2 import *
 from .models.pm_models_pb2 import *
 from .models.util_pb2 import GrpcColor
+from ..legacy.discovery.graph import Graph, GraphNode, GraphEdge
 
 
 @dataclass
@@ -242,3 +243,13 @@ def from_grpc_labeled_dataset(grpc_dataset: GrpcLabeledDataset):
 
     df[const_cluster_labels] = labels
     return df
+
+def from_grpc_graph(grpc_graph: GrpcGraph) -> Graph:
+    graph = Graph()
+    for node in grpc_graph.nodes:
+        graph.nodes.append(GraphNode(id=node.id, data=node.data))
+
+    for edge in grpc_graph.edges:
+        graph.edges.append(GraphEdge(from_node=edge.from_node, to_node=edge.to_node, data=edge.data))
+
+    return graph

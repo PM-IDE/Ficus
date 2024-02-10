@@ -1,7 +1,7 @@
 import os.path
 from enum import Enum
 
-from ...ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
+from ...ficus.legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ...ficus.grpc_pipelines.activities_parts import DiscoverActivities2, DiscoverActivitiesInstances2, \
     CreateLogFromActivitiesInstances2, ApplyClassExtractor2
 from ...ficus.grpc_pipelines.constants import const_names_event_log

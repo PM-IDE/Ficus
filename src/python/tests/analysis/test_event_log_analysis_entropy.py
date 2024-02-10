@@ -1,8 +1,8 @@
 import os.path
 
 from ..test_data_provider import sources_dir
-from ...ficus.analysis.event_log_analysis_entropy import calculate_default_entropies, calculate_laplace_entropies
-from ...ficus.log.functions import read_log_from_xes
+from ...ficus.legacy.analysis.event_log_analysis_entropy import calculate_default_entropies, calculate_laplace_entropies
+from ...ficus.legacy.log.functions import read_log_from_xes
 from ...tests import log_creators
 
 

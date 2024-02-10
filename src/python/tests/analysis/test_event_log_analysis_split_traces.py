@@ -1,8 +1,8 @@
 import os.path
 
 from ..test_data_provider import sources_dir
-from ...ficus.analysis.event_log_split import split_log_by_traces
-from ...ficus.log.functions import read_log_from_xes
+from ...ficus.legacy.analysis.event_log_split import split_log_by_traces
+from ...ficus.legacy.log.functions import read_log_from_xes
 
 
 def test():

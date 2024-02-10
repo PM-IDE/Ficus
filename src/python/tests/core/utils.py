@@ -1,4 +1,4 @@
-from ...ficus.analysis.common.common_models import SubArrayInEventLog
+from ...ficus.legacy.analysis.common.common_models import SubArrayInEventLog
 
 
 def maximal_repeats_to_substrings(raw_events: list[str],

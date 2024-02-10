@@ -1,6 +1,5 @@
 from ...tests import log_creators
-from ...ficus.filtering.event_log_filters import *
-from ...ficus.analysis.event_log_info import *
+from ...ficus.legacy.analysis.event_log_info import *
 from ...tests.filtering.util import create_sequence_of_removals
 
 

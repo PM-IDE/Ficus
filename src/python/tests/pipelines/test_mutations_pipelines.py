@@ -1,10 +1,10 @@
 from .. import log_creators
 from ..test_data_provider import *
-from ...ficus.log.functions import read_log_from_xes, parse_log_from_string, parse_log_from_strings
-from ...ficus.pipelines.mutations.mutations_parts import *
-from ...ficus.pipelines.pipelines import Pipeline
-from ...ficus.pipelines.start.start_parts import ReadLogFromXes, UseExistingLog
-from ...ficus.util import concept_name
+from ...ficus.legacy.log.functions import read_log_from_xes, parse_log_from_string, parse_log_from_strings
+from ...ficus.legacy.pipelines.mutations.mutations_parts import *
+from ...ficus.legacy.pipelines.pipelines import Pipeline
+from ...ficus.legacy.pipelines.start.start_parts import ReadLogFromXes, UseExistingLog
+from ...ficus.legacy.util import concept_name
 
 
 def test_remove_event_by_name_pipeline():

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Callable
 
 from ..log.event_log import MyEventLog, MyEvent
 from ..util import *

@@ -1,25 +1,25 @@
 from .. import log_creators
-from ...ficus.analysis.patterns.patterns_models import TandemArrayInfo, SubArrayWithTraceIndex, ActivityInTraceInfo, \
+from ficus.legacy.analysis.patterns.patterns_models import TandemArrayInfo, SubArrayWithTraceIndex, ActivityInTraceInfo, \
     UndefinedActivityHandlingStrategy
-from ...ficus.analysis.patterns.util import default_class_extractor, select_traces_activities_for_activity_level
-from ...ficus.analysis.type_aliases import ClassExtractor
-from ...ficus.log.functions import parse_log_from_string, parse_log_from_strings, serialize_log, serialize_logs
-from ...ficus.pipelines.analysis.high_level import DiscoverActivitiesForSeveralLevels, \
+from ...ficus.legacy.analysis.patterns.util import default_class_extractor, select_traces_activities_for_activity_level
+from ...ficus.legacy.analysis.type_aliases import ClassExtractor
+from ...ficus.legacy.log.functions import parse_log_from_string, parse_log_from_strings, serialize_log, serialize_logs
+from ...ficus.legacy.pipelines.analysis.high_level import DiscoverActivitiesForSeveralLevels, \
     DiscoverActivitiesFromTandemArrays
-from ...ficus.pipelines.analysis.patterns.models import TandemArrayKind, AdjustingMode
-from ...ficus.pipelines.analysis.patterns.patterns_graph_parts import BuildActivityGraph, BuildEventClassTree, \
+from ...ficus.legacy.pipelines.analysis.patterns.models import TandemArrayKind, AdjustingMode
+from ...ficus.legacy.pipelines.analysis.patterns.patterns_graph_parts import BuildActivityGraph, BuildEventClassTree, \
     BuildEventClassGraph
-from ...ficus.pipelines.analysis.patterns.patterns_parts import DiscoverTandemArrays, DiscoverRepeatsSets, \
+from ...ficus.legacy.pipelines.analysis.patterns.patterns_parts import DiscoverTandemArrays, DiscoverRepeatsSets, \
     DiscoverActivities, DiscoverActivitiesInTraces, CreateLogFromActivities, DiscoverRepeats, CreateLogsForActivities, \
     DiscoverActivitiesFromPatterns, ActivitiesDiscoveryStrategy, ClearActivities
-from ...ficus.pipelines.contexts.accessors import patterns, repeat_sets, activities, traces_activities, log, \
+from ...ficus.legacy.pipelines.contexts.accessors import patterns, repeat_sets, activities, traces_activities, log, \
     activities_to_logs, graph, event_class_tree
-from ...ficus.pipelines.contexts.keys import patterns_key, repeat_sets_key, activities_key, traces_activities_key, \
+from ...ficus.legacy.pipelines.contexts.keys import patterns_key, repeat_sets_key, activities_key, traces_activities_key, \
     log_key, activities_to_logs_key, graph_key, event_class_tree_key
-from ...ficus.pipelines.contexts.part_results import RepeatActivitiesSource
-from ...ficus.pipelines.pipelines import Pipeline
-from ...ficus.pipelines.start.start_parts import UseExistingLog
-from ...ficus.util import concept_name
+from ...ficus.legacy.pipelines.contexts.part_results import RepeatActivitiesSource
+from ...ficus.legacy.pipelines.pipelines import Pipeline
+from ...ficus.legacy.pipelines.start.start_parts import UseExistingLog
+from ...ficus.legacy.util import concept_name
 
 
 def test_discover_primitive_tandem_arrays():

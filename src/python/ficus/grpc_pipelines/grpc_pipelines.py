@@ -2,9 +2,9 @@ import uuid
 from dataclasses import dataclass
 from typing import Optional
 
-from ...ficus.analysis.event_log_analysis import draw_colors_event_log
-from ...ficus.analysis.event_log_analysis_canvas import draw_colors_event_log_canvas
-from ...ficus.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
+from ..legacy.analysis.event_log_analysis import draw_colors_event_log
+from ..legacy.analysis.event_log_analysis_canvas import draw_colors_event_log_canvas
+from ...ficus.legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ...ficus.grpc_pipelines.constants import *
 from ...ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
@@ -15,8 +15,8 @@ from ...ficus.grpc_pipelines.models.backend_service_pb2 import *
 from ...ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
 from ...ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
 from ...ficus.grpc_pipelines.models.util_pb2 import *
-from ...ficus.pipelines.analysis.patterns.models import AdjustingMode
-from ...ficus.util import performance_cookie
+from ...ficus.legacy.pipelines.analysis.patterns.models import AdjustingMode
+from ...ficus.legacy.util import performance_cookie
 
 ficus_backend_addr_key = 'backend'
 

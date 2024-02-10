@@ -3,18 +3,18 @@ import os
 import pytest
 
 from ..test_data_provider import console_app_method2_log_path, data_dir, gold_dir
-from ...ficus.analysis.patterns.event_log_patterns import *
-from ...ficus.pipelines.analysis.high_level import DiscoverActivitiesFromTandemArrays, \
+from ...ficus.legacy.analysis.patterns.event_log_patterns import *
+from ...ficus.legacy.pipelines.analysis.high_level import DiscoverActivitiesFromTandemArrays, \
     DiscoverActivitiesForSeveralLevels
-from ...ficus.pipelines.analysis.patterns.patterns_graph_parts import SerializeGraph, BuildActivityGraph, \
+from ...ficus.legacy.pipelines.analysis.patterns.patterns_graph_parts import SerializeGraph, BuildActivityGraph, \
     BuildEventClassGraph, BuildEventClassTree
-from ...ficus.pipelines.analysis.patterns.patterns_parts import TandemArrayKind, ClearActivities, \
+from ...ficus.legacy.pipelines.analysis.patterns.patterns_parts import TandemArrayKind, ClearActivities, \
     ActivitiesDiscoveryStrategy
-from ...ficus.pipelines.contexts.accessors import serialized_graph
-from ...ficus.pipelines.filtering.filter_parts import PosEntropyDirectFilter
-from ...ficus.pipelines.mutations.mutations_parts import RemoveEventsFromLogPredicate
-from ...ficus.pipelines.pipelines import Pipeline
-from ...ficus.pipelines.start.start_parts import ReadLogFromXes
+from ...ficus.legacy.pipelines.contexts.accessors import serialized_graph
+from ...ficus.legacy.pipelines.filtering.filter_parts import PosEntropyDirectFilter
+from ...ficus.legacy.pipelines.mutations.mutations_parts import RemoveEventsFromLogPredicate
+from ...ficus.legacy.pipelines.pipelines import Pipeline
+from ...ficus.legacy.pipelines.start.start_parts import ReadLogFromXes
 from ...tests.core.gold_based_test import execute_test_with_gold
 
 

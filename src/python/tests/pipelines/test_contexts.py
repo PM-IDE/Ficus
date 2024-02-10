@@ -1,6 +1,6 @@
-from ...ficus.pipelines.contexts.accessors import *
-from ...ficus.pipelines.contexts.keys import *
-from ...ficus.pipelines.contexts.part_results import PipelinePartResult
+from ...ficus.legacy.pipelines.contexts.accessors import *
+from ...ficus.legacy.pipelines.contexts.keys import *
+from ...ficus.legacy.pipelines.contexts.part_results import PipelinePartResult
 
 
 def test_log():

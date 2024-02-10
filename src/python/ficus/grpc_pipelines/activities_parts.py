@@ -6,9 +6,9 @@ from .models.pipelines_and_context_pb2 import GrpcPipelinePartBase, GrpcPipeline
     GrpcContextValue
 from .patterns_parts import FindMaximalRepeats2, \
     FindSuperMaximalRepeats2, FindNearSuperMaximalRepeats2, FindPrimitiveTandemArrays2, FindMaximalTandemArrays2
-from ..analysis.event_log_analysis import NComponents, visualize_dataset_pca, \
+from ..legacy.analysis.event_log_analysis import NComponents, visualize_dataset_pca, \
     visualize_dataset_isomap, DatasetVisualizationMethod, visualize_dataset_mds, visualize_dataset_tsne
-from ..pipelines.analysis.patterns.models import AdjustingMode
+from ..legacy.pipelines.analysis.patterns.models import AdjustingMode
 
 
 class DiscoverActivities2(PipelinePart2):

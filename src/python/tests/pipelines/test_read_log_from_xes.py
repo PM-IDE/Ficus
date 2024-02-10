@@ -1,10 +1,10 @@
 from _pytest.outcomes import fail
 
 from ..test_data_provider import get_example_log_path
-from ...ficus.pipelines.contexts.accessors import log
-from ...ficus.pipelines.contexts.keys import log_key
-from ...ficus.pipelines.pipelines import Pipeline
-from ...ficus.pipelines.start.start_parts import ReadLogFromXes
+from ...ficus.legacy.pipelines.contexts.accessors import log
+from ...ficus.legacy.pipelines.contexts.keys import log_key
+from ...ficus.legacy.pipelines.pipelines import Pipeline
+from ...ficus.legacy.pipelines.start.start_parts import ReadLogFromXes
 
 
 def test_read_log_from_xes():

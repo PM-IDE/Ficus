@@ -2,8 +2,7 @@ from typing import Optional
 
 import graphviz
 
-from ficus.discovery.petri_net import _draw_graph_like_formalism
-from ficus.grpc_pipelines.models.pipelines_and_context_pb2 import GrpcGraph
+from .petri_net import _draw_graph_like_formalism
 
 
 class Graph:
@@ -21,18 +20,6 @@ class GraphEdge:
         self.from_node = from_node
         self.to_node = to_node
         self.data = data
-
-
-def from_grpc_graph(grpc_graph: GrpcGraph) -> Graph:
-    graph = Graph()
-    for node in grpc_graph.nodes:
-        graph.nodes.append(GraphNode(id=node.id, data=node.data))
-
-    for edge in grpc_graph.edges:
-        graph.edges.append(GraphEdge(from_node=edge.from_node, to_node=edge.to_node, data=edge.data))
-
-    return graph
-
 
 def draw_graph(graph: Graph,
                name: str = 'petri_net',

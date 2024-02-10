@@ -1,7 +1,8 @@
 from ..common import InternalDrawingPipelinePart
 from ..serialization.pipeline_parts import SavePathCreator
 from ...analysis.event_log_analysis import *
-from ...log.event_log import MyEvent
+from ...analysis.event_log_analysis_entropy import draw_position_entropies_histogram
+from ...analysis.event_log_info import create_log_information
 from ...pipelines.contexts.accessors import log, cached_colors
 from ...pipelines.pipelines import *
 

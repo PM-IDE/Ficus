@@ -1,7 +1,7 @@
-from ...ficus.pipelines.contexts.part_results import PipelinePartResult
-from ...ficus.pipelines.pipelines import InternalPipelinePart, Pipeline, ParallelPipeline, IfPipeline, WithInputCopy, \
+from ...ficus.legacy.pipelines.contexts.part_results import PipelinePartResult
+from ...ficus.legacy.pipelines.pipelines import InternalPipelinePart, Pipeline, ParallelPipeline, IfPipeline, WithInputCopy, \
     WithTempInput
-from ...ficus.pipelines.start.start_parts import EmptyStartPart
+from ...ficus.legacy.pipelines.start.start_parts import EmptyStartPart
 
 custom_pipeline_part_data_key = 'custom_pipeline_part_data_key'
 

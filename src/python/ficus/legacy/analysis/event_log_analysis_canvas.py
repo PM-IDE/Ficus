@@ -3,7 +3,7 @@ from typing import Optional
 from IPython.core.display_functions import display
 from ipycanvas import Canvas, hold_canvas
 
-from ficus.analysis.event_log_analysis import ColoredRectangle
+from ..analysis.event_log_analysis import ColoredRectangle
 
 legend_rect_width = 40
 legend_rect_height = 20

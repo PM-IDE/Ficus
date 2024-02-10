@@ -1,6 +1,6 @@
-from ...ficus.analysis.event_log_analysis_entropy import *
-from ...ficus.analysis.event_log_info import *
-from ...ficus.mutations.event_log_mutations import remove_events_from_log
+from ...ficus.legacy.analysis.event_log_analysis_entropy import *
+from ...ficus.legacy.analysis.event_log_info import *
+from ...ficus.legacy.mutations.event_log_mutations import remove_events_from_log
 from ...tests import log_creators
 
 

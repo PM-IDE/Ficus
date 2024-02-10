@@ -1,9 +1,8 @@
 import copy
-from typing import Any
+from typing import Any, Callable
 
 from ..util import random_unique_color_provider_instance
 from .contexts.part_results import PipelinePartResult
-from ..filtering.event_log_filters import *
 
 
 class Pipeline:

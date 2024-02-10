@@ -2,13 +2,13 @@ from typing import Callable
 
 from .. import log_creators
 from ..test_data_provider import get_example_log_path
-from ...ficus.analysis.event_log_info import create_log_information
-from ...ficus.log.functions import read_log_from_xes, parse_log_from_strings
-from ...ficus.pipelines.contexts.accessors import log
-from ...ficus.pipelines.filtering.filter_parts import PosEntropyDirectFilter, PosEntropyIndirectFilter, \
+from ...ficus.legacy.analysis.event_log_info import create_log_information
+from ...ficus.legacy.log.functions import read_log_from_xes, parse_log_from_strings
+from ...ficus.legacy.pipelines.contexts.accessors import log
+from ...ficus.legacy.pipelines.filtering.filter_parts import PosEntropyDirectFilter, PosEntropyIndirectFilter, \
     DfgEntropyDirectFilter, DfgEntropyIndirectFilter, FilterTracesByCount, FilterTracesByVariants
-from ...ficus.pipelines.pipelines import Pipeline
-from ...ficus.pipelines.start.start_parts import ReadLogFromXes, UseExistingLog
+from ...ficus.legacy.pipelines.pipelines import Pipeline
+from ...ficus.legacy.pipelines.start.start_parts import ReadLogFromXes, UseExistingLog
 
 
 def test_pos_entropy_direct_filter():

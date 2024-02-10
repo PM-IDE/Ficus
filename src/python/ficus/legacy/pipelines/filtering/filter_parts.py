@@ -1,9 +1,12 @@
+from ...filtering.event_log_filters import default_untouchable_func, filter_events_pos_entropy_direct, \
+    filter_events_pos_entropy_indirect, filter_events_default_entropy_direct, filter_events_default_entropy_indirect, \
+    TillEndFilteringMetricKind, filter_events_pos_entropy_direct_till_end, filter_events_pos_entropy_indirect_till_end
 from ...pipelines.contexts.accessors import *
 from ...pipelines.contexts.part_results import *
-from ...filtering.event_log_filters import *
 from ...mutations.event_log_mutations import remove_empty_traces
 from ...pipelines.pipelines import InternalPipelinePart
 from ...analysis.event_log_split import *
+import matplotlib.pyplot as plt
 
 
 class PosEntropyFilter(InternalPipelinePart):

@@ -1,6 +1,6 @@
 import copy
 
-from ...ficus.log.event_log import MyEvent
+from ...ficus.legacy.log.event_log import MyEvent
 
 
 def test_my_event_empty():

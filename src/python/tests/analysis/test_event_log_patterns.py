@@ -1,7 +1,7 @@
 from ..core.utils import maximal_repeats_to_substrings
-from ...ficus.analysis.patterns.event_log_patterns import *
-from ...ficus.analysis.patterns.util import create_activity_name_from_log
-from ...ficus.log.functions import parse_log_from_strings
+from ...ficus.legacy.analysis.patterns.event_log_patterns import *
+from ...ficus.legacy.analysis.patterns.util import create_activity_name_from_log
+from ...ficus.legacy.log.functions import parse_log_from_strings
 from ...tests import log_creators
 
 

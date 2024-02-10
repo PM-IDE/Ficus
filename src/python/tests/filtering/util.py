@@ -1,6 +1,6 @@
-from ...ficus.log.event_log import MyEventLog
-from ...ficus.analysis.event_log_info import create_log_information
-from ...ficus.mutations.event_log_mutations import remove_event_from_log
+from ...ficus.legacy.log.event_log import MyEventLog
+from ...ficus.legacy.analysis.event_log_info import create_log_information
+from ...ficus.legacy.mutations.event_log_mutations import remove_event_from_log
 
 
 def create_sequence_of_removals(log: MyEventLog, next_event_to_remove_func) -> list[str]:
