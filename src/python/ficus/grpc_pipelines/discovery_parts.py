@@ -1,5 +1,5 @@
 from ..legacy.discovery.graph import draw_graph
-from ...ficus.legacy.discovery.petri_net import draw_petri_net
+from ..legacy.discovery.petri_net import draw_petri_net
 from .context_values import from_grpc_petri_net, from_grpc_count_annotation, \
     from_grpc_frequency_annotation, from_grpc_graph
 from .grpc_pipelines import *

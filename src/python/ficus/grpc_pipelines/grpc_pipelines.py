@@ -4,19 +4,19 @@ from typing import Optional
 
 from ..legacy.analysis.event_log_analysis import draw_colors_event_log
 from ..legacy.analysis.event_log_analysis_canvas import draw_colors_event_log_canvas
-from ...ficus.legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
-from ...ficus.grpc_pipelines.constants import *
-from ...ficus.grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
+from ..legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
+from ..grpc_pipelines.constants import *
+from ..grpc_pipelines.context_values import ContextValue, from_grpc_colors_log, \
     StringContextValue, Uint32ContextValue, BoolContextValue, EnumContextValue, from_grpc_event_log_info, \
     StringsContextValue, FloatContextValue
-from ...ficus.grpc_pipelines.data_models import PatternsDiscoveryStrategy, PatternsKind, NarrowActivityKind, \
+from ..grpc_pipelines.data_models import PatternsDiscoveryStrategy, PatternsKind, NarrowActivityKind, \
     ActivityFilterKind, ActivitiesLogsSource
-from ...ficus.grpc_pipelines.models.backend_service_pb2 import *
-from ...ficus.grpc_pipelines.models.backend_service_pb2_grpc import *
-from ...ficus.grpc_pipelines.models.pipelines_and_context_pb2 import *
-from ...ficus.grpc_pipelines.models.util_pb2 import *
-from ...ficus.legacy.pipelines.analysis.patterns.models import AdjustingMode
-from ...ficus.legacy.util import performance_cookie
+from ..grpc_pipelines.models.backend_service_pb2 import *
+from ..grpc_pipelines.models.backend_service_pb2_grpc import *
+from ..grpc_pipelines.models.pipelines_and_context_pb2 import *
+from ..grpc_pipelines.models.util_pb2 import *
+from ..legacy.pipelines.analysis.patterns.models import AdjustingMode
+from ..legacy.util import performance_cookie
 
 ficus_backend_addr_key = 'backend'
 
