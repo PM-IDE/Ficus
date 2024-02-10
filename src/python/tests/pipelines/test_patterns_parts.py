@@ -1,5 +1,5 @@
 from .. import log_creators
-from ficus.legacy.analysis.patterns.patterns_models import TandemArrayInfo, SubArrayWithTraceIndex, ActivityInTraceInfo, \
+from ...ficus.legacy.analysis.patterns.patterns_models import TandemArrayInfo, SubArrayWithTraceIndex, ActivityInTraceInfo, \
     UndefinedActivityHandlingStrategy
 from ...ficus.legacy.analysis.patterns.util import default_class_extractor, select_traces_activities_for_activity_level
 from ...ficus.legacy.analysis.type_aliases import ClassExtractor

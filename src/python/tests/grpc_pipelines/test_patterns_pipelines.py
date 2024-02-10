@@ -3,7 +3,7 @@ from ...ficus.grpc_pipelines.filtering_parts import FilterEventsByRegex2, Filter
 
 from ...ficus.grpc_pipelines.xes_parts import ReadLogFromXes2
 
-from ficus.legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
+from ...ficus.legacy.analysis.patterns.patterns_models import UndefinedActivityHandlingStrategy
 from ...ficus.grpc_pipelines.data_models import PatternsKind, PatternsDiscoveryStrategy, NarrowActivityKind, \
     ActivityFilterKind, ActivitiesLogsSource
 
