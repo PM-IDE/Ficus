@@ -19,6 +19,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     license='private',
     packages=['ficus',
+              'ficus.legacy',
               'ficus.legacy.discovery',
               'ficus.legacy.log',
               'ficus.legacy.analysis',
