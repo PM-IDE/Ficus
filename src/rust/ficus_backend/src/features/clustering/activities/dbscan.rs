@@ -6,7 +6,7 @@ use crate::{
     event_log::core::event_log::EventLog,
     features::clustering::{
         common::{create_colors_vector, transform_to_ficus_dataset},
-        error::{ClusteringError, ClusteringResult},
+        error::ClusteringResult,
     },
     utils::{dataset::dataset::LabeledDataset, distance::distance::DistanceWrapper},
 };

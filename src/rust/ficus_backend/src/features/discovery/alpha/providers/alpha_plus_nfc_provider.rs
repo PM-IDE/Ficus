@@ -5,7 +5,6 @@ use crate::event_log::core::trace::trace::Trace;
 use crate::features::analysis::event_log_info::EventLogInfo;
 use crate::features::discovery::alpha::providers::alpha_plus_provider::{AlphaPlusRelationsProvider, AlphaPlusRelationsProviderImpl};
 use crate::features::discovery::alpha::providers::alpha_provider::AlphaRelationsProvider;
-use crate::features::discovery::alpha::providers::relations_cache::RelationsCache;
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
 use std::collections::HashSet;
 

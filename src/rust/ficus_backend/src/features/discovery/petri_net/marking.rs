@@ -2,10 +2,7 @@ use std::collections::HashSet;
 
 use crate::event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace};
 
-use super::{
-    petri_net::{DefaultPetriNet, PetriNet},
-    place::Place,
-};
+use super::{petri_net::DefaultPetriNet, place::Place};
 
 #[derive(Debug, Clone)]
 pub struct Marking {

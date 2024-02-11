@@ -1,4 +1,4 @@
-use ficus_backend::event_log::simple::simple_event_log::{SimpleEvent, SimpleEventLog};
+use ficus_backend::event_log::simple::simple_event_log::SimpleEventLog;
 
 pub fn create_raw_event_log() -> Vec<Vec<&'static str>> {
     vec![vec!["A", "B", "C"], vec!["A", "B", "C"]]

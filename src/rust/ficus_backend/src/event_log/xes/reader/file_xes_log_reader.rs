@@ -10,13 +10,7 @@ use crate::event_log::{
 use super::{utils, xes_log_trace_reader::TraceXesEventLogIterator};
 use crate::event_log::xes::constants::*;
 use quick_xml::{events::BytesStart, Reader};
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    fs::File,
-    io::{BufReader, Read},
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
 
 pub struct FromFileXesEventLogReader {
     storage: Rc<RefCell<Vec<u8>>>,

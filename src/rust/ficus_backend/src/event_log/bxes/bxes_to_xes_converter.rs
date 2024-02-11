@@ -9,7 +9,6 @@ use chrono::{TimeZone, Utc};
 use crate::event_log::{
     core::{event::event::EventPayloadValue, event_log::EventLog, trace::trace::Trace},
     xes::{
-        self,
         shared::{XesClassifier, XesEventLogExtension, XesProperty},
         xes_event::XesEventImpl,
         xes_event_log::XesEventLogImpl,
