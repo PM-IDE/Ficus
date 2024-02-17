@@ -82,16 +82,6 @@ pub fn serialize_event_log(log: &XesEventLogImpl) -> Result<String, XmlWriteErro
 
                 write_empty(&mut writer.borrow_mut(), DATE_TAG_NAME_STR, &attrs)?;
 
-                if let Some(lifecycle) = event.lifecycle() {
-                    let lifecycle_string = lifecycle.to_string();
-                    let attrs = vec![
-                        (KEY_ATTR_NAME_STR, LIFECYCLE_TRANSITION_STR),
-                        (VALUE_ATTR_NAME_STR, lifecycle_string.as_str()),
-                    ];
-
-                    write_empty(&mut writer.borrow_mut(), STRING_TAG_NAME_STR, &attrs)?;
-                }
-
                 for (key, value) in event.ordered_payload() {
                     write_payload_tag(&writer, key, value)?;
                 }

@@ -65,12 +65,8 @@ fn create_bxes_traces(log: &XesEventLogImpl) -> Vec<BxesTraceVariant> {
 }
 
 fn create_bxes_event(log: &XesEventLogImpl, event: &XesEventImpl) -> BxesEvent {
-    BxesEvent {
+    let bxes_event = BxesEvent {
         name: Rc::new(Box::new(BxesValue::String(event.name_pointer().clone()))),
-        lifecycle: match event.lifecycle() {
-            None => bxes::models::Lifecycle::Standard(bxes::models::StandardLifecycle::Unspecified),
-            Some(lifecycle) => convert_xes_to_bxes_lifecycle(&lifecycle),
-        },
         timestamp: event.timestamp().timestamp_nanos(),
         attributes: Some(
             event
@@ -80,7 +76,9 @@ fn create_bxes_event(log: &XesEventLogImpl, event: &XesEventImpl) -> BxesEvent {
                 .map(|kv| kv_pair_to_bxes_pair(kv))
                 .collect(),
         ),
-    }
+    };
+
+    bxes_event
 }
 
 fn is_not_default_attribute(log: &XesEventLogImpl, kv: &(&String, &EventPayloadValue)) -> bool {

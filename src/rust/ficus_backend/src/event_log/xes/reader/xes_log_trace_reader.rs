@@ -1,8 +1,5 @@
 use crate::event_log::{
-    core::event::{
-        event::EventPayloadValue,
-        lifecycle::{braf_lifecycle::XesBrafLifecycle, standard_lifecycle::XesStandardLifecycle, xes_lifecycle::Lifecycle},
-    },
+    core::event::event::EventPayloadValue,
     xes::xes_event::XesEventImpl,
 };
 
@@ -10,7 +7,7 @@ use crate::event_log::xes::constants::*;
 
 use chrono::{DateTime, Utc};
 use quick_xml::Reader;
-use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc, str::FromStr};
+use std::{cell::RefCell, collections::HashMap, fs::File, io::BufReader, rc::Rc};
 
 use super::utils;
 
@@ -60,10 +57,9 @@ impl TraceXesEventLogIterator {
     fn try_parse_event_from(&mut self) -> Option<XesEventImpl> {
         let mut name = None;
         let mut date = None;
-        let mut lifecycle = None;
         let mut payload = HashMap::new();
 
-        self.set_defaults_value(&mut name, &mut date, &mut lifecycle, &mut payload);
+        self.set_defaults_value(&mut name, &mut date, &mut payload);
 
         loop {
             match self.reader.borrow_mut().read_event_into(&mut self.buffer) {
@@ -76,7 +72,7 @@ impl TraceXesEventLogIterator {
                             return None;
                         }
 
-                        let event = XesEventImpl::new_all_fields(name.unwrap(), date.unwrap(), lifecycle, Some(payload));
+                        let event = XesEventImpl::new_all_fields(name.unwrap(), date.unwrap(), Some(payload));
                         return Some(event);
                     }
                     _ => continue,
@@ -87,7 +83,7 @@ impl TraceXesEventLogIterator {
                         let key = descriptor.key.as_str();
                         let value = descriptor.value.as_str();
 
-                        Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut lifecycle, &mut payload);
+                        Self::set_parsed_value(payload_type, key, value, &mut name, &mut date, &mut payload);
                     }
                     None => continue,
                 },
@@ -100,7 +96,6 @@ impl TraceXesEventLogIterator {
         &self,
         name: &mut Option<Rc<Box<String>>>,
         date: &mut Option<DateTime<Utc>>,
-        lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
     ) {
         let globals = self.globals.borrow_mut();
@@ -109,7 +104,7 @@ impl TraceXesEventLogIterator {
         }
 
         for (key, value) in globals.get(EVENT_TAG_NAME_STR).unwrap() {
-            Self::update_event_data(key, value.clone(), date, name, lifecycle, payload);
+            Self::update_event_data(key, value.clone(), date, name, payload);
         }
     }
 
@@ -119,7 +114,6 @@ impl TraceXesEventLogIterator {
         value: &str,
         name: &mut Option<Rc<Box<String>>>,
         date: &mut Option<DateTime<Utc>>,
-        lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
     ) -> bool {
         let payload_value = utils::extract_payload_value(payload_type, value);
@@ -127,7 +121,7 @@ impl TraceXesEventLogIterator {
             return false;
         }
 
-        Self::update_event_data(key, payload_value.unwrap(), date, name, lifecycle, payload);
+        Self::update_event_data(key, payload_value.unwrap(), date, name, payload);
         true
     }
 
@@ -136,7 +130,6 @@ impl TraceXesEventLogIterator {
         payload_value: EventPayloadValue,
         date: &mut Option<DateTime<Utc>>,
         name: &mut Option<Rc<Box<String>>>,
-        lifecycle: &mut Option<Lifecycle>,
         payload: &mut HashMap<String, EventPayloadValue>,
     ) {
         match key {
@@ -148,15 +141,6 @@ impl TraceXesEventLogIterator {
             CONCEPT_NAME_STR => {
                 if let EventPayloadValue::String(parsed_string) = payload_value {
                     *name = Some(parsed_string.clone());
-                }
-            }
-            LIFECYCLE_TRANSITION_STR => {
-                if let EventPayloadValue::String(parsed_string) = payload_value {
-                    if let Ok(standard_lifecycle) = XesStandardLifecycle::from_str(parsed_string.as_str()) {
-                        *lifecycle = Some(Lifecycle::XesStandardLifecycle(standard_lifecycle));
-                    } else if let Ok(braf_lifecycle) = XesBrafLifecycle::from_str(parsed_string.as_str()) {
-                        *lifecycle = Some(Lifecycle::BrafLifecycle(braf_lifecycle));
-                    }
                 }
             }
             _ => {

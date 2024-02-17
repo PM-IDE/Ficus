@@ -6,14 +6,12 @@ use crate::{
     event_log::core::event::{
         event::{Event, EventPayloadValue},
         event_base::EventBase,
-        lifecycle::xes_lifecycle::Lifecycle,
     },
     utils::{user_data::user_data::UserDataImpl, vec_utils},
 };
 
 pub struct XesEventImpl {
     event_base: EventBase,
-    lifecycle: Option<Lifecycle>,
     payload: Option<HashMap<String, EventPayloadValue>>,
 }
 
@@ -21,12 +19,10 @@ impl XesEventImpl {
     pub fn new_all_fields(
         name: Rc<Box<String>>,
         timestamp: DateTime<Utc>,
-        lifecycle: Option<Lifecycle>,
         payload: Option<HashMap<String, EventPayloadValue>>,
     ) -> Self {
         Self {
             event_base: EventBase::new(name, timestamp),
-            lifecycle,
             payload,
         }
     }
@@ -39,13 +35,6 @@ impl Event for XesEventImpl {
 
     fn timestamp(&self) -> &DateTime<Utc> {
         &self.event_base.timestamp
-    }
-
-    fn lifecycle(&self) -> Option<Lifecycle> {
-        match self.lifecycle.as_ref() {
-            Some(value) => Some(*value),
-            None => None,
-        }
     }
 
     fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
@@ -78,10 +67,6 @@ impl Event for XesEventImpl {
         self.event_base.timestamp = new_timestamp;
     }
 
-    fn set_lifecycle(&mut self, lifecycle: Lifecycle) {
-        self.lifecycle = Some(lifecycle);
-    }
-
     fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue) {
         if self.payload.is_none() {
             self.payload = Some(HashMap::new());
@@ -93,7 +78,6 @@ impl Event for XesEventImpl {
     fn new(name: String, timestamp: DateTime<Utc>) -> Self {
         Self {
             event_base: EventBase::new(Rc::new(Box::new(name)), timestamp),
-            lifecycle: None,
             payload: None,
         }
     }
@@ -115,7 +99,6 @@ impl Clone for XesEventImpl {
     fn clone(&self) -> Self {
         Self {
             event_base: self.event_base.clone(),
-            lifecycle: self.lifecycle.clone(),
             payload: self.payload.clone(),
         }
     }

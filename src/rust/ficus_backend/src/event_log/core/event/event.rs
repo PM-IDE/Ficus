@@ -49,13 +49,11 @@ pub trait Event: Clone {
     fn name_pointer(&self) -> &Rc<Box<String>>;
 
     fn timestamp(&self) -> &DateTime<Utc>;
-    fn lifecycle(&self) -> Option<Lifecycle>;
     fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>>;
     fn ordered_payload(&self) -> Vec<(&String, &EventPayloadValue)>;
     fn user_data(&mut self) -> &mut UserDataImpl;
 
     fn set_name(&mut self, new_name: String);
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>);
-    fn set_lifecycle(&mut self, lifecycle: Lifecycle);
     fn add_or_update_payload(&mut self, key: String, value: EventPayloadValue);
 }

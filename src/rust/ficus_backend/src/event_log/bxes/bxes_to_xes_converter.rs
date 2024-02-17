@@ -143,10 +143,9 @@ fn create_xes_event(bxes_event: &BxesEvent) -> Result<XesEventImpl, BxesToXesRea
     };
 
     let timestamp = Utc.timestamp_nanos(bxes_event.timestamp);
-    let lifecycle = convert_bxes_to_xes_lifecycle(&bxes_event.lifecycle);
     let payload = create_xes_payload(bxes_event.attributes.as_ref())?;
 
-    Ok(XesEventImpl::new_all_fields(name, timestamp, Some(lifecycle), payload))
+    Ok(XesEventImpl::new_all_fields(name, timestamp, payload))
 }
 
 fn create_xes_payload(

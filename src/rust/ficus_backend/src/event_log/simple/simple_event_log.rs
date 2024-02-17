@@ -8,7 +8,6 @@ use crate::{
             event_base::EventBase,
             event_hasher::EventHasher,
             events_holder::{EventSequenceInfo, EventsHolder, EventsPositions},
-            lifecycle::xes_lifecycle::Lifecycle,
         },
         event_log::EventLog,
         trace::{trace::Trace, traces_holder::TracesHolder},
@@ -201,10 +200,6 @@ impl Event for SimpleEvent {
         &self.event_base.timestamp
     }
 
-    fn lifecycle(&self) -> Option<Lifecycle> {
-        panic!("Not supported")
-    }
-
     fn payload_map(&self) -> Option<&HashMap<String, EventPayloadValue>> {
         panic!("Not supported")
     }
@@ -223,10 +218,6 @@ impl Event for SimpleEvent {
 
     fn set_timestamp(&mut self, new_timestamp: DateTime<Utc>) {
         self.event_base.timestamp = new_timestamp;
-    }
-
-    fn set_lifecycle(&mut self, _: Lifecycle) {
-        panic!("Not supported")
     }
 
     fn add_or_update_payload(&mut self, _: String, _: EventPayloadValue) {
