@@ -61,5 +61,5 @@ pub fn create_suffix_tree_gold_file_path(file_name: &str) -> PathBuf {
 pub fn get_serialized_petri_nets_gold_path(test_name: &str) -> PathBuf {
     get_test_data_rust_gold_path()
         .join("pnml_petri_nets")
-        .join(format!("{test_name}.gold"))
+        .join(format!("{}.gold", test_name))
 }
