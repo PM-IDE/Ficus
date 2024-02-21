@@ -1,7 +1,4 @@
-use crate::event_log::{
-    core::event::event::EventPayloadValue,
-    xes::xes_event::XesEventImpl,
-};
+use crate::event_log::{core::event::event::EventPayloadValue, xes::xes_event::XesEventImpl};
 
 use crate::event_log::xes::constants::*;
 

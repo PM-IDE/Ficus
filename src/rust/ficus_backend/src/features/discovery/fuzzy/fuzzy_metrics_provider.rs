@@ -1,4 +1,7 @@
-use crate::{event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace}, features::{analysis::event_log_info::EventLogInfo, discovery::alpha::providers::relations_cache::RelationsCaches}};
+use crate::{
+    event_log::core::{event::event::Event, event_log::EventLog, trace::trace::Trace},
+    features::{analysis::event_log_info::EventLogInfo, discovery::alpha::providers::relations_cache::RelationsCaches},
+};
 
 use super::fuzzy_miner::FuzzyGraph;
 

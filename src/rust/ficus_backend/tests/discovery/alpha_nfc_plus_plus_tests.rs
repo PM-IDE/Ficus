@@ -1,7 +1,14 @@
-use ficus_backend::{event_log::simple::simple_event_log::SimpleEventLog, features::discovery::{alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc, petri_net::pnml_serialization::serialize_to_pnml}};
+use ficus_backend::{
+    event_log::simple::simple_event_log::SimpleEventLog,
+    features::discovery::{
+        alpha::alpha_plus_plus_nfc::alpha_plus_plus_nfc::discover_petri_net_alpha_plus_plus_nfc,
+        petri_net::pnml_serialization::serialize_to_pnml,
+    },
+};
 
-use crate::test_core::{gold_based_test::execute_test_with_gold, simple_events_logs_provider::*, test_paths::get_serialized_petri_nets_gold_path};
-
+use crate::test_core::{
+    gold_based_test::execute_test_with_gold, simple_events_logs_provider::*, test_paths::get_serialized_petri_nets_gold_path,
+};
 
 #[test]
 pub fn alpha_plus_plus_nfc_test_1() {

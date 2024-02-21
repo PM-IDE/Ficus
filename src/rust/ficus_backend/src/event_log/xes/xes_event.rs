@@ -16,11 +16,7 @@ pub struct XesEventImpl {
 }
 
 impl XesEventImpl {
-    pub fn new_all_fields(
-        name: Rc<Box<String>>,
-        timestamp: DateTime<Utc>,
-        payload: Option<HashMap<String, EventPayloadValue>>,
-    ) -> Self {
+    pub fn new_all_fields(name: Rc<Box<String>>, timestamp: DateTime<Utc>, payload: Option<HashMap<String, EventPayloadValue>>) -> Self {
         Self {
             event_base: EventBase::new(name, timestamp),
             payload,

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::event_log::xes::xes_event_log::XesEventLogImpl;
 use crate::features::discovery::petri_net::annotations::{annotate_with_counts, annotate_with_frequencies, annotate_with_trace_frequency};
 use crate::features::discovery::petri_net::petri_net::DefaultPetriNet;
@@ -8,8 +7,9 @@ use crate::pipelines::keys::context_key::DefaultContextKey;
 use crate::pipelines::keys::context_keys::ContextKeys;
 use crate::pipelines::pipeline_parts::PipelineParts;
 use crate::pipelines::pipelines::PipelinePartFactory;
-use crate::utils::user_data::user_data::UserDataImpl;
 use crate::utils::user_data::user_data::UserData;
+use crate::utils::user_data::user_data::UserDataImpl;
+use std::collections::HashMap;
 
 impl PipelineParts {
     pub(super) fn annotate_petri_net_count() -> (String, PipelinePartFactory) {
