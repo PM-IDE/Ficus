@@ -1,3 +1,5 @@
+## The repository is archived, the project moved to https://github.com/PM-IDE/workspace
+
 ## Ficus
 
 Ficus is a python package where some Process Mining algorithms are implemented.
